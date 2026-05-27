@@ -1125,9 +1125,24 @@ async function submitBooking() {
       comment: document.getElementById('client-comment').value
     });
 
-    const resp = await fetch(APPS_SCRIPT_URL+'?'+params, {method:'GET',mode:'no-cors'});
+    // ✅ ВИПРАВЛЕНО: mode:'cors' щоб читати реальну відповідь сервера
+    const resp = await fetch(APPS_SCRIPT_URL+'?'+params, {method:'GET', mode:'cors'});
 
-    // Show success (no-cors means we can't read response, assume ok)
+    if(!resp.ok) {
+      throw new Error('HTTP ' + resp.status);
+    }
+
+    const data = await resp.json();
+
+    // ✅ ВИПРАВЛЕНО: перевіряємо реальний результат із сервера
+    if(!data.success) {
+      showToast('Цей бокс вже зайнятий! Оберіть інший час або бокс.','error');
+      btn.textContent = '✓ Підтвердити запис';
+      btn.disabled = false;
+      goStep(3);
+      return;
+    }
+
     document.getElementById('booking-result').innerHTML = `
       <div class="success-row"><span class="success-key">Ім'я</span><span class="success-val">${name}</span></div>
       <div class="success-row"><span class="success-key">Дата</span><span class="success-val">${state.selectedDate}</span></div>
@@ -1137,6 +1152,7 @@ async function submitBooking() {
     `;
     goStep(5);
   } catch(e) {
+    console.error('submitBooking error:', e);
     showToast('Помилка збереження. Спробуйте ще раз.','error');
     btn.textContent = '✓ Підтвердити запис';
     btn.disabled = false;
@@ -1152,15 +1168,24 @@ function resetBooking() {
 }
 
 // ====== FETCH DATA FROM GOOGLE SHEETS ======
+// ✅ ВИПРАВЛЕНО: реальні дані, без тихого падіння в mock
 async function fetchBookings() {
   try {
     const url = APPS_SCRIPT_URL + '?action=getBookings&t=' + Date.now();
     const resp = await fetch(url, {mode:'cors'});
-    if(!resp.ok) return getMockBookings();
+    if(!resp.ok) {
+      console.error('fetchBookings HTTP error:', resp.status);
+      return [];
+    }
     const data = await resp.json();
-    return data.bookings || getMockBookings();
+    if(!data.bookings) {
+      console.error('fetchBookings: no bookings field in response', data);
+      return [];
+    }
+    return data.bookings;
   } catch(e) {
-    return getMockBookings();
+    console.error('fetchBookings failed:', e);
+    return [];
   }
 }
 
@@ -1168,30 +1193,13 @@ async function fetchClients() {
   try {
     const url = APPS_SCRIPT_URL + '?action=getClients&t=' + Date.now();
     const resp = await fetch(url, {mode:'cors'});
-    if(!resp.ok) return getMockClients();
+    if(!resp.ok) return [];
     const data = await resp.json();
-    return data.clients || getMockClients();
+    return data.clients || [];
   } catch(e) {
-    return getMockClients();
+    console.error('fetchClients failed:', e);
+    return [];
   }
-}
-
-// Mock data for demo (when API unavailable)
-function getMockBookings() {
-  const today = getTodayStr();
-  return [
-    ['B-0001',today,'Понеділок','09:00','Box 1','C-001','Іванов Іван','+380991234567','Комплексна мийка','✅ Підтверджено','Автозапис'],
-    ['B-0002',today,'Понеділок','11:00','Box 2','C-002','Петренко Олег','+380501234567','Детейлінг','✅ Підтверджено','Автозапис'],
-    ['B-0003',today,'Понеділок','14:00','Box 1','C-003','Сидоренко М.','+380671234567','Хімчистка','✅ Підтверджено','Автозапис'],
-  ];
-}
-
-function getMockClients() {
-  return [
-    ['C-001','Іванов Іван','+380991234567','123456789','','27.05.2026',500,'active'],
-    ['C-002','Петренко Олег','+380501234567','987654321','','15.03.2026',1200,'active'],
-    ['C-003','Сидоренко Марія','+380671234567','','','10.01.2026',300,'active'],
-  ];
 }
 
 // ====== SERVICES ======
