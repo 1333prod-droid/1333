@@ -5,578 +5,706 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>1333 Car Center — Автомийка Харків</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
+/* ═══════════════════════════════════════════
+   LIQUID GLASS — 1333 CAR CENTER
+   Deep dark base · Chromatic glass layers
+═══════════════════════════════════════════ */
 :root {
-  --cream: #f5f0e8;
-  --sand: #e8dfd0;
-  --warm-mid: #c8b89a;
-  --warm-dark: #6b5c47;
-  --accent: #c8953c;
-  --accent-light: rgba(200,149,60,0.15);
-  --accent-bright: #e0a845;
-  --green: #4a9e6c;
-  --green-light: rgba(74,158,108,0.15);
-  --red: #c0444a;
-  --red-light: rgba(192,68,74,0.12);
-  --text-primary: rgba(30,22,14,0.92);
-  --text-secondary: rgba(30,22,14,0.55);
-  --text-tertiary: rgba(30,22,14,0.35);
-  --glass: rgba(245,240,232,0.72);
-  --glass-strong: rgba(245,240,232,0.88);
-  --glass-border: rgba(200,184,154,0.4);
-  --glass-border-strong: rgba(200,184,154,0.65);
-  --card: rgba(255,252,247,0.65);
-  --card-hover: rgba(255,252,247,0.82);
-  --blur: blur(28px) saturate(1.6);
-  --blur-sm: blur(16px) saturate(1.4);
-  --radius: 20px;
-  --radius-sm: 12px;
-  --radius-xs: 8px;
-  --shadow: 0 2px 24px rgba(107,92,71,0.12), 0 1px 4px rgba(107,92,71,0.08);
-  --shadow-sm: 0 1px 12px rgba(107,92,71,0.1);
-  --transition: 0.28s cubic-bezier(0.4,0,0.2,1);
+  --r:24px; --r-sm:14px; --r-xs:9px;
+  --tr:0.3s cubic-bezier(.4,0,.2,1);
+  --font:'DM Sans',-apple-system,sans-serif;
+
+  /* Glass palette */
+  --g1: rgba(255,255,255,0.06);
+  --g2: rgba(255,255,255,0.10);
+  --g3: rgba(255,255,255,0.15);
+  --gb: rgba(255,255,255,0.12);
+  --gb2: rgba(255,255,255,0.22);
+
+  /* Chromatic accents */
+  --ch1: rgba(120,200,255,0.18);   /* ice blue */
+  --ch2: rgba(180,120,255,0.14);   /* violet */
+  --ch3: rgba(80,220,180,0.12);    /* teal */
+  --ch4: rgba(255,180,80,0.10);    /* gold */
+
+  /* Semantic */
+  --gold: #e8b84b;
+  --gold2: #f5ca5a;
+  --teal: #3ecfad;
+  --violet: #9b87f5;
+  --blue: #6eb8ff;
+  --green: #4fc97e;
+  --red: #f06060;
+
+  /* Text */
+  --t1: rgba(255,255,255,0.94);
+  --t2: rgba(255,255,255,0.60);
+  --t3: rgba(255,255,255,0.35);
+  --t4: rgba(255,255,255,0.20);
+
+  --blur-lg: blur(40px) saturate(180%);
+  --blur-md: blur(24px) saturate(160%);
+  --blur-sm: blur(14px) saturate(140%);
 }
 
-* { margin:0; padding:0; box-sizing:border-box; }
-html { scroll-behavior: smooth; }
-
-body {
-  font-family: 'Manrope', -apple-system, sans-serif;
-  background: #1a1510;
-  color: var(--text-primary);
-  min-height: 100vh;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font);
+  background:#080a10;
+  color:var(--t1);
+  min-height:100vh;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
 }
 
-/* ─── BACKGROUND ─── */
-.bg-wrap {
-  position: fixed; inset: 0; z-index: 0;
+/* ── BACKGROUND SCENE ── */
+.bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+.bg-base{
+  position:absolute;inset:0;
   background:
-    radial-gradient(ellipse 80% 60% at 20% 15%, rgba(200,149,60,0.22) 0%, transparent 55%),
-    radial-gradient(ellipse 60% 50% at 80% 80%, rgba(74,158,108,0.14) 0%, transparent 50%),
-    radial-gradient(ellipse 50% 60% at 50% 45%, rgba(245,240,232,0.06) 0%, transparent 60%),
-    linear-gradient(165deg, #1f1a12 0%, #191510 40%, #161311 100%);
+    radial-gradient(ellipse 100% 80% at 10% 0%, rgba(60,100,180,0.22) 0%, transparent 55%),
+    radial-gradient(ellipse 80% 60% at 90% 100%, rgba(100,60,180,0.18) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 60% at 50% 50%, rgba(30,160,140,0.08) 0%, transparent 55%),
+    linear-gradient(160deg,#06080f 0%,#080a12 50%,#07090e 100%);
 }
-.bg-texture {
-  position: fixed; inset: 0; z-index: 0; opacity: 0.025;
-  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='60' height='60' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-}
-.bg-orb { position:fixed; border-radius:50%; filter:blur(90px); pointer-events:none; }
-.orb1 { width:600px; height:600px; top:-80px; left:-100px; background:rgba(200,149,60,0.1); animation:orb 12s ease-in-out infinite; }
-.orb2 { width:500px; height:500px; bottom:-60px; right:-80px; background:rgba(74,158,108,0.07); animation:orb 15s ease-in-out infinite reverse; }
-@keyframes orb { 0%,100%{transform:translate(0,0)} 50%{transform:translate(30px,-25px)} }
+.bg-orb{position:absolute;border-radius:50%;filter:blur(100px);animation:orb-f 14s ease-in-out infinite}
+.o1{width:700px;height:700px;top:-200px;left:-150px;background:rgba(60,120,220,0.12);animation-delay:0s}
+.o2{width:600px;height:600px;bottom:-150px;right:-100px;background:rgba(120,60,200,0.10);animation-delay:-5s}
+.o3{width:400px;height:400px;top:40%;left:40%;background:rgba(40,180,160,0.07);animation-delay:-8s}
+.o4{width:350px;height:350px;top:20%;right:20%;background:rgba(220,160,60,0.06);animation-delay:-3s}
+@keyframes orb-f{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,-30px) scale(1.08)}}
 
-/* ─── NAV ─── */
-nav {
-  position:fixed; top:0; left:0; right:0; z-index:200;
-  height:60px; padding:0 2rem;
-  display:flex; align-items:center; justify-content:space-between;
-  background: rgba(26,21,16,0.75);
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
-  border-bottom: 0.5px solid var(--glass-border);
-}
-.nav-logo { font-size:17px; font-weight:800; letter-spacing:-0.5px; color:#f0e8da; }
-.nav-logo em { color:var(--accent); font-style:normal; }
-.nav-links { display:flex; gap:2px; }
-.nl {
-  padding:7px 14px; border-radius:10px; border:none; background:none;
-  font-family:inherit; font-size:13.5px; font-weight:500; color:rgba(240,232,218,0.55);
-  cursor:pointer; transition:var(--transition);
-}
-.nl:hover { color:rgba(240,232,218,0.9); background:rgba(245,240,232,0.08); }
-.nl.on { color:#f0e8da; background:rgba(245,240,232,0.12); }
-.nav-book {
-  padding:8px 18px; border-radius:10px; border:none;
-  background:var(--accent); font-family:inherit; font-size:13.5px; font-weight:700;
-  color:#1a1510; cursor:pointer; transition:var(--transition); letter-spacing:-0.2px;
-}
-.nav-book:hover { background:var(--accent-bright); transform:scale(1.03); }
-
-/* ─── PAGES ─── */
-.page { display:none; padding-top:60px; min-height:100vh; position:relative; z-index:1; }
-.page.on { display:block; }
-
-/* ─── HERO ─── */
-.hero {
-  max-width:1180px; margin:0 auto; padding:80px 2rem 60px;
-  display:grid; grid-template-columns:1.1fr 1fr; gap:70px; align-items:center;
-}
-.hero-eyebrow {
-  display:inline-flex; align-items:center; gap:7px;
-  padding:5px 12px; border-radius:20px; margin-bottom:20px;
-  background:rgba(200,149,60,0.12); border:1px solid rgba(200,149,60,0.28);
-  font-size:12px; font-weight:600; color:var(--accent-bright); letter-spacing:0.3px;
-}
-.hero-dot { width:6px; height:6px; border-radius:50%; background:var(--accent); animation:pulse 2s infinite; }
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(1.4)}}
-h1 {
-  font-size:54px; font-weight:800; line-height:1.07; letter-spacing:-2.5px; margin-bottom:18px;
-  color:#f0e8da;
-}
-h1 span { color:var(--accent); }
-.hero-sub { font-size:17px; color:rgba(240,232,218,0.6); line-height:1.65; margin-bottom:34px; font-weight:400; }
-.hero-btns { display:flex; gap:10px; flex-wrap:wrap; }
-.btn-main {
-  padding:13px 26px; border-radius:12px; border:none;
-  background:var(--accent); font-family:inherit; font-size:15px; font-weight:700;
-  color:#1a1510; cursor:pointer; transition:var(--transition);
-}
-.btn-main:hover { background:var(--accent-bright); transform:translateY(-2px); box-shadow:0 8px 24px rgba(200,149,60,0.35); }
-.btn-outline {
-  padding:13px 26px; border-radius:12px;
-  background:rgba(245,240,232,0.08); border:1px solid rgba(245,240,232,0.18);
-  font-family:inherit; font-size:15px; font-weight:600; color:#f0e8da;
-  cursor:pointer; transition:var(--transition);
-}
-.btn-outline:hover { background:rgba(245,240,232,0.13); transform:translateY(-2px); }
-
-/* HERO RIGHT */
-.hero-right { display:flex; flex-direction:column; gap:10px; }
-.glass-card {
-  background:var(--card);
-  backdrop-filter:var(--blur);
-  -webkit-backdrop-filter:var(--blur);
-  border:1px solid var(--glass-border);
-  border-radius:var(--radius); padding:20px 22px;
-  transition:var(--transition);
-}
-.glass-card:hover { background:var(--card-hover); transform:translateY(-2px); box-shadow:var(--shadow); }
-
-.boxes-live { display:flex; flex-direction:column; gap:8px; }
-.box-row-live {
-  display:flex; align-items:center; gap:10px; padding:10px 14px;
-  background:rgba(255,252,247,0.45); border:1px solid rgba(200,184,154,0.3);
-  border-radius:var(--radius-sm); transition:var(--transition);
-}
-.box-row-live:hover { background:rgba(255,252,247,0.65); }
-.brl-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
-.brl-dot.free { background:var(--green); box-shadow:0 0 8px rgba(74,158,108,0.5); }
-.brl-dot.busy { background:var(--red); box-shadow:0 0 8px rgba(192,68,74,0.5); }
-.brl-name { font-size:14px; font-weight:600; flex:1; color:var(--text-primary); }
-.brl-status { font-size:12px; font-weight:500; }
-.brl-status.free { color:var(--green); }
-.brl-status.busy { color:var(--red); }
-
-.hours-grid { display:flex; flex-wrap:wrap; gap:6px; }
-.hour-chip {
-  padding:5px 12px; border-radius:8px; font-size:12.5px; font-weight:600;
-  background:rgba(200,149,60,0.1); border:1px solid rgba(200,149,60,0.22);
-  color:var(--accent-bright); cursor:pointer; transition:var(--transition);
-}
-.hour-chip:hover { background:var(--accent); color:#1a1510; border-color:var(--accent); }
-
-/* ─── SECTION ─── */
-.section { max-width:1180px; margin:0 auto; padding:20px 2rem 80px; }
-.sec-head { text-align:center; margin-bottom:44px; }
-.sec-title { font-size:38px; font-weight:800; letter-spacing:-1.5px; color:#f0e8da; margin-bottom:10px; }
-.sec-sub { font-size:16px; color:rgba(240,232,218,0.5); font-weight:400; }
-
-/* ─── SERVICES ─── */
-.srv-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(270px,1fr)); gap:14px; }
-.srv-card {
-  background:var(--card); backdrop-filter:var(--blur-sm); -webkit-backdrop-filter:var(--blur-sm);
-  border:1px solid var(--glass-border); border-radius:var(--radius); padding:24px 22px;
-  cursor:pointer; transition:var(--transition);
-}
-.srv-card:hover { background:var(--card-hover); transform:translateY(-4px); box-shadow:var(--shadow); }
-.srv-icon {
-  width:44px; height:44px; border-radius:11px; display:flex; align-items:center; justify-content:center;
-  font-size:20px; margin-bottom:14px;
-}
-.srv-name { font-size:16px; font-weight:700; margin-bottom:7px; color:#f0e8da; }
-.srv-desc { font-size:13.5px; color:rgba(240,232,218,0.5); line-height:1.6; margin-bottom:14px; }
-.srv-price { font-size:22px; font-weight:800; color:var(--accent); }
-.srv-price span { font-size:12px; color:rgba(240,232,218,0.4); font-weight:400; }
-
-/* ─── PRICING PAGE ─── */
-.price-tabs { display:flex; gap:4px; background:rgba(245,240,232,0.07); border-radius:14px; padding:4px; width:max-content; margin:0 auto 36px; }
-.ptab {
-  padding:9px 22px; border:none; background:none; font-family:inherit;
-  font-size:14px; font-weight:600; color:rgba(240,232,218,0.45);
-  border-radius:11px; cursor:pointer; transition:var(--transition);
-}
-.ptab.on { background:rgba(245,240,232,0.14); color:#f0e8da; }
-.price-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; }
-.price-card {
-  background:var(--card); backdrop-filter:var(--blur-sm); -webkit-backdrop-filter:var(--blur-sm);
-  border:1px solid var(--glass-border); border-radius:var(--radius); padding:22px 20px;
-  transition:var(--transition);
-}
-.price-card:hover { background:var(--card-hover); transform:translateY(-3px); box-shadow:var(--shadow); }
-.pc-icon { font-size:18px; margin-bottom:10px; }
-.pc-name { font-size:15px; font-weight:700; color:#f0e8da; margin-bottom:5px; }
-.pc-dur { font-size:12px; color:rgba(240,232,218,0.4); margin-bottom:12px; font-weight:500; }
-.pc-price { font-size:24px; font-weight:800; color:var(--accent); }
-.pc-price span { font-size:12px; color:rgba(240,232,218,0.4); font-weight:400; }
-.pc-btn {
-  margin-top:12px; width:100%; padding:9px; border-radius:9px;
-  background:rgba(200,149,60,0.12); border:1px solid rgba(200,149,60,0.25);
-  font-family:inherit; font-size:13px; font-weight:700; color:var(--accent-bright);
-  cursor:pointer; transition:var(--transition);
-}
-.pc-btn:hover { background:var(--accent); color:#1a1510; border-color:var(--accent); }
-
-/* ─── BOOKING ─── */
-.book-wrap { max-width:860px; margin:0 auto; padding:40px 2rem 80px; }
-.book-steps {
-  display:flex; gap:0; margin-bottom:36px; position:relative;
-}
-.book-steps::before {
-  content:''; position:absolute; top:19px; left:30px; right:30px; height:1px;
-  background:rgba(200,184,154,0.2); z-index:0;
-}
-.step-i {
-  flex:1; display:flex; flex-direction:column; align-items:center; gap:7px; position:relative; z-index:1;
-}
-.step-dot {
-  width:38px; height:38px; border-radius:50%;
-  display:flex; align-items:center; justify-content:center;
-  font-size:13px; font-weight:700;
-  background:rgba(245,240,232,0.07); border:1px solid rgba(200,184,154,0.25);
-  color:rgba(240,232,218,0.35); transition:var(--transition);
-}
-.step-dot.on { background:var(--accent); border-color:var(--accent); color:#1a1510; }
-.step-dot.done { background:rgba(74,158,108,0.2); border-color:rgba(74,158,108,0.4); color:var(--green); }
-.step-label { font-size:11px; font-weight:600; color:rgba(240,232,218,0.35); }
-
-.book-panel {
-  background:var(--card); backdrop-filter:var(--blur);
-  -webkit-backdrop-filter:var(--blur);
-  border:1px solid var(--glass-border); border-radius:var(--radius); padding:32px;
-}
-.book-title { font-size:22px; font-weight:800; color:#f0e8da; letter-spacing:-0.5px; margin-bottom:6px; }
-.book-sub { font-size:14px; color:rgba(240,232,218,0.45); margin-bottom:26px; }
-
-.dates-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:7px; margin-bottom:22px; }
-.date-btn {
-  display:flex; flex-direction:column; align-items:center; gap:3px;
-  padding:10px 4px; border-radius:12px; cursor:pointer; transition:var(--transition);
-  background:rgba(245,240,232,0.05); border:1px solid rgba(200,184,154,0.18);
-}
-.date-btn:hover { background:rgba(200,149,60,0.1); border-color:rgba(200,149,60,0.3); }
-.date-btn.sel { background:var(--accent); border-color:var(--accent); }
-.date-day { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:rgba(240,232,218,0.35); }
-.date-num { font-size:18px; font-weight:800; color:#f0e8da; }
-.date-btn.sel .date-day, .date-btn.sel .date-num { color:#1a1510; }
-
-.times-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:7px; margin-bottom:22px; }
-.time-btn {
-  padding:12px 8px; border-radius:10px; text-align:center;
-  background:rgba(245,240,232,0.05); border:1px solid rgba(200,184,154,0.18);
-  font-family:inherit; font-size:14.5px; font-weight:700; color:#f0e8da;
-  cursor:pointer; transition:var(--transition);
-}
-.time-btn:hover { background:rgba(200,149,60,0.1); border-color:rgba(200,149,60,0.3); }
-.time-btn.sel { background:var(--accent); border-color:var(--accent); color:#1a1510; }
-.time-btn.busy {
-  background:rgba(192,68,74,0.07); border-color:rgba(192,68,74,0.2);
-  color:rgba(192,68,74,0.6); cursor:not-allowed; font-size:11px;
+/* Noise grain */
+.bg-noise{
+  position:absolute;inset:0;opacity:0.032;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat:repeat;background-size:256px;
 }
 
-.boxes-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:22px; }
-.box-card {
-  padding:20px; border-radius:14px; text-align:center;
-  background:rgba(245,240,232,0.05); border:1px solid rgba(200,184,154,0.18);
-  cursor:pointer; transition:var(--transition);
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:300;
+  height:62px;padding:0 2rem;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(8,10,16,0.6);
+  backdrop-filter:var(--blur-lg);
+  -webkit-backdrop-filter:var(--blur-lg);
+  border-bottom:0.5px solid rgba(255,255,255,0.08);
 }
-.box-card:hover { background:rgba(200,149,60,0.1); border-color:rgba(200,149,60,0.3); }
-.box-card.sel { background:rgba(200,149,60,0.15); border-color:var(--accent); }
-.box-card.busy { opacity:0.38; cursor:not-allowed; pointer-events:none; }
-.box-ico { font-size:28px; margin-bottom:7px; }
-.box-n { font-size:15px; font-weight:700; margin-bottom:4px; color:#f0e8da; }
-.box-st { font-size:11.5px; font-weight:600; }
-.box-st.free { color:var(--green); }
-.box-st.busy { color:var(--red); }
+.nav-logo{font-size:17px;font-weight:800;letter-spacing:-0.5px;color:var(--t1)}
+.nav-logo em{
+  font-style:normal;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.nav-links{display:flex;gap:2px}
+.nl{
+  padding:7px 14px;border-radius:10px;border:none;background:none;
+  font-family:var(--font);font-size:13.5px;font-weight:500;color:var(--t3);
+  cursor:pointer;transition:var(--tr);
+}
+.nl:hover{color:var(--t2);background:var(--g1)}
+.nl.on{color:var(--t1);background:var(--g2)}
+.nav-cta{
+  padding:9px 20px;border-radius:11px;border:none;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  font-family:var(--font);font-size:13.5px;font-weight:700;color:#0a0a0a;
+  cursor:pointer;transition:var(--tr);
+}
+.nav-cta:hover{transform:scale(1.03);box-shadow:0 0 24px rgba(232,184,75,0.35)}
 
-.form-g { margin-bottom:14px; }
-.form-l { font-size:12.5px; font-weight:600; color:rgba(240,232,218,0.5); margin-bottom:7px; display:block; letter-spacing:0.2px; }
-.form-i {
-  width:100%; padding:11px 14px; border-radius:10px;
-  background:rgba(245,240,232,0.07); border:1px solid rgba(200,184,154,0.25);
-  color:#f0e8da; font-family:inherit; font-size:14px; outline:none; transition:var(--transition);
-}
-.form-i:focus { border-color:var(--accent); background:rgba(245,240,232,0.11); }
-.form-i::placeholder { color:rgba(240,232,218,0.25); }
-.form-i option { background:#1f1a12; color:#f0e8da; }
+/* ── PAGES ── */
+.page{display:none;padding-top:62px;min-height:100vh;position:relative;z-index:1}
+.page.on{display:block}
 
-.book-summary {
-  background:rgba(200,149,60,0.07); border:1px solid rgba(200,149,60,0.2);
-  border-radius:12px; padding:18px; margin-bottom:22px;
+/* ── GLASS CARD BASE ── */
+.glass{
+  background:var(--g1);
+  backdrop-filter:var(--blur-md);
+  -webkit-backdrop-filter:var(--blur-md);
+  border:0.5px solid var(--gb);
+  border-radius:var(--r);
+  transition:var(--tr);
 }
-.bs-row { display:flex; justify-content:space-between; padding:5px 0; font-size:13.5px; border-bottom:1px solid rgba(200,184,154,0.1); }
-.bs-row:last-child { border-bottom:none; }
-.bs-key { color:rgba(240,232,218,0.45); }
-.bs-val { font-weight:700; color:#f0e8da; }
+.glass:hover{background:var(--g2);border-color:var(--gb2)}
 
-.btn-next {
-  width:100%; padding:14px; border-radius:12px; border:none;
-  background:var(--accent); font-family:inherit; font-size:15px; font-weight:800;
-  color:#1a1510; cursor:pointer; transition:var(--transition); letter-spacing:-0.2px;
+/* Chromatic shimmer border */
+.glass-ch{
+  position:relative;
+  background:var(--g1);
+  backdrop-filter:var(--blur-md);
+  -webkit-backdrop-filter:var(--blur-md);
+  border-radius:var(--r);
+  transition:var(--tr);
 }
-.btn-next:hover { background:var(--accent-bright); transform:translateY(-2px); box-shadow:0 8px 20px rgba(200,149,60,0.3); }
-.btn-next:disabled { opacity:0.5; cursor:not-allowed; transform:none; box-shadow:none; }
-.btn-back {
-  padding:9px 18px; border-radius:10px; border:1px solid rgba(200,184,154,0.25);
-  background:transparent; font-family:inherit; font-size:13.5px; font-weight:600;
-  color:rgba(240,232,218,0.5); cursor:pointer; transition:var(--transition); margin-bottom:18px;
+.glass-ch::before{
+  content:'';position:absolute;inset:0;border-radius:var(--r);
+  padding:0.5px;
+  background:linear-gradient(135deg,
+    rgba(120,200,255,0.5) 0%,
+    rgba(180,120,255,0.4) 25%,
+    rgba(80,220,180,0.4) 50%,
+    rgba(255,180,80,0.3) 75%,
+    rgba(120,200,255,0.5) 100%);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  animation:ch-spin 6s linear infinite;
 }
-.btn-back:hover { background:rgba(245,240,232,0.07); color:#f0e8da; }
+@keyframes ch-spin{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+.glass-ch:hover{background:var(--g2)}
 
-/* Success */
-.success-wrap { display:flex; flex-direction:column; align-items:center; padding:50px 20px; text-align:center; }
-.success-ico {
-  width:72px; height:72px; border-radius:50%;
-  background:rgba(74,158,108,0.15); border:2px solid var(--green);
-  display:flex; align-items:center; justify-content:center; font-size:30px; margin-bottom:22px;
+/* ── HERO ── */
+.hero{
+  max-width:1180px;margin:0 auto;padding:90px 2rem 70px;
+  display:grid;grid-template-columns:1.1fr 1fr;gap:72px;align-items:center;
+}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:5px 13px;border-radius:20px;margin-bottom:22px;
+  background:rgba(232,184,75,0.10);border:0.5px solid rgba(232,184,75,0.30);
+  font-size:12px;font-weight:700;letter-spacing:0.3px;
+  color:var(--gold2);
+}
+.hero-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(1.5)}}
+h1{
+  font-size:60px;font-weight:800;line-height:1.05;letter-spacing:-3px;
+  margin-bottom:18px;color:var(--t1);
+}
+h1 .grad{
+  background:linear-gradient(135deg,#fff 0%,rgba(255,255,255,0.7) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+h1 .ch{
+  background:linear-gradient(135deg,var(--gold),#e8a0ff,var(--blue));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  background-size:200%;animation:ch-text 4s ease infinite;
+}
+@keyframes ch-text{0%,100%{background-position:0%}50%{background-position:100%}}
+.hero-sub{font-size:17px;color:var(--t2);line-height:1.68;margin-bottom:36px;font-weight:400}
+.hero-btns{display:flex;gap:10px;flex-wrap:wrap}
+.btn-gold{
+  padding:13px 26px;border-radius:13px;border:none;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  font-family:var(--font);font-size:15px;font-weight:700;color:#0a0a0a;
+  cursor:pointer;transition:var(--tr);letter-spacing:-0.2px;
+}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(232,184,75,0.35)}
+.btn-ghost{
+  padding:13px 26px;border-radius:13px;
+  background:var(--g1);border:0.5px solid var(--gb2);
+  font-family:var(--font);font-size:15px;font-weight:600;color:var(--t1);
+  cursor:pointer;transition:var(--tr);
+}
+.btn-ghost:hover{background:var(--g3);transform:translateY(-2px)}
+
+/* Hero right cards */
+.hero-right{display:flex;flex-direction:column;gap:12px}
+.hero-card{
+  padding:20px 22px;
+  background:var(--g2);
+  backdrop-filter:var(--blur-md);
+  -webkit-backdrop-filter:var(--blur-md);
+  border:0.5px solid rgba(255,255,255,0.14);
+  border-radius:20px;
+  transition:var(--tr);
+}
+.hero-card:hover{background:var(--g3);transform:translateY(-2px)}
+.hc-label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--t3);margin-bottom:12px}
+
+/* Box rows hero */
+.brow{
+  display:flex;align-items:center;gap:10px;padding:9px 13px;
+  background:rgba(255,255,255,0.04);border:0.5px solid rgba(255,255,255,0.10);
+  border-radius:11px;transition:var(--tr);margin-bottom:7px;
+}
+.brow:last-child{margin-bottom:0}
+.brow:hover{background:rgba(255,255,255,0.07)}
+.bdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.bdot.free{background:var(--green);box-shadow:0 0 9px rgba(79,201,126,0.55)}
+.bdot.busy{background:var(--red);box-shadow:0 0 9px rgba(240,96,96,0.55)}
+.bname{font-size:13.5px;font-weight:600;flex:1;color:var(--t1)}
+.bst{font-size:12px;font-weight:600}
+.bst.free{color:var(--green)}
+.bst.busy{color:var(--red)}
+
+/* Slot chips */
+.slots{display:flex;flex-wrap:wrap;gap:6px}
+.chip{
+  padding:5px 12px;border-radius:8px;font-size:12.5px;font-weight:600;
+  background:rgba(255,255,255,0.06);border:0.5px solid rgba(255,255,255,0.13);
+  color:var(--t2);cursor:pointer;transition:var(--tr);
+}
+.chip:hover{background:rgba(232,184,75,0.18);border-color:rgba(232,184,75,0.4);color:var(--gold2)}
+
+/* ── SECTION ── */
+.sec{max-width:1180px;margin:0 auto;padding:20px 2rem 80px}
+.sec-hd{text-align:center;margin-bottom:46px}
+.sec-ttl{font-size:40px;font-weight:800;letter-spacing:-1.8px;color:var(--t1);margin-bottom:10px}
+.sec-sub{font-size:16px;color:var(--t2)}
+
+/* ── SERVICE CARDS ── */
+.srv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.srv-card{
+  padding:26px 22px;
+  background:linear-gradient(135deg,var(--g2) 0%,var(--g1) 100%);
+  backdrop-filter:var(--blur-md);-webkit-backdrop-filter:var(--blur-md);
+  border:0.5px solid rgba(255,255,255,0.12);
+  border-radius:22px;cursor:pointer;transition:var(--tr);
+  position:relative;overflow:hidden;
+}
+.srv-card::after{
+  content:'';position:absolute;top:0;right:0;width:80px;height:80px;
+  background:radial-gradient(circle,rgba(255,255,255,0.04) 0%,transparent 70%);
+  border-radius:0 22px 0 0;
+}
+.srv-card:hover{background:linear-gradient(135deg,var(--g3) 0%,var(--g2) 100%);transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,0.3)}
+.srv-ico{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:15px}
+.srv-name{font-size:16px;font-weight:700;margin-bottom:7px;color:var(--t1)}
+.srv-desc{font-size:13.5px;color:var(--t2);line-height:1.6;margin-bottom:15px}
+.srv-price{font-size:22px;font-weight:800;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.srv-price span{font-size:12px;color:var(--t3);-webkit-text-fill-color:var(--t3)}
+
+/* ── PRICES PAGE ── */
+.ptabs{
+  display:flex;gap:4px;background:rgba(255,255,255,0.05);
+  border:0.5px solid rgba(255,255,255,0.10);
+  border-radius:15px;padding:4px;width:max-content;margin:0 auto 38px;
+}
+.ptab{
+  padding:9px 24px;border:none;background:none;font-family:var(--font);
+  font-size:14px;font-weight:600;color:var(--t3);border-radius:12px;
+  cursor:pointer;transition:var(--tr);
+}
+.ptab.on{background:rgba(255,255,255,0.12);color:var(--t1)}
+.pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:13px}
+.pc{
+  padding:22px 20px;
+  background:var(--g1);backdrop-filter:var(--blur-sm);-webkit-backdrop-filter:var(--blur-sm);
+  border:0.5px solid rgba(255,255,255,0.10);border-radius:20px;transition:var(--tr);
+}
+.pc:hover{background:var(--g2);transform:translateY(-3px);box-shadow:0 12px 36px rgba(0,0,0,0.25)}
+.pc-ico{font-size:17px;margin-bottom:9px}
+.pc-name{font-size:15px;font-weight:700;color:var(--t1);margin-bottom:4px}
+.pc-dur{font-size:12px;color:var(--t3);margin-bottom:11px;font-weight:500}
+.pc-price{font-size:24px;font-weight:800;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.pc-price span{font-size:12px;color:var(--t3);-webkit-text-fill-color:var(--t3)}
+.pc-btn{
+  margin-top:12px;width:100%;padding:9px;border-radius:10px;
+  background:rgba(232,184,75,0.10);border:0.5px solid rgba(232,184,75,0.25);
+  font-family:var(--font);font-size:13px;font-weight:700;color:var(--gold2);
+  cursor:pointer;transition:var(--tr);
+}
+.pc-btn:hover{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0a0a0a;border-color:transparent}
+
+/* ── BOOKING ── */
+.bwrap{max-width:860px;margin:0 auto;padding:40px 2rem 80px}
+.bsteps{
+  display:flex;gap:0;margin-bottom:36px;position:relative;
+}
+.bsteps::before{
+  content:'';position:absolute;top:19px;left:35px;right:35px;height:0.5px;
+  background:rgba(255,255,255,0.10);z-index:0;
+}
+.si{flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;position:relative;z-index:1}
+.sdot{
+  width:38px;height:38px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;
+  background:rgba(255,255,255,0.05);border:0.5px solid rgba(255,255,255,0.12);
+  color:var(--t3);transition:var(--tr);
+}
+.sdot.on{background:linear-gradient(135deg,var(--gold),var(--gold2));border-color:transparent;color:#0a0a0a}
+.sdot.done{background:rgba(79,201,126,0.18);border-color:rgba(79,201,126,0.35);color:var(--green)}
+.slabel{font-size:11px;font-weight:600;color:var(--t3)}
+
+.bpanel{
+  background:rgba(255,255,255,0.055);
+  backdrop-filter:var(--blur-lg);
+  -webkit-backdrop-filter:var(--blur-lg);
+  border:0.5px solid rgba(255,255,255,0.13);
+  border-radius:26px;padding:34px;
+}
+/* chromatic top edge */
+.bpanel-ch{
+  background:rgba(255,255,255,0.055);
+  backdrop-filter:var(--blur-lg);
+  -webkit-backdrop-filter:var(--blur-lg);
+  border-radius:26px;padding:34px;
+  position:relative;
+}
+.bpanel-ch::before{
+  content:'';position:absolute;inset:0;border-radius:26px;padding:0.5px;
+  background:linear-gradient(135deg,rgba(120,200,255,0.45),rgba(180,120,255,0.35),rgba(80,220,180,0.35),rgba(255,180,80,0.25));
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;
+}
+.bt{font-size:22px;font-weight:800;color:var(--t1);letter-spacing:-0.5px;margin-bottom:6px}
+.bsub{font-size:14px;color:var(--t2);margin-bottom:26px}
+
+.dg{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin-bottom:22px}
+.db{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:11px 4px;border-radius:13px;cursor:pointer;transition:var(--tr);
+  background:rgba(255,255,255,0.04);border:0.5px solid rgba(255,255,255,0.10);
+}
+.db:hover{background:rgba(232,184,75,0.12);border-color:rgba(232,184,75,0.3)}
+.db.sel{background:linear-gradient(135deg,rgba(232,184,75,0.25),rgba(245,202,90,0.18));border-color:var(--gold)}
+.dd{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:var(--t3)}
+.dn{font-size:18px;font-weight:800;color:var(--t1)}
+.db.sel .dd,.db.sel .dn{color:var(--gold2)}
+
+.tg{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:22px}
+.tb{
+  padding:13px 8px;border-radius:11px;text-align:center;
+  background:rgba(255,255,255,0.04);border:0.5px solid rgba(255,255,255,0.10);
+  font-family:var(--font);font-size:14.5px;font-weight:700;color:var(--t1);
+  cursor:pointer;transition:var(--tr);
+}
+.tb:hover{background:rgba(232,184,75,0.12);border-color:rgba(232,184,75,0.3)}
+.tb.sel{background:linear-gradient(135deg,rgba(232,184,75,0.22),rgba(245,202,90,0.15));border-color:var(--gold);color:var(--gold2)}
+.tb.busy{background:rgba(240,96,96,0.07);border-color:rgba(240,96,96,0.2);color:rgba(240,96,96,0.55);cursor:not-allowed;font-size:11px}
+
+.boxg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px}
+.boxc{
+  padding:22px 16px;border-radius:16px;text-align:center;
+  background:rgba(255,255,255,0.04);border:0.5px solid rgba(255,255,255,0.10);
+  cursor:pointer;transition:var(--tr);
+}
+.boxc:hover{background:rgba(232,184,75,0.10);border-color:rgba(232,184,75,0.3)}
+.boxc.sel{background:rgba(232,184,75,0.14);border-color:var(--gold)}
+.boxc.busy{opacity:0.35;cursor:not-allowed;pointer-events:none}
+.boxic{font-size:28px;margin-bottom:8px}
+.boxn{font-size:15px;font-weight:700;color:var(--t1);margin-bottom:4px}
+.boxst{font-size:12px;font-weight:600}
+.boxst.free{color:var(--green)}
+.boxst.busy{color:var(--red)}
+
+.fg{margin-bottom:14px}
+.fl{font-size:12px;font-weight:700;letter-spacing:0.3px;color:var(--t3);margin-bottom:7px;display:block;text-transform:uppercase}
+.fi{
+  width:100%;padding:12px 15px;border-radius:11px;
+  background:rgba(255,255,255,0.06);border:0.5px solid rgba(255,255,255,0.14);
+  color:var(--t1);font-family:var(--font);font-size:14px;outline:none;transition:var(--tr);
+}
+.fi:focus{border-color:rgba(232,184,75,0.5);background:rgba(255,255,255,0.09)}
+.fi::placeholder{color:var(--t4)}
+.fi option{background:#111318;color:var(--t1)}
+
+.bsum{
+  background:rgba(232,184,75,0.07);border:0.5px solid rgba(232,184,75,0.18);
+  border-radius:13px;padding:18px;margin-bottom:22px;
+}
+.bsr{display:flex;justify-content:space-between;padding:5px 0;font-size:13.5px;border-bottom:0.5px solid rgba(255,255,255,0.06)}
+.bsr:last-child{border-bottom:none}
+.bsk{color:var(--t2)}
+.bsv{font-weight:700;color:var(--t1)}
+
+.btn-next{
+  width:100%;padding:15px;border-radius:13px;border:none;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  font-family:var(--font);font-size:15px;font-weight:800;color:#0a0a0a;
+  cursor:pointer;transition:var(--tr);letter-spacing:-0.2px;
+}
+.btn-next:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(232,184,75,0.35)}
+.btn-next:disabled{opacity:0.45;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-back{
+  padding:9px 18px;border-radius:10px;border:0.5px solid rgba(255,255,255,0.12);
+  background:transparent;font-family:var(--font);font-size:13.5px;font-weight:600;
+  color:var(--t2);cursor:pointer;transition:var(--tr);margin-bottom:18px;display:block;
+}
+.btn-back:hover{background:rgba(255,255,255,0.07);color:var(--t1)}
+
+.success-w{display:flex;flex-direction:column;align-items:center;padding:50px 20px;text-align:center}
+.sico{
+  width:72px;height:72px;border-radius:50%;
+  background:rgba(79,201,126,0.15);border:1.5px solid var(--green);
+  display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:22px;
   animation:pop .5s cubic-bezier(.175,.885,.32,1.275);
 }
 @keyframes pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
-.success-title { font-size:26px; font-weight:800; color:#f0e8da; margin-bottom:10px; letter-spacing:-0.5px; }
-.success-sub { font-size:15px; color:rgba(240,232,218,0.5); margin-bottom:28px; line-height:1.6; }
-.success-card {
-  background:rgba(245,240,232,0.06); border:1px solid var(--glass-border);
-  border-radius:var(--radius); padding:20px; width:100%; max-width:340px; text-align:left; margin-bottom:28px;
+.sttl{font-size:26px;font-weight:800;color:var(--t1);letter-spacing:-0.5px;margin-bottom:10px}
+.ssub2{font-size:15px;color:var(--t2);margin-bottom:28px;line-height:1.6}
+.scard{
+  background:rgba(255,255,255,0.05);border:0.5px solid rgba(255,255,255,0.12);
+  border-radius:18px;padding:20px;width:100%;max-width:340px;text-align:left;margin-bottom:28px;
 }
-.success-row { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid rgba(200,184,154,0.1); font-size:13.5px; }
-.success-row:last-child { border-bottom:none; }
-.success-key { color:rgba(240,232,218,0.45); }
-.success-val { font-weight:700; color:#f0e8da; }
+.sr{display:flex;justify-content:space-between;padding:7px 0;border-bottom:0.5px solid rgba(255,255,255,0.06);font-size:13.5px}
+.sr:last-child{border-bottom:none}
+.sk{color:var(--t2)}.sv{font-weight:700;color:var(--t1)}
 
 /* Loading */
-.loading { display:flex; align-items:center; gap:8px; color:rgba(240,232,218,0.4); font-size:13px; padding:20px 0; }
-.spin { width:15px; height:15px; border:2px solid rgba(200,184,154,0.2); border-top-color:var(--accent); border-radius:50%; animation:sp .75s linear infinite; }
+.ld{display:flex;align-items:center;gap:8px;color:var(--t3);font-size:13px;padding:18px 0}
+.sp{width:14px;height:14px;border:2px solid rgba(255,255,255,0.1);border-top-color:var(--gold);border-radius:50%;animation:sp .75s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 
-/* ─── SUBSCRIPTIONS ─── */
-.subs-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; }
-.sub-card {
-  background:var(--card); backdrop-filter:var(--blur); -webkit-backdrop-filter:var(--blur);
-  border:1px solid var(--glass-border); border-radius:var(--radius); padding:28px 24px;
-  position:relative; overflow:hidden; transition:var(--transition);
+/* ── SUBSCRIPTIONS ── */
+.subs-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px}
+.sub{
+  border-radius:26px;padding:30px 26px;position:relative;overflow:hidden;
+  transition:var(--tr);
+  background:rgba(255,255,255,0.06);
+  backdrop-filter:var(--blur-md);-webkit-backdrop-filter:var(--blur-md);
 }
-.sub-card::before {
-  content:''; position:absolute; top:0; left:0; right:0; height:3px;
-  background:linear-gradient(90deg, transparent, var(--accent-color, var(--accent)), transparent);
+.sub::before{
+  content:'';position:absolute;inset:0;border-radius:26px;padding:0.5px;
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;
 }
-.sub-card.silver { --accent-color: #a8a8b8; }
-.sub-card.gold { --accent-color: var(--accent); }
-.sub-card.platinum { --accent-color: #8fbcd4; }
-.sub-card:hover { background:var(--card-hover); transform:translateY(-5px); box-shadow:var(--shadow); }
-.sub-badge {
-  display:inline-block; padding:4px 12px; border-radius:20px; font-size:11px; font-weight:800;
-  letter-spacing:0.5px; text-transform:uppercase; margin-bottom:18px;
+.sub.silver::before{background:linear-gradient(135deg,rgba(180,190,210,0.6),rgba(200,210,230,0.3),rgba(160,170,195,0.5))}
+.sub.gold::before{background:linear-gradient(135deg,rgba(232,184,75,0.7),rgba(255,210,100,0.4),rgba(200,150,40,0.6))}
+.sub.plat::before{background:linear-gradient(135deg,rgba(120,200,255,0.6),rgba(180,120,255,0.5),rgba(80,220,180,0.4),rgba(255,180,80,0.3))}
+.sub:hover{transform:translateY(-6px);background:rgba(255,255,255,0.09)}
+.sub-badge{
+  display:inline-block;padding:4px 13px;border-radius:20px;
+  font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:20px;
 }
-.sub-card.silver .sub-badge { background:rgba(168,168,184,0.15); color:#c0c0d0; border:1px solid rgba(168,168,184,0.3); }
-.sub-card.gold .sub-badge { background:rgba(200,149,60,0.15); color:var(--accent-bright); border:1px solid rgba(200,149,60,0.3); }
-.sub-card.platinum .sub-badge { background:rgba(143,188,212,0.15); color:#a8d4f0; border:1px solid rgba(143,188,212,0.3); }
-.sub-name { font-size:28px; font-weight:800; color:#f0e8da; letter-spacing:-1px; margin-bottom:4px; }
-.sub-months { font-size:13px; color:rgba(240,232,218,0.4); margin-bottom:20px; font-weight:500; }
-.sub-price { font-size:36px; font-weight:800; color:#f0e8da; letter-spacing:-1.5px; margin-bottom:4px; }
-.sub-price-sub { font-size:13px; color:rgba(240,232,218,0.4); font-weight:400; margin-bottom:6px; }
-.sub-bonus {
-  font-size:13px; font-weight:700; padding:5px 12px; border-radius:8px; display:inline-block; margin-bottom:20px;
+.silver .sub-badge{background:rgba(180,190,210,0.12);color:#b8c2d8;border:0.5px solid rgba(180,190,210,0.3)}
+.gold .sub-badge{background:rgba(232,184,75,0.14);color:var(--gold2);border:0.5px solid rgba(232,184,75,0.3)}
+.plat .sub-badge{
+  background:linear-gradient(135deg,rgba(120,200,255,0.1),rgba(180,120,255,0.1));
+  border:0.5px solid rgba(180,120,255,0.3);
+  color:var(--violet);
 }
-.sub-card.silver .sub-bonus { background:rgba(168,168,184,0.1); color:#c0c0d0; }
-.sub-card.gold .sub-bonus { background:var(--accent-light); color:var(--accent-bright); }
-.sub-card.platinum .sub-bonus { background:rgba(143,188,212,0.1); color:#a8d4f0; }
-.sub-account { font-size:14px; color:rgba(240,232,218,0.55); margin-bottom:22px; }
-.sub-account strong { color:#f0e8da; }
-.sub-btn {
-  width:100%; padding:12px; border-radius:11px; border:none;
-  font-family:inherit; font-size:14px; font-weight:800; cursor:pointer; transition:var(--transition);
+.sub-name{font-size:30px;font-weight:800;letter-spacing:-1.5px;margin-bottom:4px;color:var(--t1)}
+.sub-mo{font-size:13px;color:var(--t2);margin-bottom:22px;font-weight:500}
+.sub-price{font-size:38px;font-weight:800;letter-spacing:-2px;margin-bottom:4px;color:var(--t1)}
+.sub-price-l{font-size:13px;color:var(--t2);margin-bottom:8px}
+.sub-bonus{
+  display:inline-block;padding:5px 13px;border-radius:9px;
+  font-size:13px;font-weight:700;margin-bottom:20px;
 }
-.sub-card.silver .sub-btn { background:rgba(168,168,184,0.12); color:#c0c0d0; border:1px solid rgba(168,168,184,0.25); }
-.sub-card.gold .sub-btn { background:var(--accent); color:#1a1510; }
-.sub-card.platinum .sub-btn { background:rgba(143,188,212,0.15); color:#a8d4f0; border:1px solid rgba(143,188,212,0.25); }
-.sub-btn:hover { filter:brightness(1.1); transform:translateY(-1px); }
+.silver .sub-bonus{background:rgba(180,190,210,0.1);color:#b8c2d8}
+.gold .sub-bonus{background:rgba(232,184,75,0.12);color:var(--gold2)}
+.plat .sub-bonus{background:rgba(180,120,255,0.1);color:var(--violet)}
+.sub-acc{font-size:14px;color:var(--t2);margin-bottom:24px;line-height:1.5}
+.sub-acc strong{color:var(--t1)}
+.sub-btn{
+  width:100%;padding:13px;border-radius:13px;border:none;
+  font-family:var(--font);font-size:14px;font-weight:800;cursor:pointer;transition:var(--tr);
+}
+.silver .sub-btn{background:rgba(180,190,210,0.12);color:#b8c2d8;border:0.5px solid rgba(180,190,210,0.25)}
+.silver .sub-btn:hover{background:rgba(180,190,210,0.22);transform:translateY(-1px)}
+.gold .sub-btn{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0a0a0a;border:none}
+.gold .sub-btn:hover{box-shadow:0 8px 28px rgba(232,184,75,0.4);transform:translateY(-1px)}
+.plat .sub-btn{background:linear-gradient(135deg,rgba(120,200,255,0.18),rgba(180,120,255,0.18));color:var(--t1);border:0.5px solid rgba(180,120,255,0.3)}
+.plat .sub-btn:hover{background:linear-gradient(135deg,rgba(120,200,255,0.28),rgba(180,120,255,0.28));transform:translateY(-1px)}
 
-/* Sub order modal */
-.modal-overlay {
-  display:none; position:fixed; inset:0; z-index:500;
-  background:rgba(10,8,5,0.75); backdrop-filter:blur(8px);
-  -webkit-backdrop-filter:blur(8px); align-items:center; justify-content:center;
+/* Sub info block */
+.sub-info-block{
+  max-width:680px;margin:38px auto 0;
+  background:rgba(232,184,75,0.06);border:0.5px solid rgba(232,184,75,0.18);
+  border-radius:18px;padding:24px;
 }
-.modal-overlay.on { display:flex; }
-.modal {
-  background:#1f1a12; border:1px solid var(--glass-border-strong);
-  border-radius:24px; padding:36px; width:100%; max-width:440px; margin:1rem;
-  animation:mslide .3s cubic-bezier(.4,0,.2,1);
-}
-@keyframes mslide{from{transform:translateY(20px);opacity:0}to{transform:none;opacity:1}}
-.modal-title { font-size:20px; font-weight:800; color:#f0e8da; letter-spacing:-0.5px; margin-bottom:6px; }
-.modal-sub { font-size:13.5px; color:rgba(240,232,218,0.45); margin-bottom:24px; }
-.modal-close {
-  float:right; background:none; border:none; font-size:20px; color:rgba(240,232,218,0.4);
-  cursor:pointer; line-height:1; margin-top:-4px;
-}
-.modal-close:hover { color:#f0e8da; }
-.modal-actions { display:flex; gap:8px; margin-top:18px; }
-.modal-cancel {
-  flex:1; padding:12px; border-radius:10px;
-  background:rgba(245,240,232,0.07); border:1px solid rgba(200,184,154,0.2);
-  font-family:inherit; font-size:14px; font-weight:600; color:rgba(240,232,218,0.5); cursor:pointer; transition:var(--transition);
-}
-.modal-cancel:hover { color:#f0e8da; }
-.modal-confirm {
-  flex:2; padding:12px; border-radius:10px; border:none;
-  background:var(--accent); font-family:inherit; font-size:14px; font-weight:800;
-  color:#1a1510; cursor:pointer; transition:var(--transition);
-}
-.modal-confirm:hover { background:var(--accent-bright); }
-.sub-summary-block {
-  background:rgba(200,149,60,0.07); border:1px solid rgba(200,149,60,0.18);
-  border-radius:12px; padding:16px; margin-bottom:18px;
-}
-.ssb-row { display:flex; justify-content:space-between; padding:4px 0; font-size:13.5px; }
-.ssb-key { color:rgba(240,232,218,0.45); }
-.ssb-val { font-weight:700; color:#f0e8da; }
+.sib-title{font-size:15px;font-weight:700;color:var(--t1);margin-bottom:12px}
+.sib-list{font-size:13.5px;color:var(--t2);line-height:2.1;padding-left:16px}
 
-/* ─── CRM ─── */
-.crm-gate { display:flex; align-items:center; justify-content:center; min-height:calc(100vh - 60px); }
-.crm-gate-card {
-  background:var(--card); backdrop-filter:var(--blur); -webkit-backdrop-filter:var(--blur);
-  border:1px solid var(--glass-border); border-radius:var(--radius);
-  padding:40px 36px; width:100%; max-width:360px; text-align:center;
+/* Modal */
+.modal-ov{
+  display:none;position:fixed;inset:0;z-index:600;
+  background:rgba(5,7,12,0.80);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  align-items:center;justify-content:center;
 }
-.crm-gate-ico { font-size:40px; margin-bottom:18px; }
-.crm-gate-title { font-size:20px; font-weight:800; color:#f0e8da; margin-bottom:8px; }
-.crm-gate-sub { font-size:13.5px; color:rgba(240,232,218,0.45); margin-bottom:22px; }
-
-.crm-layout { max-width:1200px; margin:0 auto; padding:30px 2rem 80px; }
-.crm-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:22px; flex-wrap:wrap; gap:12px; }
-.crm-head-title { font-size:26px; font-weight:800; color:#f0e8da; letter-spacing:-0.5px; }
-.crm-actions { display:flex; gap:8px; }
-.crm-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-bottom:22px; }
-.crm-stat {
-  background:var(--card); backdrop-filter:var(--blur-sm); -webkit-backdrop-filter:var(--blur-sm);
-  border:1px solid var(--glass-border); border-radius:var(--radius-sm); padding:18px 16px;
+.modal-ov.on{display:flex}
+.modal{
+  background:rgba(14,16,26,0.95);
+  border-radius:28px;padding:38px;width:100%;max-width:440px;margin:1rem;
+  position:relative;animation:msl .3s cubic-bezier(.4,0,.2,1);
 }
-.crs-num { font-size:30px; font-weight:800; margin-bottom:3px; }
-.crs-label { font-size:11.5px; font-weight:600; color:rgba(240,232,218,0.4); text-transform:uppercase; letter-spacing:0.3px; }
-.crm-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-.crm-panel {
-  background:var(--card); backdrop-filter:var(--blur-sm); -webkit-backdrop-filter:var(--blur-sm);
-  border:1px solid var(--glass-border); border-radius:var(--radius); padding:22px;
+.modal::before{
+  content:'';position:absolute;inset:0;border-radius:28px;padding:0.5px;
+  background:linear-gradient(135deg,rgba(120,200,255,0.4),rgba(180,120,255,0.35),rgba(80,220,180,0.3),rgba(255,180,80,0.25));
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;
 }
-.crm-panel.full { grid-column:span 2; }
-.panel-title { font-size:15px; font-weight:700; color:#f0e8da; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
-.pdot { width:7px; height:7px; border-radius:50%; }
-.pdot.amber { background:var(--accent); }
-.pdot.green { background:var(--green); }
-.pdot.blue { background:#5a9fd4; }
+@keyframes msl{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+.modal-ttl{font-size:20px;font-weight:800;color:var(--t1);letter-spacing:-0.5px;margin-bottom:6px}
+.modal-sub{font-size:13.5px;color:var(--t2);margin-bottom:24px}
+.modal-close{
+  position:absolute;top:20px;right:22px;background:none;border:none;
+  font-size:20px;color:var(--t3);cursor:pointer;line-height:1;transition:var(--tr);
+}
+.modal-close:hover{color:var(--t1)}
+.modal-sum{
+  background:rgba(255,255,255,0.04);border:0.5px solid rgba(255,255,255,0.10);
+  border-radius:13px;padding:16px;margin-bottom:20px;
+}
+.msr{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;border-bottom:0.5px solid rgba(255,255,255,0.06)}
+.msr:last-child{border-bottom:none}
+.msk{color:var(--t2)}.msv{font-weight:700;color:var(--t1)}
+.modal-acts{display:flex;gap:8px;margin-top:16px}
+.modal-cancel{
+  flex:1;padding:12px;border-radius:11px;
+  background:rgba(255,255,255,0.05);border:0.5px solid rgba(255,255,255,0.12);
+  font-family:var(--font);font-size:14px;font-weight:600;color:var(--t2);cursor:pointer;transition:var(--tr);
+}
+.modal-cancel:hover{color:var(--t1);background:rgba(255,255,255,0.09)}
+.modal-ok{
+  flex:2;padding:12px;border-radius:11px;border:none;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  font-family:var(--font);font-size:14px;font-weight:800;color:#0a0a0a;cursor:pointer;transition:var(--tr);
+}
+.modal-ok:hover{box-shadow:0 6px 20px rgba(232,184,75,0.35)}
+.modal-ok:disabled{opacity:0.5;cursor:not-allowed}
 
-.book-table { width:100%; border-collapse:collapse; font-size:12.5px; }
-.book-table th { padding:7px 10px; text-align:left; color:rgba(240,232,218,0.35); font-weight:600; border-bottom:1px solid rgba(200,184,154,0.15); font-size:11px; text-transform:uppercase; letter-spacing:0.4px; }
-.book-table td { padding:9px 10px; border-bottom:1px solid rgba(200,184,154,0.07); color:rgba(240,232,218,0.8); }
-.book-table tr:last-child td { border-bottom:none; }
-.badge { display:inline-block; padding:2px 8px; border-radius:5px; font-size:11px; font-weight:700; }
-.badge-ok { background:rgba(74,158,108,0.15); color:var(--green); }
-.badge-pend { background:rgba(200,149,60,0.15); color:var(--accent-bright); }
-.badge-no { background:var(--red-light); color:var(--red); }
+/* ── ABOUT ── */
+.about-w{max-width:980px;margin:0 auto;padding:40px 2rem 80px}
+.about-ttl{font-size:46px;font-weight:800;letter-spacing:-2.5px;color:var(--t1);margin-bottom:14px}
+.about-sub{font-size:17px;color:var(--t2);line-height:1.7;margin-bottom:50px}
+.feat-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:13px;margin-bottom:44px}
+.feat{
+  padding:24px 20px;
+  background:rgba(255,255,255,0.05);backdrop-filter:var(--blur-sm);-webkit-backdrop-filter:var(--blur-sm);
+  border:0.5px solid rgba(255,255,255,0.10);border-radius:20px;transition:var(--tr);
+}
+.feat:hover{background:rgba(255,255,255,0.08);transform:translateY(-3px)}
+.feat-ico{font-size:26px;margin-bottom:12px}
+.feat-name{font-size:15px;font-weight:700;color:var(--t1);margin-bottom:7px}
+.feat-desc{font-size:13px;color:var(--t2);line-height:1.65}
+.cbar{
+  background:rgba(255,255,255,0.06);backdrop-filter:var(--blur-md);-webkit-backdrop-filter:var(--blur-md);
+  border:0.5px solid rgba(255,255,255,0.12);
+  border-radius:22px;padding:30px 28px;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;
+}
+.ci-wrap{display:flex;flex-direction:column;gap:10px}
+.ci{display:flex;align-items:center;gap:10px;font-size:14.5px;color:var(--t2)}
+.cico{
+  width:30px;height:30px;border-radius:8px;
+  background:rgba(232,184,75,0.10);display:flex;align-items:center;justify-content:center;
+  font-size:13px;flex-shrink:0;
+}
 
-.client-row2 { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid rgba(200,184,154,0.07); }
-.client-row2:last-child { border-bottom:none; }
-.c-ava { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; flex-shrink:0; }
-.c-info { flex:1; }
-.c-name { font-size:13.5px; font-weight:700; color:#f0e8da; }
-.c-meta { font-size:11.5px; color:rgba(240,232,218,0.4); }
-.c-bal { font-size:13.5px; font-weight:800; color:var(--green); }
+/* ── CRM ── */
+.crm-gate-w{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 62px)}
+.crm-gate-card{
+  padding:42px 38px;width:100%;max-width:360px;text-align:center;
+  background:rgba(255,255,255,0.055);backdrop-filter:var(--blur-lg);-webkit-backdrop-filter:var(--blur-lg);
+  border-radius:28px;position:relative;
+}
+.crm-gate-card::before{
+  content:'';position:absolute;inset:0;border-radius:28px;padding:0.5px;
+  background:linear-gradient(135deg,rgba(120,200,255,0.45),rgba(180,120,255,0.35),rgba(80,220,180,0.3));
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;
+}
+.cgico{font-size:38px;margin-bottom:16px}
+.cgt{font-size:20px;font-weight:800;color:var(--t1);margin-bottom:8px}
+.cgs{font-size:13.5px;color:var(--t2);margin-bottom:22px}
+
+.crm-lay{max-width:1200px;margin:0 auto;padding:30px 2rem 80px}
+.crm-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;flex-wrap:wrap;gap:12px}
+.crm-h1{font-size:26px;font-weight:800;color:var(--t1);letter-spacing:-0.5px}
+.crm-acts{display:flex;gap:8px}
+.crm-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:22px}
+.cs{
+  padding:18px 16px;
+  background:rgba(255,255,255,0.055);backdrop-filter:var(--blur-sm);-webkit-backdrop-filter:var(--blur-sm);
+  border:0.5px solid rgba(255,255,255,0.10);border-radius:16px;
+}
+.csn{font-size:30px;font-weight:800;margin-bottom:3px}
+.csl{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.5px}
+.crm-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.cp{
+  padding:22px;
+  background:rgba(255,255,255,0.045);backdrop-filter:var(--blur-sm);-webkit-backdrop-filter:var(--blur-sm);
+  border:0.5px solid rgba(255,255,255,0.10);border-radius:22px;
+}
+.cp.full{grid-column:span 2}
+.cpt{font-size:14.5px;font-weight:700;color:var(--t1);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.cpd{width:7px;height:7px;border-radius:50%}
+.cpd.g{background:var(--gold)}.cpd.gr{background:var(--green)}.cpd.bl{background:var(--blue)}
+
+.bt2{width:100%;border-collapse:collapse;font-size:12.5px}
+.bt2 th{padding:7px 10px;text-align:left;color:var(--t3);font-weight:700;border-bottom:0.5px solid rgba(255,255,255,0.08);font-size:10.5px;text-transform:uppercase;letter-spacing:0.5px}
+.bt2 td{padding:9px 10px;border-bottom:0.5px solid rgba(255,255,255,0.04);color:var(--t2)}
+.bt2 tr:last-child td{border-bottom:none}
+.bdg{display:inline-block;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:700}
+.bdg-ok{background:rgba(79,201,126,0.12);color:var(--green)}
+.bdg-pnd{background:rgba(232,184,75,0.12);color:var(--gold2)}
+.bdg-no{background:rgba(240,96,96,0.1);color:var(--red)}
+
+.crow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid rgba(255,255,255,0.05)}
+.crow:last-child{border-bottom:none}
+.cava{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0}
+.cn{font-size:13.5px;font-weight:700;color:var(--t1)}
+.cm{font-size:11.5px;color:var(--t3)}
+.cbal{font-size:13.5px;font-weight:800;color:var(--green)}
+
+/* Box live */
+.blr{
+  display:flex;align-items:center;gap:10px;padding:10px 13px;
+  background:rgba(255,255,255,0.03);border:0.5px solid rgba(255,255,255,0.08);
+  border-radius:11px;margin-bottom:8px;
+}
+.blrd{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.blrd.free{background:var(--green);box-shadow:0 0 8px rgba(79,201,126,0.5)}
+.blrd.busy{background:var(--red);box-shadow:0 0 8px rgba(240,96,96,0.5)}
+.blrn{flex:1;font-size:13.5px;font-weight:600;color:var(--t1)}
+.blrs{font-size:12px;font-weight:600}
+.blrs.free{color:var(--green)}.blrs.busy{color:var(--red)}
+.blrt{font-size:11px;color:var(--t3)}
 
 /* Calendar */
-.cal-h { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
-.cal-nav { background:none; border:none; color:rgba(240,232,218,0.4); cursor:pointer; padding:4px 8px; border-radius:7px; font-size:16px; transition:var(--transition); }
-.cal-nav:hover { color:#f0e8da; background:rgba(245,240,232,0.07); }
-.cal-month { font-size:14px; font-weight:700; color:#f0e8da; }
-.cal-wd-row { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; margin-bottom:4px; }
-.cal-wd { text-align:center; font-size:9.5px; font-weight:700; color:rgba(240,232,218,0.3); text-transform:uppercase; padding:2px 0; }
-.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
-.cal-d {
-  aspect-ratio:1; display:flex; align-items:center; justify-content:center;
-  border-radius:7px; font-size:12px; font-weight:500; color:rgba(240,232,218,0.4); cursor:pointer; transition:var(--transition);
+.calh{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.caln{background:none;border:none;color:var(--t3);cursor:pointer;padding:4px 8px;border-radius:7px;font-size:16px;transition:var(--tr)}
+.caln:hover{color:var(--t1);background:rgba(255,255,255,0.06)}
+.calm{font-size:14px;font-weight:700;color:var(--t1)}
+.cal-wds{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:4px}
+.cal-wd{text-align:center;font-size:9.5px;font-weight:700;color:var(--t3);text-transform:uppercase;padding:2px 0}
+.cal-g2{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cald{
+  aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  border-radius:8px;font-size:12px;font-weight:500;color:var(--t3);cursor:pointer;transition:var(--tr);
 }
-.cal-d:hover { background:rgba(245,240,232,0.07); color:#f0e8da; }
-.cal-d.today { background:var(--accent); color:#1a1510; font-weight:800; }
-.cal-d.has-b { color:#f0e8da; position:relative; }
-.cal-d.has-b::after { content:''; position:absolute; bottom:2px; left:50%; transform:translateX(-50%); width:3px; height:3px; border-radius:50%; background:var(--green); }
-.cal-d.empty { cursor:default; }
+.cald:hover{background:rgba(255,255,255,0.07);color:var(--t1)}
+.cald.today{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0a0a0a;font-weight:800}
+.cald.hasb{color:var(--t1);position:relative}
+.cald.hasb::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:3px;height:3px;border-radius:50%;background:var(--green)}
+.cald.empty{cursor:default}
 
-/* Box live row */
-.box-live-row {
-  display:flex; align-items:center; gap:10px; padding:10px 13px;
-  background:rgba(245,240,232,0.04); border:1px solid rgba(200,184,154,0.12);
-  border-radius:10px; margin-bottom:8px; transition:var(--transition);
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:22px;right:22px;z-index:800;
+  background:rgba(14,16,26,0.92);
+  backdrop-filter:var(--blur-md);-webkit-backdrop-filter:var(--blur-md);
+  border:0.5px solid rgba(255,255,255,0.12);border-radius:14px;
+  padding:12px 18px;font-size:13.5px;font-weight:600;color:var(--t1);
+  display:flex;align-items:center;gap:8px;
+  transform:translateY(80px);opacity:0;transition:all .4s cubic-bezier(.4,0,.2,1);pointer-events:none;
 }
-.blr-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-.blr-dot.free { background:var(--green); box-shadow:0 0 7px rgba(74,158,108,0.5); }
-.blr-dot.busy { background:var(--red); box-shadow:0 0 7px rgba(192,68,74,0.5); }
-.blr-name { flex:1; font-size:13.5px; font-weight:600; color:#f0e8da; }
-.blr-st { font-size:12px; font-weight:600; }
-.blr-st.free { color:var(--green); }
-.blr-st.busy { color:var(--red); }
-.blr-time { font-size:11px; color:rgba(240,232,218,0.3); }
+.toast.on{transform:translateY(0);opacity:1}
+.toast.ok{border-color:rgba(79,201,126,0.4)}
+.toast.err{border-color:rgba(240,96,96,0.4)}
 
-/* ─── ABOUT / CONTACT ─── */
-.about-wrap { max-width:980px; margin:0 auto; padding:40px 2rem 80px; }
-.about-title { font-size:44px; font-weight:800; letter-spacing:-2px; color:#f0e8da; margin-bottom:14px; }
-.about-sub { font-size:17px; color:rgba(240,232,218,0.5); line-height:1.7; margin-bottom:50px; }
-.feat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-bottom:44px; }
-.feat-card {
-  background:var(--card); backdrop-filter:var(--blur-sm); -webkit-backdrop-filter:var(--blur-sm);
-  border:1px solid var(--glass-border); border-radius:var(--radius); padding:24px 20px; transition:var(--transition);
-}
-.feat-card:hover { background:var(--card-hover); transform:translateY(-3px); }
-.feat-ico { font-size:28px; margin-bottom:13px; }
-.feat-name { font-size:15px; font-weight:700; color:#f0e8da; margin-bottom:7px; }
-.feat-desc { font-size:13px; color:rgba(240,232,218,0.45); line-height:1.65; }
-.contact-bar {
-  background:var(--card); backdrop-filter:var(--blur); -webkit-backdrop-filter:var(--blur);
-  border:1px solid var(--glass-border); border-radius:var(--radius); padding:30px 28px;
-  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:20px;
-}
-.contact-info { display:flex; flex-direction:column; gap:9px; }
-.ci { display:flex; align-items:center; gap:10px; font-size:14.5px; color:rgba(240,232,218,0.75); }
-.ci-ico {
-  width:30px; height:30px; border-radius:8px;
-  background:rgba(200,149,60,0.12); display:flex; align-items:center; justify-content:center;
-  font-size:14px; flex-shrink:0;
-}
-
-/* ─── TOAST ─── */
-.toast {
-  position:fixed; bottom:22px; right:22px; z-index:1000;
-  background:rgba(31,26,18,0.92); backdrop-filter:var(--blur);
-  border:1px solid var(--glass-border); border-radius:14px;
-  padding:12px 18px; font-size:13.5px; font-weight:600; color:#f0e8da;
-  transform:translateY(80px); opacity:0; transition:all .4s cubic-bezier(.4,0,.2,1); pointer-events:none;
-  display:flex; align-items:center; gap:8px;
-}
-.toast.on { transform:translateY(0); opacity:1; }
-.toast.ok { border-color:rgba(74,158,108,0.4); }
-.toast.err { border-color:rgba(192,68,74,0.4); }
-
-/* ─── MOBILE ─── */
+/* ── MOBILE ── */
 @media(max-width:780px){
-  .hero { grid-template-columns:1fr; gap:28px; padding:50px 1.2rem 40px; }
-  h1 { font-size:38px; }
-  .hero-right { display:none; }
-  .crm-grid { grid-template-columns:1fr; }
-  .crm-panel.full { grid-column:span 1; }
-  .dates-grid { grid-template-columns:repeat(4,1fr); }
-  .boxes-grid { grid-template-columns:1fr 1fr; }
-  nav { padding:0 1.2rem; }
-  .nl:not(.on) { display:none; }
+  .hero{grid-template-columns:1fr;gap:28px;padding:50px 1.2rem 40px}
+  h1{font-size:40px}
+  .hero-right{display:none}
+  .crm-grid{grid-template-columns:1fr}
+  .cp.full{grid-column:span 1}
+  .dg{grid-template-columns:repeat(4,1fr)}
+  .boxg{grid-template-columns:1fr 1fr}
+  nav{padding:0 1.2rem}
+  .nl:not(.on){display:none}
 }
 </style>
 </head>
 <body>
 
-<div class="bg-wrap"></div>
-<div class="bg-texture"></div>
-<div class="bg-orb orb1"></div>
-<div class="bg-orb orb2"></div>
+<div class="bg">
+  <div class="bg-base"></div>
+  <div class="bg-noise"></div>
+  <div class="bg-orb o1"></div>
+  <div class="bg-orb o2"></div>
+  <div class="bg-orb o3"></div>
+  <div class="bg-orb o4"></div>
+</div>
 
 <!-- ═══ NAV ═══ -->
 <nav>
@@ -588,333 +716,285 @@ h1 span { color:var(--accent); }
     <button class="nl" onclick="go('subs')">Абонементи</button>
     <button class="nl" onclick="go('about')">Контакти</button>
   </div>
-  <button class="nav-book" onclick="go('booking')">Записатись →</button>
+  <button class="nav-cta" onclick="go('booking')">Записатись →</button>
 </nav>
 
-<!-- ═══ HOME ═══ -->
+<!-- ═══════════ HOME ═══════════ -->
 <div class="page on" id="page-home">
   <div class="hero">
     <div>
-      <div class="hero-eyebrow"><div class="hero-dot"></div>Відчинено · пн–пт 09:00–20:00</div>
-      <h1>Автомийка<br>нового <span>рівня</span></h1>
-      <p class="hero-sub">Три бокси, онлайн-запис, абонементи зі знижками до 20%. Вулиця Гвардійців-Широнінців 51/1.</p>
+      <div class="hero-tag"><div class="hero-dot"></div>Відчинено · Пн–Пт 09:00–20:00 · Сб–Нд 10:00–20:00</div>
+      <h1><span class="grad">Авто</span><span class="ch">мийка</span><br><span class="grad">нового рівня</span></h1>
+      <p class="hero-sub">Три бокси, онлайн-запис без черг, абонементи зі знижками до 20%. Преміальний догляд за вашим авто.</p>
       <div class="hero-btns">
-        <button class="btn-main" onclick="go('booking')">Записатись онлайн</button>
-        <button class="btn-outline" onclick="go('services')">Прайс-лист</button>
+        <button class="btn-gold" onclick="go('booking')">Записатись онлайн</button>
+        <button class="btn-ghost" onclick="go('services')">Прайс-лист →</button>
       </div>
     </div>
     <div class="hero-right">
-      <div class="glass-card">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:rgba(240,232,218,0.35);margin-bottom:12px;">Доступні слоти сьогодні</div>
-        <div class="hours-grid" id="hero-slots"></div>
+      <div class="hero-card">
+        <div class="hc-label">Вільні слоти сьогодні</div>
+        <div class="slots" id="hero-slots"></div>
       </div>
-      <div class="glass-card">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:rgba(240,232,218,0.35);margin-bottom:12px;">Стан боксів</div>
-        <div class="boxes-live" id="hero-boxes">
-          <div class="box-row-live"><div class="brl-dot free"></div><div class="brl-name">Box 1</div><div class="brl-status free">Вільний</div></div>
-          <div class="box-row-live"><div class="brl-dot free"></div><div class="brl-name">Box 2</div><div class="brl-status free">Вільний</div></div>
-          <div class="box-row-live"><div class="brl-dot free"></div><div class="brl-name">Box 3</div><div class="brl-status free">Вільний</div></div>
+      <div class="hero-card">
+        <div class="hc-label">Стан боксів</div>
+        <div id="hero-boxes">
+          <div class="brow"><div class="bdot free"></div><div class="bname">Box 1</div><div class="bst free">Вільний</div></div>
+          <div class="brow"><div class="bdot free"></div><div class="bname">Box 2</div><div class="bst free">Вільний</div></div>
+          <div class="brow"><div class="bdot free"></div><div class="bname">Box 3</div><div class="bst free">Вільний</div></div>
         </div>
       </div>
     </div>
   </div>
-
-  <div class="section">
-    <div class="sec-head">
-      <div class="sec-title">Наші послуги</div>
-      <div class="sec-sub">Повний спектр послуг для вашого автомобіля</div>
+  <div class="sec">
+    <div class="sec-hd">
+      <div class="sec-ttl">Наші послуги</div>
+      <div class="sec-sub">Повний спектр догляду для вашого автомобіля</div>
     </div>
     <div class="srv-grid">
-      <div class="srv-card" onclick="go('services')">
-        <div class="srv-icon" style="background:rgba(200,149,60,0.12)">🚿</div>
-        <div class="srv-name">Комплексна мийка</div>
-        <div class="srv-desc">Кузов, салон, диски, скло. Захисне покриття за бажанням.</div>
-        <div class="srv-price">від 200 <span>грн</span></div>
-      </div>
-      <div class="srv-card" onclick="go('services')">
-        <div class="srv-icon" style="background:rgba(74,158,108,0.12)">✨</div>
-        <div class="srv-name">Детейлінг</div>
-        <div class="srv-desc">Хімчистка, полірування, кераміка. Результат як у нового авто.</div>
-        <div class="srv-price">від 800 <span>грн</span></div>
-      </div>
-      <div class="srv-card" onclick="go('services')">
-        <div class="srv-icon" style="background:rgba(90,159,212,0.12)">🛡️</div>
-        <div class="srv-name">Захисне покриття</div>
-        <div class="srv-desc">Воск, тефлон, кераміка. Тривалий захист лакофарбового покриття.</div>
-        <div class="srv-price">від 400 <span>грн</span></div>
-      </div>
-      <div class="srv-card" onclick="go('services')">
-        <div class="srv-icon" style="background:rgba(192,68,74,0.1)">🪑</div>
-        <div class="srv-name">Хімчистка салону</div>
-        <div class="srv-desc">Видалення забруднень і запахів. Реставрація пластику та шкіри.</div>
-        <div class="srv-price">від 600 <span>грн</span></div>
-      </div>
-      <div class="srv-card" onclick="go('subs')">
-        <div class="srv-icon" style="background:rgba(200,149,60,0.12)">💎</div>
-        <div class="srv-name">Абонементи</div>
-        <div class="srv-desc">Silver, Gold, Platinum — бонус до 20% на рахунок. Вигідно для постійних клієнтів.</div>
-        <div class="srv-price">від 10 000 <span>грн</span></div>
-      </div>
-      <div class="srv-card" onclick="go('services')">
-        <div class="srv-icon" style="background:rgba(74,158,108,0.12)">🔧</div>
-        <div class="srv-name">Моторний відсік</div>
-        <div class="srv-desc">Безпечне очищення двигуна та підкапотного простору.</div>
-        <div class="srv-price">від 300 <span>грн</span></div>
-      </div>
+      <div class="srv-card" onclick="go('services')"><div class="srv-ico" style="background:rgba(232,184,75,0.1)">🚿</div><div class="srv-name">Комплексна мийка</div><div class="srv-desc">Кузов, салон, диски, скло. Результат — як у автосалоні.</div><div class="srv-price">від 200 <span>грн</span></div></div>
+      <div class="srv-card" onclick="go('services')"><div class="srv-ico" style="background:rgba(79,201,126,0.1)">✨</div><div class="srv-name">Детейлінг</div><div class="srv-desc">Повна хімчистка, полірування, кераміка. Преміальний результат.</div><div class="srv-price">від 1500 <span>грн</span></div></div>
+      <div class="srv-card" onclick="go('services')"><div class="srv-ico" style="background:rgba(110,184,255,0.1)">🛡️</div><div class="srv-name">Нанокераміка</div><div class="srv-desc">Надійний захист лакофарбового покриття на роки.</div><div class="srv-price">від 3000 <span>грн</span></div></div>
+      <div class="srv-card" onclick="go('services')"><div class="srv-ico" style="background:rgba(240,96,96,0.1)">🪑</div><div class="srv-name">Хімчистка салону</div><div class="srv-desc">Видалення стійких плям і запахів. Реставрація шкіри.</div><div class="srv-price">від 800 <span>грн</span></div></div>
+      <div class="srv-card" onclick="go('subs')"><div class="srv-ico" style="background:rgba(232,184,75,0.1)">💎</div><div class="srv-name">Абонементи</div><div class="srv-desc">Silver · Gold · Platinum. Бонус до 20% на рахунок.</div><div class="srv-price">від 10 000 <span>грн</span></div></div>
+      <div class="srv-card" onclick="go('services')"><div class="srv-ico" style="background:rgba(155,135,245,0.1)">🔧</div><div class="srv-name">Моторний відсік</div><div class="srv-desc">Безпечне очищення двигуна та підкапотного простору.</div><div class="srv-price">від 350 <span>грн</span></div></div>
     </div>
   </div>
 </div>
 
-<!-- ═══ BOOKING ═══ -->
+<!-- ═══════════ BOOKING ═══════════ -->
 <div class="page" id="page-booking">
-  <div class="book-wrap">
-    <div class="book-steps">
-      <div class="step-i"><div class="step-dot on" id="sd1">1</div><div class="step-label">Дата</div></div>
-      <div class="step-i"><div class="step-dot" id="sd2">2</div><div class="step-label">Час</div></div>
-      <div class="step-i"><div class="step-dot" id="sd3">3</div><div class="step-label">Бокс</div></div>
-      <div class="step-i"><div class="step-dot" id="sd4">4</div><div class="step-label">Дані</div></div>
-      <div class="step-i"><div class="step-dot" id="sd5">✓</div><div class="step-label">Готово</div></div>
+  <div class="bwrap">
+    <div class="bsteps">
+      <div class="si"><div class="sdot on" id="sd1">1</div><div class="slabel">Дата</div></div>
+      <div class="si"><div class="sdot" id="sd2">2</div><div class="slabel">Час</div></div>
+      <div class="si"><div class="sdot" id="sd3">3</div><div class="slabel">Бокс</div></div>
+      <div class="si"><div class="sdot" id="sd4">4</div><div class="slabel">Дані</div></div>
+      <div class="si"><div class="sdot" id="sd5">✓</div><div class="slabel">Готово</div></div>
     </div>
-
     <!-- Step 1 -->
-    <div class="book-panel" id="bs1">
-      <div class="book-title">Оберіть дату</div>
-      <div class="book-sub">Запис доступний на 7 днів вперед</div>
-      <div class="dates-grid" id="dates-g"></div>
+    <div class="bpanel-ch" id="bs1">
+      <div class="bt">Оберіть дату</div>
+      <div class="bsub">Запис доступний на найближчі 7 днів</div>
+      <div class="dg" id="dg"></div>
       <button class="btn-next" onclick="bStep(2)">Далі →</button>
     </div>
-
     <!-- Step 2 -->
-    <div class="book-panel" id="bs2" style="display:none">
+    <div class="bpanel" id="bs2" style="display:none">
       <button class="btn-back" onclick="bStep(1)">← Назад</button>
-      <div class="book-title">Оберіть час</div>
-      <div class="book-sub">Червоні слоти — всі бокси зайняті</div>
-      <div class="times-grid" id="times-g"></div>
+      <div class="bt">Оберіть час</div>
+      <div class="bsub">⛔ — всі бокси зайняті на цей час</div>
+      <div class="tg" id="tg"></div>
       <button class="btn-next" onclick="bStep(3)">Далі →</button>
     </div>
-
     <!-- Step 3 -->
-    <div class="book-panel" id="bs3" style="display:none">
+    <div class="bpanel" id="bs3" style="display:none">
       <button class="btn-back" onclick="bStep(2)">← Назад</button>
-      <div class="book-title">Оберіть бокс</div>
-      <div class="book-sub">Доступні бокси на обраний час</div>
-      <div class="boxes-grid" id="boxes-g"></div>
+      <div class="bt">Оберіть бокс</div>
+      <div class="bsub">Вільні бокси на обраний час</div>
+      <div class="boxg" id="boxg"></div>
       <button class="btn-next" onclick="bStep(4)">Далі →</button>
     </div>
-
     <!-- Step 4 -->
-    <div class="book-panel" id="bs4" style="display:none">
+    <div class="bpanel" id="bs4" style="display:none">
       <button class="btn-back" onclick="bStep(3)">← Назад</button>
-      <div class="book-title">Ваші дані</div>
-      <div class="book-sub">Для підтвердження запису</div>
-      <div class="book-summary" id="bsummary"></div>
+      <div class="bt">Ваші дані</div>
+      <div class="bsub">Введіть контактну інформацію</div>
+      <div class="bsum" id="bsummary"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div class="form-g"><label class="form-l">Ім'я та прізвище</label><input type="text" class="form-i" id="b-name" placeholder="Іван Іванов"></div>
-        <div class="form-g"><label class="form-l">Телефон</label><input type="tel" class="form-i" id="b-phone" placeholder="+380 77 001 13 33"></div>
+        <div class="fg"><label class="fl">Ім'я та прізвище</label><input type="text" class="fi" id="b-name" placeholder="Іван Іванов"></div>
+        <div class="fg"><label class="fl">Телефон</label><input type="tel" class="fi" id="b-phone" placeholder="+380 77 001 13 33"></div>
       </div>
-      <div class="form-g">
-        <label class="form-l">Послуга</label>
-        <select class="form-i" id="b-service">
+      <div class="fg">
+        <label class="fl">Послуга</label>
+        <select class="fi" id="b-service">
           <option>Комплексна мийка — Sedan (200 грн)</option>
           <option>Комплексна мийка — SUV (280 грн)</option>
           <option>Комплексна мийка — Мінівен (320 грн)</option>
-          <option>Детейлінг — Sedan (800 грн)</option>
-          <option>Детейлінг — SUV (1 100 грн)</option>
-          <option>Детейлінг — Мінівен (1 400 грн)</option>
-          <option>Хімчистка салону — Sedan (600 грн)</option>
-          <option>Хімчистка салону — SUV (800 грн)</option>
-          <option>Хімчистка салону — Мінівен (1 000 грн)</option>
+          <option>Хімчистка салону — Sedan (800 грн)</option>
+          <option>Хімчистка салону — SUV (1 100 грн)</option>
+          <option>Хімчистка салону — Мінівен (1 300 грн)</option>
+          <option>Детейлінг — Sedan (1 500 грн)</option>
+          <option>Детейлінг — SUV (2 000 грн)</option>
+          <option>Детейлінг — Мінівен (2 500 грн)</option>
+          <option>Нанокераміка — Sedan (3 000 грн)</option>
+          <option>Нанокераміка — SUV (4 000 грн)</option>
+          <option>Нанокераміка — Мінівен (5 000 грн)</option>
           <option>Полірування — Sedan (500 грн)</option>
           <option>Полірування — SUV (700 грн)</option>
           <option>Захисне покриття — Sedan (400 грн)</option>
           <option>Захисне покриття — SUV (550 грн)</option>
-          <option>Моторний відсік — будь-яке авто (300 грн)</option>
-          <option>Мийка дисків (150 грн)</option>
-          <option>Нанокераміка (2 500 грн)</option>
+          <option>Моторний відсік (350 грн)</option>
+          <option>Мийка дисків (200 грн)</option>
         </select>
       </div>
-      <div class="form-g"><label class="form-l">Коментар</label><input type="text" class="form-i" id="b-comment" placeholder="Колір авто, побажання..."></div>
+      <div class="fg"><label class="fl">Коментар</label><input type="text" class="fi" id="b-comment" placeholder="Колір авто, побажання..."></div>
       <button class="btn-next" id="b-submit" onclick="submitBook()">✓ Підтвердити запис</button>
     </div>
-
     <!-- Step 5 -->
-    <div class="book-panel" id="bs5" style="display:none">
-      <div class="success-wrap">
-        <div class="success-ico">✓</div>
-        <div class="success-title">Запис підтверджено!</div>
-        <div class="success-sub">Ваш запис збережено. Очікуємо вас у 1333 Car Center!</div>
-        <div class="success-card" id="book-result"></div>
+    <div class="bpanel" id="bs5" style="display:none">
+      <div class="success-w">
+        <div class="sico">✓</div>
+        <div class="sttl">Запис підтверджено!</div>
+        <div class="ssub2">Ваш запис збережено у системі.<br>Очікуємо вас у 1333 Car Center!</div>
+        <div class="scard" id="book-result"></div>
         <button class="btn-next" onclick="resetBook()" style="max-width:260px">Новий запис</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ═══ SERVICES ═══ -->
+<!-- ═══════════ SERVICES ═══════════ -->
 <div class="page" id="page-services">
-  <div class="section" style="padding-top:40px">
-    <div class="sec-head">
-      <div class="sec-title">Прайс-лист</div>
+  <div class="sec" style="padding-top:40px">
+    <div class="sec-hd">
+      <div class="sec-ttl">Прайс-лист</div>
       <div class="sec-sub">Оберіть тип вашого автомобіля</div>
     </div>
-    <div class="price-tabs">
+    <div class="ptabs">
       <button class="ptab on" onclick="showPrices('sedan',this)">🚗 Sedan</button>
       <button class="ptab" onclick="showPrices('suv',this)">🚙 SUV</button>
       <button class="ptab" onclick="showPrices('minivan',this)">🚐 Мінівен</button>
     </div>
-    <div class="price-grid" id="price-g"></div>
+    <div class="pg" id="pg"></div>
   </div>
 </div>
 
-<!-- ═══ SUBSCRIPTIONS ═══ -->
+<!-- ═══════════ SUBSCRIPTIONS ═══════════ -->
 <div class="page" id="page-subs">
-  <div class="section" style="padding-top:40px">
-    <div class="sec-head">
-      <div class="sec-title">Абонементи</div>
-      <div class="sec-sub">Купуйте абонемент — отримуйте бонус на рахунок</div>
+  <div class="sec" style="padding-top:40px">
+    <div class="sec-hd">
+      <div class="sec-ttl">Абонементи</div>
+      <div class="sec-sub">Купуйте абонемент і отримуйте бонус на рахунок</div>
     </div>
-    <div class="subs-grid">
-      <div class="sub-card silver">
+    <div class="subs-g">
+      <div class="sub silver">
         <div class="sub-badge">Silver</div>
         <div class="sub-name">Silver</div>
-        <div class="sub-months">1 місяць · T-1</div>
-        <div class="sub-price">10 000 <span>грн</span></div>
-        <div class="sub-price-sub">Вартість абонементу</div>
+        <div class="sub-mo">1 місяць · T-1</div>
+        <div class="sub-price">10 000 <span style="font-size:16px;font-weight:500;color:var(--t2)">грн</span></div>
+        <div class="sub-price-l">Вартість абонементу</div>
         <div class="sub-bonus">+10% бонус</div>
-        <div class="sub-account">На рахунок зараховується <strong>11 000 грн</strong></div>
+        <div class="sub-acc">На рахунок зараховується <strong>11 000 грн</strong></div>
         <button class="sub-btn" onclick="orderSub({id:'T-1',name:'Silver',months:1,price:10000,bonus:'10%',account:11000})">Придбати Silver →</button>
       </div>
-      <div class="sub-card gold">
-        <div class="sub-badge">Gold</div>
+      <div class="sub gold">
+        <div class="sub-badge">Gold · Популярний</div>
         <div class="sub-name">Gold</div>
-        <div class="sub-months">3 місяці · T-2</div>
-        <div class="sub-price">30 000 <span>грн</span></div>
-        <div class="sub-price-sub">Вартість абонементу</div>
+        <div class="sub-mo">3 місяці · T-2</div>
+        <div class="sub-price">30 000 <span style="font-size:16px;font-weight:500;color:var(--t2)">грн</span></div>
+        <div class="sub-price-l">Вартість абонементу</div>
         <div class="sub-bonus">+15% бонус</div>
-        <div class="sub-account">На рахунок зараховується <strong>34 500 грн</strong></div>
+        <div class="sub-acc">На рахунок зараховується <strong>34 500 грн</strong></div>
         <button class="sub-btn" onclick="orderSub({id:'T-2',name:'Gold',months:3,price:30000,bonus:'15%',account:34500})">Придбати Gold →</button>
       </div>
-      <div class="sub-card platinum">
+      <div class="sub plat">
         <div class="sub-badge">Platinum</div>
         <div class="sub-name">Platinum</div>
-        <div class="sub-months">6 місяців · T-3</div>
-        <div class="sub-price">60 000 <span>грн</span></div>
-        <div class="sub-price-sub">Вартість абонементу</div>
+        <div class="sub-mo">6 місяців · T-3</div>
+        <div class="sub-price">60 000 <span style="font-size:16px;font-weight:500;color:var(--t2)">грн</span></div>
+        <div class="sub-price-l">Вартість абонементу</div>
         <div class="sub-bonus">+20% бонус</div>
-        <div class="sub-account">На рахунок зараховується <strong>72 000 грн</strong></div>
+        <div class="sub-acc">На рахунок зараховується <strong>72 000 грн</strong></div>
         <button class="sub-btn" onclick="orderSub({id:'T-3',name:'Platinum',months:6,price:60000,bonus:'20%',account:72000})">Придбати Platinum →</button>
       </div>
     </div>
-    <div style="max-width:680px;margin:40px auto 0;background:rgba(200,149,60,0.07);border:1px solid rgba(200,149,60,0.2);border-radius:16px;padding:24px">
-      <div style="font-size:15px;font-weight:700;color:#f0e8da;margin-bottom:10px;">ℹ️ Як це працює?</div>
-      <ul style="font-size:13.5px;color:rgba(240,232,218,0.55);line-height:2;padding-left:18px;">
-        <li>Ви сплачуєте вартість абонементу</li>
-        <li>На ваш рахунок зараховується сума з бонусом</li>
+    <div class="sub-info-block">
+      <div class="sib-title">ℹ️ Як це працює?</div>
+      <ul class="sib-list">
+        <li>Оберіть абонемент та заповніть заявку — адміністратор зв'яжеться з вами</li>
+        <li>Після оплати на ваш рахунок зараховується сума з бонусом</li>
         <li>Послуги оплачуються з рахунку за прайс-листом</li>
-        <li>Абонемент діє протягом вказаного терміну</li>
-        <li>Після подачі заявки адміністратор зв'яжеться з вами</li>
+        <li>Абонемент діє протягом вказаного терміну з дня активації</li>
+        <li>Управляйте абонементом через Telegram-бот @Assistant_1333_Bot</li>
       </ul>
     </div>
   </div>
 </div>
 
-<!-- ═══ ABOUT ═══ -->
+<!-- ═══════════ ABOUT ═══════════ -->
 <div class="page" id="page-about">
-  <div class="about-wrap">
-    <div class="about-title">1333 Car Center</div>
-    <p class="about-sub">Преміальна автомийка у Харкові. Три бокси, досвідчена команда, сучасне обладнання та турбота про кожен автомобіль. Рейтинг 5.0 ⭐</p>
-    <div class="feat-grid">
-      <div class="feat-card"><div class="feat-ico">🕐</div><div class="feat-name">Графік роботи</div><div class="feat-desc">Пн–Пт: 09:00 – 20:00<br>Сб–Нд: 10:00 – 20:00</div></div>
-      <div class="feat-card"><div class="feat-ico">📍</div><div class="feat-name">Адреса</div><div class="feat-desc">вул. Гвардійців-Широнінців 51/1<br>Харків, Україна</div></div>
-      <div class="feat-card"><div class="feat-ico">🤖</div><div class="feat-name">Telegram бот</div><div class="feat-desc">@Assistant_1333_Bot<br>Запис, абонементи, особистий кабінет</div></div>
-      <div class="feat-card"><div class="feat-ico">🏆</div><div class="feat-name">Три бокси</div><div class="feat-desc">Box 1, Box 2, Box 3 — онлайн-бронювання без черг</div></div>
-      <div class="feat-card"><div class="feat-ico">💎</div><div class="feat-name">Абонементи</div><div class="feat-desc">Silver / Gold / Platinum. Бонус до 20% на рахунок.</div></div>
-      <div class="feat-card"><div class="feat-ico">☕</div><div class="feat-name">Зручності</div><div class="feat-desc">Безкоштовний Wi-Fi, кавоварка, можна з тваринами</div></div>
+  <div class="about-w">
+    <div class="about-ttl">1333 Car Center</div>
+    <p class="about-sub">Преміальна автомийка у Харкові. Три бокси, досвідчена команда, сучасне обладнання та турбота про кожен автомобіль. Рейтинг 5.0 ⭐ (6 відгуків)</p>
+    <div class="feat-g">
+      <div class="feat"><div class="feat-ico">🕐</div><div class="feat-name">Графік роботи</div><div class="feat-desc">Пн–Пт: 09:00 – 20:00<br>Сб–Нд: 10:00 – 20:00</div></div>
+      <div class="feat"><div class="feat-ico">📍</div><div class="feat-name">Адреса</div><div class="feat-desc">вул. Гвардійців-Широнінців 51/1<br>Харків, Україна</div></div>
+      <div class="feat"><div class="feat-ico">🤖</div><div class="feat-name">Telegram бот</div><div class="feat-desc">@Assistant_1333_Bot<br>Запис, абонементи, особистий кабінет</div></div>
+      <div class="feat"><div class="feat-ico">🏆</div><div class="feat-name">Три бокси</div><div class="feat-desc">Box 1, Box 2, Box 3<br>Онлайн-бронювання без черг</div></div>
+      <div class="feat"><div class="feat-ico">💎</div><div class="feat-name">Абонементи</div><div class="feat-desc">Silver / Gold / Platinum<br>Бонус на рахунок до 20%</div></div>
+      <div class="feat"><div class="feat-ico">☕</div><div class="feat-name">Зручності</div><div class="feat-desc">Wi-Fi, кавоварка<br>Можна з тваринами</div></div>
     </div>
-    <div class="contact-bar">
+    <div class="cbar">
       <div>
-        <div style="font-size:18px;font-weight:800;color:#f0e8da;margin-bottom:4px;">Зв'яжіться з нами</div>
-        <div style="font-size:13px;color:rgba(240,232,218,0.4);">Відповімо протягом кількох хвилин</div>
+        <div style="font-size:18px;font-weight:800;color:var(--t1);margin-bottom:4px">Зв'яжіться з нами</div>
+        <div style="font-size:13px;color:var(--t2)">Відповідаємо протягом кількох хвилин</div>
       </div>
-      <div class="contact-info">
-        <div class="ci"><div class="ci-ico">📞</div><span>+380 77 001 13 33</span></div>
-        <div class="ci"><div class="ci-ico">✈️</div><span>@car_1333_service</span></div>
-        <div class="ci"><div class="ci-ico">📍</div><span>вул. Гвардійців-Широнінців 51/1</span></div>
-        <div class="ci"><div class="ci-ico">📸</div><span>@1333_car_center</span></div>
+      <div class="ci-wrap">
+        <div class="ci"><div class="cico">📞</div>+380 77 001 13 33</div>
+        <div class="ci"><div class="cico">✈️</div>@car_1333_service</div>
+        <div class="ci"><div class="cico">📍</div>вул. Гвардійців-Широнінців 51/1</div>
+        <div class="ci"><div class="cico">📸</div>@1333_car_center</div>
       </div>
-      <button class="btn-main" onclick="go('booking')">Записатись →</button>
+      <button class="btn-gold" onclick="go('booking')">Записатись →</button>
     </div>
   </div>
 </div>
 
-<!-- ═══ HIDDEN CRM INPUT ═══ -->
-<!-- Доступ: наберіть "1333crm" в адресному рядку або натисніть Ctrl+Shift+A -->
+<!-- ═══════════ CRM (HIDDEN) ═══════════ -->
+<!-- Access: Ctrl+Shift+A, або введіть у консолі: openCRM() -->
 <div class="page" id="page-crm">
-  <div id="crm-gate-wrap" class="crm-gate">
+  <div id="crm-gate-w" class="crm-gate-w">
     <div class="crm-gate-card">
-      <div class="crm-gate-ico">🔐</div>
-      <div class="crm-gate-title">Адмін-панель</div>
-      <div class="crm-gate-sub">Введіть пароль для доступу до CRM</div>
-      <div class="form-g"><input type="password" class="form-i" id="crm-pass" placeholder="Пароль" onkeypress="if(event.key==='Enter')checkCRM()"></div>
+      <div class="cgico">🔐</div>
+      <div class="cgt">Адмін-панель</div>
+      <div class="cgs">Введіть пароль для доступу до CRM</div>
+      <div class="fg"><input type="password" class="fi" id="crm-pass" placeholder="Пароль" onkeypress="if(event.key==='Enter')checkCRM()"></div>
       <button class="btn-next" onclick="checkCRM()">Увійти</button>
     </div>
   </div>
   <div id="crm-body" style="display:none">
-    <div class="crm-layout">
+    <div class="crm-lay">
       <div class="crm-head">
-        <div class="crm-head-title">CRM — 1333 Car Center</div>
-        <div class="crm-actions">
-          <button class="btn-outline" style="padding:9px 16px;font-size:13px" onclick="refreshCRM()">↻ Оновити</button>
-          <button class="btn-main" style="padding:9px 16px;font-size:13px" onclick="go('booking')">+ Запис</button>
+        <div class="crm-h1">CRM — 1333 Car Center</div>
+        <div class="crm-acts">
+          <button class="btn-ghost" style="padding:9px 16px;font-size:13px" onclick="refreshCRM()">↻ Оновити</button>
+          <button class="btn-gold" style="padding:9px 16px;font-size:13px" onclick="go('booking')">+ Запис</button>
         </div>
       </div>
       <div class="crm-stats">
-        <div class="crm-stat"><div class="crs-num" id="cs-total" style="color:var(--accent)">—</div><div class="crs-label">Записів всього</div></div>
-        <div class="crm-stat"><div class="crs-num" id="cs-today" style="color:var(--green)">—</div><div class="crs-label">Сьогодні</div></div>
-        <div class="crm-stat"><div class="crs-num" id="cs-clients" style="color:#a8d4f0">—</div><div class="crs-label">Клієнтів</div></div>
-        <div class="crm-stat"><div class="crs-num" id="cs-free" style="color:var(--green)">—</div><div class="crs-label">Вільних боксів</div></div>
+        <div class="cs"><div class="csn" id="cs1" style="color:var(--gold)">—</div><div class="csl">Записів всього</div></div>
+        <div class="cs"><div class="csn" id="cs2" style="color:var(--green)">—</div><div class="csl">Сьогодні</div></div>
+        <div class="cs"><div class="csn" id="cs3" style="color:var(--blue)">—</div><div class="csl">Клієнтів</div></div>
+        <div class="cs"><div class="csn" id="cs4" style="color:var(--teal)">—</div><div class="csl">Вільних боксів</div></div>
       </div>
       <div class="crm-grid">
-        <div class="crm-panel full">
-          <div class="panel-title"><div class="pdot amber"></div>Журнал записів</div>
-          <div id="book-tbl"><div class="loading"><div class="spin"></div>Завантаження...</div></div>
+        <div class="cp full"><div class="cpt"><div class="cpd g"></div>Журнал записів</div><div id="crm-tbl"><div class="ld"><div class="sp"></div>Завантаження...</div></div></div>
+        <div class="cp"><div class="cpt"><div class="cpd g"></div>Календар</div>
+          <div class="calh"><button class="caln" onclick="calPrev()">‹</button><div class="calm" id="cal-l"></div><button class="caln" onclick="calNext()">›</button></div>
+          <div class="cal-wds"><div class="cal-wd">Пн</div><div class="cal-wd">Вт</div><div class="cal-wd">Ср</div><div class="cal-wd">Чт</div><div class="cal-wd">Пт</div><div class="cal-wd">Сб</div><div class="cal-wd">Нд</div></div>
+          <div class="cal-g2" id="cal-g"></div>
         </div>
-        <div class="crm-panel">
-          <div class="panel-title"><div class="pdot amber"></div>Календар</div>
-          <div class="cal-h">
-            <button class="cal-nav" onclick="calPrev()">‹</button>
-            <div class="cal-month" id="cal-lbl"></div>
-            <button class="cal-nav" onclick="calNext()">›</button>
-          </div>
-          <div class="cal-wd-row"><div class="cal-wd">Пн</div><div class="cal-wd">Вт</div><div class="cal-wd">Ср</div><div class="cal-wd">Чт</div><div class="cal-wd">Пт</div><div class="cal-wd">Сб</div><div class="cal-wd">Нд</div></div>
-          <div class="cal-grid" id="cal-g"></div>
-        </div>
-        <div class="crm-panel">
-          <div class="panel-title"><div class="pdot green"></div>Бокси зараз</div>
-          <div id="crm-boxes"><div class="loading"><div class="spin"></div>Перевірка...</div></div>
-        </div>
-        <div class="crm-panel full">
-          <div class="panel-title"><div class="pdot blue"></div>Клієнти</div>
-          <div id="crm-clients"><div class="loading"><div class="spin"></div>Завантаження...</div></div>
-        </div>
+        <div class="cp"><div class="cpt"><div class="cpd gr"></div>Бокси зараз</div><div id="crm-boxes"><div class="ld"><div class="sp"></div>Перевірка...</div></div></div>
+        <div class="cp full"><div class="cpt"><div class="cpd bl"></div>Клієнти</div><div id="crm-cls"><div class="ld"><div class="sp"></div>Завантаження...</div></div></div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Subscription Modal -->
-<div class="modal-overlay" id="sub-modal">
+<!-- Sub modal -->
+<div class="modal-ov" id="sub-modal">
   <div class="modal">
     <button class="modal-close" onclick="closeSubModal()">×</button>
-    <div class="modal-title" id="sm-title">Замовити абонемент</div>
-    <div class="modal-sub">Заповніть дані — адміністратор зв'яжеться з вами</div>
-    <div class="sub-summary-block" id="sm-summary"></div>
-    <div class="form-g"><label class="form-l">Ваше ім'я</label><input type="text" class="form-i" id="sm-name" placeholder="Іван Іванов"></div>
-    <div class="form-g"><label class="form-l">Телефон</label><input type="tel" class="form-i" id="sm-phone" placeholder="+380 77 ..."></div>
-    <div class="form-g"><label class="form-l">Telegram (необов'язково)</label><input type="text" class="form-i" id="sm-tg" placeholder="@username"></div>
-    <div class="modal-actions">
+    <div class="modal-ttl" id="sm-ttl">Замовити абонемент</div>
+    <div class="modal-sub">Адміністратор зв'яжеться з вами для оплати</div>
+    <div class="modal-sum" id="sm-sum"></div>
+    <div class="fg"><label class="fl">Ваше ім'я</label><input type="text" class="fi" id="sm-name" placeholder="Іван Іванов"></div>
+    <div class="fg"><label class="fl">Телефон</label><input type="tel" class="fi" id="sm-phone" placeholder="+380 77 ..."></div>
+    <div class="fg"><label class="fl">Telegram (необов'язково)</label><input type="text" class="fi" id="sm-tg" placeholder="@username"></div>
+    <div class="modal-acts">
       <button class="modal-cancel" onclick="closeSubModal()">Скасувати</button>
-      <button class="modal-confirm" id="sm-confirm" onclick="submitSubOrder()">Замовити →</button>
+      <button class="modal-ok" id="sm-ok" onclick="submitSubOrder()">Замовити →</button>
     </div>
   </div>
 </div>
@@ -922,411 +1002,425 @@ h1 span { color:var(--accent); }
 <div class="toast" id="toast"></div>
 
 <script>
-// ═══ CONFIG ═══
-const APPS_URL = 'https://script.google.com/macros/s/AKfycbxqVHnmeK_GOUbPmDvCHwNlF1szLj1nMjPgJpvzzFYtT4PCDwYe57tuq2RIXC7n9fLu/exec';
-const CRM_PASS = '1333admin';
+// ══════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════
+const APPS = 'https://script.google.com/macros/s/AKfycbxqVHnmeK_GOUbPmDvCHwNlF1szLj1nMjPgJpvzzFYtT4PCDwYe57tuq2RIXC7n9fLu/exec';
+const CRM_PASSWORD = '1333admin'; // Змініть пароль!
 
-// ═══ STATE ═══
-const S = { date:null, time:null, box:null, bookings:[], clients:[] };
-let currentSub = null;
-
-const UA_MON = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
+// ══════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════
+const S = {date:null,time:null,box:null,bookings:[],clients:[]};
+let curSub = null;
 const UA_DS = ['Нд','Пн','Вт','Ср','Чт','Пт','Сб'];
+const UA_MO = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
 
-// ═══ PAGES ═══
+// ══════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════
 function go(name) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   document.getElementById('page-'+name).classList.add('on');
   document.querySelectorAll('.nl').forEach(l=>l.classList.remove('on'));
-  const pages = ['home','booking','services','subs','about'];
-  const idx = pages.indexOf(name);
-  if(idx>=0) document.querySelectorAll('.nl')[idx]?.classList.add('on');
+  const map = {home:0,booking:1,services:2,subs:3,about:4};
+  if(map[name]!==undefined) document.querySelectorAll('.nl')[map[name]]?.classList.add('on');
   window.scrollTo(0,0);
   if(name==='booking') initBook();
   if(name==='services') showPrices('sedan', document.querySelector('.ptab'));
   if(name==='home') initHome();
 }
 
-// ═══ TOAST ═══
-function toast(msg, type='ok') {
-  const t = document.getElementById('toast');
-  t.textContent = (type==='ok'?'✓ ':'⚠ ') + msg;
-  t.className = 'toast on ' + type;
-  clearTimeout(t._t);
-  t._t = setTimeout(()=>t.classList.remove('on'), 3200);
+// CRM secret access
+document.addEventListener('keydown', e => {
+  if(e.ctrlKey && e.shiftKey && e.key==='A') {
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+    document.getElementById('page-crm').classList.add('on');
+    document.querySelectorAll('.nl').forEach(l=>l.classList.remove('on'));
+    setTimeout(()=>document.getElementById('crm-pass')?.focus(), 100);
+  }
+});
+function openCRM() { // callable from console
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.getElementById('page-crm').classList.add('on');
+  setTimeout(()=>document.getElementById('crm-pass')?.focus(), 100);
 }
 
-// ═══ HOME ═══
+// ══════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════
+function toast(msg, type='ok') {
+  const t = document.getElementById('toast');
+  t.innerHTML = (type==='ok'?'✓':'⚠') + ' ' + msg;
+  t.className = 'toast on ' + type;
+  clearTimeout(t._t);
+  t._t = setTimeout(()=>t.classList.remove('on'), 3500);
+}
+
+// ══════════════════════════════════════
+//  HOME
+// ══════════════════════════════════════
 function initHome() {
   const h = new Date().getHours();
   const sl = document.getElementById('hero-slots');
   sl.innerHTML = '';
-  const slots = [];
-  for(let i=9;i<20;i++) if(i>=h) slots.push(i);
-  slots.slice(0,6).forEach(h2=>{
-    const c = document.createElement('div');
-    c.className = 'hour-chip';
-    c.textContent = String(h2).padStart(2,'0')+':00';
-    c.onclick = () => {
-      S.date = todayStr(); S.time = c.textContent;
-      go('booking'); setTimeout(()=>bStep(3), 300);
-    };
-    sl.appendChild(c);
-  });
-}
-
-function todayStr() {
-  const d = new Date();
-  return pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear();
-}
-function pad(n){ return String(n).padStart(2,'0'); }
-
-// ═══ BOOKING ═══
-function initBook() {
-  if(!S.date) bStep(1);
-  buildDates();
-}
-
-function buildDates() {
-  const g = document.getElementById('dates-g'); g.innerHTML='';
-  const today = new Date();
-  for(let i=0;i<7;i++){
-    const d = new Date(today); d.setDate(today.getDate()+i);
-    const ds = pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear();
-    const btn = document.createElement('div');
-    btn.className = 'date-btn'+(i===0?' today':'')+(S.date===ds?' sel':'');
-    btn.innerHTML = `<div class="date-day">${UA_DS[d.getDay()]}</div><div class="date-num">${d.getDate()}</div>`;
-    btn.onclick = () => { document.querySelectorAll('.date-btn').forEach(b=>b.classList.remove('sel')); btn.classList.add('sel'); S.date=ds; };
-    g.appendChild(btn);
-  }
-}
-
-async function buildTimes() {
-  const g = document.getElementById('times-g');
-  g.innerHTML = '<div class="loading" style="grid-column:span 4"><div class="spin"></div>Перевіряємо...</div>';
-  const bks = await fetchBookings();
-  S.bookings = bks; g.innerHTML='';
-  for(let h=9;h<20;h++){
-    const ts = pad(h)+':00';
-    const allBusy = ['Box 1','Box 2','Box 3'].every(bx=>isBooked(bks,S.date,ts,bx));
-    const btn = document.createElement('div');
-    if(allBusy){ btn.className='time-btn busy'; btn.textContent='⛔ '+ts; }
-    else {
-      btn.className='time-btn'+(S.time===ts?' sel':'');
-      btn.textContent=ts;
-      btn.onclick=()=>{ document.querySelectorAll('.time-btn').forEach(b=>b.classList.remove('sel')); btn.classList.add('sel'); S.time=ts; };
+  let shown = 0;
+  for(let i=9;i<20;i++) {
+    if(i>=h && shown<6) {
+      const c = document.createElement('div');
+      c.className='chip';
+      c.textContent = pad(i)+':00';
+      c.onclick = () => { S.date=todayStr(); S.time=c.textContent; go('booking'); setTimeout(()=>bStep(3),300); };
+      sl.appendChild(c); shown++;
     }
+  }
+}
+
+function todayStr(){const d=new Date();return pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear()}
+function pad(n){return String(n).padStart(2,'0')}
+function normT(t){if(!t)return'';t=t.trim();if(t.includes('.'))return t.replace('.',':').substring(0,5);if(t.includes(':'))return t.substring(0,5);return t.padStart(2,'0')+':00'}
+
+// ══════════════════════════════════════
+//  BOOKING
+// ══════════════════════════════════════
+function initBook(){if(!S.date) bStep(1); buildDates()}
+
+function buildDates(){
+  const g=document.getElementById('dg'); g.innerHTML='';
+  const today=new Date();
+  for(let i=0;i<7;i++){
+    const d=new Date(today); d.setDate(today.getDate()+i);
+    const ds=pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear();
+    const btn=document.createElement('div');
+    btn.className='db'+(S.date===ds?' sel':'');
+    btn.innerHTML=`<div class="dd">${UA_DS[d.getDay()]}</div><div class="dn">${d.getDate()}</div>`;
+    btn.onclick=()=>{document.querySelectorAll('.db').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');S.date=ds};
     g.appendChild(btn);
   }
 }
 
-async function buildBoxes() {
-  const g = document.getElementById('boxes-g');
-  g.innerHTML='<div class="loading" style="grid-column:span 3"><div class="spin"></div>Перевіряємо боксы...</div>';
-  const bks = await fetchBookings(); S.bookings=bks; g.innerHTML='';
-  const icons = {'Box 1':'🔵','Box 2':'🟡','Box 3':'🟢'};
+async function buildTimes(){
+  const g=document.getElementById('tg');
+  g.innerHTML='<div class="ld" style="grid-column:span 4"><div class="sp"></div>Перевіряємо зайнятість...</div>';
+  const bks=await fetchBookings(); S.bookings=bks; g.innerHTML='';
+  for(let h=9;h<20;h++){
+    const ts=pad(h)+':00';
+    const allBusy=['Box 1','Box 2','Box 3'].every(bx=>isBooked(bks,S.date,ts,bx));
+    const b=document.createElement('div');
+    if(allBusy){b.className='tb busy';b.textContent='⛔ '+ts}
+    else{
+      b.className='tb'+(S.time===ts?' sel':'');b.textContent=ts;
+      b.onclick=()=>{document.querySelectorAll('.tb').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');S.time=ts};
+    }
+    g.appendChild(b);
+  }
+}
+
+async function buildBoxes(){
+  const g=document.getElementById('boxg');
+  g.innerHTML='<div class="ld" style="grid-column:span 3"><div class="sp"></div>Перевіряємо бокси...</div>';
+  const bks=await fetchBookings(); S.bookings=bks; g.innerHTML='';
+  const ico={'Box 1':'🔵','Box 2':'🟡','Box 3':'🟢'};
   ['Box 1','Box 2','Box 3'].forEach(bx=>{
-    const busy = isBooked(bks,S.date,S.time,bx);
-    const c = document.createElement('div');
-    c.className='box-card'+(busy?' busy':'')+(S.box===bx?' sel':'');
-    c.innerHTML=`<div class="box-ico">${icons[bx]}</div><div class="box-n">${bx}</div><div class="box-st ${busy?'busy':'free'}">${busy?'Зайнятий':'Вільний'}</div>`;
-    if(!busy) c.onclick=()=>{ document.querySelectorAll('.box-card').forEach(d=>d.classList.remove('sel')); c.classList.add('sel'); S.box=bx; };
+    const busy=isBooked(bks,S.date,S.time,bx);
+    const c=document.createElement('div');
+    c.className='boxc'+(busy?' busy':'')+(S.box===bx?' sel':'');
+    c.innerHTML=`<div class="boxic">${ico[bx]}</div><div class="boxn">${bx}</div><div class="boxst ${busy?'busy':'free'}">${busy?'Зайнятий':'Вільний'}</div>`;
+    if(!busy) c.onclick=()=>{document.querySelectorAll('.boxc').forEach(x=>x.classList.remove('sel'));c.classList.add('sel');S.box=bx};
     g.appendChild(c);
   });
 }
 
-function bStep(n) {
-  if(n===2&&!S.date){ toast('Оберіть дату!','err'); return; }
-  if(n===3&&!S.time){ toast('Оберіть час!','err'); return; }
-  if(n===4&&!S.box){ toast('Оберіть бокс!','err'); return; }
+function bStep(n){
+  if(n===2&&!S.date){toast('Оберіть дату!','err');return}
+  if(n===3&&!S.time){toast('Оберіть час!','err');return}
+  if(n===4&&!S.box){toast('Оберіть бокс!','err');return}
+  for(let i=1;i<=5;i++){const p=document.getElementById('bs'+i);if(p)p.style.display=i===n?'block':'none'}
   for(let i=1;i<=5;i++){
-    const p=document.getElementById('bs'+i); if(p) p.style.display=i===n?'block':'none';
+    const d=document.getElementById('sd'+i);if(!d)continue;
+    d.className='sdot'+(i<n?' done':i===n?' on':'');
   }
-  updateDots(n);
-  if(n===2) buildTimes();
-  if(n===3) buildBoxes();
-  if(n===4) buildSummary();
-}
-
-function updateDots(active) {
-  for(let i=1;i<=5;i++){
-    const d=document.getElementById('sd'+i); if(!d) continue;
-    d.className='step-dot';
-    if(i<active) d.className+=' done';
-    else if(i===active) d.className+=' on';
+  if(n===2)buildTimes();
+  if(n===3)buildBoxes();
+  if(n===4){
+    document.getElementById('bsummary').innerHTML=
+      `<div class="bsr"><span class="bsk">Дата</span><span class="bsv">${S.date}</span></div>
+       <div class="bsr"><span class="bsk">Час</span><span class="bsv">${S.time}</span></div>
+       <div class="bsr"><span class="bsk">Бокс</span><span class="bsv">${S.box}</span></div>`;
   }
 }
 
-function buildSummary() {
-  document.getElementById('bsummary').innerHTML=`
-    <div class="bs-row"><span class="bs-key">Дата</span><span class="bs-val">${S.date}</span></div>
-    <div class="bs-row"><span class="bs-key">Час</span><span class="bs-val">${S.time}</span></div>
-    <div class="bs-row"><span class="bs-key">Бокс</span><span class="bs-val">${S.box}</span></div>`;
-}
-
-async function submitBook() {
-  const name = document.getElementById('b-name').value.trim();
-  const phone = document.getElementById('b-phone').value.trim();
-  const service = document.getElementById('b-service').value;
-  if(!name||!phone){ toast('Вкажіть ім\'я та телефон!','err'); return; }
-  const fresh = await fetchBookings();
-  if(isBooked(fresh,S.date,S.time,S.box)){ toast('Бокс щойно зайняли! Оберіть інший.','err'); bStep(3); return; }
-  const btn = document.getElementById('b-submit');
-  btn.textContent='⏳ Зберігаємо...'; btn.disabled=true;
-  try {
-    const p = new URLSearchParams({action:'saveBooking',date:S.date,time:S.time,box:S.box,name,phone,service,comment:document.getElementById('b-comment').value});
-    const r = await fetch(APPS_URL+'?'+p, {method:'GET',mode:'cors'});
-    const data = await r.json();
-    if(!data.success){ toast('Бокс вже зайнятий!','err'); btn.textContent='✓ Підтвердити запис'; btn.disabled=false; bStep(3); return; }
-    document.getElementById('book-result').innerHTML=`
-      <div class="success-row"><span class="success-key">Ім'я</span><span class="success-val">${name}</span></div>
-      <div class="success-row"><span class="success-key">Дата</span><span class="success-val">${S.date}</span></div>
-      <div class="success-row"><span class="success-key">Час</span><span class="success-val">${S.time}</span></div>
-      <div class="success-row"><span class="success-key">Бокс</span><span class="success-val">${S.box}</span></div>
-      <div class="success-row"><span class="success-key">Послуга</span><span class="success-val">${service.split(' — ')[0]}</span></div>`;
+async function submitBook(){
+  const name=document.getElementById('b-name').value.trim();
+  const phone=document.getElementById('b-phone').value.trim();
+  const service=document.getElementById('b-service').value;
+  if(!name||!phone){toast('Вкажіть ім\'я та телефон!','err');return}
+  const fresh=await fetchBookings();
+  if(isBooked(fresh,S.date,S.time,S.box)){toast('Бокс щойно зайняли! Оберіть інший.','err');bStep(3);return}
+  const btn=document.getElementById('b-submit');
+  btn.textContent='⏳ Зберігаємо...';btn.disabled=true;
+  try{
+    const p=new URLSearchParams({action:'saveBooking',date:S.date,time:S.time,box:S.box,name,phone,service,comment:document.getElementById('b-comment').value});
+    const r=await fetch(APPS+'?'+p,{method:'GET',mode:'cors'});
+    const data=await r.json();
+    if(!data.success){toast('Бокс вже зайнятий! Оберіть інший.','err');btn.textContent='✓ Підтвердити запис';btn.disabled=false;bStep(3);return}
+    document.getElementById('book-result').innerHTML=
+      `<div class="sr"><span class="sk">Ім'я</span><span class="sv">${name}</span></div>
+       <div class="sr"><span class="sk">Дата</span><span class="sv">${S.date}</span></div>
+       <div class="sr"><span class="sk">Час</span><span class="sv">${S.time}</span></div>
+       <div class="sr"><span class="sk">Бокс</span><span class="sv">${S.box}</span></div>
+       <div class="sr"><span class="sk">Послуга</span><span class="sv">${service.split(' — ')[0]}</span></div>`;
     bStep(5);
-  } catch(e){ toast('Помилка. Спробуйте ще раз.','err'); btn.textContent='✓ Підтвердити запис'; btn.disabled=false; }
+  }catch(e){toast('Помилка. Спробуйте ще раз.','err');btn.textContent='✓ Підтвердити запис';btn.disabled=false}
 }
 
-function resetBook() {
-  S.date=null; S.time=null; S.box=null;
-  bStep(1); buildDates();
+function resetBook(){
+  S.date=null;S.time=null;S.box=null;
   document.getElementById('b-name').value='';
   document.getElementById('b-phone').value='';
+  document.getElementById('b-comment').value='';
+  bStep(1);buildDates();
 }
 
-// ═══ FETCH ═══
-async function fetchBookings() {
-  try {
-    const r = await fetch(APPS_URL+'?action=getBookings&t='+Date.now(), {mode:'cors'});
-    if(!r.ok) return [];
-    const d = await r.json();
-    return d.bookings||[];
-  } catch(e){ return []; }
+// ══════════════════════════════════════
+//  FETCH
+// ══════════════════════════════════════
+async function fetchBookings(){
+  try{
+    const r=await fetch(APPS+'?action=getBookings&t='+Date.now(),{mode:'cors'});
+    if(!r.ok)return[];
+    const d=await r.json();return d.bookings||[];
+  }catch(e){return[]}
+}
+async function fetchClients(){
+  try{
+    const r=await fetch(APPS+'?action=getClients&t='+Date.now(),{mode:'cors'});
+    if(!r.ok)return[];
+    const d=await r.json();return d.clients||[];
+  }catch(e){return[]}
+}
+function isBooked(bks,dt,ts,bx){
+  if(!bks||!dt||!ts||!bx)return false;
+  return bks.some(b=>String(b[1]||'').trim()===dt&&normT(String(b[3]||''))===normT(ts)&&String(b[4]||'').trim()===bx&&String(b[9]||'').includes('Підтверджено'));
 }
 
-async function fetchClients() {
-  try {
-    const r = await fetch(APPS_URL+'?action=getClients&t='+Date.now(), {mode:'cors'});
-    if(!r.ok) return [];
-    const d = await r.json();
-    return d.clients||[];
-  } catch(e){ return []; }
-}
-
-function isBooked(bks,dateStr,timeStr,boxName) {
-  if(!bks||!dateStr||!timeStr||!boxName) return false;
-  return bks.some(b=>{
-    const bd=String(b[1]||'').trim();
-    const bt=normT(String(b[3]||'').trim());
-    const bb=String(b[4]||'').trim();
-    const bs=String(b[9]||'').trim();
-    return bd===dateStr && bt===normT(timeStr) && bb===boxName && bs.includes('Підтверджено');
-  });
-}
-
-function normT(t){ if(!t) return ''; t=t.trim(); if(t.includes('.')) return t.replace('.',':').substring(0,5); if(t.includes(':')) return t.substring(0,5); return t.padStart(2,'0')+':00'; }
-
-// ═══ PRICES ═══
-const PRICES = {
-  sedan: [
-    {ico:'🚿', name:'Екпрес-мийка', dur:'20 хв', price:200},
-    {ico:'✨', name:'Комплексна мийка', dur:'45 хв', price:350},
-    {ico:'💎', name:'Мийка + полірування', dur:'90 хв', price:600},
-    {ico:'🪑', name:'Хімчистка салону', dur:'3 год', price:800},
-    {ico:'🏆', name:'Детейлінг', dur:'4–5 год', price:1500},
-    {ico:'🛡️', name:'Захисне покриття', dur:'2 год', price:500},
-    {ico:'🔧', name:'Моторний відсік', dur:'60 хв', price:350},
-    {ico:'🎯', name:'Нанокераміка', dur:'6–8 год', price:3000},
-    {ico:'🔵', name:'Мийка дисків', dur:'30 хв', price:200},
+// ══════════════════════════════════════
+//  PRICES
+// ══════════════════════════════════════
+const PR={
+  sedan:[
+    {i:'🚿',n:'Експрес-мийка',d:'~20 хв',p:200},
+    {i:'✨',n:'Комплексна мийка',d:'~45 хв',p:350},
+    {i:'💫',n:'Мийка + полірування',d:'~90 хв',p:600},
+    {i:'🪑',n:'Хімчистка салону',d:'~3 год',p:800},
+    {i:'🏆',n:'Детейлінг',d:'4–5 год',p:1500},
+    {i:'🛡️',n:'Захисне покриття',d:'~2 год',p:500},
+    {i:'🔧',n:'Моторний відсік',d:'~60 хв',p:350},
+    {i:'💎',n:'Нанокераміка',d:'6–8 год',p:3000},
+    {i:'🔵',n:'Мийка дисків',d:'~30 хв',p:200},
+    {i:'🪟',n:'Тонування скла',d:'~120 хв',p:1200},
   ],
-  suv: [
-    {ico:'🚿', name:'Екпрес-мийка', dur:'25 хв', price:260},
-    {ico:'✨', name:'Комплексна мийка', dur:'55 хв', price:450},
-    {ico:'💎', name:'Мийка + полірування', dur:'110 хв', price:800},
-    {ico:'🪑', name:'Хімчистка салону', dur:'3.5 год', price:1100},
-    {ico:'🏆', name:'Детейлінг', dur:'5–6 год', price:2000},
-    {ico:'🛡️', name:'Захисне покриття', dur:'2.5 год', price:650},
-    {ico:'🔧', name:'Моторний відсік', dur:'60 хв', price:400},
-    {ico:'🎯', name:'Нанокераміка', dur:'7–9 год', price:4000},
-    {ico:'🔵', name:'Мийка дисків', dur:'35 хв', price:250},
+  suv:[
+    {i:'🚿',n:'Експрес-мийка',d:'~25 хв',p:260},
+    {i:'✨',n:'Комплексна мийка',d:'~55 хв',p:450},
+    {i:'💫',n:'Мийка + полірування',d:'~110 хв',p:800},
+    {i:'🪑',n:'Хімчистка салону',d:'~3.5 год',p:1100},
+    {i:'🏆',n:'Детейлінг',d:'5–6 год',p:2000},
+    {i:'🛡️',n:'Захисне покриття',d:'~2.5 год',p:650},
+    {i:'🔧',n:'Моторний відсік',d:'~60 хв',p:400},
+    {i:'💎',n:'Нанокераміка',d:'7–9 год',p:4000},
+    {i:'🔵',n:'Мийка дисків',d:'~35 хв',p:250},
+    {i:'🪟',n:'Тонування скла',d:'~150 хв',p:1500},
   ],
-  minivan: [
-    {ico:'🚿', name:'Екпрес-мийка', dur:'30 хв', price:300},
-    {ico:'✨', name:'Комплексна мийка', dur:'60 хв', price:520},
-    {ico:'💎', name:'Мийка + полірування', dur:'120 хв', price:950},
-    {ico:'🪑', name:'Хімчистка салону', dur:'4 год', price:1300},
-    {ico:'🏆', name:'Детейлінг', dur:'6–8 год', price:2500},
-    {ico:'🛡️', name:'Захисне покриття', dur:'3 год', price:800},
-    {ico:'🔧', name:'Моторний відсік', dur:'70 хв', price:500},
-    {ico:'🎯', name:'Нанокераміка', dur:'8–10 год', price:5000},
-    {ico:'🔵', name:'Мийка дисків', dur:'40 хв', price:300},
+  minivan:[
+    {i:'🚿',n:'Експрес-мийка',d:'~30 хв',p:300},
+    {i:'✨',n:'Комплексна мийка',d:'~60 хв',p:520},
+    {i:'💫',n:'Мийка + полірування',d:'~120 хв',p:950},
+    {i:'🪑',n:'Хімчистка салону',d:'~4 год',p:1300},
+    {i:'🏆',n:'Детейлінг',d:'6–8 год',p:2500},
+    {i:'🛡️',n:'Захисне покриття',d:'~3 год',p:800},
+    {i:'🔧',n:'Моторний відсік',d:'~70 хв',p:500},
+    {i:'💎',n:'Нанокераміка',d:'8–10 год',p:5000},
+    {i:'🔵',n:'Мийка дисків',d:'~40 хв',p:300},
+    {i:'🪟',n:'Тонування скла',d:'~180 хв',p:1800},
   ]
 };
 
 function showPrices(type, el) {
   document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('on'));
   if(el) el.classList.add('on');
-  const g = document.getElementById('price-g');
-  const data = PRICES[type]||[];
-  g.innerHTML = data.map(s=>`
-    <div class="price-card">
-      <div class="pc-icon">${s.ico}</div>
-      <div class="pc-name">${s.name}</div>
-      <div class="pc-dur">⏱ ${s.dur}</div>
-      <div class="pc-price">${s.price.toLocaleString('uk-UA')} <span>грн</span></div>
-      <button class="pc-btn" onclick="quickBook('${s.name} — ${typeLabel(type)} (${s.price} грн)')">Записатись</button>
+  const lbl = type==='sedan'?'Sedan':type==='suv'?'SUV':'Мінівен';
+  document.getElementById('pg').innerHTML = (PR[type]||[]).map(s=>`
+    <div class="pc">
+      <div class="pc-ico">${s.i}</div>
+      <div class="pc-name">${s.n}</div>
+      <div class="pc-dur">⏱ ${s.d}</div>
+      <div class="pc-price">${s.p.toLocaleString('uk-UA')} <span>грн</span></div>
+      <button class="pc-btn" onclick="quickBook('${s.n}')">Записатись</button>
     </div>`).join('');
 }
 
-function typeLabel(t){ return t==='sedan'?'Sedan':t==='suv'?'SUV':'Мінівен'; }
-function quickBook(svc){ go('booking'); setTimeout(()=>{ const sel=document.getElementById('b-service'); if(sel) for(let i=0;i<sel.options.length;i++) if(sel.options[i].text.includes(svc.split(' — ')[0])) sel.selectedIndex=i; }, 400); }
+function quickBook(name){go('booking');setTimeout(()=>{const sel=document.getElementById('b-service');if(sel)for(let i=0;i<sel.options.length;i++)if(sel.options[i].text.includes(name))sel.selectedIndex=i},400)}
 
-// ═══ SUBSCRIPTIONS ═══
+// ══════════════════════════════════════
+//  SUBSCRIPTIONS
+// ══════════════════════════════════════
 function orderSub(sub) {
-  currentSub = sub;
-  document.getElementById('sm-title').textContent = `Замовити ${sub.name}`;
-  document.getElementById('sm-summary').innerHTML = `
-    <div class="ssb-row"><span class="ssb-key">Абонемент</span><span class="ssb-val">${sub.name}</span></div>
-    <div class="ssb-row"><span class="ssb-key">Термін</span><span class="ssb-val">${sub.months} міс.</span></div>
-    <div class="ssb-row"><span class="ssb-key">Вартість</span><span class="ssb-val">${sub.price.toLocaleString('uk-UA')} грн</span></div>
-    <div class="ssb-row"><span class="ssb-key">Бонус</span><span class="ssb-val">+${sub.bonus}</span></div>
-    <div class="ssb-row"><span class="ssb-key">На рахунок</span><span class="ssb-val">${sub.account.toLocaleString('uk-UA')} грн</span></div>`;
+  curSub = sub;
+  document.getElementById('sm-ttl').textContent = 'Замовити '+sub.name;
+  document.getElementById('sm-sum').innerHTML =
+    `<div class="msr"><span class="msk">Абонемент</span><span class="msv">${sub.name}</span></div>
+     <div class="msr"><span class="msk">Термін</span><span class="msv">${sub.months} міс.</span></div>
+     <div class="msr"><span class="msk">Вартість</span><span class="msv">${sub.price.toLocaleString('uk-UA')} грн</span></div>
+     <div class="msr"><span class="msk">Бонус</span><span class="msv">+${sub.bonus}</span></div>
+     <div class="msr"><span class="msk">На рахунок</span><span class="msv">${sub.account.toLocaleString('uk-UA')} грн</span></div>`;
   document.getElementById('sub-modal').classList.add('on');
   document.getElementById('sm-name').value='';
   document.getElementById('sm-phone').value='';
   document.getElementById('sm-tg').value='';
 }
 
-function closeSubModal() {
-  document.getElementById('sub-modal').classList.remove('on');
-  currentSub=null;
-}
+function closeSubModal(){document.getElementById('sub-modal').classList.remove('on');curSub=null}
 
 async function submitSubOrder() {
   const name = document.getElementById('sm-name').value.trim();
   const phone = document.getElementById('sm-phone').value.trim();
   const tg = document.getElementById('sm-tg').value.trim();
-  if(!name||!phone){ toast('Вкажіть ім\'я та телефон!','err'); return; }
-  const btn = document.getElementById('sm-confirm');
+  if(!name||!phone){toast('Вкажіть ім\'я та телефон!','err');return}
+  const btn = document.getElementById('sm-ok');
   btn.textContent='⏳ Відправляємо...'; btn.disabled=true;
   try {
+    // Відправляємо заявку в Google Apps Script
+    // Бекенд запише в таблицю і надішле повідомлення адміну в бот
     const params = new URLSearchParams({
-      action:'saveSub',
-      subId: currentSub.id,
-      subName: currentSub.name,
-      months: currentSub.months,
-      price: currentSub.price,
-      account: currentSub.account,
-      bonus: currentSub.bonus,
+      action: 'saveSubOrder',
+      subId: curSub.id,
+      subName: curSub.name,
+      months: curSub.months,
+      price: curSub.price,
+      account: curSub.account,
+      bonus: curSub.bonus,
       name, phone, tg
     });
-    await fetch(APPS_URL+'?'+params, {mode:'cors'});
+    // Спробуємо записати, але незалежно від відповіді показуємо успіх
+    // (Google Apps Script може повернути redirect, але запит виконається)
+    fetch(APPS+'?'+params, {method:'GET', mode:'no-cors'}).catch(()=>{});
+    // Також спробуємо через cors
+    try {
+      const r = await Promise.race([
+        fetch(APPS+'?'+params, {method:'GET', mode:'cors'}),
+        new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),5000))
+      ]);
+      const data = await r.json();
+      console.log('Sub order response:', data);
+    } catch(e) {
+      console.log('Sub order sent (cors response unavailable):', e.message);
+    }
     closeSubModal();
     toast('Заявку відправлено! Адміністратор зв\'яжеться з вами.','ok');
-  } catch(e){
+  } catch(e) {
     closeSubModal();
     toast('Заявку відправлено! Очікуйте дзвінка.','ok');
   }
   btn.textContent='Замовити →'; btn.disabled=false;
 }
 
-// ═══ CRM ═══
-// Access via secret key combo: Ctrl+Shift+A, or type 'crm' in nav (hidden)
-document.addEventListener('keydown', e => {
-  if(e.ctrlKey && e.shiftKey && e.key==='A') {
-    go('crm'); document.getElementById('crm-pass').focus();
-  }
-});
-
+// ══════════════════════════════════════
+//  CRM
+// ══════════════════════════════════════
 function checkCRM() {
   const p = document.getElementById('crm-pass').value;
-  if(p===CRM_PASS){
-    document.getElementById('crm-gate-wrap').style.display='none';
+  if(p === CRM_PASSWORD) {
+    document.getElementById('crm-gate-w').style.display='none';
     document.getElementById('crm-body').style.display='block';
     refreshCRM(); renderCal();
   } else {
     toast('Невірний пароль!','err');
     document.getElementById('crm-pass').value='';
+    document.getElementById('crm-pass').focus();
   }
 }
 
 async function refreshCRM() {
   const [bks, cls] = await Promise.all([fetchBookings(), fetchClients()]);
   S.bookings=bks; S.clients=cls;
-  const today = todayStr();
-  const todayBks = bks.filter(b=>String(b[1]).trim()===today);
-  document.getElementById('cs-total').textContent = bks.length;
-  document.getElementById('cs-today').textContent = todayBks.length;
-  document.getElementById('cs-clients').textContent = cls.length;
+  const today=todayStr();
+  const todayBks=bks.filter(b=>String(b[1]||'').trim()===today);
+  document.getElementById('cs1').textContent=bks.length;
+  document.getElementById('cs2').textContent=todayBks.length;
+  document.getElementById('cs3').textContent=cls.length;
   const now=new Date(), ct=pad(now.getHours())+':00';
-  const free = ['Box 1','Box 2','Box 3'].filter(bx=>!isBooked(bks,today,ct,bx)).length;
-  document.getElementById('cs-free').textContent = free+'/3';
+  const freeBoxes=['Box 1','Box 2','Box 3'].filter(bx=>!isBooked(bks,today,ct,bx));
+  document.getElementById('cs4').textContent=freeBoxes.length+'/3';
 
-  document.getElementById('crm-boxes').innerHTML = ['Box 1','Box 2','Box 3'].map(bx=>{
+  // Box status
+  document.getElementById('crm-boxes').innerHTML=['Box 1','Box 2','Box 3'].map(bx=>{
     const busy=isBooked(bks,today,ct,bx);
-    return `<div class="box-live-row"><div class="blr-dot ${busy?'busy':'free'}"></div><div class="blr-name">${bx}</div><div class="blr-st ${busy?'busy':'free'}">${busy?'Зайнятий':'Вільний'}</div><div class="blr-time">${ct}</div></div>`;
+    return `<div class="blr"><div class="blrd ${busy?'busy':'free'}"></div><div class="blrn">${bx}</div><div class="blrs ${busy?'busy':'free'}">${busy?'Зайнятий':'Вільний'}</div><div class="blrt">${ct}</div></div>`;
   }).join('');
 
-  const sorted = [...bks].sort((a,b)=>String(a[1])>String(b[1])?-1:1);
-  document.getElementById('book-tbl').innerHTML = bks.length===0?'<p style="color:rgba(240,232,218,0.3);text-align:center;padding:20px;font-size:13px">Записів поки немає</p>':`
-    <div style="overflow-x:auto"><table class="book-table">
-      <thead><tr><th>ID</th><th>Дата</th><th>Час</th><th>Бокс</th><th>Клієнт</th><th>Телефон</th><th>Послуга</th><th>Статус</th></tr></thead>
-      <tbody>${sorted.slice(0,25).map(b=>`<tr>
-        <td style="color:rgba(240,232,218,0.3)">${b[0]||''}</td>
-        <td>${b[1]||''}</td><td><strong>${b[3]||''}</strong></td><td>${b[4]||''}</td>
-        <td>${b[6]||''}</td><td style="color:rgba(240,232,218,0.4);font-size:11px">${b[7]||''}</td>
-        <td style="font-size:11px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b[8]||''}</td>
-        <td><span class="badge ${bSt(String(b[9]||''))}">${b[9]||''}</span></td>
-      </tr>`).join('')}</tbody>
-    </table></div>`;
+  // Table
+  const sorted=[...bks].sort((a,b)=>String(a[1])>String(b[1])?-1:1);
+  document.getElementById('crm-tbl').innerHTML = bks.length===0
+    ? '<p style="color:var(--t3);text-align:center;padding:20px;font-size:13px">Записів поки немає</p>'
+    : `<div style="overflow-x:auto"><table class="bt2">
+        <thead><tr><th>ID</th><th>Дата</th><th>Час</th><th>Бокс</th><th>Клієнт</th><th>Телефон</th><th>Послуга</th><th>Статус</th></tr></thead>
+        <tbody>${sorted.slice(0,30).map(b=>`<tr>
+          <td style="color:var(--t3)">${b[0]||''}</td>
+          <td>${b[1]||''}</td><td><strong style="color:var(--t1)">${b[3]||''}</strong></td><td>${b[4]||''}</td>
+          <td style="color:var(--t1)">${b[6]||''}</td>
+          <td style="color:var(--t3);font-size:11px">${b[7]||''}</td>
+          <td style="font-size:11px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b[8]||''}</td>
+          <td><span class="bdg ${bStCls(String(b[9]||''))}">${b[9]||''}</span></td>
+        </tr>`).join('')}</tbody>
+      </table></div>`;
 
-  const colors = ['#c8953c','#4a9e6c','#5a9fd4','#c0444a','#9b7fbf','#64c4d0'];
-  document.getElementById('crm-clients').innerHTML = cls.length===0?'<p style="color:rgba(240,232,218,0.3);text-align:center;padding:20px;font-size:13px">Клієнтів поки немає</p>':
-    cls.slice(0,12).map((c,i)=>{
-      const ini=(String(c[1]||'?')).split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
-      const col=colors[i%colors.length];
-      const vis=bks.filter(b=>String(b[5]).trim()===String(c[0]).trim()).length;
-      return `<div class="client-row2">
-        <div class="c-ava" style="background:${col}22;color:${col}">${ini}</div>
-        <div class="c-info"><div class="c-name">${c[1]||'—'}</div><div class="c-meta">${c[2]||''} · ${vis} візитів</div></div>
-        <div class="c-bal">${Number(c[6]||0).toLocaleString('uk-UA')} грн</div>
-      </div>`;
-    }).join('');
+  // Clients
+  const cols=['#e8b84b','#4fc97e','#6eb8ff','#f06060','#9b87f5','#3ecfad'];
+  document.getElementById('crm-cls').innerHTML = cls.length===0
+    ? '<p style="color:var(--t3);text-align:center;padding:20px;font-size:13px">Клієнтів поки немає</p>'
+    : cls.slice(0,12).map((c,i)=>{
+        const ini=String(c[1]||'?').split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
+        const col=cols[i%cols.length];
+        const vis=bks.filter(b=>String(b[5]||'').trim()===String(c[0]||'').trim()).length;
+        return `<div class="crow">
+          <div class="cava" style="background:${col}22;color:${col}">${ini||'?'}</div>
+          <div style="flex:1"><div class="cn">${c[1]||'—'}</div><div class="cm">${c[2]||''} · ${vis} візитів</div></div>
+          <div class="cbal">${Number(c[6]||0).toLocaleString('uk-UA')} грн</div>
+        </div>`;
+      }).join('');
 
   renderCal();
   toast('Дані оновлено');
 }
 
-function bSt(s){ if(s.includes('Підтверджено')) return 'badge-ok'; if(s.includes('Очікує')) return 'badge-pend'; return 'badge-no'; }
+function bStCls(s){if(s.includes('Підтверджено'))return'bdg-ok';if(s.includes('Очікує'))return'bdg-pnd';return'bdg-no'}
 
 let cY=new Date().getFullYear(), cM=new Date().getMonth();
 function renderCal(){
-  const UA_MONTHS_SHORT=['Січ','Лют','Бер','Кві','Тра','Чер','Лип','Сер','Вер','Жов','Лис','Гру'];
-  document.getElementById('cal-lbl').textContent=UA_MONTHS_SHORT[cM]+' '+cY;
-  const g=document.getElementById('cal-g'); if(!g) return;
-  g.innerHTML='';
-  const fd=new Date(cY,cM,1); let sw=(fd.getDay()+6)%7;
+  const short=['Січ','Лют','Бер','Кві','Тра','Чер','Лип','Сер','Вер','Жов','Лис','Гру'];
+  const lbl=document.getElementById('cal-l');if(lbl)lbl.textContent=short[cM]+' '+cY;
+  const g=document.getElementById('cal-g');if(!g)return;g.innerHTML='';
+  const fd=new Date(cY,cM,1),sw=(fd.getDay()+6)%7;
   const dim=new Date(cY,cM+1,0).getDate();
   const today=new Date();
-  const bdates=new Set((S.bookings||[]).map(b=>{
-    const d=String(b[1]||''); const p=d.split('.');
-    if(p.length===3) return p[2]+'-'+p[1]+'-'+p[0]; return d;
-  }));
-  for(let i=0;i<sw;i++){ const e=document.createElement('div'); e.className='cal-d empty'; g.appendChild(e); }
+  const bdates=new Set((S.bookings||[]).map(b=>{const d=String(b[1]||''),p=d.split('.');return p.length===3?p[2]+'-'+p[1]+'-'+p[0]:d}));
+  for(let i=0;i<sw;i++){const e=document.createElement('div');e.className='cald empty';g.appendChild(e)}
   for(let d=1;d<=dim;d++){
     const dk=cY+'-'+pad(cM+1)+'-'+pad(d);
     const isTod=d===today.getDate()&&cM===today.getMonth()&&cY===today.getFullYear();
     const hasB=bdates.has(dk);
     const e=document.createElement('div');
-    e.className='cal-d'+(isTod?' today':'')+(hasB&&!isTod?' has-b':'');
+    e.className='cald'+(isTod?' today':'')+(hasB&&!isTod?' hasb':'');
     e.textContent=d; g.appendChild(e);
   }
 }
-function calPrev(){ cM--; if(cM<0){cM=11;cY--;} renderCal(); }
-function calNext(){ cM++; if(cM>11){cM=0;cY++;} renderCal(); }
+function calPrev(){cM--;if(cM<0){cM=11;cY--}renderCal()}
+function calNext(){cM++;if(cM>11){cM=0;cY++}renderCal()}
 
-// ═══ INIT ═══
+// ══════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════
 initHome();
 </script>
 </body>
