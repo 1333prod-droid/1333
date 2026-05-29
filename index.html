@@ -1,1546 +1,679 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="ru">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>1333 Car Center — Автомийка Харків</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;600;700;900&family=Onest:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>1333 Car Center — CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root {
-  --black: #050507;
-  --black2: #0a0a0f;
-  --black3: #111118;
-  --white: #ffffff;
-  --w90: rgba(255,255,255,0.90);
-  --w60: rgba(255,255,255,0.60);
-  --w35: rgba(255,255,255,0.35);
-  --w15: rgba(255,255,255,0.15);
-  --w08: rgba(255,255,255,0.08);
-  --w04: rgba(255,255,255,0.04);
-  --green: #00ff88;
-  --green2: #00cc6a;
-  --green-dim: rgba(0,255,136,0.15);
-  --green-glow: rgba(0,255,136,0.25);
-  --red: #ff4444;
-  --red-dim: rgba(255,68,68,0.15);
-  --red-glow: rgba(255,68,68,0.25);
-  --neon: rgba(255,255,255,0.9);
-  --glass: rgba(255,255,255,0.055);
-  --glass2: rgba(255,255,255,0.09);
-  --glass3: rgba(255,255,255,0.13);
-  --border: rgba(255,255,255,0.10);
-  --border2: rgba(255,255,255,0.18);
-  --blur: blur(40px) saturate(180%);
-  --blur-sm: blur(20px) saturate(150%);
-  --r: 20px;
-  --r-sm: 12px;
-  --tr: 0.28s cubic-bezier(0.4,0,0.2,1);
-  --shadow: 0 8px 40px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3);
-  --shadow-neon: 0 0 30px rgba(255,255,255,0.08), 0 8px 40px rgba(0,0,0,0.5);
-  --font-display: 'Unbounded', sans-serif;
-  --font-body: 'Onest', sans-serif;
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0a;
+  --bg2:#111111;
+  --bg3:#161616;
+  --bg4:#1c1c1c;
+  --border:#2a2a2a;
+  --border2:#333333;
+  --text:#f0f0f0;
+  --text2:#888888;
+  --text3:#555555;
+  --accent:#e8e8e8;
+  --gold:#c9a84c;
+  --gold2:#f0c96a;
+  --red:#e05252;
+  --green:#4caf82;
+  --blue:#4a90d9;
+  --sidebar:220px;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;line-height:1.5;overflow-x:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  position:fixed;top:0;left:0;width:var(--sidebar);height:100vh;
+  background:var(--bg2);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;z-index:100;
+}
+.logo-wrap{padding:28px 24px 24px;border-bottom:1px solid var(--border)}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;color:var(--text);line-height:1}
+.logo span{display:block;font-family:'Inter',sans-serif;font-size:10px;font-weight:300;letter-spacing:4px;color:var(--text2);margin-top:3px;text-transform:uppercase}
+.nav{padding:20px 0;flex:1}
+.nav-item{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 24px;font-size:13px;font-weight:400;
+  color:var(--text2);cursor:pointer;
+  border-left:2px solid transparent;
+  transition:all .15s;text-decoration:none;
+}
+.nav-item:hover{color:var(--text);background:var(--bg3)}
+.nav-item.active{color:var(--text);border-left-color:var(--gold);background:var(--bg3)}
+.nav-item svg{width:16px;height:16px;flex-shrink:0;opacity:.7}
+.nav-item.active svg{opacity:1}
+.sidebar-footer{padding:20px 24px;border-top:1px solid var(--border)}
+.user-row{display:flex;align-items:center;gap:10px}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#000;flex-shrink:0}
+.user-name{font-size:13px;font-weight:500;color:var(--text)}
+.user-role{font-size:11px;color:var(--text2)}
+.logout-btn{margin-left:auto;background:none;border:none;color:var(--text3);cursor:pointer;padding:4px;border-radius:4px;transition:color .15s}
+.logout-btn:hover{color:var(--red)}
+
+/* ── MAIN ── */
+.main{margin-left:var(--sidebar);min-height:100vh;display:flex;flex-direction:column}
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 32px;border-bottom:1px solid var(--border);
+  background:var(--bg2);position:sticky;top:0;z-index:50;
+}
+.topbar-left .page-title{font-size:20px;font-weight:500;color:var(--text)}
+.topbar-left .page-sub{font-size:12px;color:var(--text2);margin-top:1px}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.notif-btn{
+  width:36px;height:36px;border-radius:8px;border:1px solid var(--border2);
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;position:relative;transition:border-color .15s;
+}
+.notif-btn:hover{border-color:var(--gold)}
+.notif-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);position:absolute;top:8px;right:8px;border:1.5px solid var(--bg2)}
+.create-btn{
+  display:flex;align-items:center;gap:8px;
+  padding:9px 18px;border-radius:8px;
+  background:var(--gold);color:#000;font-weight:600;font-size:13px;
+  border:none;cursor:pointer;transition:background .15s;
+}
+.create-btn:hover{background:var(--gold2)}
+.create-btn svg{width:14px;height:14px}
+
+/* ── HERO ── */
+.hero{
+  position:relative;overflow:hidden;
+  background:var(--bg3);border-bottom:1px solid var(--border);
+  padding:36px 32px 32px;
+  display:flex;align-items:center;justify-content:space-between;
+  min-height:160px;
+}
+.hero-bg{
+  position:absolute;right:0;top:0;bottom:0;width:55%;
+  background:linear-gradient(to left, transparent 0%, var(--bg3) 60%);
+  z-index:1;pointer-events:none;
+}
+.hero-car{
+  position:absolute;right:0;top:0;width:55%;height:100%;
+  background:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200"><rect width="800" height="200" fill="%23111"/><text x="400" y="140" font-family="Bebas Neue" font-size="120" fill="%231a1a1a" text-anchor="middle" letter-spacing="8">1333</text></svg>') center/cover no-repeat;
+  z-index:0;
+}
+.hero-content{position:relative;z-index:2}
+.hero-greeting{font-size:13px;color:var(--text2);margin-bottom:6px}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:2px;color:var(--text);line-height:1}
+.hero-sub{font-size:13px;color:var(--text2);margin-top:8px}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  margin-top:14px;padding:6px 14px;border-radius:6px;
+  border:1px solid var(--gold);color:var(--gold);font-size:12px;font-weight:500;
+}
+.hero-logo-bg{
+  position:absolute;right:32px;top:50%;transform:translateY(-50%);
+  font-family:'Bebas Neue',sans-serif;font-size:72px;letter-spacing:4px;
+  color:var(--bg4);z-index:0;user-select:none;line-height:1;
+}
+.hero-logo-sub{font-size:16px;letter-spacing:6px;display:block;margin-top:-8px}
+
+/* ── CONTENT ── */
+.content{padding:28px 32px;flex:1}
+
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.stat-card{
+  background:var(--bg2);border:1px solid var(--border);border-radius:10px;
+  padding:18px 20px;position:relative;overflow:hidden;
+}
+.stat-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--border);
+}
+.stat-card.gold::before{background:var(--gold)}
+.stat-card.green::before{background:var(--green)}
+.stat-card.blue::before{background:var(--blue)}
+.stat-card.red::before{background:var(--red)}
+.stat-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+.stat-label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px}
+.stat-icon{width:32px;height:32px;border-radius:8px;background:var(--bg4);display:flex;align-items:center;justify-content:center}
+.stat-icon svg{width:16px;height:16px;color:var(--text2)}
+.stat-value{font-size:26px;font-weight:600;color:var(--text);letter-spacing:-0.5px;margin-bottom:6px}
+.stat-delta{font-size:12px;color:var(--text2)}
+.stat-delta.up{color:var(--green)}
+.stat-delta.down{color:var(--red)}
+.sparkline{margin-top:12px;height:28px}
+.sparkline svg{width:100%;height:100%}
+
+/* ── GRID LAYOUT ── */
+.main-grid{display:grid;grid-template-columns:1fr 280px;gap:20px;margin-bottom:20px}
+.bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+
+/* ── CARDS ── */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.card-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px;border-bottom:1px solid var(--border);
+}
+.card-title{font-size:13px;font-weight:500;color:var(--text)}
+.card-link{font-size:12px;color:var(--text3);cursor:pointer;transition:color .15s;text-decoration:none}
+.card-link:hover{color:var(--gold)}
+
+/* ── BOOKINGS ── */
+.booking-row{
+  display:flex;align-items:center;gap:14px;
+  padding:12px 20px;border-bottom:1px solid var(--border);
+  transition:background .1s;
+}
+.booking-row:last-child{border-bottom:none}
+.booking-row:hover{background:var(--bg3)}
+.booking-time{font-size:13px;font-weight:600;color:var(--text);min-width:44px;font-variant-numeric:tabular-nums}
+.booking-info{flex:1}
+.booking-car{font-size:13px;font-weight:500;color:var(--text)}
+.booking-service{font-size:12px;color:var(--text2);margin-top:1px}
+.status-badge{
+  padding:4px 10px;border-radius:5px;font-size:11px;font-weight:500;
+  white-space:nowrap;
+}
+.status-working{background:rgba(201,168,76,.12);color:var(--gold);border:1px solid rgba(201,168,76,.25)}
+.status-planned{background:rgba(74,144,217,.12);color:var(--blue);border:1px solid rgba(74,144,217,.25)}
+.status-waiting{background:rgba(136,136,136,.1);color:var(--text2);border:1px solid var(--border)}
+.status-done{background:rgba(76,175,130,.12);color:var(--green);border:1px solid rgba(76,175,130,.25)}
+
+/* ── CALENDAR ── */
+.calendar-wrap{padding:16px 20px}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.cal-month{font-size:13px;font-weight:500;color:var(--text)}
+.cal-btn{width:26px;height:26px;border-radius:6px;border:1px solid var(--border2);background:var(--bg3);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);transition:all .15s}
+.cal-btn:hover{border-color:var(--gold);color:var(--gold)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-day-name{text-align:center;font-size:10px;color:var(--text3);padding:4px 0;text-transform:uppercase;letter-spacing:.5px}
+.cal-day{
+  text-align:center;padding:5px 2px;font-size:12px;color:var(--text2);
+  border-radius:5px;cursor:pointer;transition:all .15s;
+}
+.cal-day:hover{background:var(--bg4);color:var(--text)}
+.cal-day.other{color:var(--text3)}
+.cal-day.today{background:var(--gold);color:#000;font-weight:600}
+.cal-day.has-booking{position:relative}
+.cal-day.has-booking::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--blue)}
+
+/* ── SERVICES ── */
+.service-row{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 20px;border-bottom:1px solid var(--border);
+  transition:background .1s;
+}
+.service-row:last-child{border-bottom:none}
+.service-row:hover{background:var(--bg3)}
+.service-icon{width:28px;height:28px;border-radius:6px;background:var(--bg4);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.service-icon svg{width:13px;height:13px;color:var(--text2)}
+.service-name{flex:1;font-size:13px;color:var(--text)}
+.service-count{font-size:13px;font-weight:600;color:var(--text2)}
+.service-bar{width:60px;height:3px;background:var(--border);border-radius:2px;margin-left:8px}
+.service-bar-fill{height:100%;border-radius:2px;background:var(--gold)}
+
+/* ── SUBSCRIPTIONS ── */
+.subs-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px 20px}
+.sub-card{
+  border:1px solid var(--border);border-radius:8px;padding:14px;
+  background:var(--bg3);position:relative;overflow:hidden;transition:border-color .15s;
+}
+.sub-card:hover{border-color:var(--gold)}
+.sub-tier{font-size:9px;font-weight:600;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:8px}
+.sub-price{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;color:var(--text);line-height:1}
+.sub-unit{font-size:11px;color:var(--text2);margin-top:2px;margin-bottom:10px}
+.sub-services{font-size:11px;color:var(--text3)}
+.sub-car-img{
+  position:absolute;bottom:-4px;right:-4px;width:70px;height:35px;
+  background:var(--bg4);border-radius:6px 0 8px 0;
+  display:flex;align-items:center;justify-content:center;
+}
+.sub-card.silver .sub-tier{color:#aaa}
+.sub-card.black .sub-price{color:var(--text)}
+.sub-card.ceramic .sub-price{color:var(--blue)}
+.sub-card.premium .sub-price{color:var(--gold)}
+.sub-card.premium{border-color:rgba(201,168,76,.35)}
+
+/* ── CLIENTS ── */
+.client-row{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 20px;border-bottom:1px solid var(--border);
+  transition:background .1s;
+}
+.client-row:last-child{border-bottom:none}
+.client-row:hover{background:var(--bg3)}
+.client-av{width:32px;height:32px;border-radius:50%;background:var(--bg4);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0}
+.client-info{flex:1}
+.client-name{font-size:13px;font-weight:500;color:var(--text)}
+.client-phone{font-size:11px;color:var(--text2);margin-top:1px}
+.client-car{display:flex;align-items:center;gap:6px;color:var(--text2);font-size:12px}
+.client-visits{
+  display:flex;align-items:center;gap:4px;
+  font-size:11px;color:var(--text3);white-space:nowrap;
 }
 
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-html { scroll-behavior: smooth; }
-body {
-  font-family: var(--font-body);
-  background: var(--black);
-  color: var(--w90);
-  min-height: 100vh;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ── ACTIVE NAV INDICATOR ── */
+.nav-badge{
+  margin-left:auto;background:var(--bg4);border:1px solid var(--border);
+  border-radius:4px;padding:1px 7px;font-size:10px;color:var(--text2);
 }
 
-/* ─── BACKGROUND ─── */
-.bg {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
-}
-.bg-grid {
-  position: absolute; inset: 0;
-  background-image:
-    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
-  background-size: 60px 60px;
-  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 0%, transparent 100%);
-}
-.bg-radial {
-  position: absolute; inset: 0;
-  background:
-    radial-gradient(ellipse 60% 50% at 15% 20%, rgba(255,255,255,0.04) 0%, transparent 55%),
-    radial-gradient(ellipse 50% 40% at 85% 80%, rgba(255,255,255,0.03) 0%, transparent 50%),
-    radial-gradient(ellipse 40% 40% at 50% 50%, rgba(255,255,255,0.02) 0%, transparent 60%);
-}
-.bg-orb {
-  position: absolute; border-radius: 50%;
-  filter: blur(120px); animation: orb-float 16s ease-in-out infinite;
-}
-.o1 { width:600px; height:600px; top:-100px; left:-100px; background:rgba(255,255,255,0.025); animation-delay:0s; }
-.o2 { width:500px; height:500px; bottom:-80px; right:-80px; background:rgba(255,255,255,0.018); animation-delay:-6s; }
-.o3 { width:300px; height:300px; top:45%; left:45%; background:rgba(0,255,136,0.04); animation-delay:-10s; }
-
-@keyframes orb-float {
-  0%,100% { transform: translate(0,0); }
-  50% { transform: translate(30px,-30px); }
-}
-
-/* ─── NAV ─── */
-nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 300;
-  height: 60px; padding: 0 2rem;
-  display: flex; align-items: center; justify-content: space-between;
-  background: rgba(5,5,7,0.70);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-  border-bottom: 0.5px solid var(--border);
-}
-.nav-logo {
-  font-family: var(--font-display);
-  font-size: 14px; font-weight: 700;
-  letter-spacing: -0.3px; color: var(--white);
-}
-.nav-logo em {
-  font-style: normal; color: var(--green);
-  text-shadow: 0 0 16px rgba(0,255,136,0.6);
-}
-.nav-links { display: flex; gap: 2px; }
-.nl {
-  padding: 7px 13px; border-radius: 9px; border: none; background: none;
-  font-family: var(--font-body); font-size: 13.5px; font-weight: 500;
-  color: var(--w35); cursor: pointer; transition: var(--tr);
-}
-.nl:hover { color: var(--w60); background: var(--w04); }
-.nl.on { color: var(--white); background: var(--w08); }
-.nav-cta {
-  padding: 8px 18px; border-radius: 10px;
-  background: var(--white); border: none;
-  font-family: var(--font-body); font-size: 13px; font-weight: 700;
-  color: var(--black); cursor: pointer; transition: var(--tr);
-  box-shadow: 0 0 20px rgba(255,255,255,0.15);
-}
-.nav-cta:hover { background: var(--w90); transform: scale(1.03); box-shadow: 0 0 30px rgba(255,255,255,0.25); }
-
-/* ─── PAGES ─── */
-.page { display: none; padding-top: 60px; min-height: 100vh; position: relative; z-index: 1; }
-.page.on { display: block; }
-
-/* ─── GLASS BASE ─── */
-.g {
-  background: var(--glass);
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
-  border: 0.5px solid var(--border);
-  border-radius: var(--r);
-  position: relative; overflow: hidden;
-  transition: var(--tr);
-}
-.g::before {
-  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-  background: linear-gradient(135deg, rgba(255,255,255,0.07) 0%, transparent 50%, rgba(255,255,255,0.02) 100%);
-  z-index: 1;
-}
-.g::after {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 0.5px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
-  z-index: 2;
-}
-.g:hover { background: var(--glass2); border-color: var(--border2); }
-
-.g-sm {
-  background: var(--glass);
-  backdrop-filter: var(--blur-sm);
-  -webkit-backdrop-filter: var(--blur-sm);
-  border: 0.5px solid var(--border);
-  border-radius: var(--r-sm);
-  transition: var(--tr); position: relative; overflow: hidden;
-}
-.g-sm::after {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 0.5px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-}
-
-/* Neon bordered glass */
-.g-neon {
-  background: var(--glass);
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
-  border-radius: var(--r);
-  position: relative; overflow: hidden; transition: var(--tr);
-}
-.g-neon::before {
-  content: ''; position: absolute; inset: 0; border-radius: var(--r); padding: 0.5px;
-  background: linear-gradient(135deg,
-    rgba(255,255,255,0.35) 0%,
-    rgba(255,255,255,0.08) 40%,
-    rgba(255,255,255,0.20) 70%,
-    rgba(255,255,255,0.35) 100%);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
-  animation: border-spin 8s linear infinite;
-}
-@keyframes border-spin {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 200% 50%; }
-}
-.g-neon:hover { background: var(--glass2); transform: translateY(-3px); box-shadow: var(--shadow-neon); }
-
-/* ─── HERO ─── */
-.hero {
-  max-width: 1180px; margin: 0 auto;
-  padding: 80px 2rem 60px;
-  display: grid; grid-template-columns: 1.15fr 1fr; gap: 64px; align-items: center;
-}
-.hero-tag {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 5px 12px; border-radius: 20px; margin-bottom: 24px;
-  background: rgba(0,255,136,0.08);
-  border: 0.5px solid rgba(0,255,136,0.25);
-  font-size: 11.5px; font-weight: 600; color: var(--green);
-  letter-spacing: 0.2px;
-}
-.hero-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--green); animation: pulse 2s infinite;
-  box-shadow: 0 0 8px rgba(0,255,136,0.8);
-}
-@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.5)} }
-
-h1 {
-  font-family: var(--font-display);
-  font-size: 52px; font-weight: 900; line-height: 1.05;
-  letter-spacing: -3px; margin-bottom: 18px;
-  color: var(--white);
-}
-h1 .thin { font-weight: 300; color: var(--w60); }
-h1 .neon {
-  color: var(--white);
-  text-shadow: 0 0 40px rgba(255,255,255,0.4), 0 0 80px rgba(255,255,255,0.15);
-}
-
-.hero-sub {
-  font-size: 16px; color: var(--w60); line-height: 1.7;
-  margin-bottom: 34px; font-weight: 400; max-width: 520px;
-}
-.hero-btns { display: flex; gap: 10px; flex-wrap: wrap; }
-
-.btn-white {
-  padding: 13px 26px; border-radius: 12px; border: none;
-  background: var(--white); font-family: var(--font-body);
-  font-size: 15px; font-weight: 700; color: var(--black);
-  cursor: pointer; transition: var(--tr);
-  box-shadow: 0 0 24px rgba(255,255,255,0.2);
-}
-.btn-white:hover { transform: translateY(-2px); box-shadow: 0 0 40px rgba(255,255,255,0.35); }
-
-.btn-outline {
-  padding: 13px 26px; border-radius: 12px;
-  background: transparent; border: 0.5px solid var(--border2);
-  font-family: var(--font-body); font-size: 15px; font-weight: 600; color: var(--w90);
-  cursor: pointer; transition: var(--tr);
-  backdrop-filter: blur(10px);
-}
-.btn-outline:hover { background: var(--w08); border-color: var(--w35); transform: translateY(-2px); }
-
-/* hero right */
-.hero-right { display: flex; flex-direction: column; gap: 10px; }
-.hero-card { padding: 18px 20px; }
-.hc-lbl {
-  font-size: 9.5px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 1px; color: var(--w35); margin-bottom: 12px;
-}
-
-/* slots */
-.slots { display: flex; flex-wrap: wrap; gap: 6px; }
-.slot-chip {
-  padding: 5px 12px; border-radius: 7px; font-size: 12px; font-weight: 600;
-  background: var(--w04); border: 0.5px solid var(--border);
-  color: var(--w60); cursor: pointer; transition: var(--tr);
-}
-.slot-chip:hover {
-  background: rgba(0,255,136,0.1); border-color: rgba(0,255,136,0.3);
-  color: var(--green); box-shadow: 0 0 12px rgba(0,255,136,0.15);
-}
-
-/* box rows */
-.box-live {
-  display: flex; align-items: center; gap: 10px; padding: 9px 12px;
-  background: var(--w04); border: 0.5px solid var(--border);
-  border-radius: 10px; transition: var(--tr); margin-bottom: 6px;
-}
-.box-live:last-child { margin-bottom: 0; }
-.box-live:hover { background: var(--w08); }
-.bl-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.bl-dot.free { background: var(--green); box-shadow: 0 0 10px rgba(0,255,136,0.7); }
-.bl-dot.busy { background: var(--red); box-shadow: 0 0 10px rgba(255,68,68,0.7); }
-.bl-name { font-size: 13px; font-weight: 600; flex: 1; }
-.bl-st { font-size: 11.5px; font-weight: 700; }
-.bl-st.free { color: var(--green); }
-.bl-st.busy { color: var(--red); }
-
-/* stat row */
-.stat-row { display: flex; gap: 8px; }
-.stat-cell {
-  flex: 1; background: var(--w04); border: 0.5px solid var(--border);
-  border-radius: 10px; padding: 12px 8px; text-align: center;
-}
-.stat-n {
-  font-family: var(--font-display);
-  font-size: 24px; font-weight: 700; margin-bottom: 3px;
-}
-.stat-l { font-size: 9.5px; color: var(--w35); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-
-/* ─── SECTION ─── */
-.sec { max-width: 1180px; margin: 0 auto; padding: 20px 2rem 80px; }
-.sec-hd { text-align: center; margin-bottom: 44px; }
-.sec-ttl {
-  font-family: var(--font-display);
-  font-size: 34px; font-weight: 700; letter-spacing: -1.5px;
-  color: var(--white); margin-bottom: 10px;
-}
-.sec-sub { font-size: 15px; color: var(--w35); }
-
-/* ─── SERVICE CARDS ─── */
-.srv-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap: 12px; }
-.srv-card { padding: 24px 20px; cursor: pointer; }
-.srv-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-neon); }
-.srv-ico {
-  width: 44px; height: 44px; border-radius: 11px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px; margin-bottom: 14px;
-  background: var(--w08); border: 0.5px solid var(--border);
-}
-.srv-name { font-family: var(--font-display); font-size: 14px; font-weight: 600; margin-bottom: 7px; color: var(--white); letter-spacing: -0.3px; }
-.srv-desc { font-size: 13px; color: var(--w35); line-height: 1.65; margin-bottom: 14px; }
-.srv-price { font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--white); }
-.srv-price span { font-size: 11px; color: var(--w35); font-family: var(--font-body); font-weight: 400; }
-
-/* ─── PRICES ─── */
-.ptabs {
-  display: flex; gap: 3px;
-  background: var(--w04); border: 0.5px solid var(--border);
-  border-radius: 13px; padding: 4px;
-  width: max-content; margin: 0 auto 36px;
-}
-.ptab {
-  padding: 9px 22px; border: none; background: none;
-  font-family: var(--font-body); font-size: 13.5px; font-weight: 600;
-  color: var(--w35); border-radius: 10px; cursor: pointer; transition: var(--tr);
-}
-.ptab.on { background: var(--w15); color: var(--white); }
-.price-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap: 10px; }
-.pc { padding: 20px 18px; }
-.pc:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
-.pc-ico { font-size: 17px; margin-bottom: 9px; }
-.pc-name { font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--white); margin-bottom: 4px; letter-spacing: -0.2px; }
-.pc-dur { font-size: 11.5px; color: var(--w35); margin-bottom: 10px; }
-.pc-price { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--white); }
-.pc-price span { font-size: 11px; color: var(--w35); font-family: var(--font-body); font-weight: 400; }
-.pc-btn {
-  margin-top: 12px; width: 100%; padding: 9px; border-radius: 9px;
-  background: var(--w08); border: 0.5px solid var(--border2);
-  font-family: var(--font-body); font-size: 12.5px; font-weight: 700;
-  color: var(--w90); cursor: pointer; transition: var(--tr);
-}
-.pc-btn:hover { background: var(--white); color: var(--black); box-shadow: 0 0 16px rgba(255,255,255,0.2); }
-
-/* ─── BOOKING ─── */
-.bwrap { max-width: 840px; margin: 0 auto; padding: 40px 2rem 80px; }
-.bsteps {
-  display: flex; gap: 0; margin-bottom: 32px; position: relative;
-}
-.bsteps::before {
-  content: ''; position: absolute; top: 17px; left: 30px; right: 30px;
-  height: 0.5px; background: var(--border); z-index: 0;
-}
-.si { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; position: relative; z-index: 1; }
-.sdot {
-  width: 34px; height: 34px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 700;
-  background: var(--w04); border: 0.5px solid var(--border);
-  color: var(--w35); transition: var(--tr);
-}
-.sdot.on { background: var(--white); border-color: transparent; color: var(--black); box-shadow: 0 0 20px rgba(255,255,255,0.25); }
-.sdot.done { background: var(--green-dim); border-color: rgba(0,255,136,0.4); color: var(--green); }
-.slabel { font-size: 10px; font-weight: 600; color: var(--w35); }
-
-.bpanel { padding: 30px; }
-.bt {
-  font-family: var(--font-display);
-  font-size: 20px; font-weight: 700; color: var(--white);
-  letter-spacing: -0.5px; margin-bottom: 6px;
-}
-.bsub { font-size: 13.5px; color: var(--w35); margin-bottom: 24px; }
-
-.dg { display: grid; grid-template-columns: repeat(7,1fr); gap: 6px; margin-bottom: 20px; }
-.db {
-  display: flex; flex-direction: column; align-items: center; gap: 2px;
-  padding: 10px 2px; border-radius: 11px; cursor: pointer; transition: var(--tr);
-  background: var(--w04); border: 0.5px solid var(--border);
-}
-.db:hover { background: var(--w08); border-color: var(--border2); }
-.db.sel { background: var(--w15); border-color: var(--white); box-shadow: 0 0 16px rgba(255,255,255,0.12); }
-.dd { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: var(--w35); }
-.dn { font-family: var(--font-display); font-size: 17px; font-weight: 700; color: var(--w90); }
-.db.sel .dd { color: var(--w60); }
-.db.sel .dn { color: var(--white); }
-
-.tg { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; margin-bottom: 20px; }
-.tb {
-  padding: 12px 6px; border-radius: 10px; text-align: center;
-  background: var(--w04); border: 0.5px solid var(--border);
-  font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--w90);
-  cursor: pointer; transition: var(--tr);
-}
-.tb:hover { background: var(--w08); border-color: var(--border2); }
-.tb.sel { background: var(--w15); border-color: var(--white); color: var(--white); box-shadow: 0 0 12px rgba(255,255,255,0.1); }
-.tb.busy {
-  background: var(--red-dim); border-color: rgba(255,68,68,0.2);
-  color: rgba(255,68,68,0.5); cursor: not-allowed; font-size: 10px;
-  font-family: var(--font-body);
-}
-
-.boxg { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 20px; }
-.boxc {
-  padding: 20px 14px; border-radius: 14px; text-align: center;
-  background: var(--w04); border: 0.5px solid var(--border);
-  cursor: pointer; transition: var(--tr);
-}
-.boxc:hover { background: var(--w08); border-color: var(--border2); }
-.boxc.sel { background: var(--w08); border-color: var(--white); box-shadow: 0 0 20px rgba(255,255,255,0.1); }
-.boxc.busy { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
-.boxic { font-size: 26px; margin-bottom: 7px; }
-.boxn { font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--white); margin-bottom: 4px; letter-spacing: -0.2px; }
-.boxst { font-size: 11px; font-weight: 700; }
-.boxst.free { color: var(--green); text-shadow: 0 0 8px rgba(0,255,136,0.5); }
-.boxst.busy { color: var(--red); text-shadow: 0 0 8px rgba(255,68,68,0.5); }
-
-.fg { margin-bottom: 13px; }
-.fl { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: var(--w35); margin-bottom: 6px; display: block; text-transform: uppercase; }
-.fi {
-  width: 100%; padding: 11px 14px; border-radius: 10px;
-  background: var(--w04); border: 0.5px solid var(--border);
-  color: var(--w90); font-family: var(--font-body); font-size: 14px; outline: none; transition: var(--tr);
-}
-.fi:focus { border-color: rgba(255,255,255,0.35); background: var(--w08); box-shadow: 0 0 0 2px rgba(255,255,255,0.06); }
-.fi::placeholder { color: var(--w15); }
-.fi option { background: #0a0a0f; color: var(--w90); }
-
-.bsum {
-  background: rgba(255,255,255,0.04); border: 0.5px solid var(--border);
-  border-radius: 12px; padding: 16px; margin-bottom: 20px;
-}
-.bsr { display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; border-bottom: 0.5px solid var(--w04); }
-.bsr:last-child { border-bottom: none; }
-.bsk { color: var(--w35); }
-.bsv { font-weight: 600; color: var(--white); }
-
-.btn-next {
-  width: 100%; padding: 14px; border-radius: 12px; border: none;
-  background: var(--white); font-family: var(--font-body);
-  font-size: 15px; font-weight: 700; color: var(--black);
-  cursor: pointer; transition: var(--tr);
-  box-shadow: 0 0 24px rgba(255,255,255,0.15);
-}
-.btn-next:hover { transform: translateY(-2px); box-shadow: 0 0 36px rgba(255,255,255,0.28); }
-.btn-next:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
-.btn-back {
-  padding: 8px 16px; border-radius: 9px;
-  background: transparent; border: 0.5px solid var(--border);
-  font-family: var(--font-body); font-size: 13px; font-weight: 600;
-  color: var(--w35); cursor: pointer; transition: var(--tr); margin-bottom: 16px; display: block;
-}
-.btn-back:hover { background: var(--w08); color: var(--w90); }
-
-/* success */
-.success-w { display: flex; flex-direction: column; align-items: center; padding: 48px 20px; text-align: center; }
-.sico {
-  width: 70px; height: 70px; border-radius: 50%;
-  background: var(--green-dim); border: 1.5px solid rgba(0,255,136,0.4);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 26px; margin-bottom: 20px; color: var(--green);
-  box-shadow: 0 0 30px rgba(0,255,136,0.25);
-  animation: pop 0.5s cubic-bezier(0.175,0.885,0.32,1.275);
-}
-@keyframes pop { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
-.sttl { font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--white); margin-bottom: 10px; letter-spacing: -0.5px; }
-.ssub { font-size: 14px; color: var(--w35); margin-bottom: 26px; line-height: 1.65; }
-.scard { background: var(--w04); border: 0.5px solid var(--border); border-radius: 16px; padding: 18px; width: 100%; max-width: 330px; text-align: left; margin-bottom: 26px; }
-.sr { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 0.5px solid var(--w04); font-size: 13px; }
-.sr:last-child { border-bottom: none; }
-.sk { color: var(--w35); } .sv { font-weight: 600; color: var(--white); }
-
-/* loading */
-.ld { display: flex; align-items: center; gap: 8px; color: var(--w35); font-size: 13px; padding: 18px 0; }
-.sp { width: 14px; height: 14px; border: 2px solid var(--w08); border-top-color: var(--white); border-radius: 50%; animation: sp .75s linear infinite; }
-@keyframes sp { to { transform: rotate(360deg); } }
-
-/* ─── SUBSCRIPTIONS ─── */
-.subs-g { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px,1fr)); gap: 14px; }
-.sub {
-  border-radius: var(--r); padding: 28px 24px;
-  position: relative; overflow: hidden; transition: var(--tr);
-  background: var(--glass);
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
-}
-/* Neon border per tier */
-.sub::before {
-  content: ''; position: absolute; inset: 0; border-radius: var(--r); padding: 0.5px;
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
-}
-.sub.silver::before { background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1), rgba(255,255,255,0.35)); }
-.sub.gold::before { background: linear-gradient(135deg, rgba(255,255,255,0.6), rgba(255,255,255,0.2), rgba(255,255,255,0.5)); }
-.sub.plat::before {
-  background: linear-gradient(135deg, rgba(0,255,136,0.5), rgba(255,255,255,0.3), rgba(0,255,136,0.4), rgba(255,255,255,0.5));
-  animation: plat-spin 4s linear infinite;
-}
-@keyframes plat-spin { 0%{background-position:0%} 100%{background-position:400%} }
-.sub:hover { transform: translateY(-6px); box-shadow: 0 16px 48px rgba(0,0,0,0.4); }
-.sub-badge {
-  display: inline-block; padding: 3px 12px; border-radius: 20px;
-  font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 18px;
-}
-.silver .sub-badge { background: rgba(255,255,255,0.08); color: var(--w60); border: 0.5px solid var(--border2); }
-.gold .sub-badge { background: rgba(255,255,255,0.12); color: var(--w90); border: 0.5px solid rgba(255,255,255,0.3); box-shadow: 0 0 12px rgba(255,255,255,0.1); }
-.plat .sub-badge { background: rgba(0,255,136,0.1); color: var(--green); border: 0.5px solid rgba(0,255,136,0.3); box-shadow: 0 0 12px rgba(0,255,136,0.15); }
-.sub-name { font-family: var(--font-display); font-size: 28px; font-weight: 900; letter-spacing: -1.5px; margin-bottom: 4px; }
-.silver .sub-name { color: var(--w60); }
-.gold .sub-name { color: var(--white); text-shadow: 0 0 30px rgba(255,255,255,0.2); }
-.plat .sub-name { color: var(--green); text-shadow: 0 0 30px rgba(0,255,136,0.4); }
-.sub-mo { font-size: 12.5px; color: var(--w35); margin-bottom: 20px; }
-.sub-price { font-family: var(--font-display); font-size: 36px; font-weight: 900; letter-spacing: -2px; color: var(--white); margin-bottom: 3px; }
-.sub-price-l { font-size: 12px; color: var(--w35); margin-bottom: 8px; }
-.sub-bonus {
-  display: inline-block; padding: 4px 12px; border-radius: 8px;
-  font-size: 12.5px; font-weight: 700; margin-bottom: 16px;
-}
-.silver .sub-bonus { background: var(--w08); color: var(--w60); }
-.gold .sub-bonus { background: var(--w15); color: var(--white); }
-.plat .sub-bonus { background: var(--green-dim); color: var(--green); box-shadow: 0 0 10px rgba(0,255,136,0.1); }
-.sub-acc { font-size: 13.5px; color: var(--w60); margin-bottom: 22px; line-height: 1.5; }
-.sub-acc strong { color: var(--white); }
-.sub-btn {
-  width: 100%; padding: 13px; border-radius: 11px; border: none;
-  font-family: var(--font-body); font-size: 14px; font-weight: 700;
-  cursor: pointer; transition: var(--tr);
-}
-.silver .sub-btn { background: var(--w08); color: var(--w60); border: 0.5px solid var(--border2); }
-.silver .sub-btn:hover { background: var(--w15); color: var(--white); }
-.gold .sub-btn { background: var(--white); color: var(--black); }
-.gold .sub-btn:hover { box-shadow: 0 0 24px rgba(255,255,255,0.25); transform: translateY(-1px); }
-.plat .sub-btn { background: rgba(0,255,136,0.12); color: var(--green); border: 0.5px solid rgba(0,255,136,0.3); }
-.plat .sub-btn:hover { background: rgba(0,255,136,0.2); box-shadow: 0 0 20px rgba(0,255,136,0.2); transform: translateY(-1px); }
-.sub-info-b {
-  max-width: 680px; margin: 36px auto 0; padding: 22px 24px;
-  background: var(--w04); border: 0.5px solid var(--border);
-  border-radius: 16px;
-}
-.sib-ttl { font-size: 14px; font-weight: 700; color: var(--white); margin-bottom: 10px; }
-.sib-list { font-size: 13px; color: var(--w60); line-height: 2.1; padding-left: 16px; }
-
-/* ─── ABOUT ─── */
-.about-w { max-width: 980px; margin: 0 auto; padding: 40px 2rem 80px; }
-.about-ttl { font-family: var(--font-display); font-size: 42px; font-weight: 900; letter-spacing: -2.5px; color: var(--white); margin-bottom: 14px; }
-.about-sub { font-size: 16px; color: var(--w60); line-height: 1.7; margin-bottom: 44px; max-width: 600px; }
-.feat-g { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 11px; margin-bottom: 40px; }
-.feat { padding: 22px 18px; }
-.feat:hover { transform: translateY(-3px); }
-.feat-ico { font-size: 24px; margin-bottom: 11px; }
-.feat-name { font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--white); margin-bottom: 7px; letter-spacing: -0.2px; }
-.feat-desc { font-size: 12.5px; color: var(--w60); line-height: 1.65; }
-.cbar {
-  display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: 20px; padding: 28px 26px;
-}
-.ci-wrap { display: flex; flex-direction: column; gap: 9px; }
-.ci { display: flex; align-items: center; gap: 9px; font-size: 14px; color: var(--w60); }
-.cico { width: 28px; height: 28px; border-radius: 7px; background: var(--w08); border: 0.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
-
-/* ─── CRM ─── */
-.crm-gate-w { display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 60px); }
-.crm-gate-card { padding: 40px 36px; width: 100%; max-width: 360px; text-align: center; }
-.cgico { font-size: 36px; margin-bottom: 16px; }
-.cgt { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--white); margin-bottom: 8px; letter-spacing: -0.5px; }
-.cgs { font-size: 13px; color: var(--w35); margin-bottom: 22px; }
-.crm-lay { max-width: 1200px; margin: 0 auto; padding: 28px 2rem 80px; }
-.crm-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
-.crm-h1 { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--white); letter-spacing: -0.5px; }
-.crm-acts { display: flex; gap: 8px; }
-.btn-sm {
-  padding: 8px 14px; border-radius: 9px; border: 0.5px solid var(--border);
-  background: var(--w08); font-family: var(--font-body); font-size: 12.5px; font-weight: 600;
-  color: var(--w60); cursor: pointer; transition: var(--tr);
-}
-.btn-sm:hover { background: var(--w15); color: var(--white); }
-.btn-sm.green-btn { border-color: rgba(0,255,136,0.3); color: var(--green); background: var(--green-dim); }
-.btn-sm.green-btn:hover { background: rgba(0,255,136,0.2); }
-.crm-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px,1fr)); gap: 10px; margin-bottom: 20px; }
-.cs { padding: 16px 14px; }
-.csn { font-family: var(--font-display); font-size: 28px; font-weight: 700; margin-bottom: 3px; }
-.csl { font-size: 10px; font-weight: 700; color: var(--w35); text-transform: uppercase; letter-spacing: 0.5px; }
-.crm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.cp { padding: 20px; }
-.cp.full { grid-column: span 2; }
-.cpt { font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--white); margin-bottom: 15px; display: flex; align-items: center; gap: 8px; letter-spacing: -0.2px; }
-.cpd { width: 6px; height: 6px; border-radius: 50%; }
-.cpd.w { background: var(--white); box-shadow: 0 0 8px rgba(255,255,255,0.5); }
-.cpd.g { background: var(--green); box-shadow: 0 0 8px rgba(0,255,136,0.5); }
-.cpd.r { background: var(--red); box-shadow: 0 0 8px rgba(255,68,68,0.5); }
-.bt2 { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-.bt2 th { padding: 6px 9px; text-align: left; color: var(--w35); font-weight: 700; border-bottom: 0.5px solid var(--w08); font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-.bt2 td { padding: 8px 9px; border-bottom: 0.5px solid var(--w04); color: var(--w60); }
-.bt2 tr:last-child td { border-bottom: none; }
-.bt2 tr:hover td { background: var(--w04); }
-.bdg { display: inline-block; padding: 2px 7px; border-radius: 5px; font-size: 10.5px; font-weight: 700; }
-.bdg-ok { background: var(--green-dim); color: var(--green); }
-.bdg-pnd { background: rgba(255,255,255,0.08); color: var(--w60); }
-.bdg-no { background: var(--red-dim); color: var(--red); }
-.bdg-na { background: rgba(255,160,0,0.12); color: #ffaa00; }
-.crow { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 0.5px solid var(--w04); }
-.crow:last-child { border-bottom: none; }
-.cava { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; font-family: var(--font-display); }
-.cn { font-size: 13px; font-weight: 600; color: var(--white); }
-.cm { font-size: 11px; color: var(--w35); }
-.cbal { font-size: 13px; font-weight: 700; color: var(--green); }
-.blr { display: flex; align-items: center; gap: 10px; padding: 9px 12px; background: var(--w04); border: 0.5px solid var(--border); border-radius: 10px; margin-bottom: 7px; }
-.blrd { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.blrd.free { background: var(--green); box-shadow: 0 0 8px rgba(0,255,136,0.6); }
-.blrd.busy { background: var(--red); box-shadow: 0 0 8px rgba(255,68,68,0.6); }
-.blrn { flex: 1; font-size: 13px; font-weight: 600; color: var(--white); }
-.blrs { font-size: 11.5px; font-weight: 700; }
-.blrs.free { color: var(--green); }
-.blrs.busy { color: var(--red); }
-.blrt { font-size: 10.5px; color: var(--w35); }
-
-/* calendar */
-.calh { display: flex; justify-content: space-between; align-items: center; margin-bottom: 11px; }
-.caln { background: none; border: none; color: var(--w35); cursor: pointer; padding: 4px 8px; border-radius: 6px; font-size: 15px; transition: var(--tr); }
-.caln:hover { color: var(--white); background: var(--w08); }
-.calm { font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--white); letter-spacing: -0.3px; }
-.cal-wds { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; margin-bottom: 4px; }
-.cal-wd { text-align: center; font-size: 9px; font-weight: 700; color: var(--w35); text-transform: uppercase; padding: 2px 0; }
-.cal-g { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
-.cald { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-size: 11.5px; font-weight: 500; color: var(--w35); cursor: pointer; transition: var(--tr); }
-.cald:hover { background: var(--w08); color: var(--white); }
-.cald.today { background: var(--white); color: var(--black); font-weight: 700; font-family: var(--font-display); box-shadow: 0 0 12px rgba(255,255,255,0.2); }
-.cald.hasb { color: var(--white); position: relative; }
-.cald.hasb::after { content: ''; position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); width: 3px; height: 3px; border-radius: 50%; background: var(--green); box-shadow: 0 0 4px rgba(0,255,136,0.6); }
-.cald.empty { cursor: default; }
-
-/* ─── MODAL ─── */
-.modal-ov {
-  display: none; position: fixed; inset: 0; z-index: 600;
-  background: rgba(2,2,5,0.85);
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  align-items: center; justify-content: center;
-}
-.modal-ov.on { display: flex; }
-.modal {
-  background: rgba(10,10,15,0.96); border-radius: 24px; padding: 36px;
-  width: 100%; max-width: 430px; margin: 1rem; position: relative;
-  border: 0.5px solid var(--border2);
-  animation: msl .3s cubic-bezier(0.4,0,0.2,1);
-  box-shadow: 0 0 60px rgba(0,0,0,0.5);
-}
-.modal::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 0.5px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent); }
-@keyframes msl { from{transform:translateY(24px);opacity:0} to{transform:none;opacity:1} }
-.modal-close { position: absolute; top: 18px; right: 20px; background: none; border: none; font-size: 20px; color: var(--w35); cursor: pointer; transition: var(--tr); line-height: 1; }
-.modal-close:hover { color: var(--white); }
-.modal-ttl { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--white); margin-bottom: 6px; letter-spacing: -0.3px; }
-.modal-sub { font-size: 13px; color: var(--w35); margin-bottom: 20px; }
-.modal-sum { background: var(--w04); border: 0.5px solid var(--border); border-radius: 11px; padding: 14px; margin-bottom: 18px; }
-.msr { display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px; border-bottom: 0.5px solid var(--w04); }
-.msr:last-child { border-bottom: none; }
-.msk { color: var(--w35); } .msv { font-weight: 600; color: var(--white); }
-.modal-acts { display: flex; gap: 8px; margin-top: 14px; }
-.modal-cancel { flex: 1; padding: 11px; border-radius: 10px; background: var(--w08); border: 0.5px solid var(--border); font-family: var(--font-body); font-size: 13.5px; font-weight: 600; color: var(--w60); cursor: pointer; transition: var(--tr); }
-.modal-cancel:hover { color: var(--white); background: var(--w15); }
-.modal-ok { flex: 2; padding: 11px; border-radius: 10px; border: none; background: var(--white); font-family: var(--font-body); font-size: 13.5px; font-weight: 700; color: var(--black); cursor: pointer; transition: var(--tr); }
-.modal-ok:hover { box-shadow: 0 0 20px rgba(255,255,255,0.2); }
-.modal-ok:disabled { opacity: 0.4; cursor: not-allowed; }
-
-/* Booking complete modal actions */
-.modal-book-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
-
-/* ─── STATUS BADGE for booking status update ─── */
-.status-sel {
-  display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 16px;
-}
-.ss-btn {
-  padding: 10px 8px; border-radius: 9px; text-align: center;
-  background: var(--w04); border: 0.5px solid var(--border);
-  font-family: var(--font-body); font-size: 12px; font-weight: 700;
-  cursor: pointer; transition: var(--tr); color: var(--w60);
-}
-.ss-btn:hover { background: var(--w08); }
-.ss-btn.done { background: var(--green-dim); border-color: rgba(0,255,136,0.4); color: var(--green); }
-.ss-btn.noshow { background: var(--red-dim); border-color: rgba(255,68,68,0.3); color: var(--red); }
-.ss-btn.waiting { background: rgba(255,160,0,0.1); border-color: rgba(255,160,0,0.3); color: #ffaa00; }
-
-/* ─── TOAST ─── */
-.toast {
-  position: fixed; bottom: 20px; right: 20px; z-index: 800;
-  background: rgba(10,10,15,0.95);
-  backdrop-filter: var(--blur-sm); -webkit-backdrop-filter: var(--blur-sm);
-  border: 0.5px solid var(--border2); border-radius: 12px;
-  padding: 11px 16px; font-size: 13.5px; font-weight: 600; color: var(--white);
-  display: flex; align-items: center; gap: 7px;
-  transform: translateY(80px); opacity: 0;
-  transition: all 0.38s cubic-bezier(0.4,0,0.2,1); pointer-events: none;
-}
-.toast.on { transform: translateY(0); opacity: 1; }
-.toast.ok { border-color: rgba(0,255,136,0.4); }
-.toast.err { border-color: rgba(255,68,68,0.4); }
-
-/* ─── MOBILE ─── */
-@media(max-width:780px) {
-  .hero { grid-template-columns: 1fr; gap: 24px; padding: 44px 1.2rem 36px; }
-  h1 { font-size: 36px; }
-  .hero-right { display: none; }
-  .crm-grid { grid-template-columns: 1fr; }
-  .cp.full { grid-column: span 1; }
-  .dg { grid-template-columns: repeat(4,1fr); }
-  .boxg { grid-template-columns: 1fr 1fr; }
-  nav { padding: 0 1.2rem; }
-  .nl:not(.on) { display: none; }
-  .tg { grid-template-columns: repeat(3,1fr); }
+/* ── TOOLTIP ── */
+.section-label{
+  font-size:10px;font-weight:600;letter-spacing:2px;color:var(--text3);
+  text-transform:uppercase;padding:10px 24px 4px;
 }
 </style>
 </head>
 <body>
 
-<div class="bg">
-  <div class="bg-grid"></div>
-  <div class="bg-radial"></div>
-  <div class="bg-orb o1"></div>
-  <div class="bg-orb o2"></div>
-  <div class="bg-orb o3"></div>
-</div>
-
-<!-- NAV -->
-<nav>
-  <div class="nav-logo">1333 <em>CAR</em> CENTER</div>
-  <div class="nav-links">
-    <button class="nl on" onclick="go('home')">Головна</button>
-    <button class="nl" onclick="go('booking')">Записатись</button>
-    <button class="nl" onclick="go('services')">Послуги</button>
-    <button class="nl" onclick="go('subs')">Абонементи</button>
-    <button class="nl" onclick="go('about')">Контакти</button>
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo-wrap">
+    <div class="logo">1333<span>Car Center</span></div>
   </div>
-  <button class="nav-cta" onclick="go('booking')">Записатись →</button>
-</nav>
-
-<!-- ══════ HOME ══════ -->
-<div class="page on" id="page-home">
-  <div class="hero">
-    <div>
-      <div class="hero-tag"><div class="hero-dot"></div>Відчинено · Пн–Пт 09:00–20:00 · Сб–Нд 10:00–20:00</div>
-      <h1>Авто<span class="thin">мийка</span><br><span class="neon">нового рівня</span></h1>
-      <p class="hero-sub">Онлайн-запис без черг, абонементи зі знижками. Записатись можна за 30 секунд.</p>
-      <div class="hero-btns">
-        <button class="btn-white" onclick="go('booking')">Записатись онлайн</button>
-        <button class="btn-outline" onclick="go('services')">Прайс-лист →</button>
-      </div>
-    </div>
-    <div class="hero-right">
-      <div class="g hero-card">
-        <div class="hc-lbl">Вільні слоти сьогодні</div>
-        <div class="slots" id="hero-slots"></div>
-      </div>
-      <div class="g hero-card">
-        <div class="hc-lbl">Статистика</div>
-        <div class="stat-row">
-          <div class="stat-cell"><div class="stat-n" id="sh-b">—</div><div class="stat-l">Записів</div></div>
-          <div class="stat-cell"><div class="stat-n" id="sh-c">—</div><div class="stat-l">Клієнтів</div></div>
-          <div class="stat-cell"><div class="stat-n" style="color:var(--green)">3</div><div class="stat-l">Боксів</div></div>
-        </div>
-      </div>
-      <div class="g hero-card">
-        <div class="hc-lbl">Стан боксів</div>
-        <div id="hero-boxes">
-          <div class="box-live"><div class="bl-dot free"></div><div class="bl-name">Box 1</div><div class="bl-st free">Вільний</div></div>
-          <div class="box-live"><div class="bl-dot free"></div><div class="bl-name">Box 2</div><div class="bl-st free">Вільний</div></div>
-          <div class="box-live"><div class="bl-dot free"></div><div class="bl-name">Box 3</div><div class="bl-st free">Вільний</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="sec">
-    <div class="sec-hd">
-      <div class="sec-ttl">Наші послуги</div>
-      <div class="sec-sub">Повний спектр догляду для вашого автомобіля</div>
-    </div>
-    <div class="srv-grid">
-      <div class="srv-card g" onclick="go('services')"><div class="srv-ico">🚿</div><div class="srv-name">Комплексна мийка</div><div class="srv-desc">Кузов, салон, диски, скло. Захист за бажанням.</div><div class="srv-price">від 200 <span>грн</span></div></div>
-      <div class="srv-card g" onclick="go('services')"><div class="srv-ico">✨</div><div class="srv-name">Детейлінг</div><div class="srv-desc">Хімчистка, полірування, кераміка. Преміальний результат.</div><div class="srv-price">від 1500 <span>грн</span></div></div>
-      <div class="srv-card g" onclick="go('services')"><div class="srv-ico">💎</div><div class="srv-name">Нанокераміка</div><div class="srv-desc">Захист покриття на роки. Стійкість до подряпин та хімії.</div><div class="srv-price">від 3000 <span>грн</span></div></div>
-      <div class="srv-card g" onclick="go('services')"><div class="srv-ico">🪑</div><div class="srv-name">Хімчистка салону</div><div class="srv-desc">Стійкі плями, запахи, реставрація шкіри та пластику.</div><div class="srv-price">від 800 <span>грн</span></div></div>
-      <div class="srv-card g" onclick="go('subs')"><div class="srv-ico">🏅</div><div class="srv-name">Абонементи</div><div class="srv-desc">Silver · Gold · Platinum. Бонус до 20% на рахунок.</div><div class="srv-price">від 10 000 <span>грн</span></div></div>
-      <div class="srv-card g" onclick="go('services')"><div class="srv-ico">🔧</div><div class="srv-name">Моторний відсік</div><div class="srv-desc">Безпечне очищення двигуна та підкапотного простору.</div><div class="srv-price">від 350 <span>грн</span></div></div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════ BOOKING ══════ -->
-<div class="page" id="page-booking">
-  <div class="bwrap">
-    <div class="bsteps">
-      <div class="si"><div class="sdot on" id="sd1">1</div><div class="slabel">Дата</div></div>
-      <div class="si"><div class="sdot" id="sd2">2</div><div class="slabel">Час</div></div>
-      <div class="si"><div class="sdot" id="sd3">3</div><div class="slabel">Бокс</div></div>
-      <div class="si"><div class="sdot" id="sd4">4</div><div class="slabel">Дані</div></div>
-      <div class="si"><div class="sdot" id="sd5">✓</div><div class="slabel">Готово</div></div>
-    </div>
-    <div class="g-neon bpanel" id="bs1">
-      <div class="bt">Оберіть дату</div>
-      <div class="bsub">Запис доступний на 7 днів вперед</div>
-      <div class="dg" id="dg"></div>
-      <button class="btn-next" onclick="bStep(2)">Далі →</button>
-    </div>
-    <div class="g bpanel" id="bs2" style="display:none">
-      <button class="btn-back" onclick="bStep(1)">← Назад</button>
-      <div class="bt">Оберіть час</div>
-      <div class="bsub">⛔ — всі бокси зайняті на цей час</div>
-      <div class="tg" id="tg"></div>
-      <button class="btn-next" onclick="bStep(3)">Далі →</button>
-    </div>
-    <div class="g bpanel" id="bs3" style="display:none">
-      <button class="btn-back" onclick="bStep(2)">← Назад</button>
-      <div class="bt">Оберіть бокс</div>
-      <div class="bsub">Вільні бокси на обраний час</div>
-      <div class="boxg" id="boxg"></div>
-      <button class="btn-next" onclick="bStep(4)">Далі →</button>
-    </div>
-    <div class="g bpanel" id="bs4" style="display:none">
-      <button class="btn-back" onclick="bStep(3)">← Назад</button>
-      <div class="bt">Ваші дані</div>
-      <div class="bsub">Введіть контактну інформацію</div>
-      <div class="bsum" id="bsummary"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div class="fg"><label class="fl">Ім'я та прізвище</label><input type="text" class="fi" id="b-name" placeholder="Іван Іванов"></div>
-        <div class="fg"><label class="fl">Телефон</label><input type="tel" class="fi" id="b-phone" placeholder="+380 77 001 13 33"></div>
-      </div>
-      <div class="fg">
-        <label class="fl">Послуга</label>
-        <select class="fi" id="b-service">
-          <option>Комплексна мийка — Sedan (200 грн)</option>
-          <option>Комплексна мийка — SUV (280 грн)</option>
-          <option>Комплексна мийка — Мінівен (320 грн)</option>
-          <option>Хімчистка салону — Sedan (800 грн)</option>
-          <option>Хімчистка салону — SUV (1100 грн)</option>
-          <option>Хімчистка салону — Мінівен (1300 грн)</option>
-          <option>Детейлінг — Sedan (1500 грн)</option>
-          <option>Детейлінг — SUV (2000 грн)</option>
-          <option>Детейлінг — Мінівен (2500 грн)</option>
-          <option>Нанокераміка — Sedan (3000 грн)</option>
-          <option>Нанокераміка — SUV (4000 грн)</option>
-          <option>Нанокераміка — Мінівен (5000 грн)</option>
-          <option>Полірування — Sedan (500 грн)</option>
-          <option>Полірування — SUV (700 грн)</option>
-          <option>Захисне покриття (400 грн)</option>
-          <option>Моторний відсік (350 грн)</option>
-          <option>Мийка дисків (200 грн)</option>
-          <option>Тонування скла (1200 грн)</option>
-        </select>
-      </div>
-      <div class="fg"><label class="fl">Коментар</label><input type="text" class="fi" id="b-comment" placeholder="Колір авто, побажання..."></div>
-      <button class="btn-next" id="b-submit" onclick="submitBook()">✓ Підтвердити запис</button>
-    </div>
-    <div class="g bpanel" id="bs5" style="display:none">
-      <div class="success-w">
-        <div class="sico">✓</div>
-        <div class="sttl">Запис підтверджено!</div>
-        <div class="ssub">Ваш запис збережено. Адміністратор отримав сповіщення.<br>Очікуємо вас у 1333 Car Center!</div>
-        <div class="scard" id="book-result"></div>
-        <button class="btn-next" onclick="resetBook()" style="max-width:260px">Новий запис</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════ SERVICES ══════ -->
-<div class="page" id="page-services">
-  <div class="sec" style="padding-top:40px">
-    <div class="sec-hd">
-      <div class="sec-ttl">Прайс-лист</div>
-      <div class="sec-sub">Оберіть тип вашого автомобіля</div>
-    </div>
-    <div class="ptabs">
-      <button class="ptab on" onclick="showPrices('sedan',this)">🚗 Sedan</button>
-      <button class="ptab" onclick="showPrices('suv',this)">🚙 SUV</button>
-      <button class="ptab" onclick="showPrices('minivan',this)">🚐 Мінівен</button>
-    </div>
-    <div class="price-grid" id="pg"></div>
-  </div>
-</div>
-
-<!-- ══════ SUBSCRIPTIONS ══════ -->
-<div class="page" id="page-subs">
-  <div class="sec" style="padding-top:40px">
-    <div class="sec-hd">
-      <div class="sec-ttl">Абонементи</div>
-      <div class="sec-sub">Купуйте абонемент — отримуйте бонус на рахунок</div>
-    </div>
-    <div class="subs-g">
-      <div class="sub silver">
-        <div class="sub-badge">Silver</div>
-        <div class="sub-name">Silver</div>
-        <div class="sub-mo">1 місяць · T-1</div>
-        <div class="sub-price">10 000 <span style="font-size:15px;font-weight:400;color:var(--w35)">грн</span></div>
-        <div class="sub-price-l">Вартість абонементу</div>
-        <div class="sub-bonus">+10% бонус</div>
-        <div class="sub-acc">На рахунок зараховується <strong>11 000 грн</strong></div>
-        <button class="sub-btn" onclick="orderSub({id:'T-1',name:'Silver',months:1,price:10000,bonus:'10%',account:11000})">Придбати Silver →</button>
-      </div>
-      <div class="sub gold">
-        <div class="sub-badge">Gold · Популярний</div>
-        <div class="sub-name">Gold</div>
-        <div class="sub-mo">3 місяці · T-2</div>
-        <div class="sub-price">30 000 <span style="font-size:15px;font-weight:400;color:var(--w35)">грн</span></div>
-        <div class="sub-price-l">Вартість абонементу</div>
-        <div class="sub-bonus">+15% бонус</div>
-        <div class="sub-acc">На рахунок зараховується <strong>34 500 грн</strong></div>
-        <button class="sub-btn" onclick="orderSub({id:'T-2',name:'Gold',months:3,price:30000,bonus:'15%',account:34500})">Придбати Gold →</button>
-      </div>
-      <div class="sub plat">
-        <div class="sub-badge">Platinum</div>
-        <div class="sub-name">Platinum</div>
-        <div class="sub-mo">6 місяців · T-3</div>
-        <div class="sub-price">60 000 <span style="font-size:15px;font-weight:400;color:var(--w35)">грн</span></div>
-        <div class="sub-price-l">Вартість абонементу</div>
-        <div class="sub-bonus">+20% бонус</div>
-        <div class="sub-acc">На рахунок зараховується <strong>72 000 грн</strong></div>
-        <button class="sub-btn" onclick="orderSub({id:'T-3',name:'Platinum',months:6,price:60000,bonus:'20%',account:72000})">Придбати Platinum →</button>
-      </div>
-    </div>
-    <div class="sub-info-b">
-      <div class="sib-ttl">ℹ️ Як це працює?</div>
-      <ul class="sib-list">
-        <li>Оберіть абонемент та заповніть заявку — адміністратор зв'яжеться з вами</li>
-        <li>Після оплати сума з бонусом зараховується на ваш рахунок</li>
-        <li>Послуги оплачуються з рахунку за прайс-листом</li>
-        <li>Абонемент діє з дня активації протягом вказаного терміну</li>
-        <li>За день до закінчення бот надішле нагадування у Telegram</li>
-        <li>Управляйте абонементом через @Assistant_1333_Bot</li>
-      </ul>
-    </div>
-  </div>
-</div>
-
-<!-- ══════ ABOUT ══════ -->
-<div class="page" id="page-about">
-  <div class="about-w">
-    <div class="about-ttl">1333 Car Center</div>
-    <p class="about-sub">Преміальна автомийка у Харкові. Досвідчена команда, сучасне обладнання. Рейтинг 5.0 ⭐</p>
-    <div class="feat-g">
-      <div class="feat g"><div class="feat-ico">🕐</div><div class="feat-name">Графік роботи</div><div class="feat-desc">Пн–Пт: 09:00–20:00<br>Сб–Нд: 10:00–20:00</div></div>
-      <div class="feat g"><div class="feat-ico">📍</div><div class="feat-name">Адреса</div><div class="feat-desc">вул. Гвардійців-Широнінців 51/1<br>Харків, Україна</div></div>
-      <div class="feat g"><div class="feat-ico">🤖</div><div class="feat-name">Telegram бот</div><div class="feat-desc">@Assistant_1333_Bot<br>Запис, кабінет, абонементи</div></div>
-      <div class="feat g"><div class="feat-ico">📞</div><div class="feat-name">Телефон</div><div class="feat-desc">+380 77 001 13 33<br>Відповідаємо швидко</div></div>
-      <div class="feat g"><div class="feat-ico">💎</div><div class="feat-name">Абонементи</div><div class="feat-desc">Silver / Gold / Platinum<br>Бонус до +20% на рахунок</div></div>
-      <div class="feat g"><div class="feat-ico">☕</div><div class="feat-name">Зручності</div><div class="feat-desc">Wi-Fi, кавоварка<br>Можна з тваринами</div></div>
-    </div>
-    <div class="cbar g">
+  <nav class="nav">
+    <div class="section-label">Меню</div>
+    <a class="nav-item active" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Дашборд
+    </a>
+    <a class="nav-item" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Записи
+      <span class="nav-badge">7</span>
+    </a>
+    <a class="nav-item" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+      Абонементи
+    </a>
+    <a class="nav-item" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Клієнти
+    </a>
+    <div class="section-label" style="margin-top:8px">Аналітика</div>
+    <a class="nav-item" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Звіти
+    </a>
+    <a class="nav-item" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+      Налаштування
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-row">
+      <div class="avatar">АЛ</div>
       <div>
-        <div style="font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--white);margin-bottom:4px;letter-spacing:-0.3px">Зв'яжіться з нами</div>
-        <div style="font-size:12.5px;color:var(--w35)">Відповідаємо протягом кількох хвилин</div>
+        <div class="user-name">Олексій</div>
+        <div class="user-role">Адміністратор</div>
       </div>
-      <div class="ci-wrap">
-        <div class="ci"><div class="cico">📞</div>+380 77 001 13 33</div>
-        <div class="ci"><div class="cico">✈️</div>@car_1333_service</div>
-        <div class="ci"><div class="cico">📍</div>вул. Гвардійців-Широнінців 51/1</div>
-        <div class="ci"><div class="cico">📸</div>@1333_car_center</div>
-      </div>
-      <button class="btn-white" onclick="go('booking')">Записатись →</button>
+      <button class="logout-btn" title="Вийти">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
     </div>
   </div>
-</div>
+</aside>
 
-<!-- ══════ CRM ══════ -->
-<div class="page" id="page-crm">
-  <div id="crm-gate-w" class="crm-gate-w">
-    <div class="g-neon crm-gate-card">
-      <div class="cgico">🔐</div>
-      <div class="cgt">Адмін-панель</div>
-      <div class="cgs">Введіть пароль для доступу</div>
-      <div class="fg"><input type="password" class="fi" id="crm-pass" placeholder="Пароль" onkeypress="if(event.key==='Enter')checkCRM()"></div>
-      <button class="btn-next" onclick="checkCRM()">Увійти</button>
+<!-- MAIN -->
+<main class="main">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="page-title">Дашборд</div>
+      <div class="page-sub">П'ятниця, 29 травня 2026</div>
     </div>
-  </div>
-  <div id="crm-body" style="display:none">
-    <div class="crm-lay">
-      <div class="crm-head">
-        <div class="crm-h1">CRM — 1333 Car Center</div>
-        <div class="crm-acts">
-          <button class="btn-sm" onclick="refreshCRM()">↻ Оновити</button>
-          <button class="btn-sm green-btn" onclick="go('booking')">+ Запис</button>
-        </div>
-      </div>
-      <div class="crm-stats">
-        <div class="cs g-sm"><div class="csn" id="cs1" style="color:var(--white)">—</div><div class="csl">Записів всього</div></div>
-        <div class="cs g-sm"><div class="csn" id="cs2" style="color:var(--green)">—</div><div class="csl">Сьогодні</div></div>
-        <div class="cs g-sm"><div class="csn" id="cs3" style="color:var(--white)">—</div><div class="csl">Клієнтів</div></div>
-        <div class="cs g-sm"><div class="csn" id="cs4" style="color:var(--green)">—</div><div class="csl">Вільних боксів</div></div>
-      </div>
-      <div class="crm-grid">
-        <div class="cp g full">
-          <div class="cpt"><div class="cpd w"></div>Журнал записів</div>
-          <div id="crm-tbl"><div class="ld"><div class="sp"></div>Завантаження...</div></div>
-        </div>
-        <div class="cp g">
-          <div class="cpt"><div class="cpd w"></div>Календар</div>
-          <div class="calh"><button class="caln" onclick="calPrev()">‹</button><div class="calm" id="cal-l"></div><button class="caln" onclick="calNext()">›</button></div>
-          <div class="cal-wds"><div class="cal-wd">Пн</div><div class="cal-wd">Вт</div><div class="cal-wd">Ср</div><div class="cal-wd">Чт</div><div class="cal-wd">Пт</div><div class="cal-wd">Сб</div><div class="cal-wd">Нд</div></div>
-          <div class="cal-g" id="cal-g"></div>
-        </div>
-        <div class="cp g">
-          <div class="cpt"><div class="cpd g"></div>Бокси зараз</div>
-          <div id="crm-boxes"><div class="ld"><div class="sp"></div>Перевірка...</div></div>
-        </div>
-        <div class="cp g full">
-          <div class="cpt"><div class="cpd w"></div>Клієнти</div>
-          <div id="crm-cls"><div class="ld"><div class="sp"></div>Завантаження...</div></div>
-        </div>
+    <div class="topbar-right">
+      <button class="notif-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-dot"></span>
+      </button>
+      <button class="create-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Новий запис
+      </button>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-content">
+      <div class="hero-greeting">Добро пожалувати,</div>
+      <div class="hero-title">Олексій.</div>
+      <div class="hero-sub">У вас 7 записів на сьогодні · 2 нових клієнти</div>
+      <div class="hero-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        +12.4% до минулого місяця
       </div>
     </div>
-  </div>
-</div>
-
-<!-- Sub Modal -->
-<div class="modal-ov" id="sub-modal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeSubModal()">×</button>
-    <div class="modal-ttl" id="sm-ttl">Замовити абонемент</div>
-    <div class="modal-sub">Адміністратор зв'яжеться з вами для підтвердження оплати</div>
-    <div class="modal-sum" id="sm-sum"></div>
-    <div class="fg"><label class="fl">Ваше ім'я</label><input type="text" class="fi" id="sm-name" placeholder="Іван Іванов"></div>
-    <div class="fg"><label class="fl">Телефон</label><input type="tel" class="fi" id="sm-phone" placeholder="+380 77 ..."></div>
-    <div class="fg"><label class="fl">Telegram (необов'язково)</label><input type="text" class="fi" id="sm-tg" placeholder="@username"></div>
-    <div class="modal-acts">
-      <button class="modal-cancel" onclick="closeSubModal()">Скасувати</button>
-      <button class="modal-ok" id="sm-ok" onclick="submitSubOrder()">Замовити →</button>
+    <div class="hero-logo-bg">
+      1333
+      <span class="hero-logo-sub">CAR CENTER</span>
     </div>
   </div>
-</div>
 
-<!-- Booking status modal (for CRM) -->
-<div class="modal-ov" id="status-modal">
-  <div class="modal">
-    <button class="modal-close" onclick="document.getElementById('status-modal').classList.remove('on')">×</button>
-    <div class="modal-ttl">Оновити статус</div>
-    <div class="modal-sub" id="st-modal-info"></div>
-    <div class="status-sel">
-      <div class="ss-btn done" onclick="updateBookingStatus('✅ Виконано')">✅<br><small>Виконано</small></div>
-      <div class="ss-btn noshow" onclick="updateBookingStatus('❌ Не приїхав')">❌<br><small>Не приїхав</small></div>
-      <div class="ss-btn waiting" onclick="updateBookingStatus('⏳ Очікується')">⏳<br><small>Очікується</small></div>
+  <div class="content">
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card gold">
+        <div class="stat-top">
+          <div class="stat-label">Виручка за місяць</div>
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+        </div>
+        <div class="stat-value">1 247 800 ₴</div>
+        <div class="stat-delta up">↑ 12.4% до минулого місяця</div>
+        <div class="sparkline">
+          <svg viewBox="0 0 120 28" preserveAspectRatio="none"><polyline points="0,22 15,18 30,20 45,12 60,15 75,8 90,10 105,6 120,4" fill="none" stroke="#c9a84c" stroke-width="1.5" opacity="0.8"/></svg>
+        </div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-top">
+          <div class="stat-label">Записів на сьогодні</div>
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+        </div>
+        <div class="stat-value">7</div>
+        <div class="stat-delta up">+ 2 нових</div>
+        <div class="sparkline">
+          <svg viewBox="0 0 120 28" preserveAspectRatio="none"><polyline points="0,18 15,20 30,14 45,18 60,10 75,14 90,8 105,12 120,6" fill="none" stroke="#4a90d9" stroke-width="1.5" opacity="0.8"/></svg>
+        </div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-top">
+          <div class="stat-label">Активних клієнтів</div>
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+        </div>
+        <div class="stat-value">82</div>
+        <div class="stat-delta up">+ 9 нових</div>
+        <div class="sparkline">
+          <svg viewBox="0 0 120 28" preserveAspectRatio="none">
+            <rect x="0" y="16" width="12" height="12" fill="#4caf82" opacity="0.3" rx="2"/>
+            <rect x="15" y="12" width="12" height="16" fill="#4caf82" opacity="0.3" rx="2"/>
+            <rect x="30" y="14" width="12" height="14" fill="#4caf82" opacity="0.3" rx="2"/>
+            <rect x="45" y="8" width="12" height="20" fill="#4caf82" opacity="0.5" rx="2"/>
+            <rect x="60" y="10" width="12" height="18" fill="#4caf82" opacity="0.5" rx="2"/>
+            <rect x="75" y="6" width="12" height="22" fill="#4caf82" opacity="0.6" rx="2"/>
+            <rect x="90" y="4" width="12" height="24" fill="#4caf82" opacity="0.7" rx="2"/>
+            <rect x="105" y="2" width="12" height="26" fill="#4caf82" opacity="0.9" rx="2"/>
+          </svg>
+        </div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-top">
+          <div class="stat-label">Абонементів продано</div>
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/></svg>
+          </div>
+        </div>
+        <div class="stat-value">24</div>
+        <div class="stat-delta up">+ 6 до минулого місяця</div>
+        <div class="sparkline">
+          <svg viewBox="0 0 120 28" preserveAspectRatio="none"><polyline points="0,20 15,18 30,22 45,14 60,16 75,10 90,12 105,8 120,6" fill="none" stroke="#e05252" stroke-width="1.5" opacity="0.8"/></svg>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
-<div class="toast" id="toast"></div>
+    <!-- MAIN GRID -->
+    <div class="main-grid">
+      <!-- Bookings -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Записи на сьогодні</div>
+          <a class="card-link" href="#">Всі записи →</a>
+        </div>
+        <div class="booking-row">
+          <div class="booking-time">10:00</div>
+          <div class="booking-info">
+            <div class="booking-car">Mercedes-Benz GLE</div>
+            <div class="booking-service">Керамічне покриття · Box 1</div>
+          </div>
+          <span class="status-badge status-working">В роботі</span>
+        </div>
+        <div class="booking-row">
+          <div class="booking-time">12:30</div>
+          <div class="booking-info">
+            <div class="booking-car">BMW X5</div>
+            <div class="booking-service">Детейлінг комплекс · Box 2</div>
+          </div>
+          <span class="status-badge status-planned">Заплановано</span>
+        </div>
+        <div class="booking-row">
+          <div class="booking-time">15:00</div>
+          <div class="booking-info">
+            <div class="booking-car">Porsche 911</div>
+            <div class="booking-service">Полірування кузова · Box 1</div>
+          </div>
+          <span class="status-badge status-planned">Заплановано</span>
+        </div>
+        <div class="booking-row">
+          <div class="booking-time">17:30</div>
+          <div class="booking-info">
+            <div class="booking-car">Audi RS7</div>
+            <div class="booking-service">Хімчистка салону · Box 3</div>
+          </div>
+          <span class="status-badge status-waiting">Очікує</span>
+        </div>
+        <div class="booking-row">
+          <div class="booking-time">09:00</div>
+          <div class="booking-info">
+            <div class="booking-car">Range Rover Sport</div>
+            <div class="booking-service">Комплексна мийка · Box 2</div>
+          </div>
+          <span class="status-badge status-done">Виконано</span>
+        </div>
+      </div>
+
+      <!-- Calendar -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Календар</div>
+          <a class="card-link" href="#">Відкрити →</a>
+        </div>
+        <div class="calendar-wrap">
+          <div class="cal-nav">
+            <button class="cal-btn">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <span class="cal-month">Травень 2026</span>
+            <button class="cal-btn">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+          <div class="cal-grid">
+            <div class="cal-day-name">Пн</div><div class="cal-day-name">Вт</div><div class="cal-day-name">Ср</div><div class="cal-day-name">Чт</div><div class="cal-day-name">Пт</div><div class="cal-day-name">Сб</div><div class="cal-day-name">Нд</div>
+            <div class="cal-day other">28</div><div class="cal-day other">29</div><div class="cal-day other">30</div><div class="cal-day other">1</div><div class="cal-day has-booking">2</div><div class="cal-day">3</div><div class="cal-day">4</div>
+            <div class="cal-day has-booking">5</div><div class="cal-day">6</div><div class="cal-day has-booking">7</div><div class="cal-day">8</div><div class="cal-day has-booking">9</div><div class="cal-day">10</div><div class="cal-day">11</div>
+            <div class="cal-day">12</div><div class="cal-day has-booking">13</div><div class="cal-day">14</div><div class="cal-day has-booking">15</div><div class="cal-day">16</div><div class="cal-day has-booking">17</div><div class="cal-day">18</div>
+            <div class="cal-day has-booking">19</div><div class="cal-day">20</div><div class="cal-day">21</div><div class="cal-day has-booking">22</div><div class="cal-day">23</div><div class="cal-day">24</div><div class="cal-day">25</div>
+            <div class="cal-day">26</div><div class="cal-day">27</div><div class="cal-day">28</div><div class="cal-day today">29</div><div class="cal-day">30</div><div class="cal-day">31</div><div class="cal-day other">1</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM GRID -->
+    <div class="bottom-grid">
+
+      <!-- Popular services -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Популярні послуги</div>
+          <a class="card-link" href="#">Всі послуги →</a>
+        </div>
+        <div class="service-row">
+          <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+          <div class="service-name">Керамічне покриття</div>
+          <div class="service-count">24</div>
+          <div class="service-bar"><div class="service-bar-fill" style="width:100%"></div></div>
+        </div>
+        <div class="service-row">
+          <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+          <div class="service-name">Детейлінг комплекс</div>
+          <div class="service-count">18</div>
+          <div class="service-bar"><div class="service-bar-fill" style="width:75%"></div></div>
+        </div>
+        <div class="service-row">
+          <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+          <div class="service-name">Полірування кузова</div>
+          <div class="service-count">15</div>
+          <div class="service-bar"><div class="service-bar-fill" style="width:62%"></div></div>
+        </div>
+        <div class="service-row">
+          <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+          <div class="service-name">Хімчистка салону</div>
+          <div class="service-count">12</div>
+          <div class="service-bar"><div class="service-bar-fill" style="width:50%"></div></div>
+        </div>
+        <div class="service-row">
+          <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg></div>
+          <div class="service-name">Захисні покриття</div>
+          <div class="service-count">10</div>
+          <div class="service-bar"><div class="service-bar-fill" style="width:42%"></div></div>
+        </div>
+      </div>
+
+      <!-- Recent clients -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Останні клієнти</div>
+          <a class="card-link" href="#">Всі клієнти →</a>
+        </div>
+        <div class="client-row">
+          <div class="client-av" style="color:var(--gold)">ІП</div>
+          <div class="client-info">
+            <div class="client-name">Іван Петров</div>
+            <div class="client-phone">+38 (099) 123-45-87</div>
+          </div>
+          <div class="client-car">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            Merc GLE · 2 записи
+          </div>
+        </div>
+        <div class="client-row">
+          <div class="client-av" style="color:var(--blue)">ОС</div>
+          <div class="client-info">
+            <div class="client-name">Олексій Смирнов</div>
+            <div class="client-phone">+38 (097) 982-65-43</div>
+          </div>
+          <div class="client-car">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            BMW X5 · 3 записи
+          </div>
+        </div>
+        <div class="client-row">
+          <div class="client-av" style="color:var(--green)">ДВ</div>
+          <div class="client-info">
+            <div class="client-name">Дмитро Волков</div>
+            <div class="client-phone">+38 (073) 456-78-90</div>
+          </div>
+          <div class="client-car">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            Porsche 911 · 1 запис
+          </div>
+        </div>
+        <div class="client-row">
+          <div class="client-av" style="color:var(--red)">МК</div>
+          <div class="client-info">
+            <div class="client-name">Марина Ковальчук</div>
+            <div class="client-phone">+38 (066) 234-56-78</div>
+          </div>
+          <div class="client-car">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            Range Rover · 4 записи
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBSCRIPTIONS -->
+    <div class="card" style="margin-top:20px">
+      <div class="card-header">
+        <div class="card-title">Абонементи</div>
+        <a class="card-link" href="#">Всі абонементи →</a>
+      </div>
+      <div class="subs-grid">
+        <div class="sub-card silver">
+          <div class="sub-tier">Silver</div>
+          <div class="sub-price">5 990 ₴</div>
+          <div class="sub-unit">/ місяць</div>
+          <div class="sub-services">5 послуг включено</div>
+          <div class="sub-car-img">
+            <svg width="40" height="20" viewBox="0 0 60 25" fill="none"><path d="M5 18 Q15 8 30 8 Q45 8 55 14 L55 18 Q30 20 5 18Z" fill="#2a2a2a"/><circle cx="14" cy="19" r="4" fill="#1a1a1a" stroke="#444" stroke-width="1"/><circle cx="44" cy="19" r="4" fill="#1a1a1a" stroke="#444" stroke-width="1"/></svg>
+          </div>
+        </div>
+        <div class="sub-card black">
+          <div class="sub-tier">Black</div>
+          <div class="sub-price">9 990 ₴</div>
+          <div class="sub-unit">/ місяць</div>
+          <div class="sub-services">10 послуг включено</div>
+          <div class="sub-car-img">
+            <svg width="40" height="20" viewBox="0 0 60 25" fill="none"><path d="M5 18 Q15 8 30 8 Q45 8 55 14 L55 18 Q30 20 5 18Z" fill="#333333"/><circle cx="14" cy="19" r="4" fill="#1a1a1a" stroke="#555" stroke-width="1"/><circle cx="44" cy="19" r="4" fill="#1a1a1a" stroke="#555" stroke-width="1"/></svg>
+          </div>
+        </div>
+        <div class="sub-card ceramic">
+          <div class="sub-tier">Ceramic</div>
+          <div class="sub-price" style="color:var(--blue)">14 990 ₴</div>
+          <div class="sub-unit">/ місяць</div>
+          <div class="sub-services">15 послуг включено</div>
+          <div class="sub-car-img">
+            <svg width="40" height="20" viewBox="0 0 60 25" fill="none"><path d="M5 18 Q15 8 30 8 Q45 8 55 14 L55 18 Q30 20 5 18Z" fill="#1a2a3a"/><circle cx="14" cy="19" r="4" fill="#1a1a1a" stroke="#4a90d9" stroke-width="1"/><circle cx="44" cy="19" r="4" fill="#1a1a1a" stroke="#4a90d9" stroke-width="1"/></svg>
+          </div>
+        </div>
+        <div class="sub-card premium">
+          <div class="sub-tier">Premium</div>
+          <div class="sub-price" style="color:var(--gold)">19 990 ₴</div>
+          <div class="sub-unit">/ місяць</div>
+          <div class="sub-services">20 послуг включено</div>
+          <div class="sub-car-img">
+            <svg width="40" height="20" viewBox="0 0 60 25" fill="none"><path d="M5 18 Q15 8 30 8 Q45 8 55 14 L55 18 Q30 20 5 18Z" fill="#2a1f0a"/><circle cx="14" cy="19" r="4" fill="#1a1a1a" stroke="#c9a84c" stroke-width="1"/><circle cx="44" cy="19" r="4" fill="#1a1a1a" stroke="#c9a84c" stroke-width="1"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:32px"></div>
+  </div>
+</main>
 
 <script>
-// ════════════════════════════════════════
-// CONFIG — замініть URL на ваш!
-// ════════════════════════════════════════
-const APPS = 'https://script.google.com/macros/s/AKfycbyOWT9rICwqsAE5KeZ4q2PNNxafNdnlZyOhwioDs3ARuAgL3-zW5tKaf_udy8VXmYfx/exec';
-const CRM_PASSWORD = '1333admin'; // ЗМІНІТЬ!
+// Calendar navigation
+let currentMonth = 4; // May (0-indexed)
+let currentYear = 2026;
+const monthNames = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
 
-// ════════════════════════════════════════
-// STATE
-// ════════════════════════════════════════
-const S = { date:null, time:null, box:null, bookings:[], clients:[] };
-let curSub = null;
-let curBookingId = null;
-
-const UA_DS = ['Нд','Пн','Вт','Ср','Чт','Пт','Сб'];
-const UA_MO = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
-
-// ════════════════════════════════════════
-// NAVIGATION
-// ════════════════════════════════════════
-function go(name) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
-  document.getElementById('page-' + name).classList.add('on');
-  document.querySelectorAll('.nl').forEach(l => l.classList.remove('on'));
-  const map = { home:0, booking:1, services:2, subs:3, about:4 };
-  if (map[name] !== undefined) document.querySelectorAll('.nl')[map[name]]?.classList.add('on');
-  window.scrollTo(0, 0);
-  if (name === 'booking') initBook();
-  if (name === 'services') showPrices('sedan', document.querySelector('.ptab'));
-  if (name === 'home') initHome();
-}
-
-// CRM secret: Ctrl+Shift+A
-document.addEventListener('keydown', e => {
-  if (e.ctrlKey && e.shiftKey && e.key === 'A') {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
-    document.getElementById('page-crm').classList.add('on');
-    setTimeout(() => document.getElementById('crm-pass')?.focus(), 100);
-  }
+document.querySelectorAll('.cal-btn').forEach((btn, i) => {
+  btn.addEventListener('click', () => {
+    if (i === 0) { currentMonth--; if (currentMonth < 0) { currentMonth = 11; currentYear--; } }
+    else { currentMonth++; if (currentMonth > 11) { currentMonth = 0; currentYear++; } }
+    document.querySelector('.cal-month').textContent = monthNames[currentMonth] + ' ' + currentYear;
+  });
 });
 
-// ════════════════════════════════════════
-// TOAST
-// ════════════════════════════════════════
-function toast(msg, type = 'ok') {
-  const t = document.getElementById('toast');
-  t.textContent = (type === 'ok' ? '✓ ' : '⚠ ') + msg;
-  t.className = 'toast on ' + type;
-  clearTimeout(t._t);
-  t._t = setTimeout(() => t.classList.remove('on'), 3400);
-}
-
-// ════════════════════════════════════════
-// HELPERS
-// ════════════════════════════════════════
-function pad(n) { return String(n).padStart(2, '0'); }
-function todayStr() { const d = new Date(); return pad(d.getDate()) + '.' + pad(d.getMonth()+1) + '.' + d.getFullYear(); }
-function normT(t) {
-  if (!t) return '';
-  t = t.trim();
-  if (t.includes('.')) return t.replace('.', ':').substring(0, 5);
-  if (t.includes(':')) return t.substring(0, 5);
-  return t.padStart(2, '0') + ':00';
-}
-function isBooked(bks, dt, ts, bx) {
-  if (!bks || !dt || !ts || !bx) return false;
-  return bks.some(b =>
-    String(b[1]||'').trim() === dt &&
-    normT(String(b[3]||'')) === normT(ts) &&
-    String(b[4]||'').trim() === bx &&
-    String(b[9]||'').includes('Підтверджено')
-  );
-}
-
-// ════════════════════════════════════════
-// HOME
-// ════════════════════════════════════════
-async function initHome() {
-  const h = new Date().getHours();
-  const sl = document.getElementById('hero-slots');
-  sl.innerHTML = '';
-  let shown = 0;
-  for (let i = 9; i < 20; i++) {
-    if (i >= h && shown < 6) {
-      const c = document.createElement('div');
-      c.className = 'slot-chip';
-      c.textContent = pad(i) + ':00';
-      c.onclick = () => { S.date = todayStr(); S.time = c.textContent; go('booking'); setTimeout(() => bStep(3), 300); };
-      sl.appendChild(c); shown++;
-    }
-  }
-  // Load live stats
-  try {
-    const bks = await fetchBookings();
-    S.bookings = bks;
-    const today = todayStr();
-    document.getElementById('sh-b').textContent = bks.filter(b => String(b[1]||'').trim() === today).length;
-    const cls = await fetchClients();
-    document.getElementById('sh-c').textContent = cls.length;
-    const now = new Date(), ct = pad(now.getHours()) + ':00';
-    document.getElementById('hero-boxes').innerHTML = ['Box 1','Box 2','Box 3'].map(bx => {
-      const busy = isBooked(bks, today, ct, bx);
-      return `<div class="box-live"><div class="bl-dot ${busy?'busy':'free'}"></div><div class="bl-name">${bx}</div><div class="bl-st ${busy?'busy':'free'}">${busy?'Зайнятий':'Вільний'}</div></div>`;
-    }).join('');
-  } catch(e) {}
-}
-
-// ════════════════════════════════════════
-// BOOKING
-// ════════════════════════════════════════
-function initBook() { if (!S.date) bStep(1); buildDates(); }
-
-function buildDates() {
-  const g = document.getElementById('dg'); g.innerHTML = '';
-  const today = new Date();
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(today); d.setDate(today.getDate() + i);
-    const ds = pad(d.getDate()) + '.' + pad(d.getMonth()+1) + '.' + d.getFullYear();
-    const btn = document.createElement('div');
-    btn.className = 'db' + (S.date === ds ? ' sel' : '');
-    btn.innerHTML = `<div class="dd">${UA_DS[d.getDay()]}</div><div class="dn">${d.getDate()}</div>`;
-    btn.onclick = () => { document.querySelectorAll('.db').forEach(b => b.classList.remove('sel')); btn.classList.add('sel'); S.date = ds; };
-    g.appendChild(btn);
-  }
-}
-
-async function buildTimes() {
-  const g = document.getElementById('tg');
-  g.innerHTML = '<div class="ld" style="grid-column:span 4"><div class="sp"></div>Перевіряємо зайнятість...</div>';
-  const bks = await fetchBookings(); S.bookings = bks; g.innerHTML = '';
-  for (let h = 9; h < 20; h++) {
-    const ts = pad(h) + ':00';
-    const allBusy = ['Box 1','Box 2','Box 3'].every(bx => isBooked(bks, S.date, ts, bx));
-    const b = document.createElement('div');
-    if (allBusy) { b.className = 'tb busy'; b.textContent = '⛔ ' + ts; }
-    else {
-      b.className = 'tb' + (S.time === ts ? ' sel' : ''); b.textContent = ts;
-      b.onclick = () => { document.querySelectorAll('.tb').forEach(x => x.classList.remove('sel')); b.classList.add('sel'); S.time = ts; };
-    }
-    g.appendChild(b);
-  }
-}
-
-async function buildBoxes() {
-  const g = document.getElementById('boxg');
-  g.innerHTML = '<div class="ld" style="grid-column:span 3"><div class="sp"></div>Перевіряємо бокси...</div>';
-  const bks = await fetchBookings(); S.bookings = bks; g.innerHTML = '';
-  const ico = {'Box 1':'🔵','Box 2':'🟡','Box 3':'🟢'};
-  ['Box 1','Box 2','Box 3'].forEach(bx => {
-    const busy = isBooked(bks, S.date, S.time, bx);
-    const c = document.createElement('div');
-    c.className = 'boxc' + (busy ? ' busy' : '') + (S.box === bx ? ' sel' : '');
-    c.innerHTML = `<div class="boxic">${ico[bx]}</div><div class="boxn">${bx}</div><div class="boxst ${busy?'busy':'free'}">${busy?'Зайнятий':'Вільний'}</div>`;
-    if (!busy) c.onclick = () => { document.querySelectorAll('.boxc').forEach(x => x.classList.remove('sel')); c.classList.add('sel'); S.box = bx; };
-    g.appendChild(c);
+// Nav items
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', e => {
+    e.preventDefault();
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    item.classList.add('active');
   });
-}
+});
 
-function bStep(n) {
-  if (n===2 && !S.date) { toast('Оберіть дату!','err'); return; }
-  if (n===3 && !S.time) { toast('Оберіть час!','err'); return; }
-  if (n===4 && !S.box) { toast('Оберіть бокс!','err'); return; }
-  for (let i=1;i<=5;i++) { const p=document.getElementById('bs'+i); if(p) p.style.display=i===n?'block':'none'; }
-  for (let i=1;i<=5;i++) {
-    const d=document.getElementById('sd'+i); if(!d) continue;
-    d.className = 'sdot' + (i<n?' done':i===n?' on':'');
-  }
-  if (n===2) buildTimes();
-  if (n===3) buildBoxes();
-  if (n===4) {
-    document.getElementById('bsummary').innerHTML =
-      `<div class="bsr"><span class="bsk">Дата</span><span class="bsv">${S.date}</span></div>
-       <div class="bsr"><span class="bsk">Час</span><span class="bsv">${S.time}</span></div>
-       <div class="bsr"><span class="bsk">Бокс</span><span class="bsv">${S.box}</span></div>`;
-  }
-}
-
-async function submitBook() {
-  const name = document.getElementById('b-name').value.trim();
-  const phone = document.getElementById('b-phone').value.trim();
-  const service = document.getElementById('b-service').value;
-  const comment = document.getElementById('b-comment').value;
-  if (!name || !phone) { toast('Вкажіть ім\'я та телефон!','err'); return; }
-
-  // Final check
-  const fresh = await fetchBookings();
-  if (isBooked(fresh, S.date, S.time, S.box)) {
-    toast('Бокс щойно зайняли! Оберіть інший.','err'); bStep(3); return;
-  }
-
-  const btn = document.getElementById('b-submit');
-  btn.textContent = '⏳ Зберігаємо...'; btn.disabled = true;
-
-  try {
-    const params = new URLSearchParams({
-      action: 'saveBooking',
-      date: S.date, time: S.time, box: S.box,
-      name, phone, service, comment
-    });
-    const r = await fetch(APPS + '?' + params, { method:'GET', mode:'cors' });
-    const data = await r.json();
-    if (!data.success) {
-      toast('Бокс вже зайнятий! Оберіть інший.','err');
-      btn.textContent = '✓ Підтвердити запис'; btn.disabled = false;
-      bStep(3); return;
-    }
-    document.getElementById('book-result').innerHTML =
-      `<div class="sr"><span class="sk">Ім'я</span><span class="sv">${name}</span></div>
-       <div class="sr"><span class="sk">Дата</span><span class="sv">${S.date}</span></div>
-       <div class="sr"><span class="sk">Час</span><span class="sv">${S.time}</span></div>
-       <div class="sr"><span class="sk">Бокс</span><span class="sv">${S.box}</span></div>
-       <div class="sr"><span class="sk">Послуга</span><span class="sv">${service.split(' — ')[0]}</span></div>`;
-    bStep(5);
-  } catch(e) {
-    toast('Помилка. Спробуйте ще раз.','err');
-    btn.textContent = '✓ Підтвердити запис'; btn.disabled = false;
-  }
-}
-
-function resetBook() {
-  S.date=null; S.time=null; S.box=null;
-  document.getElementById('b-name').value = '';
-  document.getElementById('b-phone').value = '';
-  document.getElementById('b-comment').value = '';
-  bStep(1); buildDates();
-}
-
-// ════════════════════════════════════════
-// API CALLS
-// ════════════════════════════════════════
-async function fetchBookings() {
-  try {
-    const r = await fetch(APPS + '?action=getBookings&t=' + Date.now(), { mode:'cors' });
-    if (!r.ok) return [];
-    const d = await r.json(); return d.bookings || [];
-  } catch(e) { return []; }
-}
-async function fetchClients() {
-  try {
-    const r = await fetch(APPS + '?action=getClients&t=' + Date.now(), { mode:'cors' });
-    if (!r.ok) return [];
-    const d = await r.json(); return d.clients || [];
-  } catch(e) { return []; }
-}
-
-// ════════════════════════════════════════
-// PRICES
-// ════════════════════════════════════════
-const PR = {
-  sedan: [
-    {i:'🚿',n:'Експрес-мийка',d:'~20 хв',p:200},
-    {i:'✨',n:'Комплексна мийка',d:'~45 хв',p:350},
-    {i:'💫',n:'Мийка + полірування',d:'~90 хв',p:600},
-    {i:'🪑',n:'Хімчистка салону',d:'~3 год',p:800},
-    {i:'🏆',n:'Детейлінг',d:'4–5 год',p:1500},
-    {i:'🛡️',n:'Захисне покриття',d:'~2 год',p:500},
-    {i:'🔧',n:'Моторний відсік',d:'~60 хв',p:350},
-    {i:'💎',n:'Нанокераміка',d:'6–8 год',p:3000},
-    {i:'⚙️',n:'Мийка дисків',d:'~30 хв',p:200},
-    {i:'🪟',n:'Тонування скла',d:'~2 год',p:1200},
-  ],
-  suv: [
-    {i:'🚿',n:'Експрес-мийка',d:'~25 хв',p:260},
-    {i:'✨',n:'Комплексна мийка',d:'~55 хв',p:450},
-    {i:'💫',n:'Мийка + полірування',d:'~110 хв',p:800},
-    {i:'🪑',n:'Хімчистка салону',d:'~3.5 год',p:1100},
-    {i:'🏆',n:'Детейлінг',d:'5–6 год',p:2000},
-    {i:'🛡️',n:'Захисне покриття',d:'~2.5 год',p:650},
-    {i:'🔧',n:'Моторний відсік',d:'~60 хв',p:400},
-    {i:'💎',n:'Нанокераміка',d:'7–9 год',p:4000},
-    {i:'⚙️',n:'Мийка дисків',d:'~35 хв',p:250},
-    {i:'🪟',n:'Тонування скла',d:'~2.5 год',p:1500},
-  ],
-  minivan: [
-    {i:'🚿',n:'Експрес-мийка',d:'~30 хв',p:300},
-    {i:'✨',n:'Комплексна мийка',d:'~60 хв',p:520},
-    {i:'💫',n:'Мийка + полірування',d:'~120 хв',p:950},
-    {i:'🪑',n:'Хімчистка салону',d:'~4 год',p:1300},
-    {i:'🏆',n:'Детейлінг',d:'6–8 год',p:2500},
-    {i:'🛡️',n:'Захисне покриття',d:'~3 год',p:800},
-    {i:'🔧',n:'Моторний відсік',d:'~70 хв',p:500},
-    {i:'💎',n:'Нанокераміка',d:'8–10 год',p:5000},
-    {i:'⚙️',n:'Мийка дисків',d:'~40 хв',p:300},
-    {i:'🪟',n:'Тонування скла',d:'~3 год',p:1800},
-  ]
-};
-
-function showPrices(type, el) {
-  document.querySelectorAll('.ptab').forEach(t => t.classList.remove('on'));
-  if (el) el.classList.add('on');
-  document.getElementById('pg').innerHTML = (PR[type]||[]).map(s => `
-    <div class="pc g">
-      <div class="pc-ico">${s.i}</div>
-      <div class="pc-name">${s.n}</div>
-      <div class="pc-dur">⏱ ${s.d}</div>
-      <div class="pc-price">${s.p.toLocaleString('uk-UA')} <span>грн</span></div>
-      <button class="pc-btn" onclick="quickBook('${s.n}')">Записатись</button>
-    </div>`).join('');
-}
-
-function quickBook(name) {
-  go('booking');
-  setTimeout(() => {
-    const sel = document.getElementById('b-service');
-    if (sel) for (let i=0;i<sel.options.length;i++) if (sel.options[i].text.includes(name)) sel.selectedIndex = i;
-  }, 400);
-}
-
-// ════════════════════════════════════════
-// SUBSCRIPTIONS
-// ════════════════════════════════════════
-function orderSub(sub) {
-  curSub = sub;
-  document.getElementById('sm-ttl').textContent = 'Замовити ' + sub.name;
-  document.getElementById('sm-sum').innerHTML =
-    `<div class="msr"><span class="msk">Абонемент</span><span class="msv">${sub.name}</span></div>
-     <div class="msr"><span class="msk">Термін</span><span class="msv">${sub.months} міс.</span></div>
-     <div class="msr"><span class="msk">Вартість</span><span class="msv">${sub.price.toLocaleString('uk-UA')} грн</span></div>
-     <div class="msr"><span class="msk">Бонус</span><span class="msv">+${sub.bonus}</span></div>
-     <div class="msr"><span class="msk">На рахунок</span><span class="msv">${sub.account.toLocaleString('uk-UA')} грн</span></div>`;
-  document.getElementById('sub-modal').classList.add('on');
-  document.getElementById('sm-name').value = '';
-  document.getElementById('sm-phone').value = '';
-  document.getElementById('sm-tg').value = '';
-}
-function closeSubModal() { document.getElementById('sub-modal').classList.remove('on'); curSub = null; }
-
-async function submitSubOrder() {
-  const name = document.getElementById('sm-name').value.trim();
-  const phone = document.getElementById('sm-phone').value.trim();
-  const tg = document.getElementById('sm-tg').value.trim();
-  if (!name || !phone) { toast('Вкажіть ім\'я та телефон!','err'); return; }
-  const btn = document.getElementById('sm-ok');
-  btn.textContent = '⏳...'; btn.disabled = true;
-  try {
-    const params = new URLSearchParams({
-      action: 'saveSubOrder',
-      subId: curSub.id, subName: curSub.name,
-      months: curSub.months, price: curSub.price,
-      account: curSub.account, bonus: curSub.bonus,
-      name, phone, tg
-    });
-    fetch(APPS + '?' + params, { method:'GET', mode:'no-cors' }).catch(() => {});
-    try {
-      await Promise.race([
-        fetch(APPS + '?' + params, { method:'GET', mode:'cors' }),
-        new Promise((_,rej) => setTimeout(() => rej(), 5000))
-      ]);
-    } catch(e) {}
-    closeSubModal();
-    toast('Заявку відправлено! Адміністратор зв\'яжеться з вами.');
-  } catch(e) {
-    closeSubModal();
-    toast('Заявку відправлено! Очікуйте дзвінка.');
-  }
-  btn.textContent = 'Замовити →'; btn.disabled = false;
-}
-
-// ════════════════════════════════════════
-// CRM
-// ════════════════════════════════════════
-function checkCRM() {
-  const p = document.getElementById('crm-pass').value;
-  if (p === CRM_PASSWORD) {
-    document.getElementById('crm-gate-w').style.display = 'none';
-    document.getElementById('crm-body').style.display = 'block';
-    refreshCRM(); renderCal();
-  } else {
-    toast('Невірний пароль!','err');
-    document.getElementById('crm-pass').value = '';
-    document.getElementById('crm-pass').focus();
-  }
-}
-
-async function refreshCRM() {
-  const [bks, cls] = await Promise.all([fetchBookings(), fetchClients()]);
-  S.bookings = bks; S.clients = cls;
-  const today = todayStr();
-  const todayBks = bks.filter(b => String(b[1]||'').trim() === today);
-  document.getElementById('cs1').textContent = bks.length;
-  document.getElementById('cs2').textContent = todayBks.length;
-  document.getElementById('cs3').textContent = cls.length;
-  const now = new Date(), ct = pad(now.getHours()) + ':00';
-  const free = ['Box 1','Box 2','Box 3'].filter(bx => !isBooked(bks, today, ct, bx));
-  document.getElementById('cs4').textContent = free.length + '/3';
-
-  // Box status
-  document.getElementById('crm-boxes').innerHTML = ['Box 1','Box 2','Box 3'].map(bx => {
-    const busy = isBooked(bks, today, ct, bx);
-    return `<div class="blr"><div class="blrd ${busy?'busy':'free'}"></div><div class="blrn">${bx}</div><div class="blrs ${busy?'busy':'free'}">${busy?'Зайнятий':'Вільний'}</div><div class="blrt">${ct}</div></div>`;
-  }).join('');
-
-  // Bookings table with status update button
-  const sorted = [...bks].sort((a,b) => String(a[1]) > String(b[1]) ? -1 : 1);
-  document.getElementById('crm-tbl').innerHTML = bks.length === 0
-    ? '<p style="color:var(--w35);text-align:center;padding:20px;font-size:13px">Записів поки немає</p>'
-    : `<div style="overflow-x:auto"><table class="bt2">
-        <thead><tr><th>ID</th><th>Дата</th><th>Час</th><th>Бокс</th><th>Клієнт</th><th>Телефон</th><th>Послуга</th><th>Статус</th><th></th></tr></thead>
-        <tbody>${sorted.slice(0,30).map(b => {
-          const stCls = bStCls(String(b[9]||''));
-          return `<tr>
-            <td style="color:var(--w35)">${b[0]||''}</td>
-            <td>${b[1]||''}</td>
-            <td><strong style="color:var(--white)">${b[3]||''}</strong></td>
-            <td>${b[4]||''}</td>
-            <td style="color:var(--white)">${b[6]||''}</td>
-            <td style="color:var(--w35);font-size:11px">${b[7]||''}</td>
-            <td style="font-size:11px;max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b[8]||''}</td>
-            <td><span class="bdg ${stCls}">${b[9]||''}</span></td>
-            <td><button onclick="openStatusModal('${b[0]}','${b[6]}','${b[1]} ${b[3]}')" style="background:var(--w08);border:0.5px solid var(--border);border-radius:6px;color:var(--w60);font-size:11px;padding:3px 8px;cursor:pointer;font-family:var(--font-body)">✏️</button></td>
-          </tr>`;
-        }).join('')}</tbody>
-      </table></div>`;
-
-  // Clients
-  const cols = ['rgba(255,255,255,0.9)','rgba(0,255,136,0.8)','rgba(255,255,255,0.7)','rgba(0,204,106,0.8)'];
-  document.getElementById('crm-cls').innerHTML = cls.length === 0
-    ? '<p style="color:var(--w35);text-align:center;padding:20px;font-size:13px">Клієнтів поки немає</p>'
-    : cls.slice(0, 15).map((c, i) => {
-        const ini = String(c[1]||'?').split(' ').slice(0,2).map(w => w[0]||'').join('').toUpperCase();
-        const col = cols[i % cols.length];
-        const vis = bks.filter(b => String(b[5]||'').trim() === String(c[0]||'').trim()).length;
-        const bal = Number(c[6]||0);
-        return `<div class="crow">
-          <div class="cava" style="background:rgba(255,255,255,0.06);color:${col};border:0.5px solid rgba(255,255,255,0.1)">${ini||'?'}</div>
-          <div style="flex:1"><div class="cn">${c[1]||'—'}</div><div class="cm">${c[2]||''} · ${vis} візитів · з ${c[5]||''}</div></div>
-          <div class="cbal">${bal.toLocaleString('uk-UA')} грн</div>
-        </div>`;
-      }).join('');
-
-  renderCal();
-  toast('Дані оновлено');
-}
-
-function bStCls(s) {
-  if (s.includes('Виконано')) return 'bdg-ok';
-  if (s.includes('Підтверджено')) return 'bdg-pnd';
-  if (s.includes('Не приїхав')) return 'bdg-no';
-  if (s.includes('Очікується')) return 'bdg-na';
-  return 'bdg-pnd';
-}
-
-function openStatusModal(bookingId, clientName, dateTime) {
-  curBookingId = bookingId;
-  document.getElementById('st-modal-info').textContent = `${clientName} · ${dateTime}`;
-  document.getElementById('status-modal').classList.add('on');
-}
-
-async function updateBookingStatus(newStatus) {
-  document.getElementById('status-modal').classList.remove('on');
-  if (!curBookingId) return;
-  try {
-    const params = new URLSearchParams({
-      action: 'updateBookingStatus',
-      bookingId: curBookingId,
-      status: newStatus
-    });
-    fetch(APPS + '?' + params, { method:'GET', mode:'no-cors' }).catch(() => {});
-    toast('Статус оновлено: ' + newStatus);
-    setTimeout(() => refreshCRM(), 1500);
-  } catch(e) {
-    toast('Помилка оновлення','err');
-  }
-  curBookingId = null;
-}
-
-// ════════════════════════════════════════
-// CALENDAR
-// ════════════════════════════════════════
-let cY = new Date().getFullYear(), cM = new Date().getMonth();
-
-function renderCal() {
-  const short = ['Січ','Лют','Бер','Кві','Тра','Чер','Лип','Сер','Вер','Жов','Лис','Гру'];
-  const lbl = document.getElementById('cal-l'); if(lbl) lbl.textContent = short[cM] + ' ' + cY;
-  const g = document.getElementById('cal-g'); if(!g) return; g.innerHTML = '';
-  const fd = new Date(cY, cM, 1), sw = (fd.getDay()+6) % 7;
-  const dim = new Date(cY, cM+1, 0).getDate();
-  const today = new Date();
-  const bdates = new Set((S.bookings||[]).map(b => {
-    const d = String(b[1]||''), p = d.split('.');
-    return p.length === 3 ? p[2]+'-'+p[1]+'-'+p[0] : d;
-  }));
-  for (let i = 0; i < sw; i++) { const e=document.createElement('div'); e.className='cald empty'; g.appendChild(e); }
-  for (let d = 1; d <= dim; d++) {
-    const dk = cY + '-' + pad(cM+1) + '-' + pad(d);
-    const isTod = d===today.getDate() && cM===today.getMonth() && cY===today.getFullYear();
-    const hasB = bdates.has(dk);
-    const e = document.createElement('div');
-    e.className = 'cald' + (isTod?' today':'') + (hasB&&!isTod?' hasb':'');
-    e.textContent = d; g.appendChild(e);
-  }
-}
-function calPrev() { cM--; if(cM<0){cM=11;cY--;} renderCal(); }
-function calNext() { cM++; if(cM>11){cM=0;cY++;} renderCal(); }
-
-// ════════════════════════════════════════
-// INIT
-// ════════════════════════════════════════
-initHome();
+// Create button
+document.querySelector('.create-btn').addEventListener('click', () => {
+  alert('Форма нового запису — підключіть до вашого API');
+});
 </script>
 </body>
 </html>
