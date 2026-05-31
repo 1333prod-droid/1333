@@ -3,1389 +3,1311 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>1333 Car Center</title>
-<link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>1333 Car Center — Автомийка Харків</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;600;700;900&family=Onest:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --accent: #0A84FF;
-    --accent2: #30D158;
-    --accent3: #FF9F0A;
-    --accent-red: #FF453A;
-    --glass-bg: rgba(255,255,255,0.12);
-    --glass-border: rgba(255,255,255,0.25);
-    --glass-strong: rgba(255,255,255,0.18);
-    --text-primary: #ffffff;
-    --text-secondary: rgba(255,255,255,0.65);
-    --text-tertiary: rgba(255,255,255,0.4);
-    --card-bg: rgba(255,255,255,0.08);
-    --card-hover: rgba(255,255,255,0.14);
-    --blur: blur(24px);
-    --blur-strong: blur(40px);
-    --shadow: 0 8px 32px rgba(0,0,0,0.3);
-    --radius: 20px;
-    --radius-sm: 12px;
-    --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
-  }
+/* ═══════════════════════════════════════
+   1333 CAR CENTER — MONOCHROME LIQUID GLASS
+   Black & White · Neon White · Status Green/Red
+═══════════════════════════════════════ */
+:root{
+  --font-d:'Unbounded',sans-serif;
+  --font-b:'Onest',sans-serif;
+  --tr:0.28s cubic-bezier(.4,0,.2,1);
+  --r:20px;--r-sm:12px;--r-xs:8px;
 
-  * { margin:0; padding:0; box-sizing:border-box; }
+  /* Monochrome palette */
+  --bg:#050507;
+  --bg2:rgba(255,255,255,0.03);
+  --bg3:rgba(255,255,255,0.06);
+  --bg4:rgba(255,255,255,0.10);
+  --bg5:rgba(255,255,255,0.16);
 
-  body {
-    font-family: 'Inter', -apple-system, sans-serif;
-    background: #0a0a1a;
-    color: var(--text-primary);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+  /* Glass borders */
+  --b1:rgba(255,255,255,0.08);
+  --b2:rgba(255,255,255,0.16);
+  --b3:rgba(255,255,255,0.28);
 
-  /* === BACKGROUND === */
-  .bg-scene {
-    position: fixed; inset: 0; z-index: 0;
-    background:
-      radial-gradient(ellipse 70% 60% at 15% 20%, rgba(10,132,255,0.18) 0%, transparent 60%),
-      radial-gradient(ellipse 50% 50% at 85% 75%, rgba(48,209,88,0.12) 0%, transparent 55%),
-      radial-gradient(ellipse 60% 60% at 50% 50%, rgba(255,159,10,0.07) 0%, transparent 60%),
-      linear-gradient(160deg, #080818 0%, #0d0d22 50%, #0a0f1e 100%);
-  }
-  .bg-orb {
-    position: fixed; border-radius: 50%; filter: blur(80px);
-    animation: float 8s ease-in-out infinite;
-  }
-  .orb1 { width:500px; height:500px; top:-100px; left:-100px; background:rgba(10,132,255,0.12); animation-delay:0s; }
-  .orb2 { width:400px; height:400px; bottom:-50px; right:-50px; background:rgba(48,209,88,0.08); animation-delay:-3s; }
-  .orb3 { width:300px; height:300px; top:40%; left:30%; background:rgba(255,159,10,0.06); animation-delay:-5s; }
+  /* Neon white glow */
+  --neon:rgba(255,255,255,0.9);
+  --neon-glow:0 0 20px rgba(255,255,255,0.15),0 0 60px rgba(255,255,255,0.05);
 
-  @keyframes float {
-    0%,100% { transform: translate(0,0) scale(1); }
-    50% { transform: translate(20px,-20px) scale(1.05); }
-  }
+  /* Text */
+  --t1:#ffffff;
+  --t2:rgba(255,255,255,0.65);
+  --t3:rgba(255,255,255,0.35);
+  --t4:rgba(255,255,255,0.18);
 
-  /* === NAV === */
-  nav {
-    position: fixed; top:0; left:0; right:0; z-index:100;
-    padding: 0 2rem;
-    height: 64px;
-    display: flex; align-items: center; justify-content: space-between;
-    background: rgba(10,10,26,0.6);
-    backdrop-filter: var(--blur);
-    -webkit-backdrop-filter: var(--blur);
-    border-bottom: 0.5px solid var(--glass-border);
-  }
-  .nav-logo {
-    font-family: 'Inter', sans-serif;
-    font-size: 18px; font-weight: 700;
-    letter-spacing: -0.5px;
-    color: var(--text-primary);
-  }
-  .nav-logo span { color: var(--accent); }
-  .nav-links { display:flex; gap:8px; }
-  .nav-link {
-    padding: 8px 16px; border-radius: 10px;
-    font-size: 14px; font-weight: 500;
-    color: var(--text-secondary);
-    cursor: pointer; border: none; background: none;
-    transition: var(--transition);
-  }
-  .nav-link:hover, .nav-link.active {
-    background: var(--glass-bg);
-    color: var(--text-primary);
-  }
-  .nav-link.active { color: var(--accent); }
-  .nav-cta {
-    padding: 8px 20px; border-radius: 10px;
-    background: var(--accent); border: none;
-    color: white; font-size: 14px; font-weight: 600;
-    cursor: pointer; transition: var(--transition);
-  }
-  .nav-cta:hover { background: #0066cc; transform: scale(1.02); }
+  /* Status — ONLY colors allowed */
+  --green:#00e676;
+  --green-d:rgba(0,230,118,0.12);
+  --green-b:rgba(0,230,118,0.35);
+  --red:#ff5252;
+  --red-d:rgba(255,82,82,0.12);
+  --red-b:rgba(255,82,82,0.35);
 
-  /* === PAGES === */
-  .page { display:none; padding-top:64px; min-height:100vh; position:relative; z-index:1; }
-  .page.active { display:block; }
+  /* Blur */
+  --blur:blur(32px) saturate(180%);
+  --blur-sm:blur(16px) saturate(140%);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font-b);
+  background:var(--bg);
+  color:var(--t1);
+  min-height:100vh;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
 
-  /* === HERO === */
-  .hero {
-    padding: 100px 2rem 80px;
-    max-width: 1200px; margin: 0 auto;
-    display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
-  }
-  .hero-badge {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 6px 14px; border-radius: 20px;
-    background: rgba(10,132,255,0.15);
-    border: 1px solid rgba(10,132,255,0.3);
-    font-size: 13px; font-weight: 500; color: #60A5FA;
-    margin-bottom: 20px;
-  }
-  .hero-badge-dot { width:6px; height:6px; border-radius:50%; background:#0A84FF; animation:pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.3)} }
-  .hero-title {
-    font-size: 58px; font-weight: 700; line-height: 1.1;
-    letter-spacing: -2px; margin-bottom: 20px;
-  }
-  .hero-title .grad {
-    background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  }
-  .hero-title .blue { color: var(--accent); -webkit-text-fill-color: var(--accent); }
-  .hero-sub { font-size: 18px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 36px; }
-  .hero-btns { display:flex; gap:12px; flex-wrap:wrap; }
-  .btn-primary {
-    padding: 14px 28px; border-radius: 14px;
-    background: var(--accent); border: none;
-    color: white; font-size: 16px; font-weight: 600;
-    cursor: pointer; transition: var(--transition);
-  }
-  .btn-primary:hover { background: #0066cc; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(10,132,255,0.4); }
-  .btn-glass {
-    padding: 14px 28px; border-radius: 14px;
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    color: var(--text-primary); font-size: 16px; font-weight: 500;
-    cursor: pointer; transition: var(--transition);
-    backdrop-filter: var(--blur);
-  }
-  .btn-glass:hover { background: var(--glass-strong); transform: translateY(-2px); }
+/* ── BACKGROUND ── */
+.bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.bg-base{position:absolute;inset:0;background:#050507}
+.bg-vignette{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(255,255,255,0.04) 0%,transparent 60%);
+}
+.bg-lines{
+  position:absolute;inset:0;opacity:0.03;
+  background-image:repeating-linear-gradient(0deg,transparent,transparent 59px,rgba(255,255,255,1) 60px),
+                   repeating-linear-gradient(90deg,transparent,transparent 59px,rgba(255,255,255,1) 60px);
+  background-size:60px 60px;
+}
+.bg-orb{position:absolute;border-radius:50%;filter:blur(120px);animation:of 16s ease-in-out infinite;pointer-events:none}
+.o1{width:800px;height:400px;top:-100px;left:-200px;background:rgba(255,255,255,0.04);animation-delay:0s}
+.o2{width:600px;height:600px;bottom:-200px;right:-150px;background:rgba(255,255,255,0.03);animation-delay:-6s}
+@keyframes of{0%,100%{transform:translate(0,0)}50%{transform:translate(40px,-30px)}}
 
-  /* HERO CARD */
-  .hero-visual {
-    display:flex; flex-direction:column; gap:12px;
-  }
-  .glass-card {
-    background: var(--glass-bg);
-    backdrop-filter: var(--blur);
-    -webkit-backdrop-filter: var(--blur);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius);
-    padding: 20px 24px;
-    transition: var(--transition);
-  }
-  .glass-card:hover { background: var(--card-hover); transform: translateY(-3px); box-shadow: var(--shadow); }
-  .stat-row { display:flex; gap:12px; }
-  .stat-item {
-    flex:1; background: var(--card-bg);
-    border-radius: var(--radius-sm);
-    padding: 16px; border: 1px solid var(--glass-border);
-    transition: var(--transition);
-  }
-  .stat-item:hover { background: var(--card-hover); }
-  .stat-num { font-size: 28px; font-weight: 700; margin-bottom: 4px; }
-  .stat-label { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
-  .stat-num.blue { color: var(--accent); }
-  .stat-num.green { color: var(--accent2); }
-  .stat-num.orange { color: var(--accent3); }
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:500;
+  height:60px;padding:0 2rem;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(5,5,7,0.75);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+  border-bottom:0.5px solid var(--b1);
+}
+.nav-logo{
+  font-family:var(--font-d);font-size:14px;font-weight:700;
+  letter-spacing:1px;color:var(--t1);text-transform:uppercase;
+}
+.nav-logo em{font-style:normal;color:var(--t3)}
+.nav-links{display:flex;gap:2px}
+.nl{
+  padding:7px 13px;border-radius:8px;border:none;background:none;
+  font-family:var(--font-b);font-size:13px;font-weight:500;color:var(--t3);
+  cursor:pointer;transition:var(--tr);
+}
+.nl:hover{color:var(--t2);background:var(--bg2)}
+.nl.on{color:var(--t1);background:var(--bg3)}
+.nav-cta{
+  padding:8px 20px;border-radius:9px;
+  background:var(--t1);border:none;
+  font-family:var(--font-b);font-size:13px;font-weight:600;color:#050507;
+  cursor:pointer;transition:var(--tr);letter-spacing:-0.1px;
+}
+.nav-cta:hover{background:rgba(255,255,255,0.88);box-shadow:var(--neon-glow)}
 
-  /* BOOKING MINI */
-  .booking-mini { display:flex; flex-direction:column; gap:10px; }
-  .bm-label { font-size: 12px; color: var(--text-tertiary); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-  .bm-slots { display:flex; gap:8px; flex-wrap:wrap; }
-  .slot {
-    padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 500;
-    cursor: pointer; transition: var(--transition); border: 1px solid var(--glass-border);
-    background: var(--glass-bg);
-  }
-  .slot:hover { background: var(--accent); border-color: var(--accent); }
-  .slot.taken { background: rgba(255,69,58,0.15); border-color: rgba(255,69,58,0.3); color: var(--accent-red); cursor: not-allowed; }
-  .slot.selected { background: var(--accent); border-color: var(--accent); }
+/* ── PAGES ── */
+.page{display:none;padding-top:60px;min-height:100vh;position:relative;z-index:1}
+.page.on{display:block}
 
-  /* === SERVICES SECTION === */
-  .section { max-width:1200px; margin:0 auto; padding: 40px 2rem 80px; }
-  .section-header { text-align:center; margin-bottom: 48px; }
-  .section-title { font-size: 40px; font-weight: 700; letter-spacing:-1.5px; margin-bottom: 12px; }
-  .section-sub { font-size: 17px; color: var(--text-secondary); }
-  .services-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap:16px; }
-  .service-card {
-    background: var(--glass-bg);
-    backdrop-filter: var(--blur);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius);
-    padding: 28px;
-    transition: var(--transition);
-    cursor: pointer;
-  }
-  .service-card:hover { background: var(--card-hover); transform: translateY(-4px); box-shadow: var(--shadow); }
-  .service-icon {
-    width: 48px; height: 48px; border-radius: 12px;
-    display:flex; align-items:center; justify-content:center;
-    font-size: 22px; margin-bottom: 16px;
-  }
-  .service-name { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
-  .service-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px; }
-  .service-price { font-size: 24px; font-weight: 700; color: var(--accent); }
-  .service-price span { font-size: 13px; color: var(--text-tertiary); font-weight: 400; }
+/* ── GLASS BASE ── */
+.glass{
+  background:var(--bg2);
+  backdrop-filter:var(--blur-sm);
+  -webkit-backdrop-filter:var(--blur-sm);
+  border:0.5px solid var(--b1);
+  border-radius:var(--r);
+  transition:var(--tr);
+}
+.glass:hover{background:var(--bg3);border-color:var(--b2)}
 
-  /* === BOOKING PAGE === */
-  .booking-layout { max-width:900px; margin:0 auto; padding: 40px 2rem 80px; }
-  .booking-steps { display:flex; gap:0; margin-bottom: 40px; position:relative; }
-  .booking-steps::before {
-    content:''; position:absolute; top:20px; left:20px; right:20px; height:1px;
-    background: var(--glass-border); z-index:0;
-  }
-  .step-item {
-    flex:1; display:flex; flex-direction:column; align-items:center; gap:8px; position:relative; z-index:1;
-  }
-  .step-dot {
-    width:40px; height:40px; border-radius:50%;
-    display:flex; align-items:center; justify-content:center;
-    font-size: 14px; font-weight: 700;
-    background: var(--glass-bg); border: 1px solid var(--glass-border);
-    transition: var(--transition);
-  }
-  .step-dot.active { background: var(--accent); border-color: var(--accent); }
-  .step-dot.done { background: var(--accent2); border-color: var(--accent2); }
-  .step-label { font-size: 12px; color: var(--text-secondary); font-weight: 500; text-align:center; }
+.glass-hi{
+  background:var(--bg3);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+  border-radius:var(--r);
+  position:relative;overflow:hidden;
+}
+.glass-hi::before{
+  content:'';position:absolute;inset:0;border-radius:var(--r);
+  padding:0.5px;pointer-events:none;
+  background:linear-gradient(135deg,rgba(255,255,255,0.2) 0%,rgba(255,255,255,0.05) 50%,rgba(255,255,255,0.15) 100%);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+}
 
-  .booking-panel {
-    background: var(--glass-bg);
-    backdrop-filter: var(--blur);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius);
-    padding: 32px;
-  }
-  .booking-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
-  .booking-sub { font-size: 15px; color: var(--text-secondary); margin-bottom: 28px; }
+/* ── HERO ── */
+.hero{
+  max-width:1160px;margin:0 auto;
+  padding:100px 2rem 70px;
+  display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;
+}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:5px 12px;border-radius:20px;margin-bottom:24px;
+  background:var(--bg3);border:0.5px solid var(--b2);
+  font-size:11px;font-weight:600;letter-spacing:0.5px;color:var(--t2);
+  text-transform:uppercase;
+}
+.h-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pd 2s infinite}
+@keyframes pd{0%,100%{opacity:1}50%{opacity:0.3}}
+h1{
+  font-family:var(--font-d);
+  font-size:56px;font-weight:900;line-height:1.04;letter-spacing:-3px;
+  margin-bottom:20px;color:var(--t1);
+}
+h1 span{color:var(--t3)}
+.hero-sub{font-size:16px;color:var(--t2);line-height:1.72;margin-bottom:36px;font-weight:400;max-width:460px}
+.hero-btns{display:flex;gap:10px;flex-wrap:wrap}
+.btn-white{
+  padding:12px 24px;border-radius:11px;border:none;
+  background:var(--t1);
+  font-family:var(--font-b);font-size:14px;font-weight:600;color:#050507;
+  cursor:pointer;transition:var(--tr);
+}
+.btn-white:hover{background:rgba(255,255,255,0.88);transform:translateY(-1px);box-shadow:var(--neon-glow)}
+.btn-outline{
+  padding:12px 24px;border-radius:11px;
+  background:transparent;border:0.5px solid var(--b3);
+  font-family:var(--font-b);font-size:14px;font-weight:500;color:var(--t2);
+  cursor:pointer;transition:var(--tr);
+}
+.btn-outline:hover{background:var(--bg3);color:var(--t1);border-color:var(--b3)}
 
-  .dates-grid { display:grid; grid-template-columns: repeat(7,1fr); gap:8px; margin-bottom: 24px; }
-  .date-btn {
-    display:flex; flex-direction:column; align-items:center; gap:3px;
-    padding: 10px 4px; border-radius: 12px;
-    background: var(--card-bg); border: 1px solid var(--glass-border);
-    cursor:pointer; transition: var(--transition);
-  }
-  .date-btn:hover { background: rgba(10,132,255,0.15); border-color: rgba(10,132,255,0.4); }
-  .date-btn.selected { background: var(--accent); border-color: var(--accent); }
-  .date-btn.today .date-day { color: var(--accent); }
-  .date-day { font-size:11px; color: var(--text-tertiary); font-weight:500; text-transform:uppercase; }
-  .date-num { font-size:18px; font-weight:700; }
-  .date-btn.selected .date-day, .date-btn.selected .date-num { color: white; }
+/* Hero right */
+.hero-right{display:flex;flex-direction:column;gap:10px}
+.hcard{
+  padding:18px 20px;
+  background:rgba(255,255,255,0.04);
+  backdrop-filter:var(--blur-sm);-webkit-backdrop-filter:var(--blur-sm);
+  border:0.5px solid var(--b1);border-radius:18px;transition:var(--tr);
+}
+.hcard:hover{background:rgba(255,255,255,0.07);border-color:var(--b2)}
+.hc-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--t4);margin-bottom:12px}
 
-  .times-grid { display:grid; grid-template-columns: repeat(4,1fr); gap:8px; margin-bottom: 24px; }
-  .time-btn {
-    padding: 12px; border-radius: 10px; text-align:center;
-    background: var(--card-bg); border: 1px solid var(--glass-border);
-    cursor:pointer; transition: var(--transition); font-size:15px; font-weight:500;
-  }
-  .time-btn:hover { background: rgba(10,132,255,0.15); border-color: rgba(10,132,255,0.4); }
-  .time-btn.selected { background: var(--accent); border-color: var(--accent); }
-  .time-btn.busy { background: rgba(255,69,58,0.1); border-color: rgba(255,69,58,0.25); color: var(--accent-red); cursor:not-allowed; font-size:12px; }
+.brow{display:flex;align-items:center;gap:10px;padding:9px 11px;background:rgba(255,255,255,0.03);border:0.5px solid var(--b1);border-radius:9px;transition:var(--tr);margin-bottom:6px}
+.brow:last-child{margin-bottom:0}
+.brow:hover{background:rgba(255,255,255,0.055)}
+.bdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.bdot.free{background:var(--green);box-shadow:0 0 8px var(--green)}
+.bdot.busy{background:var(--red);box-shadow:0 0 8px var(--red)}
+.bname{font-size:13px;font-weight:600;flex:1;color:var(--t1)}
+.bst{font-size:11.5px;font-weight:600}
+.bst.free{color:var(--green)}.bst.busy{color:var(--red)}
 
-  .boxes-grid { display:grid; grid-template-columns: repeat(3,1fr); gap:12px; margin-bottom: 24px; }
-  .box-card {
-    padding: 20px; border-radius: 14px; text-align:center;
-    background: var(--card-bg); border: 1px solid var(--glass-border);
-    cursor:pointer; transition: var(--transition);
-  }
-  .box-card:hover { background: rgba(10,132,255,0.15); border-color: rgba(10,132,255,0.4); }
-  .box-card.selected { background: rgba(10,132,255,0.2); border-color: var(--accent); }
-  .box-card.busy { opacity:0.4; cursor:not-allowed; }
-  .box-icon { font-size:32px; margin-bottom:8px; }
-  .box-name { font-size:16px; font-weight:600; margin-bottom:4px; }
-  .box-status { font-size:12px; color: var(--text-secondary); }
-  .box-status.free { color: var(--accent2); }
-  .box-status.taken { color: var(--accent-red); }
+.slots{display:flex;flex-wrap:wrap;gap:5px}
+.chip{
+  padding:5px 11px;border-radius:7px;font-size:12px;font-weight:600;
+  background:rgba(255,255,255,0.05);border:0.5px solid var(--b1);color:var(--t2);
+  cursor:pointer;transition:var(--tr);
+}
+.chip:hover{background:rgba(255,255,255,0.12);border-color:var(--b3);color:var(--t1)}
 
-  .form-group { margin-bottom:16px; }
-  .form-label { font-size:13px; color: var(--text-secondary); margin-bottom:8px; display:block; font-weight:500; }
-  .form-input {
-    width:100%; padding: 12px 16px; border-radius: 10px;
-    background: var(--glass-bg); border: 1px solid var(--glass-border);
-    color: var(--text-primary); font-size:15px; font-family:inherit;
-    outline:none; transition: var(--transition);
-  }
-  .form-input:focus { border-color: var(--accent); background: var(--glass-strong); }
-  .form-input::placeholder { color: var(--text-tertiary); }
-  .form-select {
-    width:100%; padding: 12px 16px; border-radius: 10px;
-    background: var(--glass-bg); border: 1px solid var(--glass-border);
-    color: var(--text-primary); font-size:15px; font-family:inherit;
-    outline:none; cursor:pointer; appearance:none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-    background-repeat:no-repeat; background-position: right 12px center;
-  }
-  .form-select option { background: #1a1a2e; color: white; }
+/* ── SECTION ── */
+.sec{max-width:1160px;margin:0 auto;padding:16px 2rem 80px}
+.sec-hd{text-align:center;margin-bottom:42px}
+.sec-ttl{font-family:var(--font-d);font-size:36px;font-weight:700;letter-spacing:-1.5px;color:var(--t1);margin-bottom:8px}
+.sec-sub{font-size:15px;color:var(--t2)}
 
-  .booking-summary {
-    background: rgba(10,132,255,0.08); border: 1px solid rgba(10,132,255,0.25);
-    border-radius: 14px; padding: 20px; margin-bottom:24px;
-  }
-  .summary-row { display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px; }
-  .summary-row:last-child { margin-bottom:0; font-weight:600; font-size:16px; }
-  .summary-label { color: var(--text-secondary); }
-  .summary-value { color: var(--text-primary); }
-  .summary-value.price { color: var(--accent2); }
+/* ── SERVICES ── */
+.srv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.srv-card{
+  padding:24px 20px;
+  background:var(--bg2);backdrop-filter:var(--blur-sm);-webkit-backdrop-filter:var(--blur-sm);
+  border:0.5px solid var(--b1);border-radius:var(--r);
+  cursor:pointer;transition:var(--tr);position:relative;overflow:hidden;
+}
+.srv-card::after{content:'';position:absolute;top:0;right:0;width:100px;height:100px;background:radial-gradient(circle at top right,rgba(255,255,255,0.025),transparent 70%)}
+.srv-card:hover{background:var(--bg4);transform:translateY(-3px);border-color:var(--b2);box-shadow:0 16px 40px rgba(0,0,0,0.4)}
+.srv-ico{font-size:24px;margin-bottom:14px}
+.srv-name{font-size:15px;font-weight:600;margin-bottom:7px;color:var(--t1)}
+.srv-desc{font-size:13px;color:var(--t2);line-height:1.65;margin-bottom:14px}
+.srv-price{font-size:20px;font-weight:700;color:var(--t1);font-family:var(--font-d);letter-spacing:-0.5px}
+.srv-price span{font-size:12px;color:var(--t3);font-family:var(--font-b);font-weight:400}
 
-  .btn-next {
-    width:100%; padding: 16px; border-radius: 12px;
-    background: var(--accent); border:none;
-    color:white; font-size:16px; font-weight:600; font-family:inherit;
-    cursor:pointer; transition: var(--transition);
-  }
-  .btn-next:hover { background: #0066cc; transform:translateY(-2px); box-shadow: 0 8px 24px rgba(10,132,255,0.4); }
-  .btn-back {
-    padding: 12px 24px; border-radius: 12px;
-    background: transparent; border: 1px solid var(--glass-border);
-    color: var(--text-secondary); font-size:15px; font-weight:500; font-family:inherit;
-    cursor:pointer; transition: var(--transition); margin-bottom:16px;
-  }
-  .btn-back:hover { background: var(--glass-bg); color: var(--text-primary); }
+/* ── PRICES ── */
+.ptabs{
+  display:flex;gap:3px;background:rgba(255,255,255,0.04);
+  border:0.5px solid var(--b1);border-radius:13px;padding:4px;width:max-content;margin:0 auto 36px;
+}
+.ptab{
+  padding:8px 22px;border:none;background:none;font-family:var(--font-b);
+  font-size:13.5px;font-weight:500;color:var(--t3);border-radius:10px;cursor:pointer;transition:var(--tr);
+}
+.ptab.on{background:rgba(255,255,255,0.10);color:var(--t1)}
+.pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:11px}
+.pc{
+  padding:20px 18px;
+  background:var(--bg2);backdrop-filter:var(--blur-sm);-webkit-backdrop-filter:var(--blur-sm);
+  border:0.5px solid var(--b1);border-radius:18px;transition:var(--tr);
+}
+.pc:hover{background:var(--bg3);transform:translateY(-2px);border-color:var(--b2)}
+.pc-ico{font-size:16px;margin-bottom:8px}
+.pc-name{font-size:14px;font-weight:600;color:var(--t1);margin-bottom:3px}
+.pc-dur{font-size:11.5px;color:var(--t3);margin-bottom:10px;font-weight:500}
+.pc-price{font-size:22px;font-weight:700;color:var(--t1);font-family:var(--font-d);letter-spacing:-0.5px}
+.pc-price span{font-size:11px;color:var(--t3);font-family:var(--font-b);font-weight:400}
+.pc-btn{
+  margin-top:12px;width:100%;padding:8px;border-radius:8px;
+  background:rgba(255,255,255,0.06);border:0.5px solid var(--b2);
+  font-family:var(--font-b);font-size:12.5px;font-weight:600;color:var(--t2);
+  cursor:pointer;transition:var(--tr);
+}
+.pc-btn:hover{background:var(--t1);color:#050507;border-color:transparent}
 
-  /* === CRM PAGE === */
-  .crm-layout { max-width:1200px; margin:0 auto; padding: 30px 2rem 80px; }
-  .crm-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
-  .crm-title { font-size:28px; font-weight:700; }
-  .crm-actions { display:flex; gap:8px; }
+/* ── BOOKING ── */
+.bwrap{max-width:820px;margin:0 auto;padding:40px 2rem 80px}
+.bsteps{display:flex;gap:0;margin-bottom:32px;position:relative}
+.bsteps::before{content:'';position:absolute;top:18px;left:40px;right:40px;height:0.5px;background:var(--b1);z-index:0}
+.si{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;position:relative;z-index:1}
+.sdot{
+  width:36px;height:36px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-d);font-size:12px;font-weight:700;
+  background:var(--bg3);border:0.5px solid var(--b1);color:var(--t3);transition:var(--tr);
+}
+.sdot.on{background:var(--t1);border-color:transparent;color:#050507}
+.sdot.done{background:var(--green-d);border-color:var(--green-b);color:var(--green)}
+.slabel{font-size:10.5px;font-weight:500;color:var(--t3)}
 
-  .crm-stats { display:grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:24px; }
-  .crm-stat {
-    background: var(--glass-bg);
-    backdrop-filter: var(--blur);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-sm); padding:20px;
-  }
-  .crm-stat-num { font-size:32px; font-weight:700; margin-bottom:4px; }
-  .crm-stat-label { font-size:12px; color: var(--text-secondary); font-weight:500; }
+.bpanel{
+  background:rgba(255,255,255,0.04);
+  backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  border:0.5px solid var(--b1);border-radius:24px;padding:32px;
+  position:relative;overflow:hidden;
+}
+.bpanel::before{
+  content:'';position:absolute;inset:0;border-radius:24px;padding:0.5px;pointer-events:none;
+  background:linear-gradient(135deg,rgba(255,255,255,0.12) 0%,rgba(255,255,255,0.03) 50%,rgba(255,255,255,0.08) 100%);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+}
+.bt{font-family:var(--font-d);font-size:20px;font-weight:700;color:var(--t1);letter-spacing:-0.5px;margin-bottom:5px}
+.bsub{font-size:13px;color:var(--t3);margin-bottom:24px}
 
-  .crm-grid { display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
-  .crm-panel {
-    background: var(--glass-bg);
-    backdrop-filter: var(--blur);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius); padding:24px;
-  }
-  .crm-panel.full { grid-column: span 2; }
-  .panel-title { font-size:16px; font-weight:600; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
-  .panel-dot { width:8px; height:8px; border-radius:50%; }
-  .panel-dot.blue { background: var(--accent); }
-  .panel-dot.green { background: var(--accent2); }
-  .panel-dot.orange { background: var(--accent3); }
+.dg{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:22px}
+.db{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:10px 4px;border-radius:11px;cursor:pointer;transition:var(--tr);
+  background:var(--bg2);border:0.5px solid var(--b1);
+}
+.db:hover{background:var(--bg4);border-color:var(--b2)}
+.db.sel{background:var(--t1);border-color:transparent}
+.dd{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--t3)}
+.dn{font-size:17px;font-weight:700;color:var(--t1);font-family:var(--font-d)}
+.db.sel .dd{color:rgba(5,5,7,0.5)}.db.sel .dn{color:#050507}
 
-  /* SCHEDULE GRID */
-  .schedule-table { width:100%; border-collapse:collapse; font-size:13px; }
-  .schedule-table th { padding:8px 12px; text-align:left; color:var(--text-tertiary); font-weight:500; border-bottom: 1px solid var(--glass-border); }
-  .schedule-table td { padding:10px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-  .schedule-table tr:last-child td { border-bottom:none; }
-  .status-badge {
-    display:inline-block; padding: 3px 10px; border-radius:6px; font-size:11px; font-weight:600;
-  }
-  .badge-confirmed { background:rgba(48,209,88,0.15); color: var(--accent2); }
-  .badge-pending { background:rgba(255,159,10,0.15); color: var(--accent3); }
-  .badge-cancelled { background:rgba(255,69,58,0.15); color: var(--accent-red); }
+.tg{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:20px}
+.tb{
+  padding:13px 8px;border-radius:10px;text-align:center;
+  background:var(--bg2);border:0.5px solid var(--b1);
+  font-family:var(--font-d);font-size:14px;font-weight:600;color:var(--t1);
+  cursor:pointer;transition:var(--tr);
+}
+.tb:hover{background:var(--bg4);border-color:var(--b2)}
+.tb.sel{background:var(--t1);border-color:transparent;color:#050507}
+.tb.busy{background:var(--red-d);border-color:var(--red-b);color:rgba(255,82,82,0.5);cursor:not-allowed;font-size:11px;font-family:var(--font-b)}
 
-  /* CLIENT LIST */
-  .client-row {
-    display:flex; align-items:center; gap:12px; padding:12px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-  }
-  .client-row:last-child { border-bottom:none; }
-  .client-avatar {
-    width:38px; height:38px; border-radius:50%;
-    display:flex; align-items:center; justify-content:center;
-    font-size:14px; font-weight:700; flex-shrink:0;
-  }
-  .client-info { flex:1; }
-  .client-name { font-size:14px; font-weight:600; }
-  .client-meta { font-size:12px; color:var(--text-secondary); }
-  .client-balance { font-size:14px; font-weight:700; color:var(--accent2); }
+.boxg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px}
+.boxc{
+  padding:22px 14px;border-radius:14px;text-align:center;
+  background:var(--bg2);border:0.5px solid var(--b1);cursor:pointer;transition:var(--tr);
+}
+.boxc:hover{background:var(--bg4);border-color:var(--b2)}
+.boxc.sel{background:var(--t1);border-color:transparent}
+.boxc.sel .boxn{color:#050507}.boxc.sel .boxst{color:rgba(5,5,7,0.5)}
+.boxc.busy{opacity:0.35;cursor:not-allowed;pointer-events:none}
+.boxic{font-size:26px;margin-bottom:8px}
+.boxn{font-size:14px;font-weight:700;color:var(--t1);margin-bottom:4px;font-family:var(--font-d)}
+.boxst{font-size:11.5px;font-weight:600}
+.boxst.free{color:var(--green)}.boxst.busy{color:var(--red)}
 
-  /* CALENDAR WIDGET */
-  .mini-calendar { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
-  .cal-day {
-    aspect-ratio:1; display:flex; align-items:center; justify-content:center;
-    border-radius:8px; font-size:12px; font-weight:500;
-    color:var(--text-secondary); cursor:pointer; transition:var(--transition);
-  }
-  .cal-day:hover { background:var(--glass-bg); color:var(--text-primary); }
-  .cal-day.today { background:var(--accent); color:white; }
-  .cal-day.has-booking { position:relative; color:var(--text-primary); }
-  .cal-day.has-booking::after {
-    content:''; position:absolute; bottom:2px; left:50%; transform:translateX(-50%);
-    width:4px; height:4px; border-radius:50%; background:var(--accent2);
-  }
-  .cal-day.empty { cursor:default; }
-  .cal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
-  .cal-nav { background:none; border:none; color:var(--text-secondary); cursor:pointer; padding:4px; border-radius:6px; transition:var(--transition); font-size:16px; }
-  .cal-nav:hover { color:var(--text-primary); background:var(--glass-bg); }
-  .cal-month { font-size:15px; font-weight:600; }
-  .cal-weekdays { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:4px; }
-  .cal-wd { text-align:center; font-size:10px; color:var(--text-tertiary); font-weight:600; padding:2px 0; }
+.fg{margin-bottom:13px}
+.fl{font-size:11px;font-weight:600;letter-spacing:0.4px;color:var(--t3);margin-bottom:6px;display:block;text-transform:uppercase}
+.fi{
+  width:100%;padding:11px 14px;border-radius:10px;
+  background:rgba(255,255,255,0.05);border:0.5px solid var(--b2);
+  color:var(--t1);font-family:var(--font-b);font-size:14px;outline:none;transition:var(--tr);
+}
+.fi:focus{border-color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.08)}
+.fi::placeholder{color:var(--t4)}
+.fi option{background:#0d0d0f;color:var(--t1)}
 
-  /* BOX STATUS VISUAL */
-  .boxes-status { display:flex; flex-direction:column; gap:8px; }
-  .box-row {
-    display:flex; align-items:center; gap:12px; padding:10px 14px;
-    border-radius:10px; background:var(--card-bg); border:1px solid var(--glass-border);
-  }
-  .box-indicator { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
-  .box-indicator.free { background:var(--accent2); box-shadow: 0 0 8px rgba(48,209,88,0.5); }
-  .box-indicator.busy { background:var(--accent-red); box-shadow: 0 0 8px rgba(255,69,58,0.5); }
-  .box-row-name { font-size:14px; font-weight:500; flex:1; }
-  .box-row-status { font-size:12px; color:var(--text-secondary); }
-  .box-row-time { font-size:12px; color:var(--text-tertiary); }
+.bsum{
+  background:rgba(255,255,255,0.04);border:0.5px solid var(--b1);
+  border-radius:11px;padding:16px;margin-bottom:20px;
+}
+.bsr{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;border-bottom:0.5px solid rgba(255,255,255,0.04)}
+.bsr:last-child{border-bottom:none}
+.bsk{color:var(--t3)}.bsv{font-weight:600;color:var(--t1)}
 
-  /* SUCCESS SCREEN */
-  .success-screen {
-    display:none; flex-direction:column; align-items:center; justify-content:center;
-    padding:60px 20px; text-align:center;
-  }
-  .success-screen.show { display:flex; }
-  .success-icon {
-    width:80px; height:80px; border-radius:50%; background:rgba(48,209,88,0.15);
-    border: 2px solid var(--accent2);
-    display:flex; align-items:center; justify-content:center;
-    font-size:36px; margin-bottom:24px;
-    animation: popIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275);
-  }
-  @keyframes popIn { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
-  .success-title { font-size:28px; font-weight:700; margin-bottom:12px; }
-  .success-sub { font-size:16px; color:var(--text-secondary); margin-bottom:32px; line-height:1.6; }
-  .success-card {
-    background:var(--glass-bg); border:1px solid var(--glass-border);
-    border-radius:var(--radius); padding:24px; width:100%; max-width:360px;
-    text-align:left; margin-bottom:32px;
-  }
-  .success-row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:14px; }
-  .success-row:last-child { border-bottom:none; }
-  .success-key { color:var(--text-secondary); }
-  .success-val { font-weight:500; }
+.btn-main{
+  width:100%;padding:14px;border-radius:11px;border:none;
+  background:var(--t1);
+  font-family:var(--font-b);font-size:14.5px;font-weight:600;color:#050507;
+  cursor:pointer;transition:var(--tr);
+}
+.btn-main:hover{background:rgba(255,255,255,0.9);transform:translateY(-1px);box-shadow:var(--neon-glow)}
+.btn-main:disabled{opacity:0.4;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-back{
+  padding:8px 16px;border-radius:9px;border:0.5px solid var(--b1);
+  background:transparent;font-family:var(--font-b);font-size:13px;font-weight:500;
+  color:var(--t3);cursor:pointer;transition:var(--tr);margin-bottom:18px;display:inline-block;
+}
+.btn-back:hover{background:var(--bg3);color:var(--t1)}
 
-  /* === ABOUT PAGE === */
-  .about-layout { max-width:1000px; margin:0 auto; padding:40px 2rem 80px; }
-  .about-hero { text-align:center; margin-bottom:60px; }
-  .about-title { font-size:48px; font-weight:700; letter-spacing:-2px; margin-bottom:16px; }
-  .about-text { font-size:18px; color:var(--text-secondary); line-height:1.7; }
-  .features-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; margin-bottom:48px; }
-  .feature-card {
-    background:var(--glass-bg); backdrop-filter:var(--blur);
-    border:1px solid var(--glass-border); border-radius:var(--radius); padding:28px;
-    transition:var(--transition);
-  }
-  .feature-card:hover { background:var(--card-hover); transform:translateY(-3px); }
-  .feature-icon { font-size:32px; margin-bottom:16px; }
-  .feature-name { font-size:18px; font-weight:600; margin-bottom:8px; }
-  .feature-desc { font-size:14px; color:var(--text-secondary); line-height:1.6; }
-  .contact-bar {
-    background:var(--glass-bg); backdrop-filter:var(--blur);
-    border:1px solid var(--glass-border); border-radius:var(--radius); padding:32px;
-    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:20px;
-  }
-  .contact-info { display:flex; flex-direction:column; gap:8px; }
-  .contact-item { display:flex; align-items:center; gap:10px; font-size:15px; }
-  .contact-item-icon { width:32px; height:32px; border-radius:8px; background:rgba(10,132,255,0.15); display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+.success-w{display:flex;flex-direction:column;align-items:center;padding:46px 16px;text-align:center}
+.sico{
+  width:68px;height:68px;border-radius:50%;
+  background:var(--green-d);border:1px solid var(--green-b);
+  display:flex;align-items:center;justify-content:center;font-size:26px;
+  margin-bottom:20px;box-shadow:0 0 30px rgba(0,230,118,0.15);
+  animation:pp .5s cubic-bezier(.175,.885,.32,1.275);
+}
+@keyframes pp{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.sttl{font-family:var(--font-d);font-size:24px;font-weight:700;color:var(--t1);letter-spacing:-0.5px;margin-bottom:8px}
+.ssub2{font-size:14px;color:var(--t2);margin-bottom:26px;line-height:1.6}
+.scard{
+  background:var(--bg3);border:0.5px solid var(--b1);
+  border-radius:14px;padding:18px;width:100%;max-width:320px;text-align:left;margin-bottom:24px;
+}
+.sr{display:flex;justify-content:space-between;padding:6px 0;border-bottom:0.5px solid var(--b1);font-size:13px}
+.sr:last-child{border-bottom:none}
+.sk{color:var(--t3)}.sv{font-weight:600;color:var(--t1)}
 
-  /* TOAST */
-  .toast {
-    position:fixed; bottom:24px; right:24px; z-index:1000;
-    background:var(--glass-strong); backdrop-filter:var(--blur);
-    border:1px solid var(--glass-border); border-radius:14px;
-    padding:14px 20px; display:flex; align-items:center; gap:10px;
-    font-size:14px; font-weight:500; transform:translateY(100px); opacity:0;
-    transition: all 0.4s cubic-bezier(0.4,0,0.2,1); pointer-events:none;
-  }
-  .toast.show { transform:translateY(0); opacity:1; }
-  .toast.error { border-color:rgba(255,69,58,0.4); }
-  .toast.success { border-color:rgba(48,209,88,0.4); }
+.ld{display:flex;align-items:center;gap:8px;color:var(--t3);font-size:13px;padding:16px 0}
+.sp{width:13px;height:13px;border:1.5px solid rgba(255,255,255,0.12);border-top-color:rgba(255,255,255,0.7);border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
 
-  /* LOADING */
-  .loading { display:flex; align-items:center; gap:8px; color:var(--text-secondary); font-size:14px; padding:20px 0; }
-  .spinner { width:16px; height:16px; border:2px solid var(--glass-border); border-top-color:var(--accent); border-radius:50%; animation: spin 0.8s linear infinite; }
-  @keyframes spin { to{transform:rotate(360deg)} }
+/* ── SUBSCRIPTIONS ── */
+.subs-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.sub{
+  border-radius:24px;padding:28px 24px;position:relative;overflow:hidden;
+  transition:var(--tr);
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:var(--blur-sm);-webkit-backdrop-filter:var(--blur-sm);
+}
+.sub::before{
+  content:'';position:absolute;inset:0;border-radius:24px;padding:0.5px;
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;
+}
+.sub.silver::before{background:linear-gradient(135deg,rgba(200,210,220,0.4),rgba(255,255,255,0.1),rgba(180,190,205,0.35))}
+.sub.gold::before{background:linear-gradient(135deg,rgba(255,255,255,0.45),rgba(255,255,255,0.15),rgba(255,255,255,0.35))}
+.sub.plat::before{background:linear-gradient(135deg,rgba(255,255,255,0.6),rgba(200,200,200,0.2),rgba(255,255,255,0.5))}
+.sub:hover{transform:translateY(-5px);background:rgba(255,255,255,0.08)}
+.sub.gold{background:rgba(255,255,255,0.09)}
+.sub-badge{
+  display:inline-block;padding:3px 11px;border-radius:20px;
+  font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:18px;
+  background:rgba(255,255,255,0.08);color:var(--t2);border:0.5px solid var(--b2);
+}
+.sub.gold .sub-badge{background:rgba(255,255,255,0.15);color:var(--t1)}
+.sub.plat .sub-badge{background:rgba(255,255,255,0.18);color:var(--t1)}
+.sub-name{font-family:var(--font-d);font-size:28px;font-weight:700;letter-spacing:-1px;margin-bottom:4px;color:var(--t1)}
+.sub-mo{font-size:13px;color:var(--t3);margin-bottom:20px}
+.sub-price{font-family:var(--font-d);font-size:36px;font-weight:700;letter-spacing:-2px;color:var(--t1)}
+.sub-price-l{font-size:12px;color:var(--t3);margin-bottom:6px}
+.sub-bonus{
+  display:inline-block;padding:4px 12px;border-radius:8px;
+  font-size:12.5px;font-weight:700;margin-bottom:18px;
+  background:var(--green-d);color:var(--green);border:0.5px solid var(--green-b);
+}
+.sub-acc{font-size:13.5px;color:var(--t2);margin-bottom:22px;line-height:1.55}
+.sub-acc strong{color:var(--t1)}
+.sub-btn{
+  width:100%;padding:12px;border-radius:11px;border:none;
+  font-family:var(--font-b);font-size:13.5px;font-weight:600;cursor:pointer;transition:var(--tr);
+}
+.silver .sub-btn,.plat .sub-btn{background:rgba(255,255,255,0.08);color:var(--t1);border:0.5px solid var(--b2)}
+.silver .sub-btn:hover,.plat .sub-btn:hover{background:rgba(255,255,255,0.15);border-color:var(--b3)}
+.gold .sub-btn{background:var(--t1);color:#050507;border:none}
+.gold .sub-btn:hover{background:rgba(255,255,255,0.9);box-shadow:var(--neon-glow)}
 
-  /* FADE IN */
-  .fade-up { opacity:0; transform:translateY(20px); transition:opacity 0.5s, transform 0.5s; }
-  .fade-up.visible { opacity:1; transform:none; }
+.sub-info-block{
+  max-width:660px;margin:36px auto 0;
+  background:var(--bg2);border:0.5px solid var(--b1);
+  border-radius:16px;padding:22px;
+}
+.sib-title{font-size:14px;font-weight:600;color:var(--t1);margin-bottom:10px}
+.sib-list{font-size:13px;color:var(--t2);line-height:2.1;padding-left:16px}
 
-  /* MOBILE */
-  @media(max-width:768px) {
-    .hero { grid-template-columns:1fr; gap:30px; padding:40px 1rem 60px; }
-    .hero-title { font-size:38px; }
-    .hero-visual { display:none; }
-    .crm-grid { grid-template-columns:1fr; }
-    .crm-panel.full { grid-column:span 1; }
-    .dates-grid { grid-template-columns:repeat(4,1fr); }
-    .boxes-grid { grid-template-columns:1fr; }
-    nav { padding:0 1rem; }
-    .nav-links .nav-link:not(.active) { display:none; }
-  }
+/* Modal */
+.modal-ov{
+  display:none;position:fixed;inset:0;z-index:700;
+  background:rgba(5,5,7,0.85);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  align-items:center;justify-content:center;
+}
+.modal-ov.on{display:flex}
+.modal{
+  background:rgba(18,18,22,0.98);
+  border-radius:24px;padding:34px;width:100%;max-width:420px;margin:1rem;
+  position:relative;animation:ms .3s cubic-bezier(.4,0,.2,1);
+  border:0.5px solid var(--b2);
+}
+@keyframes ms{from{transform:translateY(22px);opacity:0}to{transform:none;opacity:1}}
+.modal-ttl{font-family:var(--font-d);font-size:18px;font-weight:700;color:var(--t1);margin-bottom:5px}
+.modal-sub{font-size:13px;color:var(--t3);margin-bottom:22px}
+.modal-close{position:absolute;top:18px;right:20px;background:none;border:none;font-size:18px;color:var(--t3);cursor:pointer;transition:var(--tr)}
+.modal-close:hover{color:var(--t1)}
+.modal-sum{background:var(--bg3);border:0.5px solid var(--b1);border-radius:11px;padding:14px;margin-bottom:18px}
+.msr{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;border-bottom:0.5px solid var(--b1)}
+.msr:last-child{border-bottom:none}
+.msk{color:var(--t3)}.msv{font-weight:600;color:var(--t1)}
+.modal-acts{display:flex;gap:8px;margin-top:14px}
+.modal-cancel{flex:1;padding:11px;border-radius:9px;background:transparent;border:0.5px solid var(--b1);font-family:var(--font-b);font-size:13.5px;font-weight:500;color:var(--t3);cursor:pointer;transition:var(--tr)}
+.modal-cancel:hover{color:var(--t1);background:var(--bg3)}
+.modal-ok{flex:2;padding:11px;border-radius:9px;border:none;background:var(--t1);font-family:var(--font-b);font-size:13.5px;font-weight:600;color:#050507;cursor:pointer;transition:var(--tr)}
+.modal-ok:hover{box-shadow:var(--neon-glow)}
+.modal-ok:disabled{opacity:0.4;cursor:not-allowed}
 
-  /* TABS */
-  .tab-bar { display:flex; gap:4px; background:var(--glass-bg); border-radius:12px; padding:4px; margin-bottom:20px; }
-  .tab-btn { flex:1; padding:8px; border:none; background:none; color:var(--text-secondary); border-radius:9px; cursor:pointer; font-size:13px; font-weight:500; font-family:inherit; transition:var(--transition); }
-  .tab-btn.active { background:var(--glass-strong); color:var(--text-primary); }
+/* ── ABOUT ── */
+.about-w{max-width:940px;margin:0 auto;padding:40px 2rem 80px}
+.about-ttl{font-family:var(--font-d);font-size:44px;font-weight:700;letter-spacing:-2.5px;color:var(--t1);margin-bottom:12px}
+.about-sub{font-size:16px;color:var(--t2);line-height:1.72;margin-bottom:44px}
+.feat-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:11px;margin-bottom:40px}
+.feat{
+  padding:22px 18px;background:var(--bg2);backdrop-filter:var(--blur-sm);-webkit-backdrop-filter:var(--blur-sm);
+  border:0.5px solid var(--b1);border-radius:18px;transition:var(--tr);
+}
+.feat:hover{background:var(--bg3);transform:translateY(-2px);border-color:var(--b2)}
+.feat-ico{font-size:24px;margin-bottom:11px}
+.feat-name{font-size:14px;font-weight:600;color:var(--t1);margin-bottom:6px}
+.feat-desc{font-size:12.5px;color:var(--t2);line-height:1.65}
+.cbar{
+  background:var(--bg3);backdrop-filter:var(--blur-sm);-webkit-backdrop-filter:var(--blur-sm);
+  border:0.5px solid var(--b1);border-radius:20px;padding:28px;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:18px;
+}
+.ci-wrap{display:flex;flex-direction:column;gap:9px}
+.ci{display:flex;align-items:center;gap:9px;font-size:14px;color:var(--t2)}
+.cico{width:28px;height:28px;border-radius:7px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;border:0.5px solid var(--b1)}
 
-  /* ADMIN GATE */
-  .admin-gate {
-    display:flex; align-items:center; justify-content:center;
-    min-height: calc(100vh - 64px);
-  }
-  .admin-gate-card {
-    background:var(--glass-bg); backdrop-filter:var(--blur);
-    border:1px solid var(--glass-border); border-radius:var(--radius);
-    padding:40px; width:100%; max-width:380px; text-align:center;
-  }
-  .admin-gate-icon { font-size:48px; margin-bottom:20px; }
-  .admin-gate-title { font-size:22px; font-weight:700; margin-bottom:8px; }
-  .admin-gate-sub { font-size:14px; color:var(--text-secondary); margin-bottom:24px; }
+/* ── CRM ── */
+.crm-gate-w{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 60px)}
+.crm-gate-card{
+  padding:40px 36px;width:100%;max-width:340px;text-align:center;
+  background:var(--bg3);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  border:0.5px solid var(--b2);border-radius:24px;
+}
+.cgico{font-size:36px;margin-bottom:14px}
+.cgt{font-family:var(--font-d);font-size:18px;font-weight:700;color:var(--t1);margin-bottom:7px}
+.cgs{font-size:13px;color:var(--t3);margin-bottom:20px}
+
+.crm-lay{max-width:1160px;margin:0 auto;padding:28px 2rem 80px}
+.crm-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.crm-h1{font-family:var(--font-d);font-size:22px;font-weight:700;color:var(--t1);letter-spacing:-0.5px}
+.crm-acts{display:flex;gap:7px}
+.crm-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:9px;margin-bottom:20px}
+.cs{padding:16px 14px;background:var(--bg2);backdrop-filter:var(--blur-sm);-webkit-backdrop-filter:var(--blur-sm);border:0.5px solid var(--b1);border-radius:14px}
+.csn{font-family:var(--font-d);font-size:28px;font-weight:700;margin-bottom:2px}
+.csl{font-size:10.5px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:0.5px}
+.crm-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cp{padding:20px;background:var(--bg2);backdrop-filter:var(--blur-sm);-webkit-backdrop-filter:var(--blur-sm);border:0.5px solid var(--b1);border-radius:20px}
+.cp.full{grid-column:span 2}
+.cpt{font-size:13.5px;font-weight:600;color:var(--t1);margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.cpd{width:6px;height:6px;border-radius:50%}
+.cpd.w{background:var(--t1)}.cpd.g{background:var(--green)}.cpd.r{background:var(--red)}
+
+.bt2{width:100%;border-collapse:collapse;font-size:12.5px}
+.bt2 th{padding:6px 9px;text-align:left;color:var(--t3);font-weight:600;border-bottom:0.5px solid var(--b1);font-size:10px;text-transform:uppercase;letter-spacing:0.5px}
+.bt2 td{padding:8px 9px;border-bottom:0.5px solid rgba(255,255,255,0.03);color:var(--t2)}
+.bt2 tr:last-child td{border-bottom:none}
+.bdg{display:inline-block;padding:2px 7px;border-radius:5px;font-size:10.5px;font-weight:700}
+.bdg-ok{background:var(--green-d);color:var(--green)}
+.bdg-pnd{background:rgba(255,255,255,0.07);color:var(--t2)}
+.bdg-no{background:var(--red-d);color:var(--red)}
+
+.crow{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:0.5px solid rgba(255,255,255,0.04)}
+.crow:last-child{border-bottom:none}
+.cava{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:12px;font-weight:700;flex-shrink:0}
+.cn{font-size:13px;font-weight:600;color:var(--t1)}
+.cm{font-size:11px;color:var(--t3)}
+.cbal{font-size:13px;font-weight:700;color:var(--green)}
+
+.blr{display:flex;align-items:center;gap:9px;padding:9px 11px;background:var(--bg2);border:0.5px solid var(--b1);border-radius:10px;margin-bottom:7px}
+.blrd{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.blrd.free{background:var(--green);box-shadow:0 0 6px var(--green)}
+.blrd.busy{background:var(--red);box-shadow:0 0 6px var(--red)}
+.blrn{flex:1;font-size:13px;font-weight:600;color:var(--t1)}
+.blrs{font-size:11.5px;font-weight:600}
+.blrs.free{color:var(--green)}.blrs.busy{color:var(--red)}
+.blrt{font-size:10.5px;color:var(--t3)}
+
+.calh{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px}
+.caln{background:none;border:none;color:var(--t3);cursor:pointer;padding:4px 8px;border-radius:6px;font-size:15px;transition:var(--tr)}
+.caln:hover{color:var(--t1);background:var(--bg3)}
+.calm{font-size:13.5px;font-weight:600;color:var(--t1)}
+.cal-wds{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:3px}
+.cal-wd{text-align:center;font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;padding:2px 0}
+.cal-g2{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cald{
+  aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  border-radius:7px;font-size:11.5px;font-weight:500;color:var(--t3);cursor:pointer;transition:var(--tr);
+}
+.cald:hover{background:var(--bg3);color:var(--t1)}
+.cald.today{background:var(--t1);color:#050507;font-weight:700}
+.cald.hasb{color:var(--t1);position:relative}
+.cald.hasb::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:3px;height:3px;border-radius:50%;background:var(--green)}
+.cald.empty{cursor:default}
+
+/* ── SCHEDULE TABLE ── */
+.sched-t{width:100%;border-collapse:collapse;margin-top:12px}
+.sched-t td,.sched-t th{padding:9px 14px;border-bottom:0.5px solid var(--b1);font-size:13px;text-align:left}
+.sched-t th{color:var(--t3);font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:0.5px}
+.sched-t td:first-child{color:var(--t1);font-weight:600}
+.sched-t td:last-child{font-weight:600}
+.sched-open{color:var(--green)}.sched-close{color:var(--red)}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:20px;right:20px;z-index:900;
+  background:rgba(18,18,22,0.96);backdrop-filter:var(--blur-sm);-webkit-backdrop-filter:var(--blur-sm);
+  border:0.5px solid var(--b2);border-radius:12px;
+  padding:11px 16px;font-size:13px;font-weight:500;color:var(--t1);
+  display:flex;align-items:center;gap:7px;
+  transform:translateY(70px);opacity:0;transition:all .35s cubic-bezier(.4,0,.2,1);pointer-events:none;
+}
+.toast.on{transform:translateY(0);opacity:1}
+.toast.ok{border-color:var(--green-b)}
+.toast.err{border-color:var(--red-b)}
+
+/* ── MOBILE ── */
+@media(max-width:780px){
+  .hero{grid-template-columns:1fr;gap:24px;padding:50px 1.2rem 36px}
+  h1{font-size:38px;letter-spacing:-2px}
+  .hero-right{display:none}
+  .crm-grid{grid-template-columns:1fr}.cp.full{grid-column:span 1}
+  .dg{grid-template-columns:repeat(4,1fr)}
+  .boxg{grid-template-columns:1fr 1fr}
+  nav{padding:0 1.2rem}
+  .nl:not(.on){display:none}
+  .tg{grid-template-columns:repeat(3,1fr)}
+}
 </style>
 </head>
 <body>
 
-<div class="bg-scene"></div>
-<div class="bg-orb orb1"></div>
-<div class="bg-orb orb2"></div>
-<div class="bg-orb orb3"></div>
+<div class="bg">
+  <div class="bg-base"></div>
+  <div class="bg-lines"></div>
+  <div class="bg-vignette"></div>
+  <div class="bg-orb o1"></div>
+  <div class="bg-orb o2"></div>
+</div>
 
 <!-- NAV -->
 <nav>
-  <div class="nav-logo">1333 <span>Car</span> Center</div>
+  <div class="nav-logo">1333 <em>/</em> Car Center</div>
   <div class="nav-links">
-    <button class="nav-link active" onclick="showPage('home')">Головна</button>
-    <button class="nav-link" onclick="showPage('booking')">Записатись</button>
-    <button class="nav-link" onclick="showPage('services')">Послуги</button>
-    <button class="nav-link" onclick="showPage('crm')">CRM</button>
-    <button class="nav-link" onclick="showPage('about')">Контакти</button>
+    <button class="nl on" onclick="go('home')">Головна</button>
+    <button class="nl" onclick="go('booking')">Записатись</button>
+    <button class="nl" onclick="go('services')">Послуги</button>
+    <button class="nl" onclick="go('subs')">Абонементи</button>
+    <button class="nl" onclick="go('about')">Контакти</button>
   </div>
-  <button class="nav-cta" onclick="showPage('booking')">Записатись →</button>
+  <button class="nav-cta" onclick="go('booking')">Записатись →</button>
 </nav>
 
-<!-- ===================== HOME ===================== -->
-<div class="page active" id="page-home">
+<!-- ═══ HOME ═══ -->
+<div class="page on" id="page-home">
   <div class="hero">
     <div>
-      <div class="hero-badge"><div class="hero-badge-dot"></div>Відкрито · 08:00–21:00</div>
-      <h1 class="hero-title">
-        <span class="grad">Автомийка</span><br>
-        нового <span class="blue">рівня</span>
-      </h1>
-      <p class="hero-sub">Преміальний догляд за вашим авто. Три боксии, миттєва онлайн-запис, прозора CRM-система.</p>
+      <div class="hero-tag"><div class="h-dot"></div>Відчинено · Пн–Пт 09–20 · Сб–Нд 10–20</div>
+      <h1>Авто<span>мийка</span><br>нового рівня</h1>
+      <p class="hero-sub">Три бокси, онлайн-запис без черг, абонементи зі знижками до 20%. Преміальний догляд за вашим авто у Харкові.</p>
       <div class="hero-btns">
-        <button class="btn-primary" onclick="showPage('booking')">Записатись онлайн</button>
-        <button class="btn-glass" onclick="showPage('services')">Переглянути ціни</button>
+        <button class="btn-white" onclick="go('booking')">Записатись онлайн</button>
+        <button class="btn-outline" onclick="go('services')">Прайс-лист →</button>
       </div>
     </div>
-    <div class="hero-visual">
-      <div class="glass-card">
-        <div style="font-size:13px;color:var(--text-tertiary);margin-bottom:12px;font-weight:500;">СТАТИСТИКА СЬОГОДНІ</div>
-        <div class="stat-row">
-          <div class="stat-item"><div class="stat-num blue" id="stat-bookings">0</div><div class="stat-label">Записів</div></div>
-          <div class="stat-item"><div class="stat-num green" id="stat-clients">0</div><div class="stat-label">Клієнтів</div></div>
-          <div class="stat-item"><div class="stat-num orange" id="stat-boxes">3</div><div class="stat-label">Боксів</div></div>
+    <div class="hero-right">
+      <div class="hcard">
+        <div class="hc-lbl">Вільні слоти сьогодні</div>
+        <div class="slots" id="hero-slots"><div class="ld"><div class="sp"></div>Завантаження...</div></div>
+      </div>
+      <div class="hcard">
+        <div class="hc-lbl">Стан боксів зараз</div>
+        <div id="hero-boxes">
+          <div class="brow"><div class="bdot free"></div><div class="bname">Box 1</div><div class="bst free">Вільний</div></div>
+          <div class="brow"><div class="bdot free"></div><div class="bname">Box 2</div><div class="bst free">Вільний</div></div>
+          <div class="brow"><div class="bdot free"></div><div class="bname">Box 3</div><div class="bst free">Вільний</div></div>
         </div>
-      </div>
-      <div class="glass-card">
-        <div class="bm-label">Вільні слоти на сьогодні</div>
-        <div class="bm-slots" id="hero-slots"></div>
-      </div>
-      <div class="glass-card">
-        <div class="boxes-status" id="hero-boxes"></div>
       </div>
     </div>
   </div>
-
-  <div class="section">
-    <div class="section-header">
-      <h2 class="section-title">Наші переваги</h2>
-      <p class="section-sub">Все що потрібно для вашого автомобіля</p>
+  <div class="sec">
+    <div class="sec-hd">
+      <div class="sec-ttl">Наші послуги</div>
+      <div class="sec-sub">Повний спектр догляду для вашого автомобіля</div>
     </div>
-    <div class="services-grid">
-      <div class="service-card">
-        <div class="service-icon" style="background:rgba(10,132,255,0.15)">🚿</div>
-        <div class="service-name">Комплексна мийка</div>
-        <div class="service-desc">Повна обробка кузова, салону, дисків та скла. Захисне покриття за бажанням.</div>
-        <div class="service-price">від 250 <span>грн</span></div>
-      </div>
-      <div class="service-card">
-        <div class="service-icon" style="background:rgba(48,209,88,0.15)">✨</div>
-        <div class="service-name">Детейлінг</div>
-        <div class="service-desc">Хімчистка, полірування, нанокерамічне покриття. Автомобіль як новий.</div>
-        <div class="service-price">від 800 <span>грн</span></div>
-      </div>
-      <div class="service-card">
-        <div class="service-icon" style="background:rgba(255,159,10,0.15)">🛡️</div>
-        <div class="service-name">Захисне покриття</div>
-        <div class="service-desc">Воск, тефлон, кераміка. Тривалий захист лакофарбового покриття.</div>
-        <div class="service-price">від 400 <span>грн</span></div>
-      </div>
-      <div class="service-card">
-        <div class="service-icon" style="background:rgba(255,69,58,0.15)">🪑</div>
-        <div class="service-name">Хімчистка салону</div>
-        <div class="service-desc">Видалення стійких забруднень, запахів. Реставрація пластику та шкіри.</div>
-        <div class="service-price">від 600 <span>грн</span></div>
-      </div>
-      <div class="service-card">
-        <div class="service-icon" style="background:rgba(10,132,255,0.15)">🔧</div>
-        <div class="service-name">Моторний відсік</div>
-        <div class="service-desc">Безпечне очищення двигуна та підкапотного простору.</div>
-        <div class="service-price">від 300 <span>грн</span></div>
-      </div>
-      <div class="service-card">
-        <div class="service-icon" style="background:rgba(48,209,88,0.15)">💎</div>
-        <div class="service-name">Абонемент</div>
-        <div class="service-desc">Економте до 30% з нашими абонементами. Безлімітні відвідування.</div>
-        <div class="service-price">від 500 <span>грн/міс</span></div>
-      </div>
+    <div class="srv-grid">
+      <div class="srv-card" onclick="go('services')"><div class="srv-ico">🚿</div><div class="srv-name">Комплексна мийка</div><div class="srv-desc">Кузов, салон, диски, скло. Результат як у автосалоні.</div><div class="srv-price">від 200 <span>грн</span></div></div>
+      <div class="srv-card" onclick="go('services')"><div class="srv-ico">✨</div><div class="srv-name">Детейлінг</div><div class="srv-desc">Повна хімчистка, полірування, кераміка. Преміальний результат.</div><div class="srv-price">від 1 500 <span>грн</span></div></div>
+      <div class="srv-card" onclick="go('services')"><div class="srv-ico">🛡️</div><div class="srv-name">Нанокераміка</div><div class="srv-desc">Надійний захист лакофарбового покриття на роки.</div><div class="srv-price">від 3 000 <span>грн</span></div></div>
+      <div class="srv-card" onclick="go('services')"><div class="srv-ico">🪑</div><div class="srv-name">Хімчистка салону</div><div class="srv-desc">Видалення стійких плям і запахів. Реставрація шкіри.</div><div class="srv-price">від 800 <span>грн</span></div></div>
+      <div class="srv-card" onclick="go('subs')"><div class="srv-ico">💎</div><div class="srv-name">Абонементи</div><div class="srv-desc">Silver · Gold · Platinum. Бонус до +20% на рахунок.</div><div class="srv-price">від 10 000 <span>грн</span></div></div>
+      <div class="srv-card" onclick="go('services')"><div class="srv-ico">🔧</div><div class="srv-name">Моторний відсік</div><div class="srv-desc">Безпечне очищення двигуна та підкапотного простору.</div><div class="srv-price">від 350 <span>грн</span></div></div>
     </div>
   </div>
 </div>
 
-<!-- ===================== BOOKING ===================== -->
+<!-- ═══ BOOKING ═══ -->
 <div class="page" id="page-booking">
-  <div class="booking-layout">
-    <div class="booking-steps" id="booking-steps">
-      <div class="step-item"><div class="step-dot active" id="step1-dot">1</div><div class="step-label">Дата</div></div>
-      <div class="step-item"><div class="step-dot" id="step2-dot">2</div><div class="step-label">Час</div></div>
-      <div class="step-item"><div class="step-dot" id="step3-dot">3</div><div class="step-label">Бокс</div></div>
-      <div class="step-item"><div class="step-dot" id="step4-dot">4</div><div class="step-label">Дані</div></div>
-      <div class="step-item"><div class="step-dot" id="step5-dot">✓</div><div class="step-label">Готово</div></div>
+  <div class="bwrap">
+    <div class="bsteps">
+      <div class="si"><div class="sdot on" id="sd1">1</div><div class="slabel">Дата</div></div>
+      <div class="si"><div class="sdot" id="sd2">2</div><div class="slabel">Час</div></div>
+      <div class="si"><div class="sdot" id="sd3">3</div><div class="slabel">Бокс</div></div>
+      <div class="si"><div class="sdot" id="sd4">4</div><div class="slabel">Дані</div></div>
+      <div class="si"><div class="sdot" id="sd5">✓</div><div class="slabel">Готово</div></div>
     </div>
-
-    <!-- STEP 1: DATE -->
-    <div class="booking-panel" id="booking-step1">
-      <div class="booking-title">Оберіть дату</div>
-      <div class="booking-sub">Доступні дати на найближчі 7 днів</div>
-      <div class="dates-grid" id="dates-grid"></div>
-      <button class="btn-next" onclick="goStep(2)" id="btn-step1">Далі →</button>
+    <!-- Step 1 -->
+    <div class="bpanel" id="bs1">
+      <div class="bt">Оберіть дату</div>
+      <div class="bsub">Запис доступний на найближчі 7 днів</div>
+      <div class="dg" id="dg"></div>
+      <button class="btn-main" onclick="bStep(2)">Далі →</button>
     </div>
-
-    <!-- STEP 2: TIME -->
-    <div class="booking-panel" id="booking-step2" style="display:none">
-      <button class="btn-back" onclick="goStep(1)">← Назад</button>
-      <div class="booking-title">Оберіть час</div>
-      <div class="booking-sub">Зайняті слоти позначені червоним</div>
-      <div class="times-grid" id="times-grid"></div>
-      <button class="btn-next" onclick="goStep(3)" id="btn-step2">Далі →</button>
+    <!-- Step 2 -->
+    <div class="bpanel" id="bs2" style="display:none">
+      <button class="btn-back" onclick="bStep(1)">← Назад</button>
+      <div class="bt">Оберіть час</div>
+      <div class="bsub">⛔ — всі бокси зайняті на цей час</div>
+      <div class="tg" id="tg"></div>
+      <button class="btn-main" onclick="bStep(3)">Далі →</button>
     </div>
-
-    <!-- STEP 3: BOX -->
-    <div class="booking-panel" id="booking-step3" style="display:none">
-      <button class="btn-back" onclick="goStep(2)">← Назад</button>
-      <div class="booking-title">Оберіть бокс</div>
-      <div class="booking-sub">Доступні боксии на обрану дату і час</div>
-      <div class="boxes-grid" id="boxes-grid"></div>
-      <button class="btn-next" onclick="goStep(4)" id="btn-step3">Далі →</button>
+    <!-- Step 3 -->
+    <div class="bpanel" id="bs3" style="display:none">
+      <button class="btn-back" onclick="bStep(2)">← Назад</button>
+      <div class="bt">Оберіть бокс</div>
+      <div class="bsub">Вільні бокси на обраний час</div>
+      <div class="boxg" id="boxg"></div>
+      <button class="btn-main" onclick="bStep(4)">Далі →</button>
     </div>
-
-    <!-- STEP 4: DETAILS -->
-    <div class="booking-panel" id="booking-step4" style="display:none">
-      <button class="btn-back" onclick="goStep(3)">← Назад</button>
-      <div class="booking-title">Ваші дані</div>
-      <div class="booking-sub">Для підтвердження запису</div>
-
-      <div class="booking-summary" id="booking-summary"></div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div class="form-group">
-          <label class="form-label">Ім'я та прізвище</label>
-          <input type="text" class="form-input" id="client-name" placeholder="Іван Іванов">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Телефон</label>
-          <input type="tel" class="form-input" id="client-phone" placeholder="+380 99 000 0000">
-        </div>
+    <!-- Step 4 -->
+    <div class="bpanel" id="bs4" style="display:none">
+      <button class="btn-back" onclick="bStep(3)">← Назад</button>
+      <div class="bt">Ваші дані</div>
+      <div class="bsub">Введіть контактну інформацію</div>
+      <div class="bsum" id="bsummary"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="fg"><label class="fl">Ім'я та прізвище</label><input type="text" class="fi" id="b-name" placeholder="Іван Іванов"></div>
+        <div class="fg"><label class="fl">Телефон</label><input type="tel" class="fi" id="b-phone" placeholder="+380 77 001 13 33"></div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Послуга</label>
-        <select class="form-select form-input" id="client-service">
-          <option value="Комплексна мийка">Комплексна мийка</option>
-          <option value="Детейлінг">Детейлінг</option>
-          <option value="Хімчистка салону">Хімчистка салону</option>
-          <option value="Захисне покриття">Захисне покриття</option>
-          <option value="Моторний відсік">Моторний відсік</option>
+      <div class="fg">
+        <label class="fl">Послуга</label>
+        <select class="fi" id="b-service">
+          <option>Комплексна мийка — Sedan (200 грн)</option>
+          <option>Комплексна мийка — SUV (280 грн)</option>
+          <option>Комплексна мийка — Мінівен (320 грн)</option>
+          <option>Хімчистка салону — Sedan (800 грн)</option>
+          <option>Хімчистка салону — SUV (1 100 грн)</option>
+          <option>Хімчистка салону — Мінівен (1 300 грн)</option>
+          <option>Детейлінг — Sedan (1 500 грн)</option>
+          <option>Детейлінг — SUV (2 000 грн)</option>
+          <option>Детейлінг — Мінівен (2 500 грн)</option>
+          <option>Нанокераміка — Sedan (3 000 грн)</option>
+          <option>Нанокераміка — SUV (4 000 грн)</option>
+          <option>Нанокераміка — Мінівен (5 000 грн)</option>
+          <option>Полірування — Sedan (500 грн)</option>
+          <option>Полірування — SUV (700 грн)</option>
+          <option>Захисне покриття — Sedan (400 грн)</option>
+          <option>Захисне покриття — SUV (550 грн)</option>
+          <option>Моторний відсік (350 грн)</option>
+          <option>Мийка дисків (200 грн)</option>
+          <option>Тонування скла — Sedan (1 200 грн)</option>
+          <option>Тонування скла — SUV (1 500 грн)</option>
+          <option>Тонування скла — Мінівен (1 800 грн)</option>
         </select>
       </div>
-      <div class="form-group">
-        <label class="form-label">Коментар (необов'язково)</label>
-        <input type="text" class="form-input" id="client-comment" placeholder="Тип авто, побажання...">
-      </div>
-      <button class="btn-next" onclick="submitBooking()" id="btn-submit">✓ Підтвердити запис</button>
+      <div class="fg"><label class="fl">Коментар</label><input type="text" class="fi" id="b-comment" placeholder="Колір авто, побажання..."></div>
+      <button class="btn-main" id="b-submit" onclick="submitBook()">✓ Підтвердити запис</button>
     </div>
-
-    <!-- STEP 5: SUCCESS -->
-    <div class="booking-panel" id="booking-step5" style="display:none">
-      <div class="success-screen show">
-        <div class="success-icon">✓</div>
-        <div class="success-title">Запис підтверджено!</div>
-        <div class="success-sub">Ваш запис успішно збережено.<br>Очікуємо вас в 1333 Car Center!</div>
-        <div class="success-card" id="booking-result"></div>
-        <button class="btn-next" onclick="resetBooking()" style="max-width:280px">Зробити ще запис</button>
+    <!-- Step 5 -->
+    <div class="bpanel" id="bs5" style="display:none">
+      <div class="success-w">
+        <div class="sico">✓</div>
+        <div class="sttl">Запис підтверджено!</div>
+        <div class="ssub2">Ваш запис збережено у системі.<br>Очікуємо вас у 1333 Car Center!</div>
+        <div class="scard" id="book-result"></div>
+        <button class="btn-main" onclick="resetBook()" style="max-width:240px">Новий запис</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ===================== SERVICES ===================== -->
+<!-- ═══ SERVICES ═══ -->
 <div class="page" id="page-services">
-  <div class="section" style="padding-top:40px">
-    <div class="section-header">
-      <h2 class="section-title">Прайс-лист</h2>
-      <p class="section-sub">Ціни залежать від типу та розміру авто</p>
+  <div class="sec" style="padding-top:40px">
+    <div class="sec-hd">
+      <div class="sec-ttl">Прайс-лист</div>
+      <div class="sec-sub">Оберіть тип вашого автомобіля</div>
     </div>
-    <div class="tab-bar" style="max-width:400px;margin:0 auto 32px">
-      <button class="tab-btn active" onclick="showCarType('sedan',this)">Sedan</button>
-      <button class="tab-btn" onclick="showCarType('suv',this)">SUV</button>
-      <button class="tab-btn" onclick="showCarType('minivan',this)">Мінівен</button>
+    <div class="ptabs">
+      <button class="ptab on" onclick="showPrices('sedan',this)">Sedan</button>
+      <button class="ptab" onclick="showPrices('suv',this)">SUV</button>
+      <button class="ptab" onclick="showPrices('minivan',this)">Мінівен</button>
     </div>
-    <div id="price-list" class="services-grid"></div>
+    <div class="pg" id="pg"></div>
   </div>
 </div>
 
-<!-- ===================== CRM ===================== -->
-<div class="page" id="page-crm">
-  <div id="crm-gate" class="admin-gate">
-    <div class="admin-gate-card">
-      <div class="admin-gate-icon">🔐</div>
-      <div class="admin-gate-title">Панель адміністратора</div>
-      <div class="admin-gate-sub">Введіть пароль для доступу до CRM-системи</div>
-      <div class="form-group">
-        <input type="password" class="form-input" id="admin-pass" placeholder="Пароль" onkeypress="if(event.key==='Enter')checkAdmin()">
-      </div>
-      <button class="btn-next" onclick="checkAdmin()">Увійти</button>
+<!-- ═══ SUBSCRIPTIONS ═══ -->
+<div class="page" id="page-subs">
+  <div class="sec" style="padding-top:40px">
+    <div class="sec-hd">
+      <div class="sec-ttl">Абонементи</div>
+      <div class="sec-sub">Купуйте абонемент і отримуйте бонус на рахунок</div>
     </div>
-  </div>
-
-  <div id="crm-content" style="display:none">
-    <div class="crm-layout">
-      <div class="crm-header">
-        <div class="crm-title">CRM Панель</div>
-        <div class="crm-actions">
-          <button class="btn-glass" onclick="refreshCRM()" style="padding:10px 18px;font-size:14px">↻ Оновити</button>
-          <button class="btn-glass" onclick="showAddBooking()" style="padding:10px 18px;font-size:14px">+ Запис</button>
-        </div>
+    <div class="subs-g">
+      <div class="sub silver">
+        <div class="sub-badge">Silver</div>
+        <div class="sub-name">Silver</div>
+        <div class="sub-mo">1 місяць · T-1</div>
+        <div class="sub-price">10 000 <span style="font-size:15px;color:var(--t3)">грн</span></div>
+        <div class="sub-price-l">Вартість абонементу</div>
+        <div class="sub-bonus">+10% бонус</div>
+        <div class="sub-acc">На рахунок зараховується <strong>11 000 грн</strong></div>
+        <button class="sub-btn" onclick="orderSub({id:'T-1',name:'Silver',months:1,price:10000,bonus:'10%',account:11000})">Придбати Silver →</button>
       </div>
-
-      <div class="crm-stats">
-        <div class="crm-stat"><div class="crm-stat-num blue" id="crm-total">—</div><div class="crm-stat-label">Всього записів</div></div>
-        <div class="crm-stat"><div class="crm-stat-num green" id="crm-today">—</div><div class="crm-stat-label">Сьогодні</div></div>
-        <div class="crm-stat"><div class="crm-stat-num orange" id="crm-clients">—</div><div class="crm-stat-label">Клієнтів</div></div>
-        <div class="crm-stat"><div class="crm-stat-num" id="crm-revenue" style="color:var(--accent3)">—</div><div class="crm-stat-label">Статус боксів</div></div>
+      <div class="sub gold">
+        <div class="sub-badge">Gold · Популярний</div>
+        <div class="sub-name">Gold</div>
+        <div class="sub-mo">3 місяці · T-2</div>
+        <div class="sub-price">30 000 <span style="font-size:15px;color:var(--t3)">грн</span></div>
+        <div class="sub-price-l">Вартість абонементу</div>
+        <div class="sub-bonus">+15% бонус</div>
+        <div class="sub-acc">На рахунок зараховується <strong>34 500 грн</strong></div>
+        <button class="sub-btn" onclick="orderSub({id:'T-2',name:'Gold',months:3,price:30000,bonus:'15%',account:34500})">Придбати Gold →</button>
       </div>
-
-      <div class="crm-grid">
-        <!-- Bookings table -->
-        <div class="crm-panel full">
-          <div class="panel-title"><div class="panel-dot blue"></div>Журнал записів</div>
-          <div id="bookings-table-wrap">
-            <div class="loading"><div class="spinner"></div>Завантаження з Google Sheets...</div>
-          </div>
-        </div>
-
-        <!-- Calendar -->
-        <div class="crm-panel">
-          <div class="panel-title"><div class="panel-dot orange"></div>Календар</div>
-          <div class="cal-header">
-            <button class="cal-nav" onclick="calPrev()">‹</button>
-            <div class="cal-month" id="cal-month-label">Травень 2026</div>
-            <button class="cal-nav" onclick="calNext()">›</button>
-          </div>
-          <div class="cal-weekdays">
-            <div class="cal-wd">Пн</div><div class="cal-wd">Вт</div><div class="cal-wd">Ср</div>
-            <div class="cal-wd">Чт</div><div class="cal-wd">Пт</div><div class="cal-wd">Сб</div>
-            <div class="cal-wd">Нд</div>
-          </div>
-          <div class="mini-calendar" id="mini-cal"></div>
-        </div>
-
-        <!-- Box status -->
-        <div class="crm-panel">
-          <div class="panel-title"><div class="panel-dot green"></div>Стан боксів зараз</div>
-          <div class="boxes-status" id="crm-boxes-status">
-            <div class="loading"><div class="spinner"></div>Перевіряємо...</div>
-          </div>
-        </div>
-
-        <!-- Clients -->
-        <div class="crm-panel full">
-          <div class="panel-title"><div class="panel-dot orange"></div>Клієнти</div>
-          <div id="clients-list">
-            <div class="loading"><div class="spinner"></div>Завантаження...</div>
-          </div>
-        </div>
+      <div class="sub plat">
+        <div class="sub-badge">Platinum</div>
+        <div class="sub-name">Platinum</div>
+        <div class="sub-mo">6 місяців · T-3</div>
+        <div class="sub-price">60 000 <span style="font-size:15px;color:var(--t3)">грн</span></div>
+        <div class="sub-price-l">Вартість абонементу</div>
+        <div class="sub-bonus">+20% бонус</div>
+        <div class="sub-acc">На рахунок зараховується <strong>72 000 грн</strong></div>
+        <button class="sub-btn" onclick="orderSub({id:'T-3',name:'Platinum',months:6,price:60000,bonus:'20%',account:72000})">Придбати Platinum →</button>
       </div>
+    </div>
+    <div class="sub-info-block">
+      <div class="sib-title">Як це працює?</div>
+      <ul class="sib-list">
+        <li>Заповніть заявку — адміністратор зв'яжеться для підтвердження оплати</li>
+        <li>Після оплати на ваш рахунок зараховується сума з бонусом</li>
+        <li>Послуги оплачуються з рахунку за прайс-листом</li>
+        <li>Абонемент діє протягом вказаного терміну з дня активації</li>
+        <li>Управляйте абонементом через Telegram-бот @Assistant_1333_Bot</li>
+      </ul>
     </div>
   </div>
 </div>
 
-<!-- ===================== ABOUT ===================== -->
+<!-- ═══ ABOUT ═══ -->
 <div class="page" id="page-about">
-  <div class="about-layout">
-    <div class="about-hero">
-      <h2 class="about-title">1333 Car Center</h2>
-      <p class="about-text">Преміальна автомийка у Харкові. Три боксии, досвідчена команда, сучасне обладнання та турбота про кожен автомобіль.</p>
+  <div class="about-w">
+    <div class="about-ttl">1333 Car Center</div>
+    <p class="about-sub">Преміальна автомийка у Харкові. Три бокси, досвідчена команда, сучасне обладнання та турбота про кожен автомобіль. Рейтинг 5.0 ⭐ (6 відгуків)</p>
+    <div class="feat-g">
+      <div class="feat"><div class="feat-ico">🕐</div><div class="feat-name">Графік роботи</div><div class="feat-desc">Пн–Пт: 09:00–20:00<br>Сб–Нд: 10:00–20:00</div></div>
+      <div class="feat"><div class="feat-ico">📍</div><div class="feat-name">Адреса</div><div class="feat-desc">вул. Гвардійців-Широнінців 51/1<br>Харків, Україна</div></div>
+      <div class="feat"><div class="feat-ico">🤖</div><div class="feat-name">Telegram бот</div><div class="feat-desc">@Assistant_1333_Bot<br>Запис, абонементи, кабінет</div></div>
+      <div class="feat"><div class="feat-ico">🏆</div><div class="feat-name">Три бокси</div><div class="feat-desc">Box 1, Box 2, Box 3<br>Онлайн-бронювання без черг</div></div>
+      <div class="feat"><div class="feat-ico">💎</div><div class="feat-name">Абонементи</div><div class="feat-desc">Silver / Gold / Platinum<br>Бонус на рахунок до +20%</div></div>
+      <div class="feat"><div class="feat-ico">☕</div><div class="feat-name">Зручності</div><div class="feat-desc">Wi-Fi, кавоварка<br>Можна з тваринами 🐾</div></div>
     </div>
-    <div class="features-grid" style="margin-bottom:40px">
-      <div class="feature-card"><div class="feature-icon">🕐</div><div class="feature-name">Час роботи</div><div class="feature-desc">Понеділок–Субота: 08:00–21:00<br>Неділя: 09:00–18:00</div></div>
-      <div class="feature-card"><div class="feature-icon">📍</div><div class="feature-name">Адреса</div><div class="feature-desc">вул. Гвардійців-Широнінців 51/1<br>Харків, Україна</div></div>
-      <div class="feature-card"><div class="feature-icon">📱</div><div class="feature-name">Telegram бот</div><div class="feature-desc">@Assistant_1333_Bot<br>Запис, абонементи, статистика</div></div>
-      <div class="feature-card"><div class="feature-icon">💎</div><div class="feature-name">Абонементи</div><div class="feature-desc">Вигідні абонементи для постійних клієнтів. Знижки до 30%.</div></div>
-    </div>
-    <div class="contact-bar">
+    <div class="cbar">
       <div>
-        <div style="font-size:20px;font-weight:700;margin-bottom:4px">Зв'яжіться з нами</div>
-        <div style="font-size:14px;color:var(--text-secondary)">Відповімо протягом кількох хвилин</div>
+        <div style="font-family:var(--font-d);font-size:16px;font-weight:700;color:var(--t1);margin-bottom:4px">Зв'яжіться з нами</div>
+        <div style="font-size:13px;color:var(--t3)">Відповідаємо протягом кількох хвилин</div>
       </div>
-      <div class="contact-info">
-        <div class="contact-item"><div class="contact-item-icon">📞</div><span>+380 77 001 13 33</span></div>
-        <div class="contact-item"><div class="contact-item-icon">💬</div><span>@Assistant_1333_Bot</span></div>
-        <div class="contact-item"><div class="contact-item-icon">📍</div><span>вул. Гвардійців-Широнінців 51/1</span></div>
+      <div class="ci-wrap">
+        <div class="ci"><div class="cico">📞</div>+380 77 001 13 33</div>
+        <div class="ci"><div class="cico">✈️</div>@car_1333_service (Telegram)</div>
+        <div class="ci"><div class="cico">📍</div>вул. Гвардійців-Широнінців 51/1</div>
+        <div class="ci"><div class="cico">📸</div>@1333_car_center (Instagram)</div>
       </div>
-      <button class="btn-primary" onclick="showPage('booking')">Записатись онлайн →</button>
+      <button class="btn-white" onclick="go('booking')">Записатись →</button>
     </div>
   </div>
 </div>
 
-<!-- TOAST -->
+<!-- ═══ CRM (HIDDEN) ═══ -->
+<!-- Доступ: Ctrl+Shift+A або openCRM() в консолі -->
+<div class="page" id="page-crm">
+  <div id="crm-gate-w" class="crm-gate-w">
+    <div class="crm-gate-card">
+      <div class="cgico">🔐</div>
+      <div class="cgt">Адмін-панель</div>
+      <div class="cgs">Введіть пароль для доступу</div>
+      <div class="fg"><input type="password" class="fi" id="crm-pass" placeholder="Пароль" onkeypress="if(event.key==='Enter')checkCRM()"></div>
+      <button class="btn-main" onclick="checkCRM()">Увійти</button>
+    </div>
+  </div>
+  <div id="crm-body" style="display:none">
+    <div class="crm-lay">
+      <div class="crm-head">
+        <div class="crm-h1">CRM — 1333 Car Center</div>
+        <div class="crm-acts">
+          <button class="btn-outline" style="padding:8px 14px;font-size:12.5px" onclick="refreshCRM()">↻ Оновити</button>
+          <button class="btn-white" style="padding:8px 14px;font-size:12.5px" onclick="go('booking')">+ Запис</button>
+        </div>
+      </div>
+      <div class="crm-stats">
+        <div class="cs"><div class="csn" id="cs1" style="color:var(--t1)">—</div><div class="csl">Записів всього</div></div>
+        <div class="cs"><div class="csn" id="cs2" style="color:var(--green)">—</div><div class="csl">Сьогодні</div></div>
+        <div class="cs"><div class="csn" id="cs3" style="color:var(--t2)">—</div><div class="csl">Клієнтів</div></div>
+        <div class="cs"><div class="csn" id="cs4" style="color:var(--green)">—</div><div class="csl">Вільних боксів</div></div>
+      </div>
+      <div class="crm-grid">
+        <div class="cp full"><div class="cpt"><div class="cpd w"></div>Журнал записів</div><div id="crm-tbl"><div class="ld"><div class="sp"></div>Завантаження...</div></div></div>
+        <div class="cp"><div class="cpt"><div class="cpd w"></div>Календар</div>
+          <div class="calh"><button class="caln" onclick="calPrev()">‹</button><div class="calm" id="cal-l"></div><button class="caln" onclick="calNext()">›</button></div>
+          <div class="cal-wds"><div class="cal-wd">Пн</div><div class="cal-wd">Вт</div><div class="cal-wd">Ср</div><div class="cal-wd">Чт</div><div class="cal-wd">Пт</div><div class="cal-wd">Сб</div><div class="cal-wd">Нд</div></div>
+          <div class="cal-g2" id="cal-g"></div>
+        </div>
+        <div class="cp"><div class="cpt"><div class="cpd g"></div>Бокси зараз</div><div id="crm-boxes"><div class="ld"><div class="sp"></div>Перевірка...</div></div></div>
+        <div class="cp full"><div class="cpt"><div class="cpd w"></div>Клієнти</div><div id="crm-cls"><div class="ld"><div class="sp"></div>Завантаження...</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Sub Modal -->
+<div class="modal-ov" id="sub-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeSubModal()">×</button>
+    <div class="modal-ttl" id="sm-ttl">Замовити абонемент</div>
+    <div class="modal-sub">Адміністратор зв'яжеться для підтвердження оплати</div>
+    <div class="modal-sum" id="sm-sum"></div>
+    <div class="fg"><label class="fl">Ваше ім'я</label><input type="text" class="fi" id="sm-name" placeholder="Іван Іванов"></div>
+    <div class="fg"><label class="fl">Телефон</label><input type="tel" class="fi" id="sm-phone" placeholder="+380 77 ..."></div>
+    <div class="fg"><label class="fl">Telegram (необов'язково)</label><input type="text" class="fi" id="sm-tg" placeholder="@username"></div>
+    <div class="modal-acts">
+      <button class="modal-cancel" onclick="closeSubModal()">Скасувати</button>
+      <button class="modal-ok" id="sm-ok" onclick="submitSubOrder()">Замовити →</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
-// ====== CONFIG ======
-// Замените на ваш Google Apps Script URL
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzmET3aJfrIMK3W5bZWHOWRMtNsrz0vp4VlZ8kr7EDxsiEDf6wbJxzS76yX2vwOl5K1vQ/exec';
-const ADMIN_PASSWORD = '1333admin'; // Смените пароль!
+const APPS = 'https://script.google.com/macros/s/AKfycbwRNrHDtrOagk1Yi71kR_YNOoJoX9c4tkiKNod8Qk1sUTEJGBCTcYgjYCgu6hU2yxGn/exec';
+const CRM_PASS = '1333admin';
 
-// ====== STATE ======
-const state = {
-  selectedDate: null,
-  selectedTime: null,
-  selectedBox: null,
-  bookings: [],
-  clients: []
-};
+const S = {date:null,time:null,box:null,bookings:[],clients:[]};
+let curSub = null;
+const UA_DS = ['Нд','Пн','Вт','Ср','Чт','Пт','Сб'];
+const UA_MO = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
 
-const SERVICES_DATA = {
-  sedan: [
-    { name:'Експрес мийка', duration:20, price:150, icon:'🚿' },
-    { name:'Комплексна мийка', duration:45, price:280, icon:'✨' },
-    { name:'Мийка + полірування', duration:90, price:550, icon:'💎' },
-    { name:'Хімчистка салону', duration:180, price:700, icon:'🪑' },
-    { name:'Детейлінг', duration:240, price:1200, icon:'🏆' },
-  ],
-  suv: [
-    { name:'Експрес мийка', duration:25, price:200, icon:'🚿' },
-    { name:'Комплексна мийка', duration:55, price:380, icon:'✨' },
-    { name:'Мийка + полірування', duration:110, price:700, icon:'💎' },
-    { name:'Хімчистка салону', duration:200, price:900, icon:'🪑' },
-    { name:'Детейлінг', duration:280, price:1600, icon:'🏆' },
-  ],
-  minivan: [
-    { name:'Експрес мийка', duration:30, price:230, icon:'🚿' },
-    { name:'Комплексна мийка', duration:60, price:420, icon:'✨' },
-    { name:'Мийка + полірування', duration:120, price:800, icon:'💎' },
-    { name:'Хімчистка салону', duration:220, price:1100, icon:'🪑' },
-    { name:'Детейлінг', duration:300, price:1900, icon:'🏆' },
-  ]
-};
-
-const UA_MONTHS = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
-const UA_DAYS_SHORT = ['Нд','Пн','Вт','Ср','Чт','Пт','Сб'];
-
-// ====== PAGES ======
-function showPage(name) {
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+name).classList.add('active');
-  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
-  const map = {home:0,booking:1,services:2,crm:3,about:4};
-  const links = document.querySelectorAll('.nav-link');
-  if(map[name]!==undefined) links[map[name]].classList.add('active');
+// ── NAV ──
+function go(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.getElementById('page-'+name).classList.add('on');
+  document.querySelectorAll('.nl').forEach(l=>l.classList.remove('on'));
+  const m={home:0,booking:1,services:2,subs:3,about:4};
+  if(m[name]!==undefined) document.querySelectorAll('.nl')[m[name]]?.classList.add('on');
   window.scrollTo(0,0);
-  if(name==='booking') initBooking();
-  if(name==='services') showCarType('sedan', document.querySelector('.tab-btn'));
+  if(name==='booking') initBook();
+  if(name==='services') showPrices('sedan', document.querySelector('.ptab'));
   if(name==='home') initHome();
 }
 
-// ====== TOAST ======
-function showToast(msg, type='success') {
-  const t = document.getElementById('toast');
-  t.textContent = (type==='success'?'✓ ':'⚠ ') + msg;
-  t.className = 'toast show ' + type;
-  setTimeout(()=>t.classList.remove('show'), 3500);
+document.addEventListener('keydown',e=>{
+  if(e.ctrlKey&&e.shiftKey&&e.key==='A'){
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+    document.getElementById('page-crm').classList.add('on');
+    document.querySelectorAll('.nl').forEach(l=>l.classList.remove('on'));
+    setTimeout(()=>document.getElementById('crm-pass')?.focus(),100);
+  }
+});
+function openCRM(){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.getElementById('page-crm').classList.add('on');
+  setTimeout(()=>document.getElementById('crm-pass')?.focus(),100);
 }
 
-// ====== HOME ======
-function initHome() {
-  const hours = [9,10,11,12,13,14,15,16,17,18,19,20];
-  const now = new Date();
-  const currentHour = now.getHours();
-  const slotsEl = document.getElementById('hero-slots');
-  slotsEl.innerHTML = '';
+// ── TOAST ──
+function toast(msg,type='ok'){
+  const t=document.getElementById('toast');
+  t.innerHTML=(type==='ok'?'✓':'⚠')+' '+msg;
+  t.className='toast on '+type;
+  clearTimeout(t._t);
+  t._t=setTimeout(()=>t.classList.remove('on'),3500);
+}
+
+// ── UTILS ──
+function pad(n){return String(n).padStart(2,'0')}
+function todayStr(){const d=new Date();return pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear()}
+function normT(t){if(!t)return'';t=String(t).trim();if(t.includes('.'))return t.replace('.',':').substring(0,5);if(t.includes(':'))return t.substring(0,5);return t.padStart(2,'0')+':00'}
+
+// ── HOME ──
+async function initHome(){
+  const bks = await fetchBookings();
+  S.bookings = bks;
+  const today = todayStr();
+  const now = new Date().getHours();
+  const sl = document.getElementById('hero-slots');
+  sl.innerHTML = '';
   let shown = 0;
-  hours.forEach(h=>{
-    if(h>=currentHour && shown<6) {
-      const el = document.createElement('div');
-      el.className = 'slot';
-      el.textContent = String(h).padStart(2,'0')+':00';
-      el.onclick = ()=>{
-        document.querySelectorAll('.slot').forEach(s=>s.classList.remove('selected'));
-        el.classList.add('selected');
-        showPage('booking');
-        setTimeout(()=>{
-          state.selectedDate = getTodayStr();
-          state.selectedTime = String(h).padStart(2,'0')+':00';
-          goStep(3);
-        }, 300);
-      };
-      slotsEl.appendChild(el);
-      shown++;
+  for(let i=9;i<20;i++){
+    if(i>=now && shown<8){
+      const ts = pad(i)+':00';
+      const allBusy = ['Box 1','Box 2','Box 3'].every(bx=>isBooked(bks,today,ts,bx));
+      if(!allBusy){
+        const c = document.createElement('div');
+        c.className='chip';c.textContent=ts;
+        c.onclick=()=>{S.date=today;S.time=ts;go('booking');setTimeout(()=>bStep(3),300)};
+        sl.appendChild(c);shown++;
+      }
     }
-  });
-
-  document.getElementById('hero-boxes').innerHTML = `
-    <div class="box-row"><div class="box-indicator free"></div><div class="box-row-name">Box 1</div><div class="box-row-status free">Вільний</div></div>
-    <div class="box-row"><div class="box-indicator free"></div><div class="box-row-name">Box 2</div><div class="box-row-status free">Вільний</div></div>
-    <div class="box-row"><div class="box-indicator free"></div><div class="box-row-name">Box 3</div><div class="box-row-status free">Вільний</div></div>
-  `;
-
-  animateCounter('stat-bookings', 0, 7, 800);
-  animateCounter('stat-clients', 0, 24, 1000);
-}
-
-function animateCounter(id, from, to, dur) {
-  const el = document.getElementById(id);
-  const start = performance.now();
-  function tick(now) {
-    const p = Math.min((now-start)/dur, 1);
-    el.textContent = Math.round(from + (to-from)*p);
-    if(p<1) requestAnimationFrame(tick);
   }
-  requestAnimationFrame(tick);
+  if(shown===0) sl.innerHTML='<span style="font-size:12px;color:var(--t3)">Немає вільних слотів</span>';
+
+  const hb = document.getElementById('hero-boxes');
+  const ct = pad(now)+':00';
+  hb.innerHTML = ['Box 1','Box 2','Box 3'].map(bx=>{
+    const busy=isBooked(bks,today,ct,bx);
+    return`<div class="brow"><div class="bdot ${busy?'busy':'free'}"></div><div class="bname">${bx}</div><div class="bst ${busy?'busy':'free'}">${busy?'Зайнятий':'Вільний'}</div></div>`;
+  }).join('');
 }
 
-function getTodayStr() {
-  const d = new Date();
-  return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear();
-}
+// ── BOOKING ──
+function initBook(){if(!S.date)bStep(1);buildDates()}
 
-// ====== BOOKING ======
-function initBooking() {
-  if(!state.selectedDate) goStep(1);
-  buildDatesGrid();
-}
-
-function buildDatesGrid() {
-  const grid = document.getElementById('dates-grid');
-  grid.innerHTML='';
-  const today = new Date();
+function buildDates(){
+  const g=document.getElementById('dg');g.innerHTML='';
+  const today=new Date();
   for(let i=0;i<7;i++){
-    const d = new Date(today);
-    d.setDate(today.getDate()+i);
-    const dayName = UA_DAYS_SHORT[d.getDay()];
-    const num = d.getDate();
-    const month = d.getMonth()+1;
-    const year = d.getFullYear();
-    const dateStr = String(num).padStart(2,'0')+'.'+String(month).padStart(2,'0')+'.'+year;
-
-    const btn = document.createElement('div');
-    btn.className = 'date-btn' + (i===0?' today':'') + (state.selectedDate===dateStr?' selected':'');
-    btn.innerHTML = `<div class="date-day">${dayName}</div><div class="date-num">${num}</div>`;
-    btn.onclick = ()=>{
-      document.querySelectorAll('.date-btn').forEach(b=>b.classList.remove('selected'));
-      btn.classList.add('selected');
-      state.selectedDate = dateStr;
-    };
-    grid.appendChild(btn);
+    const d=new Date(today);d.setDate(today.getDate()+i);
+    const ds=pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear();
+    const btn=document.createElement('div');
+    btn.className='db'+(S.date===ds?' sel':'');
+    btn.innerHTML=`<div class="dd">${UA_DS[d.getDay()]}</div><div class="dn">${d.getDate()}</div>`;
+    btn.onclick=()=>{document.querySelectorAll('.db').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');S.date=ds};
+    g.appendChild(btn);
   }
 }
 
-function buildTimesGrid() {
-  const grid = document.getElementById('times-grid');
-  grid.innerHTML='<div class="loading" style="grid-column:span 4"><div class="spinner"></div>Перевіряємо зайнятість...</div>';
+async function buildTimes(){
+  const g=document.getElementById('tg');
+  g.innerHTML='<div class="ld" style="grid-column:span 4"><div class="sp"></div>Перевіряємо зайнятість...</div>';
+  const bks=await fetchBookings();S.bookings=bks;g.innerHTML='';
+  for(let h=9;h<20;h++){
+    const ts=pad(h)+':00';
+    const allBusy=['Box 1','Box 2','Box 3'].every(bx=>isBooked(bks,S.date,ts,bx));
+    const b=document.createElement('div');
+    if(allBusy){b.className='tb busy';b.textContent='⛔ '+ts}
+    else{
+      b.className='tb'+(S.time===ts?' sel':'');b.textContent=ts;
+      b.onclick=()=>{document.querySelectorAll('.tb').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');S.time=ts};
+    }
+    g.appendChild(b);
+  }
+}
 
-  fetchBookings().then(bookings=>{
-    state.bookings = bookings;
-    grid.innerHTML='';
-    const hours = [8,9,10,11,12,13,14,15,16,17,18,19,20];
-    hours.forEach(h=>{
-      const timeStr = String(h).padStart(2,'0')+':00';
-      const allBoxesBusy = ['Box 1','Box 2','Box 3'].every(box=>isBooked(bookings,state.selectedDate,timeStr,box));
-
-      const btn = document.createElement('div');
-      if(allBoxesBusy) {
-        btn.className = 'time-btn busy';
-        btn.textContent = '⛔ '+timeStr;
-      } else {
-        btn.className = 'time-btn' + (state.selectedTime===timeStr?' selected':'');
-        btn.textContent = timeStr;
-        btn.onclick = ()=>{
-          document.querySelectorAll('.time-btn').forEach(b=>b.classList.remove('selected'));
-          btn.classList.add('selected');
-          state.selectedTime = timeStr;
-        };
-      }
-      grid.appendChild(btn);
-    });
+async function buildBoxes(){
+  const g=document.getElementById('boxg');
+  g.innerHTML='<div class="ld" style="grid-column:span 3"><div class="sp"></div>Перевіряємо бокси...</div>';
+  const bks=await fetchBookings();S.bookings=bks;g.innerHTML='';
+  const ico={'Box 1':'⬜','Box 2':'⬛','Box 3':'🔲'};
+  ['Box 1','Box 2','Box 3'].forEach(bx=>{
+    const busy=isBooked(bks,S.date,S.time,bx);
+    const c=document.createElement('div');
+    c.className='boxc'+(busy?' busy':'')+(S.box===bx?' sel':'');
+    c.innerHTML=`<div class="boxic">${ico[bx]}</div><div class="boxn">${bx}</div><div class="boxst ${busy?'busy':'free'}">${busy?'Зайнятий':'Вільний'}</div>`;
+    if(!busy) c.onclick=()=>{document.querySelectorAll('.boxc').forEach(x=>x.classList.remove('sel'));c.classList.add('sel');S.box=bx};
+    g.appendChild(c);
   });
 }
 
-function buildBoxesGrid() {
-  const grid = document.getElementById('boxes-grid');
-  grid.innerHTML='<div class="loading" style="grid-column:span 3"><div class="spinner"></div>Перевіряємо боксии...</div>';
-
-  fetchBookings().then(bookings=>{
-    state.bookings = bookings;
-    grid.innerHTML='';
-    const boxEmojis = {'Box 1':'🔵','Box 2':'🟢','Box 3':'🟡'};
-    ['Box 1','Box 2','Box 3'].forEach(boxName=>{
-      const busy = isBooked(bookings, state.selectedDate, state.selectedTime, boxName);
-      const card = document.createElement('div');
-      card.className = 'box-card' + (busy?' busy':'') + (state.selectedBox===boxName?' selected':'');
-      card.innerHTML = `
-        <div class="box-icon">${boxEmojis[boxName]}</div>
-        <div class="box-name">${boxName}</div>
-        <div class="box-status ${busy?'taken':'free'}">${busy?'Зайнятий':'Вільний'}</div>
-      `;
-      if(!busy){
-        card.onclick = ()=>{
-          document.querySelectorAll('.box-card').forEach(c=>c.classList.remove('selected'));
-          card.classList.add('selected');
-          state.selectedBox = boxName;
-        };
-      }
-      grid.appendChild(card);
-    });
-  });
-}
-
-// ====== KEY FUNCTION: CHECK IF BOX IS BOOKED ======
-function isBooked(bookings, dateStr, timeStr, boxName) {
-  if(!bookings || !dateStr || !timeStr || !boxName) return false;
-  return bookings.some(b=>{
-    const bDate = String(b[1]||'').trim();
-    const bTime = normalizeTime(String(b[3]||'').trim());
-    const bBox  = String(b[4]||'').trim();
-    const bStat = String(b[9]||'').trim();
-    const nTime = normalizeTime(timeStr);
-    return bDate===dateStr && bTime===nTime && bBox===boxName && bStat.includes('Підтверджено');
-  });
-}
-
-function normalizeTime(t) {
-  if(!t) return '';
-  t = t.trim();
-  if(t.includes('.')) return t.replace('.',':').substring(0,5);
-  if(t.includes(':')) return t.substring(0,5);
-  return t.padStart(2,'0')+':00';
-}
-
-function goStep(n) {
-  if(n===2 && !state.selectedDate){ showToast('Оберіть дату!','error'); return; }
-  if(n===3 && !state.selectedTime){ showToast('Оберіть час!','error'); return; }
-  if(n===4 && !state.selectedBox){ showToast('Оберіть бокс!','error'); return; }
-
-  for(let i=1;i<=5;i++){
-    const s = document.getElementById('booking-step'+i);
-    if(s) s.style.display = i===n?'block':'none';
-  }
-  updateStepDots(n);
-  if(n===2) buildTimesGrid();
-  if(n===3) buildBoxesGrid();
-  if(n===4) buildSummary();
-}
-
-function updateStepDots(active) {
-  for(let i=1;i<=5;i++){
-    const dot = document.getElementById('step'+i+'-dot');
-    if(!dot) continue;
-    dot.className = 'step-dot';
-    if(i<active) dot.className += ' done';
-    else if(i===active) dot.className += ' active';
+function bStep(n){
+  if(n===2&&!S.date){toast('Оберіть дату!','err');return}
+  if(n===3&&!S.time){toast('Оберіть час!','err');return}
+  if(n===4&&!S.box){toast('Оберіть бокс!','err');return}
+  for(let i=1;i<=5;i++){const p=document.getElementById('bs'+i);if(p)p.style.display=i===n?'block':'none'}
+  for(let i=1;i<=5;i++){const d=document.getElementById('sd'+i);if(!d)continue;d.className='sdot'+(i<n?' done':i===n?' on':'')}
+  if(n===2)buildTimes();
+  if(n===3)buildBoxes();
+  if(n===4){
+    document.getElementById('bsummary').innerHTML=
+      `<div class="bsr"><span class="bsk">Дата</span><span class="bsv">${S.date}</span></div>
+       <div class="bsr"><span class="bsk">Час</span><span class="bsv">${S.time}</span></div>
+       <div class="bsr"><span class="bsk">Бокс</span><span class="bsv">${S.box}</span></div>`;
   }
 }
 
-function buildSummary() {
-  document.getElementById('booking-summary').innerHTML = `
-    <div class="summary-row"><span class="summary-label">Дата</span><span class="summary-value">${state.selectedDate}</span></div>
-    <div class="summary-row"><span class="summary-label">Час</span><span class="summary-value">${state.selectedTime}</span></div>
-    <div class="summary-row"><span class="summary-label">Бокс</span><span class="summary-value">${state.selectedBox}</span></div>
-  `;
+async function submitBook(){
+  const name=document.getElementById('b-name').value.trim();
+  const phone=document.getElementById('b-phone').value.trim();
+  const service=document.getElementById('b-service').value;
+  if(!name||!phone){toast('Вкажіть ім\'я та телефон!','err');return}
+  const fresh=await fetchBookings();
+  if(isBooked(fresh,S.date,S.time,S.box)){toast('Бокс щойно зайняли! Оберіть інший.','err');bStep(3);return}
+  const btn=document.getElementById('b-submit');
+  btn.textContent='⏳ Зберігаємо...';btn.disabled=true;
+  try{
+    const p=new URLSearchParams({action:'saveBooking',date:S.date,time:S.time,box:S.box,name,phone,service,comment:document.getElementById('b-comment').value});
+    const r=await fetch(APPS+'?'+p,{method:'GET',mode:'cors'});
+    const data=await r.json();
+    if(!data.success){toast('Бокс вже зайнятий! Оберіть інший.','err');btn.textContent='✓ Підтвердити запис';btn.disabled=false;bStep(3);return}
+    document.getElementById('book-result').innerHTML=
+      `<div class="sr"><span class="sk">Ім'я</span><span class="sv">${name}</span></div>
+       <div class="sr"><span class="sk">Дата</span><span class="sv">${S.date}</span></div>
+       <div class="sr"><span class="sk">Час</span><span class="sv">${S.time}</span></div>
+       <div class="sr"><span class="sk">Бокс</span><span class="sv">${S.box}</span></div>
+       <div class="sr"><span class="sk">Послуга</span><span class="sv">${service.split(' — ')[0]}</span></div>`;
+    bStep(5);
+    // Авторегистрация: записуємо нового клієнта якщо не зареєстрований
+    autoRegisterClient(name, phone);
+  }catch(e){toast('Помилка. Спробуйте ще раз.','err');btn.textContent='✓ Підтвердити запис';btn.disabled=false}
 }
 
-async function submitBooking() {
-  const name = document.getElementById('client-name').value.trim();
-  const phone = document.getElementById('client-phone').value.trim();
-  const service = document.getElementById('client-service').value;
-
-  if(!name || !phone){ showToast('Заповніть ім\'я та телефон!','error'); return; }
-
-  // DOUBLE-CHECK before saving
-  const fresh = await fetchBookings();
-  if(isBooked(fresh, state.selectedDate, state.selectedTime, state.selectedBox)){
-    showToast('Цей бокс щойно зайняли! Оберіть інший.','error');
-    goStep(3);
-    return;
-  }
-
-  const btn = document.getElementById('btn-submit');
-  btn.textContent = '⏳ Зберігаємо...';
-  btn.disabled = true;
-
-  try {
-    const params = new URLSearchParams({
-      action: 'saveBooking',
-      date: state.selectedDate,
-      time: state.selectedTime,
-      box: state.selectedBox,
-      name, phone, service,
-      comment: document.getElementById('client-comment').value
-    });
-
-    // ✅ ВИПРАВЛЕНО: mode:'cors' щоб читати реальну відповідь сервера
-    const resp = await fetch(APPS_SCRIPT_URL+'?'+params, {method:'GET', mode:'cors'});
-
-    if(!resp.ok) {
-      throw new Error('HTTP ' + resp.status);
-    }
-
-    const data = await resp.json();
-
-    // ✅ ВИПРАВЛЕНО: перевіряємо реальний результат із сервера
-    if(!data.success) {
-      showToast('Цей бокс вже зайнятий! Оберіть інший час або бокс.','error');
-      btn.textContent = '✓ Підтвердити запис';
-      btn.disabled = false;
-      goStep(3);
-      return;
-    }
-
-    document.getElementById('booking-result').innerHTML = `
-      <div class="success-row"><span class="success-key">Ім'я</span><span class="success-val">${name}</span></div>
-      <div class="success-row"><span class="success-key">Дата</span><span class="success-val">${state.selectedDate}</span></div>
-      <div class="success-row"><span class="success-key">Час</span><span class="success-val">${state.selectedTime}</span></div>
-      <div class="success-row"><span class="success-key">Бокс</span><span class="success-val">${state.selectedBox}</span></div>
-      <div class="success-row"><span class="success-key">Послуга</span><span class="success-val">${service}</span></div>
-    `;
-    goStep(5);
-  } catch(e) {
-    console.error('submitBooking error:', e);
-    showToast('Помилка збереження. Спробуйте ще раз.','error');
-    btn.textContent = '✓ Підтвердити запис';
-    btn.disabled = false;
-  }
+async function autoRegisterClient(name, phone){
+  try{
+    const p = new URLSearchParams({action:'autoRegister',name,phone});
+    await fetch(APPS+'?'+p,{method:'GET',mode:'cors'});
+  }catch(e){}
 }
 
-function resetBooking() {
-  state.selectedDate = null;
-  state.selectedTime = null;
-  state.selectedBox = null;
-  goStep(1);
-  buildDatesGrid();
+function resetBook(){
+  S.date=null;S.time=null;S.box=null;
+  document.getElementById('b-name').value='';
+  document.getElementById('b-phone').value='';
+  document.getElementById('b-comment').value='';
+  bStep(1);buildDates();
 }
 
-// ====== FETCH DATA FROM GOOGLE SHEETS ======
-// ✅ ВИПРАВЛЕНО: реальні дані, без тихого падіння в mock
-async function fetchBookings() {
-  try {
-    const url = APPS_SCRIPT_URL + '?action=getBookings&t=' + Date.now();
-    const resp = await fetch(url, {mode:'cors'});
-    if(!resp.ok) {
-      console.error('fetchBookings HTTP error:', resp.status);
-      return [];
-    }
-    const data = await resp.json();
-    if(!data.bookings) {
-      console.error('fetchBookings: no bookings field in response', data);
-      return [];
-    }
-    return data.bookings;
-  } catch(e) {
-    console.error('fetchBookings failed:', e);
-    return [];
-  }
+// ── FETCH ──
+async function fetchBookings(){
+  try{
+    const r=await fetch(APPS+'?action=getBookings&t='+Date.now(),{mode:'cors'});
+    if(!r.ok)return[];
+    const d=await r.json();return d.bookings||[];
+  }catch(e){return[]}
+}
+async function fetchClients(){
+  try{
+    const r=await fetch(APPS+'?action=getClients&t='+Date.now(),{mode:'cors'});
+    if(!r.ok)return[];
+    const d=await r.json();return d.clients||[];
+  }catch(e){return[]}
+}
+function isBooked(bks,dt,ts,bx){
+  if(!bks||!dt||!ts||!bx)return false;
+  return bks.some(b=>String(b[1]||'').trim()===dt&&normT(String(b[3]||''))===normT(ts)&&String(b[4]||'').trim()===bx&&String(b[9]||'').includes('Підтверджено'));
 }
 
-async function fetchClients() {
-  try {
-    const url = APPS_SCRIPT_URL + '?action=getClients&t=' + Date.now();
-    const resp = await fetch(url, {mode:'cors'});
-    if(!resp.ok) return [];
-    const data = await resp.json();
-    return data.clients || [];
-  } catch(e) {
-    console.error('fetchClients failed:', e);
-    return [];
-  }
+// ── PRICES ──
+const PR={
+  sedan:[
+    {i:'🚿',n:'Експрес-мийка',d:'~20 хв',p:200},
+    {i:'✨',n:'Комплексна мийка',d:'~45 хв',p:350},
+    {i:'💫',n:'Мийка + полірування',d:'~90 хв',p:600},
+    {i:'🪑',n:'Хімчистка салону',d:'~3 год',p:800},
+    {i:'🏆',n:'Детейлінг',d:'4–5 год',p:1500},
+    {i:'🛡️',n:'Захисне покриття',d:'~2 год',p:500},
+    {i:'🔧',n:'Моторний відсік',d:'~60 хв',p:350},
+    {i:'💎',n:'Нанокераміка',d:'6–8 год',p:3000},
+    {i:'🔵',n:'Мийка дисків',d:'~30 хв',p:200},
+    {i:'🪟',n:'Тонування скла',d:'~120 хв',p:1200},
+  ],
+  suv:[
+    {i:'🚿',n:'Експрес-мийка',d:'~25 хв',p:260},
+    {i:'✨',n:'Комплексна мийка',d:'~55 хв',p:450},
+    {i:'💫',n:'Мийка + полірування',d:'~110 хв',p:800},
+    {i:'🪑',n:'Хімчистка салону',d:'~3.5 год',p:1100},
+    {i:'🏆',n:'Детейлінг',d:'5–6 год',p:2000},
+    {i:'🛡️',n:'Захисне покриття',d:'~2.5 год',p:650},
+    {i:'🔧',n:'Моторний відсік',d:'~60 хв',p:400},
+    {i:'💎',n:'Нанокераміка',d:'7–9 год',p:4000},
+    {i:'🔵',n:'Мийка дисків',d:'~35 хв',p:250},
+    {i:'🪟',n:'Тонування скла',d:'~150 хв',p:1500},
+  ],
+  minivan:[
+    {i:'🚿',n:'Експрес-мийка',d:'~30 хв',p:300},
+    {i:'✨',n:'Комплексна мийка',d:'~60 хв',p:520},
+    {i:'💫',n:'Мийка + полірування',d:'~120 хв',p:950},
+    {i:'🪑',n:'Хімчистка салону',d:'~4 год',p:1300},
+    {i:'🏆',n:'Детейлінг',d:'6–8 год',p:2500},
+    {i:'🛡️',n:'Захисне покриття',d:'~3 год',p:800},
+    {i:'🔧',n:'Моторний відсік',d:'~70 хв',p:500},
+    {i:'💎',n:'Нанокераміка',d:'8–10 год',p:5000},
+    {i:'🔵',n:'Мийка дисків',d:'~40 хв',p:300},
+    {i:'🪟',n:'Тонування скла',d:'~180 хв',p:1800},
+  ]
+};
+
+function showPrices(type,el){
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('on'));
+  if(el)el.classList.add('on');
+  document.getElementById('pg').innerHTML=(PR[type]||[]).map(s=>`
+    <div class="pc">
+      <div class="pc-ico">${s.i}</div>
+      <div class="pc-name">${s.n}</div>
+      <div class="pc-dur">⏱ ${s.d}</div>
+      <div class="pc-price">${s.p.toLocaleString('uk-UA')} <span>грн</span></div>
+      <button class="pc-btn" onclick="quickBook('${s.n}')">Записатись</button>
+    </div>`).join('');
 }
 
-// ====== SERVICES ======
-function showCarType(type, btn) {
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  const data = SERVICES_DATA[type]||[];
-  const grid = document.getElementById('price-list');
-  grid.innerHTML = data.map(s=>`
-    <div class="service-card">
-      <div class="service-icon" style="background:rgba(10,132,255,0.1)">${s.icon}</div>
-      <div class="service-name">${s.name}</div>
-      <div class="service-desc">Тривалість: ~${s.duration} хв. Якісна обробка з гарантією результату.</div>
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <div class="service-price">${s.price} <span>грн</span></div>
-        <button class="btn-glass" onclick="quickBook('${s.name}')" style="padding:8px 16px;font-size:13px">Записатись</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-function quickBook(service) {
-  showPage('booking');
+function quickBook(name){
+  go('booking');
   setTimeout(()=>{
-    document.getElementById('client-service').value = service;
-  }, 500);
+    const sel=document.getElementById('b-service');
+    if(sel)for(let i=0;i<sel.options.length;i++)if(sel.options[i].text.includes(name)){sel.selectedIndex=i;break}
+  },400);
 }
 
-// ====== CRM ======
-function checkAdmin() {
-  const pass = document.getElementById('admin-pass').value;
-  if(pass === ADMIN_PASSWORD) {
-    document.getElementById('crm-gate').style.display='none';
-    document.getElementById('crm-content').style.display='block';
-    loadCRM();
-  } else {
-    showToast('Невірний пароль!','error');
-    document.getElementById('admin-pass').value='';
-    document.getElementById('admin-pass').focus();
+// ── SUBSCRIPTIONS ──
+function orderSub(sub){
+  curSub=sub;
+  document.getElementById('sm-ttl').textContent='Замовити '+sub.name;
+  document.getElementById('sm-sum').innerHTML=
+    `<div class="msr"><span class="msk">Абонемент</span><span class="msv">${sub.name}</span></div>
+     <div class="msr"><span class="msk">Термін</span><span class="msv">${sub.months} міс.</span></div>
+     <div class="msr"><span class="msk">Вартість</span><span class="msv">${sub.price.toLocaleString('uk-UA')} грн</span></div>
+     <div class="msr"><span class="msk">Бонус</span><span class="msv">+${sub.bonus}</span></div>
+     <div class="msr"><span class="msk">На рахунок</span><span class="msv">${sub.account.toLocaleString('uk-UA')} грн</span></div>`;
+  document.getElementById('sub-modal').classList.add('on');
+  document.getElementById('sm-name').value='';
+  document.getElementById('sm-phone').value='';
+  document.getElementById('sm-tg').value='';
+}
+
+function closeSubModal(){document.getElementById('sub-modal').classList.remove('on');curSub=null}
+
+async function submitSubOrder(){
+  const name=document.getElementById('sm-name').value.trim();
+  const phone=document.getElementById('sm-phone').value.trim();
+  const tg=document.getElementById('sm-tg').value.trim();
+  if(!name||!phone){toast('Вкажіть ім\'я та телефон!','err');return}
+  const btn=document.getElementById('sm-ok');
+  btn.textContent='⏳ Відправляємо...';btn.disabled=true;
+  try{
+    const params=new URLSearchParams({
+      action:'saveSubOrder',subId:curSub.id,subName:curSub.name,
+      months:curSub.months,price:curSub.price,account:curSub.account,
+      bonus:curSub.bonus,name,phone,tg
+    });
+    try{
+      const r=await Promise.race([
+        fetch(APPS+'?'+params,{method:'GET',mode:'cors'}),
+        new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),5000))
+      ]);
+      await r.json();
+    }catch(e){
+      fetch(APPS+'?'+params,{method:'GET',mode:'no-cors'}).catch(()=>{});
+    }
+    // Авторегистрация нового клієнта
+    autoRegisterClient(name, phone);
+    closeSubModal();
+    toast('Заявку відправлено! Адміністратор зв\'яжеться з вами.','ok');
+  }catch(e){
+    closeSubModal();
+    toast('Заявку відправлено! Очікуйте дзвінка.','ok');
+  }
+  btn.textContent='Замовити →';btn.disabled=false;
+}
+
+// ── CRM ──
+function checkCRM(){
+  const p=document.getElementById('crm-pass').value;
+  if(p===CRM_PASS){
+    document.getElementById('crm-gate-w').style.display='none';
+    document.getElementById('crm-body').style.display='block';
+    refreshCRM();renderCal();
+  }else{
+    toast('Невірний пароль!','err');
+    document.getElementById('crm-pass').value='';
+    document.getElementById('crm-pass').focus();
   }
 }
 
-async function loadCRM() {
-  await refreshCRM();
-  renderCalendar();
+async function refreshCRM(){
+  const [bks,cls]=await Promise.all([fetchBookings(),fetchClients()]);
+  S.bookings=bks;S.clients=cls;
+  const today=todayStr();
+  const todayBks=bks.filter(b=>String(b[1]||'').trim()===today);
+  document.getElementById('cs1').textContent=bks.length;
+  document.getElementById('cs2').textContent=todayBks.length;
+  document.getElementById('cs3').textContent=cls.length;
+  const now=new Date(),ct=pad(now.getHours())+':00';
+  const freeBoxes=['Box 1','Box 2','Box 3'].filter(bx=>!isBooked(bks,today,ct,bx));
+  document.getElementById('cs4').textContent=freeBoxes.length+'/3';
+
+  document.getElementById('crm-boxes').innerHTML=['Box 1','Box 2','Box 3'].map(bx=>{
+    const busy=isBooked(bks,today,ct,bx);
+    return`<div class="blr"><div class="blrd ${busy?'busy':'free'}"></div><div class="blrn">${bx}</div><div class="blrs ${busy?'busy':'free'}">${busy?'Зайнятий':'Вільний'}</div><div class="blrt">${ct}</div></div>`;
+  }).join('');
+
+  const sorted=[...bks].sort((a,b)=>String(a[1]||'')>String(b[1]||'')?-1:1);
+  document.getElementById('crm-tbl').innerHTML=bks.length===0
+    ?'<p style="color:var(--t3);text-align:center;padding:20px;font-size:13px">Записів поки немає</p>'
+    :`<div style="overflow-x:auto"><table class="bt2">
+      <thead><tr><th>ID</th><th>Дата</th><th>Час</th><th>Бокс</th><th>Клієнт</th><th>Телефон</th><th>Послуга</th><th>Статус</th></tr></thead>
+      <tbody>${sorted.slice(0,30).map(b=>`<tr>
+        <td style="color:var(--t3)">${b[0]||''}</td>
+        <td>${b[1]||''}</td>
+        <td><strong style="color:var(--t1)">${b[3]||''}</strong></td>
+        <td>${b[4]||''}</td>
+        <td style="color:var(--t1)">${b[6]||''}</td>
+        <td style="color:var(--t3);font-size:11px">${b[7]||''}</td>
+        <td style="font-size:11px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b[8]||''}</td>
+        <td><span class="bdg ${bStCls(String(b[9]||''))}">${b[9]||''}</span></td>
+      </tr>`).join('')}</tbody>
+    </table></div>`;
+
+  document.getElementById('crm-cls').innerHTML=cls.length===0
+    ?'<p style="color:var(--t3);text-align:center;padding:20px;font-size:13px">Клієнтів поки немає</p>'
+    :cls.slice(0,12).map((c,i)=>{
+        const ini=String(c[1]||'?').split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
+        const vis=bks.filter(b=>String(b[5]||'').trim()===String(c[0]||'').trim()).length;
+        return`<div class="crow">
+          <div class="cava" style="background:rgba(255,255,255,0.07);color:var(--t1)">${ini||'?'}</div>
+          <div style="flex:1"><div class="cn">${c[1]||'—'}</div><div class="cm">${c[2]||''} · ${vis} візитів</div></div>
+          <div class="cbal">${Number(c[6]||0).toLocaleString('uk-UA')} грн</div>
+        </div>`;
+      }).join('');
+
+  renderCal();
+  toast('Дані оновлено');
 }
 
-async function refreshCRM() {
-  const [bookings, clients] = await Promise.all([fetchBookings(), fetchClients()]);
-  state.bookings = bookings;
-  state.clients = clients;
+function bStCls(s){if(s.includes('Підтверджено'))return'bdg-ok';if(s.includes('Очікує'))return'bdg-pnd';return'bdg-no'}
 
-  const today = getTodayStr();
-  const todayBookings = bookings.filter(b=>String(b[1]).trim()===today);
-
-  document.getElementById('crm-total').textContent = bookings.length;
-  document.getElementById('crm-today').textContent = todayBookings.length;
-  document.getElementById('crm-clients').textContent = clients.length;
-
-  // Box status
-  const now = new Date();
-  const currentTime = String(now.getHours()).padStart(2,'0')+':00';
-  const boxStatuses = ['Box 1','Box 2','Box 3'].map(box=>{
-    const busy = isBooked(bookings, today, currentTime, box);
-    const booking = bookings.find(b=>String(b[1]).trim()===today && normalizeTime(String(b[3]||'')===currentTime) && String(b[4]).trim()===box && String(b[9]||'').includes('Підтверджено'));
-    return {box, busy, client: busy&&booking ? String(booking[6]||'') : null};
-  });
-
-  const freeCount = boxStatuses.filter(b=>!b.busy).length;
-  document.getElementById('crm-revenue').textContent = freeCount+'/3 вільних';
-
-  document.getElementById('crm-boxes-status').innerHTML = boxStatuses.map(b=>`
-    <div class="box-row">
-      <div class="box-indicator ${b.busy?'busy':'free'}"></div>
-      <div class="box-row-name">${b.box}</div>
-      <div class="box-row-status ${b.busy?'':'free'}">${b.busy?'Зайнятий':'Вільний'}</div>
-      <div class="box-row-time">${currentTime}</div>
-    </div>
-  `).join('');
-
-  // Bookings table
-  const sorted = [...bookings].sort((a,b)=>String(a[1])>String(b[1])?-1:1);
-  document.getElementById('bookings-table-wrap').innerHTML = sorted.length===0?'<p style="color:var(--text-secondary);font-size:14px;text-align:center;padding:20px">Записів поки немає</p>':`
-    <div style="overflow-x:auto">
-      <table class="schedule-table">
-        <thead><tr>
-          <th>ID</th><th>Дата</th><th>Час</th><th>Бокс</th><th>Клієнт</th><th>Телефон</th><th>Послуга</th><th>Статус</th>
-        </tr></thead>
-        <tbody>${sorted.slice(0,20).map(b=>`
-          <tr>
-            <td style="color:var(--text-tertiary);font-size:12px">${b[0]||''}</td>
-            <td>${b[1]||''}</td>
-            <td><strong>${b[3]||''}</strong></td>
-            <td>${b[4]||''}</td>
-            <td>${b[6]||''}</td>
-            <td style="color:var(--text-secondary);font-size:12px">${b[7]||''}</td>
-            <td style="font-size:12px">${b[8]||''}</td>
-            <td><span class="status-badge ${getStatusClass(String(b[9]||''))}">${b[9]||''}</span></td>
-          </tr>
-        `).join('')}</tbody>
-      </table>
-    </div>
-  `;
-
-  // Clients
-  const colors = ['#0A84FF','#30D158','#FF9F0A','#FF453A','#BF5AF2','#64D2FF'];
-  document.getElementById('clients-list').innerHTML = clients.length===0?'<p style="color:var(--text-secondary);font-size:14px;text-align:center;padding:20px">Клієнтів поки немає</p>':
-    clients.slice(0,10).map((c,i)=>{
-      const initials = String(c[1]||'?').split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
-      const color = colors[i%colors.length];
-      const cVisits = bookings.filter(b=>String(b[5]).trim()===String(c[0]).trim()).length;
-      return `<div class="client-row">
-        <div class="client-avatar" style="background:${color}22;color:${color}">${initials}</div>
-        <div class="client-info">
-          <div class="client-name">${c[1]||'—'}</div>
-          <div class="client-meta">${c[2]||''} · ${cVisits} візитів · з ${c[5]||''}</div>
-        </div>
-        <div class="client-balance">${c[6]||0} грн</div>
-      </div>`;
-    }).join('');
-
-  showToast('Дані оновлено!');
-}
-
-function getStatusClass(s) {
-  if(s.includes('Підтверджено')) return 'badge-confirmed';
-  if(s.includes('Очікує')) return 'badge-pending';
-  return 'badge-cancelled';
-}
-
-function showAddBooking() {
-  showPage('booking');
-}
-
-// ====== CALENDAR ======
-let calYear = new Date().getFullYear();
-let calMonth = new Date().getMonth();
-
-function renderCalendar() {
-  document.getElementById('cal-month-label').textContent = UA_MONTHS[calMonth]+' '+calYear;
-  const cal = document.getElementById('mini-cal');
-  cal.innerHTML='';
-
-  const firstDay = new Date(calYear, calMonth, 1);
-  let startDow = firstDay.getDay(); // 0=Sun
-  startDow = (startDow+6)%7; // Mon=0
-
-  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
-  const today = new Date();
-
-  for(let i=0;i<startDow;i++){
-    const el=document.createElement('div');
-    el.className='cal-day empty';
-    cal.appendChild(el);
-  }
-
-  const bookingDates = new Set((state.bookings||[]).map(b=>{
-    const d = String(b[1]||'');
-    const parts = d.split('.');
-    if(parts.length===3) return parts[2]+'-'+parts[1]+'-'+parts[0];
-    return d;
-  }));
-
-  for(let d=1;d<=daysInMonth;d++){
-    const dateKey = calYear+'-'+String(calMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-    const isToday = d===today.getDate()&&calMonth===today.getMonth()&&calYear===today.getFullYear();
-    const hasBooking = bookingDates.has(dateKey);
-    const el=document.createElement('div');
-    el.className='cal-day'+(isToday?' today':'')+(hasBooking&&!isToday?' has-booking':'');
-    el.textContent=d;
-    cal.appendChild(el);
+let cY=new Date().getFullYear(),cM=new Date().getMonth();
+function renderCal(){
+  const short=['Січ','Лют','Бер','Кві','Тра','Чер','Лип','Сер','Вер','Жов','Лис','Гру'];
+  const lbl=document.getElementById('cal-l');if(lbl)lbl.textContent=short[cM]+' '+cY;
+  const g=document.getElementById('cal-g');if(!g)return;g.innerHTML='';
+  const fd=new Date(cY,cM,1),sw=(fd.getDay()+6)%7;
+  const dim=new Date(cY,cM+1,0).getDate();
+  const today=new Date();
+  const bdates=new Set((S.bookings||[]).map(b=>{const d=String(b[1]||''),p=d.split('.');return p.length===3?p[2]+'-'+p[1]+'-'+p[0]:d}));
+  for(let i=0;i<sw;i++){const e=document.createElement('div');e.className='cald empty';g.appendChild(e)}
+  for(let d=1;d<=dim;d++){
+    const dk=cY+'-'+pad(cM+1)+'-'+pad(d);
+    const isTod=d===today.getDate()&&cM===today.getMonth()&&cY===today.getFullYear();
+    const hasB=bdates.has(dk);
+    const e=document.createElement('div');
+    e.className='cald'+(isTod?' today':'')+(hasB&&!isTod?' hasb':'');
+    e.textContent=d;g.appendChild(e);
   }
 }
+function calPrev(){cM--;if(cM<0){cM=11;cY--}renderCal()}
+function calNext(){cM++;if(cM>11){cM=0;cY++}renderCal()}
 
-function calPrev(){
-  calMonth--;
-  if(calMonth<0){calMonth=11;calYear--;}
-  renderCalendar();
-}
-function calNext(){
-  calMonth++;
-  if(calMonth>11){calMonth=0;calYear++;}
-  renderCalendar();
-}
-
-// ====== INIT ======
+// ── INIT ──
 initHome();
 </script>
 </body>
