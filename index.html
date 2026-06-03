@@ -1145,7 +1145,7 @@ function renderSchedule(bookings){
         <button class="act-btn act-btn-green" onclick="updateBookingStatusUI('${b.id}','✅ Виконано')" title="Виконано">✓</button>
         <button class="act-btn act-btn-yellow" onclick="updateBookingStatusUI('${b.id}','⏳ Очікує')" title="Очікує">⏸</button>
         <button class="act-btn act-btn-red" onclick="updateBookingStatusUI('${b.id}','❌ Скасовано')" title="Скасувати">✕</button>
-      </td></tr>`).join('')
+      </td></tr>`).join('') 
   }</tbody></table>`;
   // Mobile cards
   cards.innerHTML=bookings.map(b=>`
