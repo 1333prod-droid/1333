@@ -1368,7 +1368,7 @@ async function buyPlan() {
   if (!nm || !ph) { toast('Заповніть ім\'я та телефон'); return; }
 
   if (isApiConfigured()) {
-    await api('saveSubOrder', {
+    const result = await api('saveSubOrder', {
       subId:   _planMeta.id,
       subName: _planMeta.name,
       months:  _planMeta.months,
@@ -1379,6 +1379,10 @@ async function buyPlan() {
       phone:   ph,
       tg:      tg
     });
+    if (!result?.success) {
+      toast('❌ Помилка при відправленні заявки. Спробуйте пізніше.');
+      return;
+    }
   }
   closePlanModal();
   toast('✓ Заявку відправлено! Ми зв\'яжемося з вами найближчим часом.');
