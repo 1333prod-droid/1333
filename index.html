@@ -530,6 +530,7 @@ footer{background:rgba(255,255,255,0.03);border-top:1px solid var(--glass-border
       <button class="crm-tab-btn" onclick="switchCrmTab(event,'boxes')">Бокси</button>
       <button class="crm-tab-btn" onclick="switchCrmTab(event,'clients')">Клієнти</button>
       <button class="crm-tab-btn" onclick="switchCrmTab(event,'subs')">Абонементи</button>
+      <button class="crm-tab-btn" onclick="switchCrmTab(event,'subrequests')">🆕 Заявки</button>
     </div>
     <!-- Schedule -->
     <div class="crm-tab-panel active" id="tab-sched">
@@ -556,6 +557,10 @@ footer{background:rgba(255,255,255,0.03);border-top:1px solid var(--glass-border
     <!-- Subscriptions -->
     <div class="crm-tab-panel" id="tab-subs">
       <div id="subsTableWrap"><div class="table-loading"><span class="table-spinner"></span>Завантаження...</div></div>
+    </div>
+    <!-- Subscription Requests -->
+    <div class="crm-tab-panel" id="tab-subrequests">
+      <div id="subRequestsTableWrap"><div class="table-loading"><span class="table-spinner"></span>Завантаження...</div></div>
     </div>
   </div>
 </div>
@@ -600,7 +605,7 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw9mqrVSrAVeoMa
 // ═══ STATE ═══
 const S = { service:'', price:'', date:'', time:'', box:null, step:1, carType:'' };
 const _planMeta = {};  // зберігає дані поточного вибраного плану
-let _allBookings = [], _allClients = [], _allSubs = [];
+let _allBookings = [], _allClients = [], _allSubs = [], _allSubRequests = [];
 
 // ═══ API LAYER ═══
 function isApiConfigured() {
@@ -883,20 +888,23 @@ async function loadCRM() {
     renderDemoBoxes();
     renderDemoClients();
     renderDemoSubs();
+    renderDemoSubRequests();
     setStats(4, 1, 12, 24);
     return;
   }
 
   // Load all data in parallel
-  const [bRes, cRes, sRes] = await Promise.all([
+  const [bRes, cRes, sRes, srRes] = await Promise.all([
     api('getAllBookings'),
     api('getAllClients'),
-    api('getAllSubs')
+    api('getAllSubs'),
+    api('getAllSubRequests')
   ]);
 
   _allBookings = bRes?.bookings || [];
   _allClients  = cRes?.clients  || [];
   _allSubs     = sRes?.subs     || [];
+  _allSubRequests = srRes?.requests || [];
 
   // Stats
   const todayCount  = _allBookings.filter(b => b.date === todayStr).length;
@@ -908,6 +916,7 @@ async function loadCRM() {
   renderBoxes(_allBookings, todayStr);
   renderClients(_allClients);
   renderSubs(_allSubs);
+  renderSubRequests(_allSubRequests);
 }
 
 function setStats(t, a, m, c) {
@@ -1119,6 +1128,80 @@ async function updateSubStatusUI(subId, newStatus) {
   } else {
     toast('❌ Не вдалось оновити статус');
   }
+}
+
+// ─── Subscription Requests ────────────────────────────────────
+function renderSubRequests(requests) {
+  const wrap = document.getElementById('subRequestsTableWrap');
+  if (!requests.length) {
+    wrap.innerHTML = '<div class="table-loading" style="color:var(--gray);">Заявок не знайдено</div>';
+    return;
+  }
+  const rows = requests.map(r => `
+    <tr>
+      <td style="font-size:11px;color:var(--gray);">${r.requestId}</td>
+      <td><b>${r.clientName}</b><br><span style="font-size:11px;color:var(--gray);">${r.clientId}</span></td>
+      <td><span class="badge ${r.typeName?.toLowerCase().includes('gold') ? 'badge-gold' : r.typeName?.toLowerCase().includes('platinum') ? 'badge-platinum' : 'badge-silver'}">${r.typeName}</span></td>
+      <td style="font-weight:700;">${Math.round(r.amount||0).toLocaleString('uk-UA')} ₴</td>
+      <td style="font-size:12px;">${r.createdDate || '—'}</td>
+      <td><span class="badge ${r.status?.includes('Нова') ? 'badge-yellow' : r.status?.includes('Підтверджена') ? 'badge-green' : 'badge-red'}">${r.status || '—'}</span></td>
+      <td>
+        <button class="act-btn act-btn-green"  onclick="updateSubRequestStatusUI('${r.requestId}','✅ Підтверджена')" title="Підтвердити">✓</button>
+        <button class="act-btn act-btn-red"    onclick="updateSubRequestStatusUI('${r.requestId}','❌ Відхилена')"   title="Відхилити">✕</button>
+      </td>
+    </tr>`).join('');
+
+  wrap.innerHTML = `
+    <table class="crm-table">
+      <thead><tr><th>ID</th><th>Клієнт</th><th>План</th><th>Сума</th><th>Дата заявки</th><th>Статус</th><th>Дії</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+async function updateSubRequestStatusUI(requestId, newStatus) {
+  if (newStatus.includes('Підтверджена')) {
+    const result = await api('confirmSubRequest', { requestId });
+    if (result === null) {
+      const r = _allSubRequests.find(x => x.requestId === requestId);
+      if (r) r.status = newStatus;
+      renderSubRequests(_allSubRequests);
+      toast('✓ Заявка підтверджена (демо)');
+      return;
+    }
+    if (result?.success) {
+      const r = _allSubRequests.find(x => x.requestId === requestId);
+      if (r) r.status = newStatus;
+      renderSubRequests(_allSubRequests);
+      toast('✓ Заявка підтверджена! Абонемент активовано');
+    } else {
+      toast('❌ Помилка при підтвердженні');
+    }
+  } else if (newStatus.includes('Відхилена')) {
+    const result = await api('rejectSubRequest', { requestId });
+    if (result === null) {
+      const r = _allSubRequests.find(x => x.requestId === requestId);
+      if (r) r.status = newStatus;
+      renderSubRequests(_allSubRequests);
+      toast('✓ Заявка відхилена (демо)');
+      return;
+    }
+    if (result?.success) {
+      const r = _allSubRequests.find(x => x.requestId === requestId);
+      if (r) r.status = newStatus;
+      renderSubRequests(_allSubRequests);
+      toast('✓ Заявка відхилена');
+    } else {
+      toast('❌ Помилка при відхиленні');
+    }
+  }
+}
+
+function renderDemoSubRequests() {
+  const demoRequests = [
+    { requestId: 'SR-0001', clientName: 'Іван Петренко', clientId: 'C-001', typeName: 'GOLD', amount: 30000, createdDate: '03.06.2026', status: '🆕 Нова заявка' },
+    { requestId: 'SR-0002', clientName: 'Марія Сидоренко', clientId: 'C-002', typeName: 'PLATINUM', amount: 60000, createdDate: '02.06.2026', status: '✅ Підтверджена' }
+  ];
+  renderSubRequests(demoRequests);
 }
 
 // ─── Client Details Modal ────────────────────────────────────
