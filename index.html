@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>1333 Car Center — Детейлінг Харків</title>
 <meta name="description" content="Детейлінг центр у Харкові. Антигравійна плівка, хімчистка, полірування.">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
@@ -25,12 +25,12 @@
   --accent:#a78bfa;
 }
 html{scroll-behavior:smooth;}
-body{background:var(--bg);color:var(--white);font-family:'Outfit',sans-serif;overflow-x:hidden;min-height:100vh;}
+body{background:var(--bg);color:var(--white);font-family:'Inter',sans-serif;overflow-x:hidden;min-height:100vh;-webkit-font-smoothing:antialiased;}
 
 /* MESH BG */
 .mesh-bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
-.mesh-bg::before{content:'';position:absolute;width:800px;height:800px;background:radial-gradient(ellipse,rgba(167,139,250,0.08) 0%,transparent 65%);top:-200px;left:-200px;animation:meshFloat 18s ease-in-out infinite;}
-.mesh-bg::after{content:'';position:absolute;width:600px;height:600px;background:radial-gradient(ellipse,rgba(34,197,94,0.05) 0%,transparent 65%);bottom:-100px;right:-100px;animation:meshFloat 22s ease-in-out infinite reverse;}
+.mesh-bg::before{content:'';position:absolute;width:900px;height:900px;background:radial-gradient(ellipse,rgba(167,139,250,0.06) 0%,transparent 65%);top:-250px;left:-250px;animation:meshFloat 20s ease-in-out infinite;}
+.mesh-bg::after{content:'';position:absolute;width:700px;height:700px;background:radial-gradient(ellipse,rgba(34,197,94,0.04) 0%,transparent 65%);bottom:-150px;right:-150px;animation:meshFloat 25s ease-in-out infinite reverse;}
 .mesh-blob{position:absolute;width:500px;height:500px;background:radial-gradient(ellipse,rgba(249,115,22,0.04) 0%,transparent 65%);top:40%;left:50%;transform:translate(-50%,-50%);animation:meshFloat 15s ease-in-out infinite 5s;}
 @keyframes meshFloat{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(40px,30px) scale(1.08);}}
 
@@ -38,77 +38,82 @@ body{background:var(--bg);color:var(--white);font-family:'Outfit',sans-serif;ove
 .noise{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:0.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
 
 /* NAV */
-nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;height:68px;display:flex;align-items:center;justify-content:space-between;background:rgba(5,5,7,0.6);backdrop-filter:blur(32px) saturate(180%);-webkit-backdrop-filter:blur(32px) saturate(180%);border-bottom:1px solid rgba(255,255,255,0.06);}
-.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:4px;cursor:pointer;color:var(--white);transition:opacity 0.2s;}
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;height:64px;display:flex;align-items:center;justify-content:space-between;background:rgba(5,5,7,0.75);backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);border-bottom:1px solid rgba(255,255,255,0.05);}
+.nav-logo{font-size:15px;font-weight:700;letter-spacing:3px;cursor:pointer;color:var(--white);transition:opacity 0.2s;text-transform:uppercase;}
 .nav-logo:hover{opacity:0.75;}
 .nav-links{display:flex;gap:2px;list-style:none;}
-.nav-links a{color:var(--gray);text-decoration:none;font-size:13px;font-weight:500;padding:7px 14px;border-radius:100px;transition:all 0.2s;}
+.nav-links a{color:rgba(255,255,255,0.45);text-decoration:none;font-size:13px;font-weight:500;padding:6px 14px;border-radius:100px;transition:all 0.2s;letter-spacing:0.1px;}
 .nav-links a:hover{color:var(--white);background:rgba(255,255,255,0.07);}
 .nav-links a.active{color:var(--white);background:rgba(255,255,255,0.1);}
 .nav-right{display:flex;align-items:center;gap:10px;}
 .nav-insta{color:var(--gray);font-size:12px;font-weight:500;text-decoration:none;padding:7px 14px;border-radius:100px;border:1px solid rgba(255,255,255,0.08);transition:all 0.2s;display:flex;align-items:center;gap:6px;}
 .nav-insta:hover{color:var(--white);border-color:rgba(255,255,255,0.2);}
-.nav-btn{background:rgba(255,255,255,0.95);color:#050507;border:none;padding:9px 22px;border-radius:100px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.3px;}
+.nav-btn{background:rgba(255,255,255,0.9);color:#050507;border:none;padding:9px 20px;border-radius:8px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;}
 .nav-btn:hover{background:#fff;transform:scale(0.97);}
 .nav-menu-btn{display:none;background:none;border:1px solid rgba(255,255,255,0.1);color:var(--white);padding:8px 10px;border-radius:10px;cursor:pointer;font-size:18px;}
 
 /* GLASS */
-.glass{background:rgba(255,255,255,0.04);backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);border:1px solid rgba(255,255,255,0.07);border-radius:20px;transition:background 0.3s,border-color 0.3s;}
-.glass:hover{background:rgba(255,255,255,0.07);border-color:rgba(255,255,255,0.13);}
+.glass{background:rgba(255,255,255,0.035);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(255,255,255,0.07);border-radius:18px;transition:background 0.25s,border-color 0.25s;}
+.glass:hover{background:rgba(255,255,255,0.065);border-color:rgba(255,255,255,0.12);}
 .glass-strong{background:rgba(255,255,255,0.06);backdrop-filter:blur(40px) saturate(200%);-webkit-backdrop-filter:blur(40px) saturate(200%);border:1px solid rgba(255,255,255,0.1);border-radius:20px;}
 
 /* PAGES */
-.page{display:none;min-height:100vh;padding-top:68px;position:relative;z-index:2;}
+.page{display:none;min-height:100vh;padding-top:64px;position:relative;z-index:2;}
 .page.active{display:block;}
 #home-page.active{display:flex;flex-direction:column;}
 
 /* HERO */
-.hero{min-height:calc(100vh - 68px);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:60px 24px;position:relative;overflow:hidden;}
-.hero-eyebrow{font-size:11px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:rgba(167,139,250,0.8);margin-bottom:28px;opacity:0;animation:fadeUp 0.8s 0.1s ease forwards;}
-.hero-headline{font-family:'Bebas Neue',sans-serif;font-size:clamp(72px,12vw,148px);line-height:0.88;letter-spacing:-1px;margin-bottom:24px;opacity:0;animation:fadeUp 0.9s 0.25s ease forwards;}
-.hero-headline span{color:rgba(255,255,255,0.15);}
-.hero-sub{font-size:15px;color:var(--gray);font-weight:400;letter-spacing:0.2px;line-height:1.7;margin-bottom:48px;max-width:380px;opacity:0;animation:fadeUp 0.8s 0.45s ease forwards;}
-.hero-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;opacity:0;animation:fadeUp 0.8s 0.6s ease forwards;}
-.hero-stats{display:flex;gap:40px;margin-top:64px;opacity:0;animation:fadeUp 0.8s 0.75s ease forwards;}
-.hero-stat{text-align:center;}
-.hero-stat-num{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:1px;line-height:1;}
-.hero-stat-label{font-size:11px;color:var(--gray);font-weight:500;margin-top:2px;letter-spacing:0.5px;}
-.hero-stat-div{width:1px;background:rgba(255,255,255,0.1);}
+.hero{min-height:calc(100vh - 68px);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:40px 24px;position:relative;overflow:hidden;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);border-radius:100px;padding:7px 16px;font-size:12px;font-weight:500;color:rgba(255,255,255,0.55);margin-bottom:24px;opacity:0;animation:fadeUp 0.7s 0.1s ease forwards;letter-spacing:0.2px;}
+.hero-badge-dot{width:6px;height:6px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px #22c55e;animation:pulse 2s infinite;flex-shrink:0;}
+.hero-headline{font-size:clamp(52px,7vw,96px);font-weight:800;line-height:0.95;letter-spacing:-1.5px;margin-bottom:18px;opacity:0;animation:fadeUp 0.8s 0.2s ease forwards;}
+.hero-headline em{font-style:normal;color:rgba(255,255,255,0.16);}
+.hero-tagline{font-size:16px;color:rgba(255,255,255,0.42);font-weight:400;line-height:1.65;margin-bottom:34px;max-width:400px;opacity:0;animation:fadeUp 0.8s 0.35s ease forwards;}
+.hero-tagline b{color:rgba(255,255,255,0.72);font-weight:600;}
+.hero-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;opacity:0;animation:fadeUp 0.8s 0.5s ease forwards;}
+.hero-stats{display:flex;gap:0;margin-top:44px;opacity:0;animation:fadeUp 0.8s 0.65s ease forwards;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:16px;overflow:hidden;}
+.hero-stat{text-align:center;padding:16px 28px;flex:1;}
+.hero-stat:not(:last-child){border-right:1px solid rgba(255,255,255,0.07);}
+.hero-stat-num{font-size:22px;font-weight:700;letter-spacing:-0.3px;line-height:1;}
+.hero-stat-label{font-size:10px;color:rgba(255,255,255,0.3);font-weight:500;margin-top:3px;letter-spacing:0.5px;text-transform:uppercase;}
 
-.btn-white{background:rgba(255,255,255,0.95);color:#050507;border:none;padding:14px 32px;border-radius:100px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.2px;}
-.btn-white:hover{background:#fff;transform:scale(0.97);}
-.btn-ghost{background:rgba(255,255,255,0.05);color:var(--white);border:1px solid rgba(255,255,255,0.1);padding:14px 32px;border-radius:100px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;cursor:pointer;backdrop-filter:blur(12px);transition:all 0.2s;}
-.btn-ghost:hover{background:rgba(255,255,255,0.09);border-color:rgba(255,255,255,0.2);transform:scale(0.97);}
+.btn-white{background:rgba(255,255,255,0.92);color:#050507;border:none;padding:13px 28px;border-radius:10px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.btn-white:hover{background:#fff;transform:translateY(-1px);box-shadow:0 8px 24px rgba(255,255,255,0.12);}
+.btn-ghost{background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.1);padding:13px 28px;border-radius:10px;font-family:'Inter',sans-serif;font-size:14px;font-weight:500;cursor:pointer;backdrop-filter:blur(12px);transition:all 0.2s;}
+.btn-ghost:hover{background:rgba(255,255,255,0.07);border-color:rgba(255,255,255,0.18);transform:translateY(-1px);}
 
 /* SECTIONS */
-.section{padding:80px 40px;max-width:1100px;margin:0 auto;}
-.section-label{font-size:10px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:rgba(167,139,250,0.7);margin-bottom:14px;}
-.section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(42px,5vw,68px);letter-spacing:0.5px;margin-bottom:44px;line-height:0.95;}
+.section{padding:64px 40px;max-width:1100px;margin:0 auto;}
+.section-label{font-size:11px;font-weight:500;letter-spacing:0.3px;color:rgba(255,255,255,0.35);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.section-label::before{content:"";display:inline-block;width:18px;height:1px;background:rgba(255,255,255,0.25);}
+.section-title{font-size:clamp(28px,3.5vw,42px);font-weight:700;letter-spacing:-0.5px;margin-bottom:32px;line-height:1.1;color:rgba(255,255,255,0.92);}
 
 /* SERVICES */
 .services-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-.svc-card{padding:28px 24px;cursor:pointer;border-radius:20px;}
-.svc-icon{font-size:26px;margin-bottom:16px;}
-.svc-name{font-size:15px;font-weight:700;margin-bottom:5px;letter-spacing:0.2px;}
-.svc-price{font-size:12px;color:var(--gray);font-weight:500;}
+.svc-card{padding:22px 20px;cursor:pointer;border-radius:16px;display:flex;flex-direction:column;gap:0;}
+.svc-icon{font-size:20px;margin-bottom:14px;line-height:1;}
+.svc-name{font-size:14px;font-weight:600;margin-bottom:5px;color:rgba(255,255,255,0.88);letter-spacing:-0.1px;}
+.svc-price{font-size:12px;color:rgba(255,255,255,0.32);font-weight:400;}
+.svc-arrow{font-size:13px;color:rgba(255,255,255,0.2);margin-top:auto;padding-top:14px;transition:color 0.2s,transform 0.2s;}
+.svc-card:hover .svc-arrow{color:rgba(255,255,255,0.6);transform:translateX(3px);}
 
 /* PLANS HOME */
 .plans-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-.plan-home{padding:32px 26px;position:relative;overflow:hidden;border-radius:20px;}
-.plan-home::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at top left,rgba(255,255,255,0.04),transparent 60%);pointer-events:none;}
-.plan-home-id{font-size:9px;font-weight:700;letter-spacing:4px;color:var(--gray);text-transform:uppercase;margin-bottom:10px;}
-.plan-home-name{font-family:'Bebas Neue',sans-serif;font-size:52px;line-height:1;margin-bottom:8px;}
+.plan-home{padding:24px 22px;position:relative;overflow:hidden;border-radius:16px;display:flex;flex-direction:column;}
+.plan-home::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at top left,rgba(255,255,255,0.03),transparent 55%);pointer-events:none;}
+.plan-home-id{font-size:10px;font-weight:500;letter-spacing:0.5px;color:rgba(255,255,255,0.3);text-transform:none;margin-bottom:14px;}
+.plan-home-name{font-size:22px;font-weight:700;line-height:1;margin-bottom:4px;letter-spacing:-0.3px;}
 .plan-silver .plan-home-name{color:#d1d5db;}
 .plan-gold .plan-home-name{color:#fbbf24;}
 .plan-platinum .plan-home-name{color:#e2e8f0;}
-.plan-home-price{font-size:20px;font-weight:700;margin-bottom:3px;}
-.plan-home-bonus{font-size:12px;color:var(--green);font-weight:600;margin-bottom:22px;}
-.plan-home-btn{width:100%;padding:12px;border-radius:100px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;border:none;transition:all 0.2s;letter-spacing:0.3px;}
-.plan-silver .plan-home-btn{background:rgba(209,213,219,0.1);color:#d1d5db;border:1px solid rgba(209,213,219,0.2);}
-.plan-silver .plan-home-btn:hover{background:rgba(209,213,219,0.18);}
-.plan-gold .plan-home-btn{background:#fbbf24;color:#050507;}
+.plan-home-price{font-size:28px;font-weight:700;margin-bottom:3px;letter-spacing:-0.5px;}
+.plan-home-bonus{font-size:12px;color:var(--green);font-weight:500;margin-bottom:20px;opacity:0.9;}
+.plan-home-btn{width:100%;padding:11px;border-radius:10px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all 0.2s;margin-top:auto;}
+.plan-silver .plan-home-btn{background:rgba(209,213,219,0.08);color:rgba(209,213,219,0.8);border:1px solid rgba(209,213,219,0.15);}
+.plan-silver .plan-home-btn:hover{background:rgba(209,213,219,0.14);}
+.plan-gold .plan-home-btn{background:rgba(251,191,36,0.92);color:#050507;}
 .plan-gold .plan-home-btn:hover{background:#f59e0b;}
-.plan-platinum .plan-home-btn{background:rgba(226,232,240,0.1);color:#e2e8f0;border:1px solid rgba(226,232,240,0.2);}
+.plan-platinum .plan-home-btn{background:rgba(226,232,240,0.08);color:rgba(226,232,240,0.8);border:1px solid rgba(226,232,240,0.15);}
 .plan-platinum .plan-home-btn:hover{background:rgba(226,232,240,0.18);}
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(28px);}to{opacity:1;transform:translateY(0);}}
@@ -117,7 +122,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;height:68px;
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
 
 /* PAGE HEADER */
-.page-header{padding:56px 40px 0;max-width:1100px;margin:0 auto;}
+.page-header{padding:48px 40px 0;max-width:1100px;margin:0 auto;}
 
 /* SERVICES FULL */
 .services-full-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:8px;padding:32px 40px 80px;max-width:1100px;margin:0 auto;}
@@ -127,21 +132,21 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;height:68px;
 .price-line:last-child{border:none;}
 .price-label{color:var(--gray);}
 .price-val{font-weight:700;font-size:14px;}
-.svc-full-btn{width:100%;padding:13px;border-radius:100px;background:rgba(255,255,255,0.9);color:#050507;border:none;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;}
+.svc-full-btn{width:100%;padding:13px;border-radius:100px;background:rgba(255,255,255,0.9);color:#050507;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;}
 .svc-full-btn:hover{background:#fff;transform:scale(0.98);}
 
 /* BOOKING */
 .booking-wrap{max-width:680px;margin:0 auto;padding:40px 40px 80px;}
 .step-bar{display:flex;align-items:center;gap:0;margin-bottom:48px;}
-.step-dot{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--gray);flex-shrink:0;transition:all 0.3s;}
+.step-dot{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:rgba(255,255,255,0.3);flex-shrink:0;transition:all 0.3s;}
 .step-dot.active{background:rgba(255,255,255,0.92);color:#050507;border-color:transparent;}
 .step-dot.done{background:rgba(255,255,255,0.08);color:var(--light);border-color:rgba(255,255,255,0.15);}
 .step-line{flex:1;height:1px;background:rgba(255,255,255,0.07);}
 .step-line.done{background:rgba(255,255,255,0.18);}
 .panel{display:none;}
 .panel.active{display:block;}
-.panel-title{font-family:'Bebas Neue',sans-serif;font-size:40px;letter-spacing:0.5px;margin-bottom:6px;}
-.panel-sub{font-size:14px;color:var(--gray);margin-bottom:30px;}
+.panel-title{font-size:26px;font-weight:700;letter-spacing:-0.3px;margin-bottom:6px;}
+.panel-sub{font-size:14px;color:rgba(255,255,255,0.38);margin-bottom:26px;}
 
 /* DATE PILLS */
 .date-pills{display:flex;gap:6px;margin-bottom:22px;flex-wrap:wrap;}
@@ -161,7 +166,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;height:68px;
 .box-btn{padding:22px 14px;border-radius:18px;cursor:pointer;text-align:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);transition:all 0.2s;}
 .box-btn:hover,.box-btn.selected{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.25);}
 .box-btn.occupied{border-color:rgba(239,68,68,0.25)!important;background:rgba(239,68,68,0.04)!important;opacity:0.45;pointer-events:none;cursor:not-allowed;}
-.box-num{font-family:'Bebas Neue',sans-serif;font-size:48px;line-height:1;color:var(--white);}
+.box-num{font-size:40px;font-weight:700;line-height:1;color:var(--white);letter-spacing:-1px;}
 .box-label-s{font-size:10px;color:var(--gray);font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-top:4px;}
 .box-avail{font-size:11px;font-weight:600;margin-top:6px;}
 .box-free .box-avail{color:var(--green);}
@@ -171,7 +176,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;height:68px;
 .form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
 .form-group{display:flex;flex-direction:column;gap:7px;margin-bottom:10px;}
 .form-label{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gray);}
-.field{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:13px 16px;font-family:'Outfit',sans-serif;font-size:14px;color:var(--white);outline:none;transition:border-color 0.2s;width:100%;}
+.field{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:12px 14px;font-family:'Inter',sans-serif;font-size:14px;color:var(--white);outline:none;transition:border-color 0.2s,background 0.2s;width:100%;}
 .field::placeholder{color:rgba(255,255,255,0.25);}
 .field:focus{border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.06);}
 .field option{background:#111;color:#fff;}
@@ -185,47 +190,47 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;height:68px;
 .car-type-btn.selected .car-type-name{color:var(--white);}
 
 /* SUMMARY */
-.summary-card{padding:22px;border-radius:18px;margin-bottom:22px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);}
+.summary-card{padding:20px;border-radius:12px;margin-bottom:20px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);}
 .summary-row-i{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:14px;}
 .summary-row-i:last-child{border:none;padding-bottom:0;}
 .summary-key{color:var(--gray);}
 .summary-val{font-weight:700;}
 .summary-total .summary-val{font-size:18px;}
 .nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:12px;}
-.btn-back{background:rgba(255,255,255,0.05);color:var(--white);border:1px solid rgba(255,255,255,0.08);padding:13px 24px;border-radius:100px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.btn-back{background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.08);padding:12px 22px;border-radius:100px;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.2s;}
 .btn-back:hover{background:rgba(255,255,255,0.09);}
-.btn-next{background:rgba(255,255,255,0.93);color:#050507;border:none;padding:13px 32px;border-radius:100px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;}
+.btn-next{background:rgba(255,255,255,0.93);color:#050507;border:none;padding:13px 32px;border-radius:100px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;}
 .btn-next:hover{background:#fff;transform:scale(0.98);}
 .btn-next:disabled{opacity:0.45;cursor:not-allowed;transform:none;}
 
 /* SUCCESS */
 .success-wrap{text-align:center;padding:60px 20px;}
 .success-icon{font-size:64px;display:block;margin-bottom:20px;animation:fadeUp 0.5s ease;}
-.success-title{font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:0.5px;margin-bottom:12px;}
+.success-title{font-size:36px;font-weight:700;letter-spacing:-0.5px;margin-bottom:12px;}
 .success-msg{font-size:15px;color:var(--gray);line-height:1.7;margin-bottom:32px;}
-.booking-id-tag{display:inline-block;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);padding:13px 28px;border-radius:100px;font-size:15px;font-weight:700;letter-spacing:3px;margin-bottom:36px;}
+.booking-id-tag{display:inline-block;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:12px 24px;border-radius:10px;font-size:15px;font-weight:700;letter-spacing:2px;margin-bottom:32px;}
 
 /* SUBSCRIPTIONS PAGE */
 .plans-full{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:32px 40px 80px;max-width:1100px;margin:0 auto;}
 .plan-full{padding:40px 30px;position:relative;border-radius:20px;overflow:hidden;}
 .plan-full::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at top left,rgba(255,255,255,0.04),transparent 60%);pointer-events:none;}
-.plan-tier{font-size:9px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:var(--gray);margin-bottom:10px;}
-.plan-big-name{font-family:'Bebas Neue',sans-serif;font-size:62px;line-height:1;margin-bottom:6px;}
+.plan-tier{font-size:10px;font-weight:500;letter-spacing:0.3px;color:rgba(255,255,255,0.3);text-transform:none;margin-bottom:16px;}
+.plan-big-name{font-size:32px;font-weight:700;line-height:1;margin-bottom:4px;letter-spacing:-0.5px;}
 .plan-silver .plan-big-name{color:#d1d5db;}
 .plan-gold .plan-big-name{color:#fbbf24;}
 .plan-platinum .plan-big-name{color:#e2e8f0;}
-.plan-dur{font-size:13px;color:var(--gray);margin-bottom:30px;font-weight:400;}
-.plan-cost{font-size:30px;font-weight:700;margin-bottom:3px;}
-.plan-bonus-tag{font-size:13px;color:var(--green);font-weight:600;margin-bottom:4px;}
-.plan-account{font-size:22px;font-weight:700;margin-bottom:30px;}
+.plan-dur{font-size:13px;color:rgba(255,255,255,0.3);margin-bottom:24px;font-weight:400;}
+.plan-cost{font-size:34px;font-weight:700;margin-bottom:3px;letter-spacing:-0.5px;}
+.plan-bonus-tag{font-size:12px;color:rgba(34,197,94,0.8);font-weight:500;margin-bottom:4px;}
+.plan-account{font-size:20px;font-weight:600;margin-bottom:24px;opacity:0.9;}
 .plan-silver .plan-account{color:#d1d5db;}
 .plan-gold .plan-account{color:#fbbf24;}
 .plan-platinum .plan-account{color:#e2e8f0;}
 .plan-divider{height:1px;background:rgba(255,255,255,0.07);margin:24px 0;}
 .plan-features{list-style:none;display:flex;flex-direction:column;gap:11px;margin-bottom:34px;}
-.plan-features li{font-size:13px;color:var(--gray);display:flex;gap:10px;line-height:1.5;}
-.plan-features li::before{content:'→';color:rgba(255,255,255,0.4);flex-shrink:0;}
-.plan-cta-btn{width:100%;padding:14px;border-radius:100px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;border:none;transition:all 0.2s;letter-spacing:0.3px;}
+.plan-features li{font-size:13px;color:rgba(255,255,255,0.38);display:flex;gap:8px;line-height:1.5;}
+.plan-features li::before{content:'—';color:rgba(255,255,255,0.18);flex-shrink:0;font-weight:300;}
+.plan-cta-btn{width:100%;padding:12px;border-radius:10px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all 0.2s;}
 .plan-silver .plan-cta-btn{background:rgba(209,213,219,0.1);color:#d1d5db;border:1px solid rgba(209,213,219,0.2);}
 .plan-silver .plan-cta-btn:hover{background:rgba(209,213,219,0.18);}
 .plan-gold .plan-cta-btn{background:#fbbf24;color:#050507;}
@@ -234,15 +239,15 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;height:68px;
 .plan-platinum .plan-cta-btn:hover{background:rgba(226,232,240,0.18);}
 
 /* ═══ CRM PIN GATE ═══ */
-#crm-gate{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 68px);padding:40px;}
+#crm-gate{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 64px);padding:40px;}
 .pin-box{text-align:center;max-width:320px;width:100%;}
-.pin-title{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:1px;margin-bottom:6px;}
-.pin-sub{font-size:14px;color:var(--gray);margin-bottom:32px;}
+.pin-title{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;margin-bottom:8px;}
+.pin-sub{font-size:13px;color:rgba(255,255,255,0.35);margin-bottom:28px;}
 .pin-dots{display:flex;gap:14px;justify-content:center;margin-bottom:32px;}
 .pin-dot{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);transition:all 0.2s;}
 .pin-dot.filled{background:rgba(255,255,255,0.9);border-color:transparent;}
 .pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:260px;margin:0 auto;}
-.pin-key{padding:18px;border-radius:16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);font-size:20px;font-weight:600;cursor:pointer;transition:all 0.2s;text-align:center;}
+.pin-key{padding:16px;border-radius:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);font-size:20px;font-weight:600;cursor:pointer;transition:all 0.2s;text-align:center;font-family:'Inter',sans-serif;}
 .pin-key:hover{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.18);}
 .pin-key:active{transform:scale(0.95);}
 .pin-key.wide{grid-column:span 2;}
@@ -255,10 +260,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;height:68px;
 .crm-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;flex-wrap:wrap;gap:16px;}
 .crm-stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:24px;}
 .crm-stat-card{padding:18px 16px;border-radius:16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);}
-.crm-stat-num{font-family:'Bebas Neue',sans-serif;font-size:38px;line-height:1;color:var(--white);}
+.crm-stat-num{font-size:32px;font-weight:700;line-height:1;color:var(--white);letter-spacing:-0.5px;}
 .crm-stat-label{font-size:10px;color:var(--gray);font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-top:2px;}
 .crm-tabs-bar{display:flex;gap:3px;margin-bottom:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:4px;width:fit-content;flex-wrap:wrap;}
-.crm-tab-btn{padding:8px 18px;border-radius:10px;background:none;border:none;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;color:var(--gray);cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.crm-tab-btn{padding:8px 18px;border-radius:10px;background:none;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--gray);cursor:pointer;transition:all 0.2s;white-space:nowrap;}
 .crm-tab-btn.active{background:rgba(255,255,255,0.1);color:var(--white);}
 .crm-tab-panel{display:none;}
 .crm-tab-panel.active{display:block;}
@@ -295,7 +300,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;height:68px;
 .badge-platinum{background:rgba(226,232,240,0.08);color:#e2e8f0;border:1px solid rgba(226,232,240,0.15);}
 
 /* ACTION BUTTONS */
-.act-btn{background:none;border:1px solid rgba(255,255,255,0.08);color:var(--gray);padding:5px 10px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.2s;margin-right:3px;white-space:nowrap;font-family:'Outfit',sans-serif;}
+.act-btn{background:none;border:1px solid rgba(255,255,255,0.08);color:var(--gray);padding:5px 10px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.2s;margin-right:3px;white-space:nowrap;font-family:'Inter',sans-serif;}
 .act-btn:hover{border-color:rgba(255,255,255,0.25);color:var(--white);}
 .act-btn-green{border-color:rgba(34,197,94,0.3)!important;color:#22c55e!important;}
 .act-btn-green:hover{background:rgba(34,197,94,0.08)!important;}
@@ -318,7 +323,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;height:68px;
 .client-row:hover{border-color:rgba(255,255,255,0.18);background:rgba(255,255,255,0.07);}
 .client-av{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
 .client-info{flex:1;min-width:0;}
-.client-name-s{font-size:14px;font-weight:700;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.client-name-s{font-size:14px;font-weight:600;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .client-meta-s{font-size:11px;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .client-arrow{color:var(--gray);font-size:16px;transition:transform 0.2s;flex-shrink:0;}
 .client-row:hover .client-arrow{transform:translateX(3px);color:var(--white);}
@@ -326,14 +331,14 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;height:68px;
 /* MODALS */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;align-items:center;justify-content:center;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:16px;}
 .modal-overlay.show{display:flex;}
-.modal-box{background:#0d0d14;border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:36px;width:460px;max-width:100%;max-height:90vh;overflow-y:auto;position:relative;animation:fadeUp 0.3s ease;}
+.modal-box{background:#0c0c13;border:1px solid rgba(255,255,255,0.09);border-radius:22px;padding:32px;width:460px;max-width:100%;max-height:90vh;overflow-y:auto;position:relative;animation:fadeUp 0.3s ease;}
 .modal-box.modal-large{width:680px;}
 .modal-close{position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:var(--gray);width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;transition:all 0.2s;}
 .modal-close:hover{color:var(--white);background:rgba(255,255,255,0.1);}
 
 /* CLIENT MODAL TABS */
 .client-tabs{display:flex;gap:5px;margin-bottom:22px;flex-wrap:wrap;}
-.client-tab-btn{padding:7px 15px;border-radius:10px;background:none;border:1px solid rgba(255,255,255,0.07);font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;color:var(--gray);cursor:pointer;transition:all 0.2s;}
+.client-tab-btn{padding:7px 15px;border-radius:10px;background:none;border:1px solid rgba(255,255,255,0.07);font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:var(--gray);cursor:pointer;transition:all 0.2s;}
 .client-tab-btn.active{background:rgba(255,255,255,0.1);color:var(--white);border-color:rgba(255,255,255,0.2);}
 .client-tab-pane{display:none;}
 .client-tab-pane.active{display:block;}
@@ -355,12 +360,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;height:68px;
 .svc-pick-price{font-size:12px;color:var(--gray);}
 
 /* FOOTER */
-footer{background:rgba(255,255,255,0.02);border-top:1px solid rgba(255,255,255,0.06);padding:48px 40px 28px;position:relative;z-index:2;}
+footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,0.05);padding:48px 40px 28px;position:relative;z-index:2;}
 .footer-inner{max-width:1100px;margin:0 auto;}
 .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:40px;margin-bottom:40px;}
-.footer-brand{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:3px;margin-bottom:10px;}
+.footer-brand{font-size:18px;font-weight:700;letter-spacing:2px;margin-bottom:10px;text-transform:uppercase;}
 .footer-desc{font-size:13px;color:var(--gray);line-height:1.7;max-width:240px;}
-.footer-col-title{font-size:9px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:var(--gray);margin-bottom:14px;}
+.footer-col-title{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:14px;}
 .footer-links{list-style:none;display:flex;flex-direction:column;gap:9px;}
 .footer-links a{color:rgba(255,255,255,0.35);text-decoration:none;font-size:13px;transition:color 0.2s;}
 .footer-links a:hover{color:var(--white);}
@@ -384,8 +389,8 @@ footer{background:rgba(255,255,255,0.02);border-top:1px solid rgba(255,255,255,0
   .nav-btn{display:none;}
   .nav-menu-btn{display:flex;align-items:center;justify-content:center;}
   .hero{padding:40px 20px;}
-  .hero-stats{gap:24px;}
-  .section,.booking-wrap,.crm-wrap{padding:32px 16px 48px;}
+  .hero-stats{flex-wrap:wrap;} .hero-stat{padding:14px 20px;}
+  .section,.booking-wrap,.crm-wrap{padding:28px 16px 44px;}
   .page-header{padding:32px 16px 0;}
   .services-row,.plans-row,.plans-full,.services-full-grid{grid-template-columns:1fr;}
   .form-grid-2{grid-template-columns:1fr;}
@@ -397,8 +402,8 @@ footer{background:rgba(255,255,255,0.02);border-top:1px solid rgba(255,255,255,0
   .modal-large{width:100%!important;}
   .crm-stats-row{grid-template-columns:repeat(2,1fr);}
   .boxes-live{grid-template-columns:1fr;}
-  .crm-tabs-bar{width:100%;}
-  .crm-tab-btn{flex:1;text-align:center;padding:8px 10px;font-size:12px;}
+  .crm-tabs-bar{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .crm-tab-btn{flex:0 0 auto;text-align:center;padding:8px 12px;font-size:12px;}
   /* On mobile, show cards instead of tables */
   .desktop-table{display:none!important;}
   .crm-cards{display:flex!important;}
@@ -421,7 +426,7 @@ footer{background:rgba(255,255,255,0.02);border-top:1px solid rgba(255,255,255,0
   <a href="#" onclick="showPage('services');closeMobileMenu()">ПОСЛУГИ</a>
   <a href="#" onclick="showPage('subscriptions');closeMobileMenu()">АБОНЕМЕНТИ</a>
   <a href="#" onclick="showPage('booking');closeMobileMenu()">ЗАПИСАТИСЬ</a>
-  <a href="#" onclick="showPage('crm');closeMobileMenu()" style="font-size:24px;color:var(--gray);">CRM</a>
+  <a href="#" onclick="showPage('crm');closeMobileMenu()" style="font-size:28px;color:rgba(255,255,255,0.3);">🔐 CRM</a>
 </div>
 
 <!-- NAV -->
@@ -431,6 +436,7 @@ footer{background:rgba(255,255,255,0.02);border-top:1px solid rgba(255,255,255,0
     <li><a href="#" onclick="showPage('home')" id="nl-home" class="active">Головна</a></li>
     <li><a href="#" onclick="showPage('services')" id="nl-services">Послуги</a></li>
     <li><a href="#" onclick="showPage('subscriptions')" id="nl-subscriptions">Абонементи</a></li>
+    <li><a href="#" onclick="showPage('crm')" id="nl-crm" title="CRM Адміністрація" style="font-size:15px;padding:7px 10px;opacity:0.3;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='0.3'">🔐</a></li>
   </ul>
   <div class="nav-right">
     <a href="https://instagram.com/1333_car_center" target="_blank" class="nav-insta">
@@ -445,40 +451,39 @@ footer{background:rgba(255,255,255,0.02);border-top:1px solid rgba(255,255,255,0
 <!-- ═══ HOME ═══ -->
 <div id="home-page" class="page active">
   <div class="hero">
-    <div class="hero-eyebrow">Детейлінг центр · Харків · 3 бокси</div>
-    <h1 class="hero-headline">ДЕТЕЙЛІНГ<br><span>ЦЕНТР</span></h1>
-    <p class="hero-sub">Полірування · Хімчистка · Кераміка · PPF<br>вул. Гвардійців Широнінців, 51/1</p>
+    <div class="hero-badge"><span class="hero-badge-dot"></span>Харків · вул. Гвардійців Широнінців, 51/1</div>
+    <h1 class="hero-headline">1333<br>CAR <em>CENTER</em></h1>
+    <p class="hero-tagline"><b>Детейлінг вищого класу.</b><br>Полірування · Хімчистка · Кераміка · PPF</p>
     <div class="hero-btns">
-      <button class="btn-white" onclick="showPage('booking')">Записатись зараз</button>
-      <button class="btn-ghost" onclick="scrollToSection('home-services')">Переглянути послуги</button>
+      <button class="btn-white" onclick="showPage('booking')">Записатись онлайн</button>
+      <button class="btn-ghost" onclick="scrollToSection('home-services')">Послуги та ціни</button>
     </div>
     <div class="hero-stats">
       <div class="hero-stat"><div class="hero-stat-num">3</div><div class="hero-stat-label">Бокси</div></div>
-      <div class="hero-stat-div"></div>
       <div class="hero-stat"><div class="hero-stat-num">500+</div><div class="hero-stat-label">Клієнтів</div></div>
-      <div class="hero-stat-div"></div>
-      <div class="hero-stat"><div class="hero-stat-num">5★</div><div class="hero-stat-label">Рейтинг</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">5★</div><div class="hero-stat-label">Google</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">4+</div><div class="hero-stat-label">Роки</div></div>
     </div>
   </div>
   <div class="section" id="home-services">
-    <div class="section-label">// послуги</div>
-    <h2 class="section-title">Що ми робимо</h2>
+    <div class="section-label">Послуги</div>
+    <h2 class="section-title">Детейлінг, який<br>захищає ваш автомобіль</h2>
     <div class="services-row">
-      <div class="glass svc-card" onclick="showPageAndService('booking','Хімчистка салону','2 500 ₴')"><div class="svc-icon">🧹</div><div class="svc-name">Хімчистка салону</div><div class="svc-price">від 2 500 ₴</div></div>
-      <div class="glass svc-card" onclick="showPageAndService('booking','Полірування кузова','3 000 ₴')"><div class="svc-icon">✨</div><div class="svc-name">Полірування кузова</div><div class="svc-price">від 3 000 ₴</div></div>
-      <div class="glass svc-card" onclick="showPageAndService('booking','Керамічне покриття','6 000 ₴')"><div class="svc-icon">💎</div><div class="svc-name">Керамічне покриття</div><div class="svc-price">від 6 000 ₴</div></div>
-      <div class="glass svc-card" onclick="showPageAndService('booking','Тонування скла','1 800 ₴')"><div class="svc-icon">🌑</div><div class="svc-name">Тонування скла</div><div class="svc-price">від 1 800 ₴</div></div>
-      <div class="glass svc-card" onclick="showPageAndService('booking','PPF захисна плівка','4 000 ₴')"><div class="svc-icon">🛡️</div><div class="svc-name">PPF захисна плівка</div><div class="svc-price">від 4 000 ₴</div></div>
-      <div class="glass svc-card" onclick="showPageAndService('booking','Комплексне миття','600 ₴')"><div class="svc-icon">🚿</div><div class="svc-name">Комплексне миття</div><div class="svc-price">від 600 ₴</div></div>
+      <div class="glass svc-card" onclick="showPageAndService('booking','Хімчистка салону','2 500 ₴')"><div class="svc-icon">🧹</div><div class="svc-name">Хімчистка салону</div><div class="svc-price">від 2 500 ₴</div><div class="svc-arrow">→</div></div>
+      <div class="glass svc-card" onclick="showPageAndService('booking','Полірування кузова','3 000 ₴')"><div class="svc-icon">✨</div><div class="svc-name">Полірування кузова</div><div class="svc-price">від 3 000 ₴</div><div class="svc-arrow">→</div></div>
+      <div class="glass svc-card" onclick="showPageAndService('booking','Керамічне покриття','6 000 ₴')"><div class="svc-icon">💎</div><div class="svc-name">Керамічне покриття</div><div class="svc-price">від 6 000 ₴</div><div class="svc-arrow">→</div></div>
+      <div class="glass svc-card" onclick="showPageAndService('booking','Тонування скла','1 800 ₴')"><div class="svc-icon">🌑</div><div class="svc-name">Тонування скла</div><div class="svc-price">від 1 800 ₴</div><div class="svc-arrow">→</div></div>
+      <div class="glass svc-card" onclick="showPageAndService('booking','PPF захисна плівка','4 000 ₴')"><div class="svc-icon">🛡️</div><div class="svc-name">PPF захисна плівка</div><div class="svc-price">від 4 000 ₴</div><div class="svc-arrow">→</div></div>
+      <div class="glass svc-card" onclick="showPageAndService('booking','Комплексне миття','600 ₴')"><div class="svc-icon">🚿</div><div class="svc-name">Комплексне миття</div><div class="svc-price">від 600 ₴</div><div class="svc-arrow">→</div></div>
     </div>
   </div>
   <div class="section" id="home-plans">
-    <div class="section-label">// абонементи</div>
-    <h2 class="section-title">Обери план<br>і заощаджуй</h2>
+    <div class="section-label">Абонементи</div>
+    <h2 class="section-title">Плани для постійних<br>клієнтів</h2>
     <div class="plans-row">
-      <div class="glass plan-home plan-silver"><div class="plan-home-id">T-1 · 1 місяць</div><div class="plan-home-name">SILVER</div><div class="plan-home-price">10 000 ₴</div><div class="plan-home-bonus">+10% бонус = 11 000 ₴ на рахунок</div><button class="plan-home-btn" onclick="openPlanModal('Silver','10 000','11 000','T-1','1','10')">Придбати Silver</button></div>
-      <div class="glass plan-home plan-gold"><div class="plan-home-id">T-2 · 3 місяці</div><div class="plan-home-name">GOLD</div><div class="plan-home-price">30 000 ₴</div><div class="plan-home-bonus">+15% бонус = 34 500 ₴ на рахунок</div><button class="plan-home-btn" onclick="openPlanModal('Gold','30 000','34 500','T-2','3','15')">Придбати Gold</button></div>
-      <div class="glass plan-home plan-platinum"><div class="plan-home-id">T-3 · 6 місяців</div><div class="plan-home-name">PLATINUM</div><div class="plan-home-price">60 000 ₴</div><div class="plan-home-bonus">+20% бонус = 72 000 ₴ на рахунок</div><button class="plan-home-btn" onclick="openPlanModal('Platinum','60 000','72 000','T-3','6','20')">Придбати Platinum</button></div>
+      <div class="glass plan-home plan-silver"><div class="plan-home-id">1 місяць</div><div class="plan-home-name">Silver</div><div class="plan-home-price">10 000 ₴</div><div class="plan-home-bonus">+10% бонус = 11 000 ₴ на рахунок</div><button class="plan-home-btn" onclick="openPlanModal('Silver','10 000','11 000','T-1','1','10')">Придбати Silver</button></div>
+      <div class="glass plan-home plan-gold"><div class="plan-home-id">3 місяці</div><div class="plan-home-name">Gold</div><div class="plan-home-price">30 000 ₴</div><div class="plan-home-bonus">+15% бонус = 34 500 ₴ на рахунок</div><button class="plan-home-btn" onclick="openPlanModal('Gold','30 000','34 500','T-2','3','15')">Придбати Gold</button></div>
+      <div class="glass plan-home plan-platinum"><div class="plan-home-id">6 місяців</div><div class="plan-home-name">Platinum</div><div class="plan-home-price">60 000 ₴</div><div class="plan-home-bonus">+20% бонус = 72 000 ₴ на рахунок</div><button class="plan-home-btn" onclick="openPlanModal('Platinum','60 000','72 000','T-3','6','20')">Придбати Platinum</button></div>
     </div>
   </div>
   <footer>
@@ -495,7 +500,7 @@ footer{background:rgba(255,255,255,0.02);border-top:1px solid rgba(255,255,255,0
 
 <!-- ═══ SERVICES ═══ -->
 <div id="services-page" class="page">
-  <div class="page-header"><div class="section-label">// послуги</div><h2 class="section-title">Детейлінг<br>на вищому рівні</h2></div>
+  <div class="page-header"><div class="section-label">Послуги</div><h2 class="section-title">Детейлінг<br>на вищому рівні</h2><p style="font-size:14px;color:rgba(255,255,255,0.35);margin-top:8px;">Натисніть на будь-яку послугу, щоб одразу записатись</p></div>
   <div class="services-full-grid">
     <div class="glass svc-full" onclick="showPageAndService('booking','Хімчистка салону','2 500 ₴')"><div class="svc-icon">🧹</div><div class="svc-name">Хімчистка салону</div><p style="font-size:13px;color:var(--gray);margin-top:7px;line-height:1.7;">Глибоке очищення всіх поверхонь. Видалення складних забруднень та запахів.</p><div class="svc-full-prices"><div class="price-line"><span class="price-label">Седан</span><span class="price-val">2 500 ₴</span></div><div class="price-line"><span class="price-label">SUV / Кросовер</span><span class="price-val">3 500 ₴</span></div><div class="price-line"><span class="price-label">Мінівен</span><span class="price-val">4 500 ₴</span></div></div><button class="svc-full-btn">Записатись →</button></div>
     <div class="glass svc-full" onclick="showPageAndService('booking','Полірування кузова','3 000 ₴')"><div class="svc-icon">✨</div><div class="svc-name">Полірування кузова</div><p style="font-size:13px;color:var(--gray);margin-top:7px;line-height:1.7;">Абразивне та захисне полірування. Усунення подряпин та відновлення блиску.</p><div class="svc-full-prices"><div class="price-line"><span class="price-label">Однокрокове</span><span class="price-val">3 000 ₴</span></div><div class="price-line"><span class="price-label">Двокрокове</span><span class="price-val">5 000 ₴</span></div><div class="price-line"><span class="price-label">Full Detail</span><span class="price-val">8 000 ₴</span></div></div><button class="svc-full-btn">Записатись →</button></div>
@@ -509,8 +514,8 @@ footer{background:rgba(255,255,255,0.02);border-top:1px solid rgba(255,255,255,0
 <!-- ═══ BOOKING ═══ -->
 <div id="booking-page" class="page">
   <div class="booking-wrap">
-    <div class="section-label" style="margin-bottom:8px">// онлайн запис</div>
-    <h2 class="section-title" style="margin-bottom:36px">Запис<br>на послугу</h2>
+    <div class="section-label" style="margin-bottom:10px">Онлайн запис</div>
+    <h2 class="section-title" style="margin-bottom:32px">Запис<br>на послугу</h2>
     <div class="step-bar">
       <div class="step-dot active" id="sdot-1">1</div><div class="step-line" id="sline-1"></div>
       <div class="step-dot" id="sdot-2">2</div><div class="step-line" id="sline-2"></div>
@@ -611,14 +616,14 @@ footer{background:rgba(255,255,255,0.02);border-top:1px solid rgba(255,255,255,0
 <!-- ═══ SUBSCRIPTIONS ═══ -->
 <div id="subscriptions-page" class="page">
   <div class="page-header">
-    <div class="section-label">// абонементи</div>
-    <h2 class="section-title">Обери план<br>і заощаджуй</h2>
-    <p style="font-size:14px;color:var(--gray);margin-top:10px;">Купи абонемент і отримай бонус — витрачай на будь-які послуги</p>
+    <div class="section-label">Абонементи</div>
+    <h2 class="section-title">Плани для постійних<br>клієнтів</h2>
+    <p style="font-size:14px;color:rgba(255,255,255,0.35);margin-top:8px;font-weight:400;">Купи абонемент і отримай бонус на рахунок — витрачай на будь-які послуги</p>
   </div>
   <div class="plans-full">
-    <div class="glass plan-full plan-silver"><div class="plan-tier">T-1</div><div class="plan-big-name">SILVER</div><div class="plan-dur">Термін: 1 місяць</div><div class="plan-cost">10 000 ₴</div><div class="plan-bonus-tag">+ 10% бонус</div><div class="plan-account">= 11 000 ₴ на рахунок</div><div class="plan-divider"></div><ul class="plan-features"><li>11 000 ₴ на особистий рахунок</li><li>Пріоритетний запис без черги</li><li>Знижка 5% на додаткові послуги</li><li>Особистий менеджер</li></ul><button class="plan-cta-btn" onclick="openPlanModal('Silver','10 000','11 000','T-1','1','10')">Придбати Silver</button></div>
-    <div class="glass plan-full plan-gold"><div class="plan-tier">T-2</div><div class="plan-big-name">GOLD</div><div class="plan-dur">Термін: 3 місяці</div><div class="plan-cost">30 000 ₴</div><div class="plan-bonus-tag">+ 15% бонус</div><div class="plan-account">= 34 500 ₴ на рахунок</div><div class="plan-divider"></div><ul class="plan-features"><li>34 500 ₴ на особистий рахунок</li><li>Запис поза чергою</li><li>Знижка 10% на послуги</li><li>VIP-зона очікування</li><li>Безкоштовне миття раз на місяць</li></ul><button class="plan-cta-btn" onclick="openPlanModal('Gold','30 000','34 500','T-2','3','15')">Придбати Gold</button></div>
-    <div class="glass plan-full plan-platinum"><div class="plan-tier">T-3</div><div class="plan-big-name">PLATINUM</div><div class="plan-dur">Термін: 6 місяців</div><div class="plan-cost">60 000 ₴</div><div class="plan-bonus-tag">+ 20% бонус</div><div class="plan-account">= 72 000 ₴ на рахунок</div><div class="plan-divider"></div><ul class="plan-features"><li>72 000 ₴ на особистий рахунок</li><li>Необмежений пріоритетний доступ</li><li>Знижка 15% на всі послуги</li><li>Виїзний детейлінг на запит</li><li>Щомісячне миття + полірування</li></ul><button class="plan-cta-btn" onclick="openPlanModal('Platinum','60 000','72 000','T-3','6','20')">Придбати Platinum</button></div>
+    <div class="glass plan-full plan-silver"><div class="plan-tier">1 місяць · T-1</div><div class="plan-big-name">Silver</div><div class="plan-dur">Термін: 1 місяць</div><div class="plan-cost">10 000 ₴</div><div class="plan-bonus-tag">+ 10% бонус</div><div class="plan-account">= 11 000 ₴ на рахунок</div><div class="plan-divider"></div><ul class="plan-features"><li>11 000 ₴ на особистий рахунок</li><li>Пріоритетний запис без черги</li><li>Знижка 5% на додаткові послуги</li><li>Особистий менеджер</li></ul><button class="plan-cta-btn" onclick="openPlanModal('Silver','10 000','11 000','T-1','1','10')">Придбати Silver</button></div>
+    <div class="glass plan-full plan-gold"><div class="plan-tier">3 місяці · T-2</div><div class="plan-big-name">Gold</div><div class="plan-dur">Термін: 3 місяці</div><div class="plan-cost">30 000 ₴</div><div class="plan-bonus-tag">+ 15% бонус</div><div class="plan-account">= 34 500 ₴ на рахунок</div><div class="plan-divider"></div><ul class="plan-features"><li>34 500 ₴ на особистий рахунок</li><li>Запис поза чергою</li><li>Знижка 10% на послуги</li><li>VIP-зона очікування</li><li>Безкоштовне миття раз на місяць</li></ul><button class="plan-cta-btn" onclick="openPlanModal('Gold','30 000','34 500','T-2','3','15')">Придбати Gold</button></div>
+    <div class="glass plan-full plan-platinum"><div class="plan-tier">6 місяців · T-3</div><div class="plan-big-name">Platinum</div><div class="plan-dur">Термін: 6 місяців</div><div class="plan-cost">60 000 ₴</div><div class="plan-bonus-tag">+ 20% бонус</div><div class="plan-account">= 72 000 ₴ на рахунок</div><div class="plan-divider"></div><ul class="plan-features"><li>72 000 ₴ на особистий рахунок</li><li>Необмежений пріоритетний доступ</li><li>Знижка 15% на всі послуги</li><li>Виїзний детейлінг на запит</li><li>Щомісячне миття + полірування</li></ul><button class="plan-cta-btn" onclick="openPlanModal('Platinum','60 000','72 000','T-3','6','20')">Придбати Platinum</button></div>
   </div>
 </div>
 
@@ -656,7 +661,7 @@ footer{background:rgba(255,255,255,0.02);border-top:1px solid rgba(255,255,255,0
   <div id="crm-inner">
     <div class="crm-wrap">
       <div class="crm-top">
-        <div><div class="section-label">// адмін</div><h2 style="font-family:'Bebas Neue',sans-serif;font-size:44px;letter-spacing:0.5px;">CRM Система</h2></div>
+        <div><div class="section-label">Адмін</div><h2 style="font-size:28px;font-weight:700;letter-spacing:-0.5px;">CRM Система</h2></div>
         <div style="display:flex;gap:8px;align-items:center;">
           <button class="btn-white" onclick="showPage('booking')">+ Новий запис</button>
           <button class="btn-ghost" style="padding:10px 16px;font-size:13px;" onclick="pinLock()">🔒 Вийти</button>
@@ -722,7 +727,7 @@ footer{background:rgba(255,255,255,0.02);border-top:1px solid rgba(255,255,255,0
   <div class="modal-box">
     <div class="modal-close" onclick="closePlanModal()">✕</div>
     <div style="font-size:9px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:var(--gray);margin-bottom:8px;" id="m-id">T-1</div>
-    <div style="font-family:'Bebas Neue',sans-serif;font-size:44px;letter-spacing:0.5px;margin-bottom:4px;" id="m-name">SILVER</div>
+    <div style="font-size:26px;font-weight:700;letter-spacing:-0.3px;margin-bottom:4px;" id="m-name">SILVER</div>
     <div style="font-size:14px;color:var(--gray);margin-bottom:28px;" id="m-sub">10 000 ₴ → 11 000 ₴</div>
     <div style="display:flex;flex-direction:column;gap:10px;">
       <div class="form-group"><div class="form-label">Ім'я та прізвище</div><input type="text" class="field" id="pm-name" placeholder="Олексій Петренко"></div>
@@ -800,7 +805,7 @@ function showPage(p) {
   document.getElementById(p+'-page').classList.add('active');
   document.querySelectorAll('.nav-links a').forEach(x=>x.classList.remove('active'));
   const nl = document.getElementById('nl-'+p);
-  if (nl) nl.classList.add('active');
+  if (nl) { nl.classList.add('active'); if(p==='crm') nl.style.opacity='1'; }
   window.scrollTo({top:0,behavior:'smooth'});
   if (p==='crm') initCrmPage();
 }
@@ -818,15 +823,6 @@ function closeMobileMenu() { document.getElementById('mobileMenu').classList.rem
 
 // ═══ DATE PILLS ═══
 window.addEventListener('load', initDatePills);
-
-// ═══ KEYBOARD SHORTCUTS ═══
-document.addEventListener('keydown', (e) => {
-  // Ctrl+Shift+A — Open CRM
-  if (e.ctrlKey && e.shiftKey && e.code === 'KeyA') {
-    e.preventDefault();
-    showPage('crm');
-  }
-});
 
 function fmtDatePill(d) {
   const ukDays = ['Нд','Пн','Вт','Ср','Чт','Пт','Сб'];
@@ -1147,7 +1143,7 @@ function renderSchedule(bookings){
       <td><b>${b.clientName}</b><br><span style="font-size:11px;color:var(--gray);">${b.phone}</span></td>
       <td>${b.date}<br><span style="font-size:11px;color:var(--gray);">${b.time}</span></td>
       <td style="max-width:120px;">${b.service}</td>
-      <td><span style="font-family:'Bebas Neue';font-size:22px;">${b.box.replace('Box ','')}</span></td>
+      <td><span style="font-size:15px;font-weight:700;letter-spacing:-0.3px;">${b.box.replace('Box ','')}</span></td>
       <td><span class="badge ${statusBadgeClass(b.status)}">${b.status||'—'}</span></td>
       <td>
         <button class="act-btn act-btn-green" onclick="updateBookingStatusUI('${b.id}','▶ В роботі')" title="Почати">▶</button>
@@ -1196,7 +1192,7 @@ function renderBoxes(bookings,todayStr){
     const isBusy=!!active;
     return `<div class="box-live ${isBusy?'busy':'free'}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
-        <span style="font-family:'Bebas Neue';font-size:26px;">БОКС ${num}</span>
+        <span style="font-size:22px;font-weight:700;letter-spacing:-0.5px;">БОКС ${num}</span>
         <span class="badge ${isBusy?'badge-orange':'badge-green'}">${isBusy?'В роботі':'Вільний'}</span>
       </div>
       ${isBusy?`<div style="font-size:15px;font-weight:700;margin-bottom:3px;">${active.clientName}</div>
@@ -1375,7 +1371,7 @@ async function openClientModal(clientId){
   document.getElementById('clientModalContent').innerHTML=`
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:22px;">
       <div style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0;">${initials}</div>
-      <div><div style="font-family:'Bebas Neue';font-size:26px;letter-spacing:0.5px;">${client.name}</div><div style="font-size:12px;color:var(--gray);">${client.clientId} · ${client.phone}</div></div>
+      <div><div style="font-size:22px;font-weight:700;letter-spacing:-0.5px;letter-spacing:0.5px;">${client.name}</div><div style="font-size:12px;color:var(--gray);">${client.clientId} · ${client.phone}</div></div>
     </div>
     <div class="client-tabs">
       <button class="client-tab-btn active" onclick="switchClientTab(event,'info')">Інфо</button>
