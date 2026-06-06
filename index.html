@@ -752,13 +752,16 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
 // ╔══════════════════════════════════════════════════════╗
 // ║  CONFIG                                              ║
 // ╚══════════════════════════════════════════════════════╝
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw9mqrVSrAVeoMa4Np2SxYFRCxj5cW0uX1x7S50LddB7pXnz0PIvL7gPJHmLyIJ9986GQ/exec';
-const CRM_PIN = '1333'; // ← змініть на свій PIN
+const APPS = 'https://script.google.com/macros/s/AKfycbw9mqrVSrAVeoMa4Np2SxYFRCxj5cW0uX1x7S50LddB7pXnz0PIvL7gPJHmLyIJ9986GQ/exec';
+const CRM_PASS_KEY = '1333admin';
 
 // ═══ STATE ═══
-const S = { service:'', price:'', date:'', time:'', box:null, step:1, carType:'' };
-const _planMeta = {};
-let _allBookings=[], _allClients=[], _allSubs=[], _allSubRequests=[];
+const S = { date: null, time: null, box: null, availBoxes: [], bookings: [], clients: [], subs: [] };
+const CACHE = { bookings: null, ts: 0, ttl: 25000 };
+let curSub = null;
+
+const UA_DS = ['Нд','Пн','Вт','Ср','Чт','Пт','Сб'];
+const UA_MO = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
 // Cache layer
 const _cache = {};
 const CACHE_TTL = 60000; // 1 хвилина
@@ -800,26 +803,26 @@ async function autoRegisterClient(name, phone) {
 }
 
 // ═══ NAV ═══
-function showPage(p) {
-  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
-  document.getElementById(p+'-page').classList.add('active');
-  document.querySelectorAll('.nav-links a').forEach(x=>x.classList.remove('active'));
-  const nl = document.getElementById('nl-'+p);
-  if (nl) { nl.classList.add('active'); if(p==='crm') nl.style.opacity='1'; }
-  window.scrollTo({top:0,behavior:'smooth'});
-  if (p==='crm') initCrmPage();
+function go(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+  document.getElementById('page-' + name)?.classList.add('on');
+  document.querySelectorAll('.nl').forEach(l => l.classList.remove('on'));
+  const map = { home:0, booking:1, services:2, subs:3, about:4 };
+  if (map[name] !== undefined) document.querySelectorAll('.nl')[map[name]]?.classList.add('on');
+  window.scrollTo(0, 0);
+  if (name === 'booking') initBook();
+  if (name === 'services') showPrices('wash', document.querySelector('.ptab'));
+  if (name === 'home') initHome();
 }
-function scrollToSection(id) { document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'}); }
-function showPageAndService(page, svc, price) {
-  showPage(page);
-  setTimeout(()=>{
-    document.querySelectorAll('.svc-pick').forEach(b=>{
-      if(b.querySelector('.svc-pick-name')?.textContent===svc) { b.classList.add('selected'); S.service=svc; S.price=price; }
-    });
-  }, 100);
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.shiftKey && e.key === 'A') openCRM();
+});
+function openCRM() {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+  document.getElementById('page-crm')?.classList.add('on');
+  document.querySelectorAll('.nl').forEach(l => l.classList.remove('on'));
+  setTimeout(() => document.getElementById('crm-pass')?.focus(), 100);
 }
-function openMobileMenu() { document.getElementById('mobileMenu').classList.add('show'); document.body.style.overflow='hidden'; }
-function closeMobileMenu() { document.getElementById('mobileMenu').classList.remove('show'); document.body.style.overflow=''; }
 
 // ═══ DATE PILLS ═══
 window.addEventListener('load', initDatePills);
@@ -1446,10 +1449,13 @@ document.getElementById('planModal').addEventListener('click',function(e){if(e.t
 document.getElementById('clientModal').addEventListener('click',function(e){if(e.target===this)closeClientModal();});
 
 // ═══ TOAST ═══
-function toast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),3500);
+function toast(msg, type = 'ok') {
+  const t = document.getElementById('toast');
+  if (!t) return;
+  t.innerHTML = (type === 'ok' ? '✓' : '⚠') + ' ' + msg;
+  t.className = 'toast on ' + type;
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('on'), 3500);
 }
 </script>
 </body>
