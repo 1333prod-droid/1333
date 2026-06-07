@@ -5,429 +5,322 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>1333 Car Center — Детейлінг Харків</title>
 <meta name="description" content="Детейлінг центр у Харкові. Антигравійна плівка, хімчистка, полірування.">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
-  --bg:#050507;
-  --bg2:#0a0a10;
-  --glass:rgba(255,255,255,0.05);
-  --glass-border:rgba(255,255,255,0.08);
-  --glass-hover:rgba(255,255,255,0.09);
-  --glass-active:rgba(255,255,255,0.13);
-  --white:#ffffff;
-  --gray:rgba(255,255,255,0.4);
-  --light:rgba(255,255,255,0.7);
-  --green:#22c55e;
-  --red:#ef4444;
-  --orange:#f97316;
-  --yellow:#eab308;
-  --accent:#a78bfa;
+  --bg:#080808;--glass:rgba(255,255,255,0.06);--glass-border:rgba(255,255,255,0.10);
+  --glass-hover:rgba(255,255,255,0.10);--white:#ffffff;--gray:rgba(255,255,255,0.45);
+  --light:rgba(255,255,255,0.75);--green:#4caf50;--red:#ff4444;--orange:#ff7800;--yellow:#ffc800;
 }
 html{scroll-behavior:smooth;}
-body{background:var(--bg);color:var(--white);font-family:'Inter',sans-serif;overflow-x:hidden;min-height:100vh;-webkit-font-smoothing:antialiased;}
-
-/* MESH BG */
-.mesh-bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
-.mesh-bg::before{content:'';position:absolute;width:900px;height:900px;background:radial-gradient(ellipse,rgba(167,139,250,0.06) 0%,transparent 65%);top:-250px;left:-250px;animation:meshFloat 20s ease-in-out infinite;}
-.mesh-bg::after{content:'';position:absolute;width:700px;height:700px;background:radial-gradient(ellipse,rgba(34,197,94,0.04) 0%,transparent 65%);bottom:-150px;right:-150px;animation:meshFloat 25s ease-in-out infinite reverse;}
-.mesh-blob{position:absolute;width:500px;height:500px;background:radial-gradient(ellipse,rgba(249,115,22,0.04) 0%,transparent 65%);top:40%;left:50%;transform:translate(-50%,-50%);animation:meshFloat 15s ease-in-out infinite 5s;}
-@keyframes meshFloat{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(40px,30px) scale(1.08);}}
-
-/* NOISE */
-.noise{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:0.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+body{background:var(--bg);color:var(--white);font-family:'Manrope',sans-serif;overflow-x:hidden;}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");opacity:0.6;pointer-events:none;z-index:9999;}
 
 /* NAV */
-nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;height:64px;display:flex;align-items:center;justify-content:space-between;background:rgba(5,5,7,0.75);backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);border-bottom:1px solid rgba(255,255,255,0.05);}
-.nav-logo{font-size:15px;font-weight:700;letter-spacing:3px;cursor:pointer;color:var(--white);transition:opacity 0.2s;text-transform:uppercase;}
-.nav-logo:hover{opacity:0.75;}
-.nav-links{display:flex;gap:2px;list-style:none;}
-.nav-links a{color:rgba(255,255,255,0.45);text-decoration:none;font-size:13px;font-weight:500;padding:6px 14px;border-radius:100px;transition:all 0.2s;letter-spacing:0.1px;}
-.nav-links a:hover{color:var(--white);background:rgba(255,255,255,0.07);}
-.nav-links a.active{color:var(--white);background:rgba(255,255,255,0.1);}
-.nav-right{display:flex;align-items:center;gap:10px;}
-.nav-insta{color:var(--gray);font-size:12px;font-weight:500;text-decoration:none;padding:7px 14px;border-radius:100px;border:1px solid rgba(255,255,255,0.08);transition:all 0.2s;display:flex;align-items:center;gap:6px;}
-.nav-insta:hover{color:var(--white);border-color:rgba(255,255,255,0.2);}
-.nav-btn{background:rgba(255,255,255,0.9);color:#050507;border:none;padding:9px 20px;border-radius:8px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;}
-.nav-btn:hover{background:#fff;transform:scale(0.97);}
-.nav-menu-btn{display:none;background:none;border:1px solid rgba(255,255,255,0.1);color:var(--white);padding:8px 10px;border-radius:10px;cursor:pointer;font-size:18px;}
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;height:72px;display:flex;align-items:center;justify-content:space-between;background:rgba(8,8,8,0.7);backdrop-filter:blur(20px) saturate(180%);border-bottom:1px solid var(--glass-border);}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;cursor:pointer;color:var(--white);}
+.nav-links{display:flex;gap:8px;list-style:none;}
+.nav-links a{color:var(--gray);text-decoration:none;font-size:13px;font-weight:500;padding:8px 14px;border-radius:20px;transition:all 0.2s;}
+.nav-links a:hover{color:var(--white);background:var(--glass);}
+.nav-links a.active{color:var(--white);background:var(--glass);}
+.nav-btn{background:var(--white);color:#080808;border:none;padding:10px 22px;border-radius:20px;font-family:'Manrope',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;}
+.nav-btn:hover{background:rgba(255,255,255,0.85);transform:scale(0.98);}
 
 /* GLASS */
-.glass{background:rgba(255,255,255,0.035);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(255,255,255,0.07);border-radius:18px;transition:background 0.25s,border-color 0.25s;}
-.glass:hover{background:rgba(255,255,255,0.065);border-color:rgba(255,255,255,0.12);}
-.glass-strong{background:rgba(255,255,255,0.06);backdrop-filter:blur(40px) saturate(200%);-webkit-backdrop-filter:blur(40px) saturate(200%);border:1px solid rgba(255,255,255,0.1);border-radius:20px;}
+.glass{background:var(--glass);backdrop-filter:blur(24px) saturate(180%);border:1px solid var(--glass-border);border-radius:20px;transition:background 0.3s,border-color 0.3s;}
+.glass:hover{background:var(--glass-hover);border-color:rgba(255,255,255,0.18);}
 
 /* PAGES */
-.page{display:none;min-height:100vh;padding-top:64px;position:relative;z-index:2;}
+.page{display:none;min-height:100vh;padding-top:72px;}
 .page.active{display:block;}
 #home-page.active{display:flex;flex-direction:column;}
 
 /* HERO */
-.hero{min-height:calc(100vh - 68px);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:40px 24px;position:relative;overflow:hidden;}
-.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);border-radius:100px;padding:7px 16px;font-size:12px;font-weight:500;color:rgba(255,255,255,0.55);margin-bottom:24px;opacity:0;animation:fadeUp 0.7s 0.1s ease forwards;letter-spacing:0.2px;}
-.hero-badge-dot{width:6px;height:6px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px #22c55e;animation:pulse 2s infinite;flex-shrink:0;}
-.hero-headline{font-size:clamp(52px,7vw,96px);font-weight:800;line-height:0.95;letter-spacing:-1.5px;margin-bottom:18px;opacity:0;animation:fadeUp 0.8s 0.2s ease forwards;}
-.hero-headline em{font-style:normal;color:rgba(255,255,255,0.16);}
-.hero-tagline{font-size:16px;color:rgba(255,255,255,0.42);font-weight:400;line-height:1.65;margin-bottom:34px;max-width:400px;opacity:0;animation:fadeUp 0.8s 0.35s ease forwards;}
-.hero-tagline b{color:rgba(255,255,255,0.72);font-weight:600;}
-.hero-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;opacity:0;animation:fadeUp 0.8s 0.5s ease forwards;}
-.hero-stats{display:flex;gap:0;margin-top:44px;opacity:0;animation:fadeUp 0.8s 0.65s ease forwards;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:16px;overflow:hidden;}
-.hero-stat{text-align:center;padding:16px 28px;flex:1;}
-.hero-stat:not(:last-child){border-right:1px solid rgba(255,255,255,0.07);}
-.hero-stat-num{font-size:22px;font-weight:700;letter-spacing:-0.3px;line-height:1;}
-.hero-stat-label{font-size:10px;color:rgba(255,255,255,0.3);font-weight:500;margin-top:3px;letter-spacing:0.5px;text-transform:uppercase;}
-
-.btn-white{background:rgba(255,255,255,0.92);color:#050507;border:none;padding:13px 28px;border-radius:10px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;}
-.btn-white:hover{background:#fff;transform:translateY(-1px);box-shadow:0 8px 24px rgba(255,255,255,0.12);}
-.btn-ghost{background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.1);padding:13px 28px;border-radius:10px;font-family:'Inter',sans-serif;font-size:14px;font-weight:500;cursor:pointer;backdrop-filter:blur(12px);transition:all 0.2s;}
-.btn-ghost:hover{background:rgba(255,255,255,0.07);border-color:rgba(255,255,255,0.18);transform:translateY(-1px);}
+.hero{min-height:calc(100vh - 72px);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:60px 24px;position:relative;overflow:hidden;}
+.hero-glow{position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(255,255,255,0.04) 0%,transparent 70%);border-radius:50%;top:50%;left:50%;transform:translate(-50%,-60%);pointer-events:none;}
+.hero-logo-text{font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:6px;margin-bottom:24px;opacity:0;animation:fadeUp 0.8s 0.2s ease forwards;}
+.hero-headline{font-family:'Bebas Neue',sans-serif;font-size:clamp(56px,10vw,120px);line-height:0.92;letter-spacing:1px;margin-bottom:20px;opacity:0;animation:fadeUp 0.8s 0.4s ease forwards;}
+.hero-sub{font-size:15px;color:var(--gray);font-weight:400;letter-spacing:0.5px;line-height:1.6;margin-bottom:44px;max-width:400px;opacity:0;animation:fadeUp 0.8s 0.6s ease forwards;}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;opacity:0;animation:fadeUp 0.8s 0.8s ease forwards;}
+.btn-white{background:var(--white);color:#080808;border:none;padding:14px 32px;border-radius:50px;font-family:'Manrope',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s;}
+.btn-white:hover{background:rgba(255,255,255,0.85);transform:scale(0.98);}
+.btn-glass{background:var(--glass);color:var(--white);border:1px solid var(--glass-border);padding:14px 32px;border-radius:50px;font-family:'Manrope',sans-serif;font-size:14px;font-weight:600;cursor:pointer;backdrop-filter:blur(12px);transition:all 0.2s;}
+.btn-glass:hover{background:var(--glass-hover);transform:scale(0.98);}
 
 /* SECTIONS */
-.section{padding:64px 40px;max-width:1100px;margin:0 auto;}
-.section-label{font-size:11px;font-weight:500;letter-spacing:0.3px;color:rgba(255,255,255,0.35);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
-.section-label::before{content:"";display:inline-block;width:18px;height:1px;background:rgba(255,255,255,0.25);}
-.section-title{font-size:clamp(28px,3.5vw,42px);font-weight:700;letter-spacing:-0.5px;margin-bottom:32px;line-height:1.1;color:rgba(255,255,255,0.92);}
+.section{padding:80px 40px;max-width:1100px;margin:0 auto;}
+.section-label{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gray);margin-bottom:12px;}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,5vw,60px);letter-spacing:1px;margin-bottom:40px;line-height:1;}
 
 /* SERVICES */
-.services-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-.svc-card{padding:22px 20px;cursor:pointer;border-radius:16px;display:flex;flex-direction:column;gap:0;}
-.svc-icon{font-size:20px;margin-bottom:14px;line-height:1;}
-.svc-name{font-size:14px;font-weight:600;margin-bottom:5px;color:rgba(255,255,255,0.88);letter-spacing:-0.1px;}
-.svc-price{font-size:12px;color:rgba(255,255,255,0.32);font-weight:400;}
-.svc-arrow{font-size:13px;color:rgba(255,255,255,0.2);margin-top:auto;padding-top:14px;transition:color 0.2s,transform 0.2s;}
-.svc-card:hover .svc-arrow{color:rgba(255,255,255,0.6);transform:translateX(3px);}
+.services-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.svc-card{padding:28px 24px;cursor:pointer;}
+.svc-icon{font-size:28px;margin-bottom:14px;}
+.svc-name{font-size:16px;font-weight:700;margin-bottom:6px;}
+.svc-price{font-size:13px;color:var(--gray);font-weight:500;}
+.svc-card:hover .svc-name{color:var(--white);}
 
-/* PLANS HOME */
-.plans-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-.plan-home{padding:24px 22px;position:relative;overflow:hidden;border-radius:16px;display:flex;flex-direction:column;}
-.plan-home::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at top left,rgba(255,255,255,0.03),transparent 55%);pointer-events:none;}
-.plan-home-id{font-size:10px;font-weight:500;letter-spacing:0.5px;color:rgba(255,255,255,0.3);text-transform:none;margin-bottom:14px;}
-.plan-home-name{font-size:22px;font-weight:700;line-height:1;margin-bottom:4px;letter-spacing:-0.3px;}
-.plan-silver .plan-home-name{color:#d1d5db;}
-.plan-gold .plan-home-name{color:#fbbf24;}
-.plan-platinum .plan-home-name{color:#e2e8f0;}
-.plan-home-price{font-size:28px;font-weight:700;margin-bottom:3px;letter-spacing:-0.5px;}
-.plan-home-bonus{font-size:12px;color:var(--green);font-weight:500;margin-bottom:20px;opacity:0.9;}
-.plan-home-btn{width:100%;padding:11px;border-radius:10px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all 0.2s;margin-top:auto;}
-.plan-silver .plan-home-btn{background:rgba(209,213,219,0.08);color:rgba(209,213,219,0.8);border:1px solid rgba(209,213,219,0.15);}
-.plan-silver .plan-home-btn:hover{background:rgba(209,213,219,0.14);}
-.plan-gold .plan-home-btn{background:rgba(251,191,36,0.92);color:#050507;}
-.plan-gold .plan-home-btn:hover{background:#f59e0b;}
-.plan-platinum .plan-home-btn{background:rgba(226,232,240,0.08);color:rgba(226,232,240,0.8);border:1px solid rgba(226,232,240,0.15);}
-.plan-platinum .plan-home-btn:hover{background:rgba(226,232,240,0.18);}
+/* PLANS */
+.plans-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.plan-home{padding:32px 24px;position:relative;overflow:hidden;}
+.plan-home-id{font-size:10px;font-weight:700;letter-spacing:3px;color:var(--gray);text-transform:uppercase;margin-bottom:8px;}
+.plan-home-name{font-family:'Bebas Neue',sans-serif;font-size:44px;line-height:1;margin-bottom:6px;}
+.plan-silver .plan-home-name{color:#c0c0c0;}
+.plan-gold .plan-home-name{color:#ffd700;}
+.plan-platinum .plan-home-name{color:#e5e4e2;}
+.plan-home-price{font-size:20px;font-weight:700;margin-bottom:4px;}
+.plan-home-bonus{font-size:12px;color:var(--green);font-weight:600;margin-bottom:20px;}
+.plan-home-btn{width:100%;padding:12px;border-radius:50px;font-family:'Manrope',sans-serif;font-size:13px;font-weight:700;cursor:pointer;border:none;transition:all 0.2s;}
+.plan-silver .plan-home-btn{background:rgba(192,192,192,0.15);color:#c0c0c0;border:1px solid rgba(192,192,192,0.3);}
+.plan-gold .plan-home-btn{background:#ffd700;color:#080808;}
+.plan-platinum .plan-home-btn{background:rgba(229,228,226,0.15);color:#e5e4e2;border:1px solid rgba(229,228,226,0.3);}
 
-@keyframes fadeUp{from{opacity:0;transform:translateY(28px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
 @keyframes spin{to{transform:rotate(360deg);}}
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
 
 /* PAGE HEADER */
-.page-header{padding:48px 40px 0;max-width:1100px;margin:0 auto;}
-
-/* SERVICES FULL */
-.services-full-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:8px;padding:32px 40px 80px;max-width:1100px;margin:0 auto;}
-.svc-full{padding:30px 26px;cursor:pointer;border-radius:20px;}
-.svc-full-prices{margin:14px 0 22px;}
-.price-line{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:13px;}
+.page-header{padding:60px 40px 0;max-width:1100px;margin:0 auto;}
+.services-full-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;padding:40px;max-width:1100px;margin:0 auto;}
+.svc-full{padding:32px 28px;cursor:pointer;}
+.svc-full-prices{margin:16px 0 24px;}
+.price-line{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--glass-border);font-size:13px;}
 .price-line:last-child{border:none;}
 .price-label{color:var(--gray);}
 .price-val{font-weight:700;font-size:14px;}
-.svc-full-btn{width:100%;padding:13px;border-radius:100px;background:rgba(255,255,255,0.9);color:#050507;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;}
-.svc-full-btn:hover{background:#fff;transform:scale(0.98);}
+.svc-full-btn{width:100%;padding:13px;border-radius:50px;background:var(--white);color:#080808;border:none;font-family:'Manrope',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;}
+.svc-full-btn:hover{background:rgba(255,255,255,0.85);transform:scale(0.98);}
 
 /* BOOKING */
-.booking-wrap{max-width:680px;margin:0 auto;padding:40px 40px 80px;}
-.step-bar{display:flex;align-items:center;gap:0;margin-bottom:48px;}
-.step-dot{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:rgba(255,255,255,0.3);flex-shrink:0;transition:all 0.3s;}
-.step-dot.active{background:rgba(255,255,255,0.92);color:#050507;border-color:transparent;}
-.step-dot.done{background:rgba(255,255,255,0.08);color:var(--light);border-color:rgba(255,255,255,0.15);}
-.step-line{flex:1;height:1px;background:rgba(255,255,255,0.07);}
-.step-line.done{background:rgba(255,255,255,0.18);}
+.booking-wrap{max-width:700px;margin:0 auto;padding:40px 40px 80px;}
+.step-bar{display:flex;align-items:center;gap:0;margin-bottom:44px;}
+.step-dot{width:32px;height:32px;border-radius:50%;background:var(--glass);border:1px solid var(--glass-border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--gray);flex-shrink:0;transition:all 0.3s;}
+.step-dot.active{background:var(--white);color:#080808;border-color:var(--white);}
+.step-dot.done{background:rgba(255,255,255,0.15);color:var(--white);border-color:rgba(255,255,255,0.3);}
+.step-line{flex:1;height:1px;background:var(--glass-border);}
+.step-line.done{background:rgba(255,255,255,0.3);}
 .panel{display:none;}
 .panel.active{display:block;}
-.panel-title{font-size:26px;font-weight:700;letter-spacing:-0.3px;margin-bottom:6px;}
-.panel-sub{font-size:14px;color:rgba(255,255,255,0.38);margin-bottom:26px;}
+.panel-title{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:1px;margin-bottom:6px;}
+.panel-sub{font-size:14px;color:var(--gray);margin-bottom:28px;}
 
 /* DATE PILLS */
-.date-pills{display:flex;gap:6px;margin-bottom:22px;flex-wrap:wrap;}
-.date-pill{padding:8px 16px;border-radius:100px;font-size:12px;font-weight:600;cursor:pointer;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);color:var(--gray);transition:all 0.2s;white-space:nowrap;}
-.date-pill:hover,.date-pill.selected{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.25);color:var(--white);}
+.date-pills{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+.date-pill{padding:9px 16px;border-radius:50px;font-size:12px;font-weight:600;cursor:pointer;background:var(--glass);border:1px solid var(--glass-border);color:var(--gray);transition:all 0.2s;white-space:nowrap;}
+.date-pill:hover,.date-pill.selected{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.35);color:var(--white);}
 
 /* TIME GRID */
-.time-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-bottom:28px;min-height:50px;}
-.time-btn{padding:11px 8px;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);color:var(--gray);transition:all 0.2s;text-align:center;}
-.time-btn:hover,.time-btn.selected{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.25);color:var(--white);}
-.time-btn.busy{opacity:0.25;pointer-events:none;text-decoration:line-through;}
-.time-loading{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:10px;color:var(--gray);font-size:13px;padding:18px 0;}
-.time-loading-spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,0.1);border-top-color:rgba(255,255,255,0.6);border-radius:50%;animation:spin 0.8s linear infinite;}
+.time-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:28px;min-height:60px;}
+.time-btn{padding:12px 8px;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;background:var(--glass);border:1px solid var(--glass-border);color:var(--gray);transition:all 0.2s;text-align:center;}
+.time-btn:hover,.time-btn.selected{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.35);color:var(--white);}
+.time-btn.busy{opacity:0.3;pointer-events:none;text-decoration:line-through;}
+.time-loading{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:10px;color:var(--gray);font-size:13px;padding:20px 0;}
+.time-loading-spinner{width:16px;height:16px;border:2px solid var(--glass-border);border-top-color:var(--white);border-radius:50%;animation:spin 0.8s linear infinite;}
 
 /* BOXES */
-.box-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:28px;}
-.box-btn{padding:22px 14px;border-radius:18px;cursor:pointer;text-align:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);transition:all 0.2s;}
-.box-btn:hover,.box-btn.selected{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.25);}
-.box-btn.occupied{border-color:rgba(239,68,68,0.25)!important;background:rgba(239,68,68,0.04)!important;opacity:0.45;pointer-events:none;cursor:not-allowed;}
-.box-num{font-size:40px;font-weight:700;line-height:1;color:var(--white);letter-spacing:-1px;}
-.box-label-s{font-size:10px;color:var(--gray);font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-top:4px;}
+.box-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:28px;}
+.box-btn{padding:24px 16px;border-radius:16px;cursor:pointer;text-align:center;background:var(--glass);border:1px solid var(--glass-border);transition:all 0.2s;}
+.box-btn:hover,.box-btn.selected{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.35);}
+.box-btn.occupied{border-color:rgba(255,68,68,0.35)!important;background:rgba(255,68,68,0.06)!important;opacity:0.5;pointer-events:none;cursor:not-allowed;}
+.box-num{font-family:'Bebas Neue',sans-serif;font-size:44px;line-height:1;color:var(--white);}
+.box-label-s{font-size:11px;color:var(--gray);font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-top:4px;}
 .box-avail{font-size:11px;font-weight:600;margin-top:6px;}
 .box-free .box-avail{color:var(--green);}
 .box-btn.occupied .box-avail{color:var(--red)!important;}
 
 /* CONTACTS FORM */
-.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
-.form-group{display:flex;flex-direction:column;gap:7px;margin-bottom:10px;}
-.form-label{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gray);}
-.field{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:12px 14px;font-family:'Inter',sans-serif;font-size:14px;color:var(--white);outline:none;transition:border-color 0.2s,background 0.2s;width:100%;}
-.field::placeholder{color:rgba(255,255,255,0.25);}
-.field:focus{border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.06);}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
+.form-label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gray);}
+.field{background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:14px 16px;font-family:'Manrope',sans-serif;font-size:14px;color:var(--white);outline:none;transition:border-color 0.2s;width:100%;}
+.field:focus{border-color:rgba(255,255,255,0.4);}
 .field option{background:#111;color:#fff;}
 
 /* CAR TYPE */
-.car-type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:18px;}
-.car-type-btn{padding:13px 8px;border-radius:14px;cursor:pointer;text-align:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);transition:all 0.2s;}
-.car-type-btn:hover,.car-type-btn.selected{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.25);}
-.car-type-icon{font-size:24px;display:block;margin-bottom:5px;}
-.car-type-name{font-size:10px;font-weight:700;color:var(--gray);letter-spacing:0.3px;}
+.car-type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
+.car-type-btn{padding:14px 8px;border-radius:14px;cursor:pointer;text-align:center;background:var(--glass);border:1px solid var(--glass-border);transition:all 0.2s;}
+.car-type-btn:hover,.car-type-btn.selected{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.4);}
+.car-type-icon{font-size:26px;display:block;margin-bottom:6px;}
+.car-type-name{font-size:11px;font-weight:700;color:var(--gray);letter-spacing:0.5px;}
 .car-type-btn.selected .car-type-name{color:var(--white);}
 
 /* SUMMARY */
-.summary-card{padding:20px;border-radius:12px;margin-bottom:20px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);}
-.summary-row-i{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:14px;}
+.summary-card{padding:24px;border-radius:16px;margin-bottom:24px;background:var(--glass);border:1px solid var(--glass-border);}
+.summary-row-i{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--glass-border);font-size:14px;}
 .summary-row-i:last-child{border:none;padding-bottom:0;}
 .summary-key{color:var(--gray);}
 .summary-val{font-weight:700;}
-.summary-total .summary-val{font-size:18px;}
-.nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:12px;}
-.btn-back{background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.08);padding:12px 22px;border-radius:100px;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.2s;}
-.btn-back:hover{background:rgba(255,255,255,0.09);}
-.btn-next{background:rgba(255,255,255,0.93);color:#050507;border:none;padding:13px 32px;border-radius:100px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;}
-.btn-next:hover{background:#fff;transform:scale(0.98);}
-.btn-next:disabled{opacity:0.45;cursor:not-allowed;transform:none;}
+.summary-total .summary-val{font-size:18px;color:var(--white);}
+.nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:12px;}
+.btn-back{background:var(--glass);color:var(--white);border:1px solid var(--glass-border);padding:13px 24px;border-radius:50px;font-family:'Manrope',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.btn-back:hover{background:var(--glass-hover);}
+.btn-next{background:var(--white);color:#080808;border:none;padding:13px 32px;border-radius:50px;font-family:'Manrope',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s;}
+.btn-next:hover{background:rgba(255,255,255,0.85);transform:scale(0.98);}
+.btn-next:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
 
 /* SUCCESS */
-.success-wrap{text-align:center;padding:60px 20px;}
-.success-icon{font-size:64px;display:block;margin-bottom:20px;animation:fadeUp 0.5s ease;}
-.success-title{font-size:36px;font-weight:700;letter-spacing:-0.5px;margin-bottom:12px;}
+.success-wrap{text-align:center;padding:60px 40px;}
+.success-icon{font-size:72px;display:block;margin-bottom:20px;}
+.success-title{font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:1px;margin-bottom:12px;}
 .success-msg{font-size:15px;color:var(--gray);line-height:1.7;margin-bottom:32px;}
-.booking-id-tag{display:inline-block;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:12px 24px;border-radius:10px;font-size:15px;font-weight:700;letter-spacing:2px;margin-bottom:32px;}
+.booking-id-tag{display:inline-block;background:var(--glass);border:1px solid var(--glass-border);padding:14px 28px;border-radius:50px;font-size:16px;font-weight:700;letter-spacing:3px;margin-bottom:36px;}
 
 /* SUBSCRIPTIONS PAGE */
-.plans-full{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:32px 40px 80px;max-width:1100px;margin:0 auto;}
-.plan-full{padding:40px 30px;position:relative;border-radius:20px;overflow:hidden;}
-.plan-full::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at top left,rgba(255,255,255,0.04),transparent 60%);pointer-events:none;}
-.plan-tier{font-size:10px;font-weight:500;letter-spacing:0.3px;color:rgba(255,255,255,0.3);text-transform:none;margin-bottom:16px;}
-.plan-big-name{font-size:32px;font-weight:700;line-height:1;margin-bottom:4px;letter-spacing:-0.5px;}
-.plan-silver .plan-big-name{color:#d1d5db;}
-.plan-gold .plan-big-name{color:#fbbf24;}
-.plan-platinum .plan-big-name{color:#e2e8f0;}
-.plan-dur{font-size:13px;color:rgba(255,255,255,0.3);margin-bottom:24px;font-weight:400;}
-.plan-cost{font-size:34px;font-weight:700;margin-bottom:3px;letter-spacing:-0.5px;}
-.plan-bonus-tag{font-size:12px;color:rgba(34,197,94,0.8);font-weight:500;margin-bottom:4px;}
-.plan-account{font-size:20px;font-weight:600;margin-bottom:24px;opacity:0.9;}
-.plan-silver .plan-account{color:#d1d5db;}
-.plan-gold .plan-account{color:#fbbf24;}
-.plan-platinum .plan-account{color:#e2e8f0;}
-.plan-divider{height:1px;background:rgba(255,255,255,0.07);margin:24px 0;}
-.plan-features{list-style:none;display:flex;flex-direction:column;gap:11px;margin-bottom:34px;}
-.plan-features li{font-size:13px;color:rgba(255,255,255,0.38);display:flex;gap:8px;line-height:1.5;}
-.plan-features li::before{content:'—';color:rgba(255,255,255,0.18);flex-shrink:0;font-weight:300;}
-.plan-cta-btn{width:100%;padding:12px;border-radius:10px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all 0.2s;}
-.plan-silver .plan-cta-btn{background:rgba(209,213,219,0.1);color:#d1d5db;border:1px solid rgba(209,213,219,0.2);}
-.plan-silver .plan-cta-btn:hover{background:rgba(209,213,219,0.18);}
-.plan-gold .plan-cta-btn{background:#fbbf24;color:#050507;}
-.plan-gold .plan-cta-btn:hover{background:#f59e0b;}
-.plan-platinum .plan-cta-btn{background:rgba(226,232,240,0.1);color:#e2e8f0;border:1px solid rgba(226,232,240,0.2);}
-.plan-platinum .plan-cta-btn:hover{background:rgba(226,232,240,0.18);}
+.plans-full{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:40px;max-width:1100px;margin:0 auto;}
+.plan-full{padding:40px 32px;position:relative;}
+.plan-tier{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gray);margin-bottom:10px;}
+.plan-big-name{font-family:'Bebas Neue',sans-serif;font-size:56px;line-height:1;margin-bottom:6px;}
+.plan-silver .plan-big-name{color:#c0c0c0;}
+.plan-gold .plan-big-name{color:#ffd700;}
+.plan-platinum .plan-big-name{color:#e5e4e2;}
+.plan-dur{font-size:13px;color:var(--gray);margin-bottom:28px;font-weight:500;}
+.plan-cost{font-size:28px;font-weight:700;margin-bottom:4px;}
+.plan-bonus-tag{font-size:13px;color:var(--green);font-weight:600;margin-bottom:4px;}
+.plan-account{font-size:20px;font-weight:700;margin-bottom:28px;}
+.plan-silver .plan-account{color:#c0c0c0;}
+.plan-gold .plan-account{color:#ffd700;}
+.plan-platinum .plan-account{color:#e5e4e2;}
+.plan-divider{height:1px;background:var(--glass-border);margin:24px 0;}
+.plan-features{list-style:none;display:flex;flex-direction:column;gap:12px;margin-bottom:32px;}
+.plan-features li{font-size:13px;color:var(--gray);display:flex;gap:10px;line-height:1.5;}
+.plan-features li::before{content:'→';color:var(--white);flex-shrink:0;}
+.plan-cta-btn{width:100%;padding:14px;border-radius:50px;font-family:'Manrope',sans-serif;font-size:14px;font-weight:700;cursor:pointer;border:none;transition:all 0.2s;}
+.plan-silver .plan-cta-btn{background:rgba(192,192,192,0.15);color:#c0c0c0;border:1px solid rgba(192,192,192,0.3);}
+.plan-silver .plan-cta-btn:hover{background:rgba(192,192,192,0.25);}
+.plan-gold .plan-cta-btn{background:#ffd700;color:#080808;}
+.plan-gold .plan-cta-btn:hover{background:#e6c200;}
+.plan-platinum .plan-cta-btn{background:rgba(229,228,226,0.15);color:#e5e4e2;border:1px solid rgba(229,228,226,0.3);}
+.plan-platinum .plan-cta-btn:hover{background:rgba(229,228,226,0.25);}
 
-/* ═══ CRM PIN GATE ═══ */
-#crm-gate{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 64px);padding:40px;}
-.pin-box{text-align:center;max-width:320px;width:100%;}
-.pin-title{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;margin-bottom:8px;}
-.pin-sub{font-size:13px;color:rgba(255,255,255,0.35);margin-bottom:28px;}
-.pin-dots{display:flex;gap:14px;justify-content:center;margin-bottom:32px;}
-.pin-dot{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);transition:all 0.2s;}
-.pin-dot.filled{background:rgba(255,255,255,0.9);border-color:transparent;}
-.pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:260px;margin:0 auto;}
-.pin-key{padding:16px;border-radius:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);font-size:20px;font-weight:600;cursor:pointer;transition:all 0.2s;text-align:center;font-family:'Inter',sans-serif;}
-.pin-key:hover{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.18);}
-.pin-key:active{transform:scale(0.95);}
-.pin-key.wide{grid-column:span 2;}
-.pin-error{font-size:12px;color:var(--red);margin-top:12px;min-height:18px;transition:opacity 0.3s;}
-
-/* ═══ CRM ═══ */
-#crm-inner{display:none;}
-#crm-inner.show{display:block;}
-.crm-wrap{padding:36px 40px 60px;max-width:1200px;margin:0 auto;}
-.crm-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;flex-wrap:wrap;gap:16px;}
-.crm-stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:24px;}
-.crm-stat-card{padding:18px 16px;border-radius:16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);}
-.crm-stat-num{font-size:32px;font-weight:700;line-height:1;color:var(--white);letter-spacing:-0.5px;}
-.crm-stat-label{font-size:10px;color:var(--gray);font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-top:2px;}
-.crm-tabs-bar{display:flex;gap:3px;margin-bottom:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:4px;width:fit-content;flex-wrap:wrap;}
-.crm-tab-btn{padding:8px 18px;border-radius:10px;background:none;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--gray);cursor:pointer;transition:all 0.2s;white-space:nowrap;}
-.crm-tab-btn.active{background:rgba(255,255,255,0.1);color:var(--white);}
+/* CRM */
+.crm-wrap{padding:40px;max-width:1200px;margin:0 auto;}
+.crm-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;flex-wrap:wrap;gap:16px;}
+.crm-stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:28px;}
+.crm-stat-card{padding:20px 18px;border-radius:16px;background:var(--glass);border:1px solid var(--glass-border);}
+.crm-stat-num{font-family:'Bebas Neue',sans-serif;font-size:40px;line-height:1;color:var(--white);}
+.crm-stat-label{font-size:11px;color:var(--gray);font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
+.crm-tabs-bar{display:flex;gap:4px;margin-bottom:20px;background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:4px;width:fit-content;}
+.crm-tab-btn{padding:9px 20px;border-radius:9px;background:none;border:none;font-family:'Manrope',sans-serif;font-size:13px;font-weight:600;color:var(--gray);cursor:pointer;transition:all 0.2s;}
+.crm-tab-btn.active{background:rgba(255,255,255,0.12);color:var(--white);}
 .crm-tab-panel{display:none;}
 .crm-tab-panel.active{display:block;}
-
-/* CRM TABLE */
 .crm-table{width:100%;border-collapse:collapse;}
-.crm-table th{text-align:left;padding:9px 12px;font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gray);border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);}
-.crm-table td{padding:11px 12px;font-size:13px;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle;}
+.crm-table th{text-align:left;padding:10px 14px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gray);border-bottom:1px solid var(--glass-border);background:rgba(255,255,255,0.03);}
+.crm-table td{padding:12px 14px;font-size:13px;border-bottom:1px solid rgba(255,255,255,0.04);}
 .crm-table tr:hover td{background:rgba(255,255,255,0.02);}
-.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .table-loading{text-align:center;padding:40px;color:var(--gray);font-size:14px;}
-.table-spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,0.1);border-top-color:rgba(255,255,255,0.7);border-radius:50%;animation:spin 0.8s linear infinite;margin-right:10px;vertical-align:middle;}
-
-/* CRM MOBILE CARDS */
-.crm-cards{display:none;flex-direction:column;gap:8px;}
-.crm-card{padding:16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:16px;}
-.crm-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
-.crm-card-title{font-size:14px;font-weight:700;}
-.crm-card-sub{font-size:12px;color:var(--gray);margin-top:2px;}
-.crm-card-meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
-.crm-card-tag{font-size:11px;color:var(--gray);background:rgba(255,255,255,0.05);padding:3px 10px;border-radius:100px;}
-.crm-card-actions{display:flex;gap:6px;flex-wrap:wrap;}
+.table-spinner{display:inline-block;width:20px;height:20px;border:2px solid var(--glass-border);border-top-color:var(--white);border-radius:50%;animation:spin 0.8s linear infinite;margin-right:10px;vertical-align:middle;}
 
 /* BADGES */
-.badge{display:inline-flex;align-items:center;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:3px 9px;border-radius:100px;}
-.badge-green{background:rgba(34,197,94,0.1);color:#22c55e;border:1px solid rgba(34,197,94,0.2);}
-.badge-yellow{background:rgba(234,179,8,0.1);color:#eab308;border:1px solid rgba(234,179,8,0.2);}
-.badge-orange{background:rgba(249,115,22,0.1);color:#f97316;border:1px solid rgba(249,115,22,0.2);}
-.badge-red{background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.2);}
-.badge-blue{background:rgba(96,165,250,0.1);color:#60a5fa;border:1px solid rgba(96,165,250,0.2);}
-.badge-gray{background:rgba(255,255,255,0.06);color:var(--gray);border:1px solid rgba(255,255,255,0.1);}
-.badge-silver{background:rgba(209,213,219,0.08);color:#d1d5db;border:1px solid rgba(209,213,219,0.15);}
-.badge-gold{background:rgba(251,191,36,0.1);color:#fbbf24;border:1px solid rgba(251,191,36,0.2);}
-.badge-platinum{background:rgba(226,232,240,0.08);color:#e2e8f0;border:1px solid rgba(226,232,240,0.15);}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border-radius:50px;}
+.badge-green{background:rgba(76,175,80,0.15);color:#4caf50;border:1px solid rgba(76,175,80,0.3);}
+.badge-yellow{background:rgba(255,200,0,0.15);color:#ffc800;border:1px solid rgba(255,200,0,0.3);}
+.badge-orange{background:rgba(255,120,0,0.15);color:#ff7800;border:1px solid rgba(255,120,0,0.3);}
+.badge-red{background:rgba(255,68,68,0.15);color:#ff4444;border:1px solid rgba(255,68,68,0.3);}
+.badge-blue{background:rgba(100,149,237,0.15);color:#6495ed;border:1px solid rgba(100,149,237,0.3);}
+.badge-gray{background:rgba(255,255,255,0.08);color:var(--gray);border:1px solid var(--glass-border);}
+.badge-silver{background:rgba(192,192,192,0.12);color:#c0c0c0;border:1px solid rgba(192,192,192,0.25);}
+.badge-gold{background:rgba(255,215,0,0.12);color:#ffd700;border:1px solid rgba(255,215,0,0.25);}
+.badge-platinum{background:rgba(229,228,226,0.1);color:#e5e4e2;border:1px solid rgba(229,228,226,0.2);}
 
 /* ACTION BUTTONS */
-.act-btn{background:none;border:1px solid rgba(255,255,255,0.08);color:var(--gray);padding:5px 10px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.2s;margin-right:3px;white-space:nowrap;font-family:'Inter',sans-serif;}
-.act-btn:hover{border-color:rgba(255,255,255,0.25);color:var(--white);}
-.act-btn-green{border-color:rgba(34,197,94,0.3)!important;color:#22c55e!important;}
-.act-btn-green:hover{background:rgba(34,197,94,0.08)!important;}
-.act-btn-red{border-color:rgba(239,68,68,0.3)!important;color:#ef4444!important;}
-.act-btn-red:hover{background:rgba(239,68,68,0.08)!important;}
-.act-btn-blue{border-color:rgba(96,165,250,0.3)!important;color:#60a5fa!important;}
-.act-btn-blue:hover{background:rgba(96,165,250,0.08)!important;}
-.act-btn-yellow{border-color:rgba(234,179,8,0.3)!important;color:#eab308!important;}
-.act-btn-yellow:hover{background:rgba(234,179,8,0.08)!important;}
+.act-btn{background:none;border:1px solid var(--glass-border);color:var(--gray);padding:5px 10px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.2s;margin-right:3px;white-space:nowrap;}
+.act-btn:hover{border-color:rgba(255,255,255,0.35);color:var(--white);}
+.act-btn-green{border-color:rgba(76,175,80,0.4)!important;color:#4caf50!important;}
+.act-btn-green:hover{background:rgba(76,175,80,0.12)!important;}
+.act-btn-red{border-color:rgba(255,68,68,0.4)!important;color:#ff4444!important;}
+.act-btn-red:hover{background:rgba(255,68,68,0.12)!important;}
+.act-btn-blue{border-color:rgba(100,149,237,0.4)!important;color:#6495ed!important;}
+.act-btn-blue:hover{background:rgba(100,149,237,0.12)!important;}
+.act-btn-yellow{border-color:rgba(255,200,0,0.4)!important;color:#ffc800!important;}
+.act-btn-yellow:hover{background:rgba(255,200,0,0.12)!important;}
 
 /* BOXES LIVE */
-.boxes-live{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px;}
-.box-live{padding:22px;border-radius:16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);}
-.box-live.busy{border-color:rgba(249,115,22,0.25);background:rgba(249,115,22,0.04);}
-.box-live.free{border-color:rgba(34,197,94,0.25);background:rgba(34,197,94,0.04);}
+.boxes-live{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+.box-live{padding:24px;border-radius:16px;background:var(--glass);border:1px solid var(--glass-border);}
+.box-live.busy{border-color:rgba(255,120,0,0.35);background:rgba(255,120,0,0.06);}
+.box-live.free{border-color:rgba(76,175,80,0.35);background:rgba(76,175,80,0.06);}
 
 /* CLIENTS */
-.client-list{display:flex;flex-direction:column;gap:6px;}
-.client-row{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);transition:all 0.2s;cursor:pointer;}
-.client-row:hover{border-color:rgba(255,255,255,0.18);background:rgba(255,255,255,0.07);}
-.client-av{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
-.client-info{flex:1;min-width:0;}
-.client-name-s{font-size:14px;font-weight:600;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.client-meta-s{font-size:11px;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.client-arrow{color:var(--gray);font-size:16px;transition:transform 0.2s;flex-shrink:0;}
-.client-row:hover .client-arrow{transform:translateX(3px);color:var(--white);}
+.client-list{display:flex;flex-direction:column;gap:8px;}
+.client-row{display:flex;align-items:center;gap:14px;padding:16px 20px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);transition:all 0.2s;cursor:pointer;}
+.client-row:hover{border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.09);}
+.client-av{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;}
+.client-info{flex:1;}
+.client-name-s{font-size:14px;font-weight:700;margin-bottom:2px;}
+.client-meta-s{font-size:12px;color:var(--gray);}
+.client-arrow{color:var(--gray);font-size:16px;transition:transform 0.2s;}
+.client-row:hover .client-arrow{transform:translateX(4px);color:var(--white);}
 
 /* MODALS */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;align-items:center;justify-content:center;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:16px;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:2000;align-items:center;justify-content:center;backdrop-filter:blur(8px);padding:20px;}
 .modal-overlay.show{display:flex;}
-.modal-box{background:#0c0c13;border:1px solid rgba(255,255,255,0.09);border-radius:22px;padding:32px;width:460px;max-width:100%;max-height:90vh;overflow-y:auto;position:relative;animation:fadeUp 0.3s ease;}
+.modal-box{background:#111111;border:1px solid rgba(255,255,255,0.12);border-radius:24px;padding:40px;width:460px;max-width:100%;max-height:90vh;overflow-y:auto;position:relative;animation:fadeUp 0.3s ease;}
 .modal-box.modal-large{width:680px;}
-.modal-close{position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:var(--gray);width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;transition:all 0.2s;}
-.modal-close:hover{color:var(--white);background:rgba(255,255,255,0.1);}
+.modal-close{position:absolute;top:16px;right:16px;background:var(--glass);border:1px solid var(--glass-border);color:var(--gray);width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;transition:all 0.2s;}
+.modal-close:hover{color:var(--white);background:var(--glass-hover);}
 
 /* CLIENT MODAL TABS */
-.client-tabs{display:flex;gap:5px;margin-bottom:22px;flex-wrap:wrap;}
-.client-tab-btn{padding:7px 15px;border-radius:10px;background:none;border:1px solid rgba(255,255,255,0.07);font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:var(--gray);cursor:pointer;transition:all 0.2s;}
-.client-tab-btn.active{background:rgba(255,255,255,0.1);color:var(--white);border-color:rgba(255,255,255,0.2);}
+.client-tabs{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;}
+.client-tab-btn{padding:8px 16px;border-radius:10px;background:none;border:1px solid var(--glass-border);font-family:'Manrope',sans-serif;font-size:12px;font-weight:600;color:var(--gray);cursor:pointer;transition:all 0.2s;}
+.client-tab-btn.active{background:rgba(255,255,255,0.12);color:var(--white);border-color:rgba(255,255,255,0.3);}
 .client-tab-pane{display:none;}
 .client-tab-pane.active{display:block;}
-.info-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:13px;}
+.info-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--glass-border);font-size:14px;}
 .info-row:last-child{border:none;}
 .info-key{color:var(--gray);}
 .info-val{font-weight:600;}
-.history-item{padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px;}
+.history-item{padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:13px;}
 .history-item:last-child{border:none;}
-.sub-card-mini{padding:14px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);margin-bottom:8px;}
-.sub-status-btns{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;}
+.sub-card-mini{padding:16px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);margin-bottom:10px;}
+.sub-card-mini-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.sub-card-mini-balance{font-size:18px;font-weight:700;color:var(--green);}
+.sub-status-btns{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
 
-/* SVC PICK */
-.svc-pick-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:28px;}
-.svc-pick{padding:16px;cursor:pointer;border-radius:16px;}
-.svc-pick.selected{background:rgba(255,255,255,0.1)!important;border-color:rgba(255,255,255,0.25)!important;}
-.svc-pick-icon{font-size:22px;margin-bottom:7px;}
+/* FOOTER */
+footer{background:rgba(255,255,255,0.03);border-top:1px solid var(--glass-border);padding:48px 40px 28px;margin-top:80px;}
+.footer-inner{max-width:1100px;margin:0 auto;}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:40px;margin-bottom:40px;}
+.footer-brand{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;margin-bottom:10px;}
+.footer-desc{font-size:13px;color:var(--gray);line-height:1.7;max-width:260px;}
+.footer-col-title{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gray);margin-bottom:14px;}
+.footer-links{list-style:none;display:flex;flex-direction:column;gap:9px;}
+.footer-links a{color:rgba(255,255,255,0.5);text-decoration:none;font-size:13px;transition:color 0.2s;}
+.footer-links a:hover{color:var(--white);}
+.footer-bottom{border-top:1px solid var(--glass-border);padding-top:20px;display:flex;justify-content:space-between;font-size:11px;color:var(--gray);}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(255,255,255,0.1);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.2);border-radius:50px;padding:13px 24px;font-size:13px;font-weight:600;z-index:5000;opacity:0;transition:all 0.4s;white-space:nowrap;max-width:90vw;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* SUBS pick */
+.svc-pick-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:28px;}
+.svc-pick{padding:18px 16px;cursor:pointer;border-radius:16px;}
+.svc-pick.selected{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.35);}
+.svc-pick-icon{font-size:22px;margin-bottom:8px;}
 .svc-pick-name{font-size:14px;font-weight:700;margin-bottom:2px;}
 .svc-pick-price{font-size:12px;color:var(--gray);}
 
-/* FOOTER */
-footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,0.05);padding:48px 40px 28px;position:relative;z-index:2;}
-.footer-inner{max-width:1100px;margin:0 auto;}
-.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:40px;margin-bottom:40px;}
-.footer-brand{font-size:18px;font-weight:700;letter-spacing:2px;margin-bottom:10px;text-transform:uppercase;}
-.footer-desc{font-size:13px;color:var(--gray);line-height:1.7;max-width:240px;}
-.footer-col-title{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:14px;}
-.footer-links{list-style:none;display:flex;flex-direction:column;gap:9px;}
-.footer-links a{color:rgba(255,255,255,0.35);text-decoration:none;font-size:13px;transition:color 0.2s;}
-.footer-links a:hover{color:var(--white);}
-.footer-bottom{border-top:1px solid rgba(255,255,255,0.06);padding-top:20px;display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.3);}
-
-/* TOAST */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(255,255,255,0.08);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.15);border-radius:100px;padding:12px 22px;font-size:13px;font-weight:600;z-index:5000;opacity:0;transition:all 0.4s;white-space:nowrap;max-width:90vw;overflow:hidden;text-overflow:ellipsis;}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
-/* MOBILE NAV */
-.mobile-menu{display:none;position:fixed;inset:0;z-index:999;background:rgba(5,5,7,0.96);backdrop-filter:blur(24px);flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:20px;}
-.mobile-menu.show{display:flex;}
-.mobile-menu a{color:var(--white);text-decoration:none;font-family:'Bebas Neue',sans-serif;font-size:40px;letter-spacing:2px;transition:opacity 0.2s;}
-.mobile-menu a:hover{opacity:0.6;}
-.mobile-menu-close{position:absolute;top:20px;right:20px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--white);width:42px;height:42px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-
 @media(max-width:768px){
-  nav{padding:0 16px;}
+  nav{padding:0 20px;}
   .nav-links{display:none;}
-  .nav-insta{display:none;}
-  .nav-btn{display:none;}
-  .nav-menu-btn{display:flex;align-items:center;justify-content:center;}
   .hero{padding:40px 20px;}
-  .hero-stats{flex-wrap:wrap;} .hero-stat{padding:14px 20px;}
-  .section,.booking-wrap,.crm-wrap{padding:28px 16px 44px;}
-  .page-header{padding:32px 16px 0;}
-  .services-row,.plans-row,.plans-full,.services-full-grid{grid-template-columns:1fr;}
+  .section,.booking-wrap,.crm-wrap{padding:40px 20px;}
+  .page-header{padding:40px 20px 0;}
+  .services-row,.plans-row,.plans-full,.services-full-grid,.crm-stats-row,.box-row,.boxes-live{grid-template-columns:1fr;}
   .form-grid-2{grid-template-columns:1fr;}
   .svc-pick-grid{grid-template-columns:1fr;}
   .time-grid{grid-template-columns:repeat(3,1fr);}
-  .car-type-grid{grid-template-columns:repeat(4,1fr);}
   .footer-grid{grid-template-columns:1fr;}
-  .footer-inner .footer-bottom{flex-direction:column;gap:6px;}
+  .crm-top{flex-direction:column;}
+  .footer-inner .footer-bottom{flex-direction:column;gap:8px;}
+  .car-type-grid{grid-template-columns:repeat(3,1fr);}
   .modal-large{width:100%!important;}
-  .crm-stats-row{grid-template-columns:repeat(2,1fr);}
-  .boxes-live{grid-template-columns:1fr;}
-  .crm-tabs-bar{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
-  .crm-tab-btn{flex:0 0 auto;text-align:center;padding:8px 12px;font-size:12px;}
-  /* On mobile, show cards instead of tables */
-  .desktop-table{display:none!important;}
-  .crm-cards{display:flex!important;}
-  .box-row{grid-template-columns:repeat(3,1fr);}
-  #pin-box{max-width:100%;}
-  .crm-wrap{padding:20px 16px 60px;}
-  .plans-full{padding:16px 16px 60px;}
-  .services-full-grid{padding:16px 16px 60px;}
 }
 </style>
 </head>
 <body>
-<div class="mesh-bg"><div class="mesh-blob"></div></div>
-<div class="noise"></div>
-
-<!-- MOBILE MENU -->
-<div class="mobile-menu" id="mobileMenu">
-  <button class="mobile-menu-close" onclick="closeMobileMenu()">✕</button>
-  <a href="#" onclick="showPage('home');closeMobileMenu()">ГОЛОВНА</a>
-  <a href="#" onclick="showPage('services');closeMobileMenu()">ПОСЛУГИ</a>
-  <a href="#" onclick="showPage('subscriptions');closeMobileMenu()">АБОНЕМЕНТИ</a>
-  <a href="#" onclick="showPage('booking');closeMobileMenu()">ЗАПИСАТИСЬ</a>
-  <a href="#" onclick="showPage('crm');closeMobileMenu()" style="font-size:28px;color:rgba(255,255,255,0.3);">🔐 CRM</a>
-</div>
 
 <!-- NAV -->
 <nav>
@@ -436,86 +329,78 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
     <li><a href="#" onclick="showPage('home')" id="nl-home" class="active">Головна</a></li>
     <li><a href="#" onclick="showPage('services')" id="nl-services">Послуги</a></li>
     <li><a href="#" onclick="showPage('subscriptions')" id="nl-subscriptions">Абонементи</a></li>
-    <li><a href="#" onclick="showPage('crm')" id="nl-crm" title="CRM Адміністрація" style="font-size:15px;padding:7px 10px;opacity:0.3;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='0.3'">🔐</a></li>
+    <li><a href="#" onclick="showPage('crm')" id="nl-crm">CRM</a></li>
   </ul>
-  <div class="nav-right">
-    <a href="https://instagram.com/1333_car_center" target="_blank" class="nav-insta">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-      @1333_car_center
-    </a>
-    <button class="nav-btn" onclick="showPage('booking')">Записатись</button>
-    <button class="nav-menu-btn" onclick="openMobileMenu()">☰</button>
-  </div>
+  <a href="https://instagram.com/1333_car_center" target="_blank" style="color:var(--gray);font-size:13px;font-weight:500;text-decoration:none;padding:8px 14px;border-radius:20px;border:1px solid var(--glass-border);backdrop-filter:blur(12px);transition:all 0.2s;display:flex;align-items:center;gap:6px;" onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,255,255,0.3)'" onmouseout="this.style.color='';this.style.borderColor=''">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+    @1333_car_center
+  </a>
+  <button class="nav-btn" onclick="showPage('booking')">Записатись</button>
 </nav>
 
 <!-- ═══ HOME ═══ -->
 <div id="home-page" class="page active">
   <div class="hero">
-    <div class="hero-badge"><span class="hero-badge-dot"></span>Харків · вул. Гвардійців Широнінців, 51/1</div>
-    <h1 class="hero-headline">1333<br>CAR <em>CENTER</em></h1>
-    <p class="hero-tagline"><b>Детейлінг вищого класу.</b><br>Полірування · Хімчистка · Кераміка · PPF</p>
+    <div class="hero-glow"></div>
+    <div class="hero-logo-text">1333 CAR CENTER</div>
+    <h1 class="hero-headline">ДЕТЕЙЛІНГ<br>ЦЕНТР</h1>
+    <p class="hero-sub">Полірування · Хімчистка · Кераміка · PPF<br>3 бокси · Харків · Запис онлайн</p>
     <div class="hero-btns">
-      <button class="btn-white" onclick="showPage('booking')">Записатись онлайн</button>
-      <button class="btn-ghost" onclick="scrollToSection('home-services')">Послуги та ціни</button>
-    </div>
-    <div class="hero-stats">
-      <div class="hero-stat"><div class="hero-stat-num">3</div><div class="hero-stat-label">Бокси</div></div>
-      <div class="hero-stat"><div class="hero-stat-num">500+</div><div class="hero-stat-label">Клієнтів</div></div>
-      <div class="hero-stat"><div class="hero-stat-num">5★</div><div class="hero-stat-label">Google</div></div>
-      <div class="hero-stat"><div class="hero-stat-num">4+</div><div class="hero-stat-label">Роки</div></div>
+      <button class="btn-white" onclick="showPage('booking')">Записатись зараз</button>
+      <button class="btn-glass" onclick="scrollToSection('home-services')">Наші послуги</button>
     </div>
   </div>
   <div class="section" id="home-services">
-    <div class="section-label">Послуги</div>
-    <h2 class="section-title">Детейлінг, який<br>захищає ваш автомобіль</h2>
+    <div class="section-label">// Послуги</div>
+    <h2 class="section-title">Що ми робимо</h2>
     <div class="services-row">
-      <div class="glass svc-card" onclick="showPageAndService('booking','Хімчистка салону','2 500 ₴')"><div class="svc-icon">🧹</div><div class="svc-name">Хімчистка салону</div><div class="svc-price">від 2 500 ₴</div><div class="svc-arrow">→</div></div>
-      <div class="glass svc-card" onclick="showPageAndService('booking','Полірування кузова','3 000 ₴')"><div class="svc-icon">✨</div><div class="svc-name">Полірування кузова</div><div class="svc-price">від 3 000 ₴</div><div class="svc-arrow">→</div></div>
-      <div class="glass svc-card" onclick="showPageAndService('booking','Керамічне покриття','6 000 ₴')"><div class="svc-icon">💎</div><div class="svc-name">Керамічне покриття</div><div class="svc-price">від 6 000 ₴</div><div class="svc-arrow">→</div></div>
-      <div class="glass svc-card" onclick="showPageAndService('booking','Тонування скла','1 800 ₴')"><div class="svc-icon">🌑</div><div class="svc-name">Тонування скла</div><div class="svc-price">від 1 800 ₴</div><div class="svc-arrow">→</div></div>
-      <div class="glass svc-card" onclick="showPageAndService('booking','PPF захисна плівка','4 000 ₴')"><div class="svc-icon">🛡️</div><div class="svc-name">PPF захисна плівка</div><div class="svc-price">від 4 000 ₴</div><div class="svc-arrow">→</div></div>
-      <div class="glass svc-card" onclick="showPageAndService('booking','Комплексне миття','600 ₴')"><div class="svc-icon">🚿</div><div class="svc-name">Комплексне миття</div><div class="svc-price">від 600 ₴</div><div class="svc-arrow">→</div></div>
+      <div class="glass svc-card" onclick="showPageAndService('booking','Хімчистка салону','2 500 ₴')"><div class="svc-icon">🧹</div><div class="svc-name">Хімчистка салону</div><div class="svc-price">від 2 500 ₴</div></div>
+      <div class="glass svc-card" onclick="showPageAndService('booking','Полірування кузова','3 000 ₴')"><div class="svc-icon">✨</div><div class="svc-name">Полірування кузова</div><div class="svc-price">від 3 000 ₴</div></div>
+      <div class="glass svc-card" onclick="showPageAndService('booking','Керамічне покриття','6 000 ₴')"><div class="svc-icon">💎</div><div class="svc-name">Керамічне покриття</div><div class="svc-price">від 6 000 ₴</div></div>
+      <div class="glass svc-card" onclick="showPageAndService('booking','Тонування скла','1 800 ₴')"><div class="svc-icon">🌑</div><div class="svc-name">Тонування скла</div><div class="svc-price">від 1 800 ₴</div></div>
+      <div class="glass svc-card" onclick="showPageAndService('booking','PPF захисна плівка','4 000 ₴')"><div class="svc-icon">🛡️</div><div class="svc-name">PPF захисна плівка</div><div class="svc-price">від 4 000 ₴</div></div>
+      <div class="glass svc-card" onclick="showPageAndService('booking','Комплексне миття','600 ₴')"><div class="svc-icon">🚿</div><div class="svc-name">Комплексне миття</div><div class="svc-price">від 600 ₴</div></div>
     </div>
   </div>
   <div class="section" id="home-plans">
-    <div class="section-label">Абонементи</div>
-    <h2 class="section-title">Плани для постійних<br>клієнтів</h2>
+    <div class="section-label">// Абонементи</div>
+    <h2 class="section-title">Обери план і заощаджуй</h2>
     <div class="plans-row">
-      <div class="glass plan-home plan-silver"><div class="plan-home-id">1 місяць</div><div class="plan-home-name">Silver</div><div class="plan-home-price">10 000 ₴</div><div class="plan-home-bonus">+10% бонус = 11 000 ₴ на рахунок</div><button class="plan-home-btn" onclick="openPlanModal('Silver','10 000','11 000','T-1','1','10')">Придбати Silver</button></div>
-      <div class="glass plan-home plan-gold"><div class="plan-home-id">3 місяці</div><div class="plan-home-name">Gold</div><div class="plan-home-price">30 000 ₴</div><div class="plan-home-bonus">+15% бонус = 34 500 ₴ на рахунок</div><button class="plan-home-btn" onclick="openPlanModal('Gold','30 000','34 500','T-2','3','15')">Придбати Gold</button></div>
-      <div class="glass plan-home plan-platinum"><div class="plan-home-id">6 місяців</div><div class="plan-home-name">Platinum</div><div class="plan-home-price">60 000 ₴</div><div class="plan-home-bonus">+20% бонус = 72 000 ₴ на рахунок</div><button class="plan-home-btn" onclick="openPlanModal('Platinum','60 000','72 000','T-3','6','20')">Придбати Platinum</button></div>
+      <div class="glass plan-home plan-silver"><div class="plan-home-id">T-1 · 1 місяць</div><div class="plan-home-name">SILVER</div><div class="plan-home-price">10 000 ₴</div><div class="plan-home-bonus">+10% бонус = 11 000 ₴ на рахунок</div><button class="plan-home-btn" onclick="openPlanModal('Silver','10 000','11 000','T-1','1','10')">Придбати Silver</button></div>
+      <div class="glass plan-home plan-gold"><div class="plan-home-id">T-2 · 3 місяці</div><div class="plan-home-name">GOLD</div><div class="plan-home-price">30 000 ₴</div><div class="plan-home-bonus">+15% бонус = 34 500 ₴ на рахунок</div><button class="plan-home-btn" onclick="openPlanModal('Gold','30 000','34 500','T-2','3','15')">Придбати Gold</button></div>
+      <div class="glass plan-home plan-platinum"><div class="plan-home-id">T-3 · 6 місяців</div><div class="plan-home-name">PLATINUM</div><div class="plan-home-price">60 000 ₴</div><div class="plan-home-bonus">+20% бонус = 72 000 ₴ на рахунок</div><button class="plan-home-btn" onclick="openPlanModal('Platinum','60 000','72 000','T-3','6','20')">Придбати Platinum</button></div>
     </div>
   </div>
   <footer>
     <div class="footer-inner">
       <div class="footer-grid">
-        <div><div class="footer-brand">1333 CAR CENTER</div><p class="footer-desc">Детейлінг центр у Харкові. Антигравійна плівка, хімчистка, полірування.</p></div>
+        <div><div class="footer-brand">1333 CAR CENTER</div><p class="footer-desc">Детейлінг центр у Харкові. Антигравійна плівка, хімчистка, полірування. Ми дбаємо про ваш автомобіль як про свій 🚘❤️</p></div>
         <div><div class="footer-col-title">Навігація</div><ul class="footer-links"><li><a href="#" onclick="showPage('home')">Головна</a></li><li><a href="#" onclick="showPage('services')">Послуги</a></li><li><a href="#" onclick="showPage('subscriptions')">Абонементи</a></li><li><a href="#" onclick="showPage('booking')">Записатись</a></li></ul></div>
         <div><div class="footer-col-title">Контакти</div><ul class="footer-links"><li><a href="https://instagram.com/1333_car_center" target="_blank">@1333_car_center</a></li><li><a href="#">вул. Гвардійців Широнінців, 51/1</a></li><li><a href="#">Пн–Пт: 09:00–20:00</a></li><li><a href="#">Сб–Нд: 10:00–20:00</a></li></ul></div>
       </div>
-      <div class="footer-bottom"><span>© 2026 1333 Car Center</span><span>Made with ❤️ in Харків</span></div>
+      <div class="footer-bottom"><span>© 2026 1333 Car Center</span><span>Made with ❤️</span></div>
     </div>
   </footer>
 </div>
 
 <!-- ═══ SERVICES ═══ -->
 <div id="services-page" class="page">
-  <div class="page-header"><div class="section-label">Послуги</div><h2 class="section-title">Детейлінг<br>на вищому рівні</h2><p style="font-size:14px;color:rgba(255,255,255,0.35);margin-top:8px;">Натисніть на будь-яку послугу, щоб одразу записатись</p></div>
+  <div class="page-header"><div class="section-label">// Послуги</div><h2 class="section-title">Детейлінг<br>на вищому рівні</h2></div>
   <div class="services-full-grid">
-    <div class="glass svc-full" onclick="showPageAndService('booking','Хімчистка салону','2 500 ₴')"><div class="svc-icon">🧹</div><div class="svc-name">Хімчистка салону</div><p style="font-size:13px;color:var(--gray);margin-top:7px;line-height:1.7;">Глибоке очищення всіх поверхонь. Видалення складних забруднень та запахів.</p><div class="svc-full-prices"><div class="price-line"><span class="price-label">Седан</span><span class="price-val">2 500 ₴</span></div><div class="price-line"><span class="price-label">SUV / Кросовер</span><span class="price-val">3 500 ₴</span></div><div class="price-line"><span class="price-label">Мінівен</span><span class="price-val">4 500 ₴</span></div></div><button class="svc-full-btn">Записатись →</button></div>
-    <div class="glass svc-full" onclick="showPageAndService('booking','Полірування кузова','3 000 ₴')"><div class="svc-icon">✨</div><div class="svc-name">Полірування кузова</div><p style="font-size:13px;color:var(--gray);margin-top:7px;line-height:1.7;">Абразивне та захисне полірування. Усунення подряпин та відновлення блиску.</p><div class="svc-full-prices"><div class="price-line"><span class="price-label">Однокрокове</span><span class="price-val">3 000 ₴</span></div><div class="price-line"><span class="price-label">Двокрокове</span><span class="price-val">5 000 ₴</span></div><div class="price-line"><span class="price-label">Full Detail</span><span class="price-val">8 000 ₴</span></div></div><button class="svc-full-btn">Записатись →</button></div>
-    <div class="glass svc-full" onclick="showPageAndService('booking','Керамічне покриття','6 000 ₴')"><div class="svc-icon">💎</div><div class="svc-name">Керамічне покриття</div><p style="font-size:13px;color:var(--gray);margin-top:7px;line-height:1.7;">Довготривалий захист. Гідрофобний ефект до 5 років.</p><div class="svc-full-prices"><div class="price-line"><span class="price-label">1 шар</span><span class="price-val">6 000 ₴</span></div><div class="price-line"><span class="price-label">2 шари</span><span class="price-val">9 000 ₴</span></div><div class="price-line"><span class="price-label">Pro (3 шари)</span><span class="price-val">14 000 ₴</span></div></div><button class="svc-full-btn">Записатись →</button></div>
-    <div class="glass svc-full" onclick="showPageAndService('booking','Тонування скла','1 800 ₴')"><div class="svc-icon">🌑</div><div class="svc-name">Тонування скла</div><p style="font-size:13px;color:var(--gray);margin-top:7px;line-height:1.7;">Якісна плівка LLUMAR. УФ-захист, приватність, термоізоляція.</p><div class="svc-full-prices"><div class="price-line"><span class="price-label">Бічні (2 скла)</span><span class="price-val">1 800 ₴</span></div><div class="price-line"><span class="price-label">Задні (3 скла)</span><span class="price-val">2 800 ₴</span></div><div class="price-line"><span class="price-label">Усі скла</span><span class="price-val">4 200 ₴</span></div></div><button class="svc-full-btn">Записатись →</button></div>
-    <div class="glass svc-full" onclick="showPageAndService('booking','PPF захисна плівка','4 000 ₴')"><div class="svc-icon">🛡️</div><div class="svc-name">PPF захисна плівка</div><p style="font-size:13px;color:var(--gray);margin-top:7px;line-height:1.7;">Поліуретанова плівка проти гравію та подряпин. Самовідновлення.</p><div class="svc-full-prices"><div class="price-line"><span class="price-label">Капот</span><span class="price-val">4 000 ₴</span></div><div class="price-line"><span class="price-label">Фронт пакет</span><span class="price-val">9 500 ₴</span></div><div class="price-line"><span class="price-label">Full wrap</span><span class="price-val">від 22 000 ₴</span></div></div><button class="svc-full-btn">Записатись →</button></div>
-    <div class="glass svc-full" onclick="showPageAndService('booking','Комплексне миття','600 ₴')"><div class="svc-icon">🚿</div><div class="svc-name">Комплексне миття</div><p style="font-size:13px;color:var(--gray);margin-top:7px;line-height:1.7;">Ручне миття кузова, колеса, арки, гума, скло, салон.</p><div class="svc-full-prices"><div class="price-line"><span class="price-label">Базове</span><span class="price-val">600 ₴</span></div><div class="price-line"><span class="price-label">Стандарт</span><span class="price-val">950 ₴</span></div><div class="price-line"><span class="price-label">Преміум</span><span class="price-val">1 400 ₴</span></div></div><button class="svc-full-btn">Записатись →</button></div>
+    <div class="glass svc-full" onclick="showPageAndService('booking','Хімчистка салону','2 500 ₴')"><div class="svc-icon">🧹</div><div class="svc-name">Хімчистка салону</div><p style="font-size:13px;color:var(--gray);margin-top:8px;line-height:1.6;">Глибоке очищення всіх поверхонь салону. Видалення складних забруднень та запахів.</p><div class="svc-full-prices"><div class="price-line"><span class="price-label">Седан</span><span class="price-val">2 500 ₴</span></div><div class="price-line"><span class="price-label">SUV / Кросовер</span><span class="price-val">3 500 ₴</span></div><div class="price-line"><span class="price-label">Мінівен</span><span class="price-val">4 500 ₴</span></div></div><button class="svc-full-btn">Записатись →</button></div>
+    <div class="glass svc-full" onclick="showPageAndService('booking','Полірування кузова','3 000 ₴')"><div class="svc-icon">✨</div><div class="svc-name">Полірування кузова</div><p style="font-size:13px;color:var(--gray);margin-top:8px;line-height:1.6;">Абразивне та захисне полірування. Усунення подряпин та відновлення блиску.</p><div class="svc-full-prices"><div class="price-line"><span class="price-label">Однокрокове</span><span class="price-val">3 000 ₴</span></div><div class="price-line"><span class="price-label">Двокрокове</span><span class="price-val">5 000 ₴</span></div><div class="price-line"><span class="price-label">Full Detail</span><span class="price-val">8 000 ₴</span></div></div><button class="svc-full-btn">Записатись →</button></div>
+    <div class="glass svc-full" onclick="showPageAndService('booking','Керамічне покриття','6 000 ₴')"><div class="svc-icon">💎</div><div class="svc-name">Керамічне покриття</div><p style="font-size:13px;color:var(--gray);margin-top:8px;line-height:1.6;">Довготривалий захист. Гідрофобний ефект до 5 років.</p><div class="svc-full-prices"><div class="price-line"><span class="price-label">1 шар</span><span class="price-val">6 000 ₴</span></div><div class="price-line"><span class="price-label">2 шари</span><span class="price-val">9 000 ₴</span></div><div class="price-line"><span class="price-label">Pro (3 шари)</span><span class="price-val">14 000 ₴</span></div></div><button class="svc-full-btn">Записатись →</button></div>
+    <div class="glass svc-full" onclick="showPageAndService('booking','Тонування скла','1 800 ₴')"><div class="svc-icon">🌑</div><div class="svc-name">Тонування скла</div><p style="font-size:13px;color:var(--gray);margin-top:8px;line-height:1.6;">Якісна плівка LLUMAR. УФ-захист, приватність, термоізоляція.</p><div class="svc-full-prices"><div class="price-line"><span class="price-label">Бічні (2 скла)</span><span class="price-val">1 800 ₴</span></div><div class="price-line"><span class="price-label">Задні (3 скла)</span><span class="price-val">2 800 ₴</span></div><div class="price-line"><span class="price-label">Усі скла</span><span class="price-val">4 200 ₴</span></div></div><button class="svc-full-btn">Записатись →</button></div>
+    <div class="glass svc-full" onclick="showPageAndService('booking','PPF захисна плівка','4 000 ₴')"><div class="svc-icon">🛡️</div><div class="svc-name">PPF захисна плівка</div><p style="font-size:13px;color:var(--gray);margin-top:8px;line-height:1.6;">Поліуретанова плівка проти гравію та подряпин. Самовідновлення.</p><div class="svc-full-prices"><div class="price-line"><span class="price-label">Капот</span><span class="price-val">4 000 ₴</span></div><div class="price-line"><span class="price-label">Фронт пакет</span><span class="price-val">9 500 ₴</span></div><div class="price-line"><span class="price-label">Full wrap</span><span class="price-val">від 22 000 ₴</span></div></div><button class="svc-full-btn">Записатись →</button></div>
+    <div class="glass svc-full" onclick="showPageAndService('booking','Комплексне миття','600 ₴')"><div class="svc-icon">🚿</div><div class="svc-name">Комплексне миття</div><p style="font-size:13px;color:var(--gray);margin-top:8px;line-height:1.6;">Ручне миття кузова, колеса, арки, гума, скло, салон.</p><div class="svc-full-prices"><div class="price-line"><span class="price-label">Базове</span><span class="price-val">600 ₴</span></div><div class="price-line"><span class="price-label">Стандарт</span><span class="price-val">950 ₴</span></div><div class="price-line"><span class="price-label">Преміум</span><span class="price-val">1 400 ₴</span></div></div><button class="svc-full-btn">Записатись →</button></div>
   </div>
 </div>
 
 <!-- ═══ BOOKING ═══ -->
 <div id="booking-page" class="page">
   <div class="booking-wrap">
-    <div class="section-label" style="margin-bottom:10px">Онлайн запис</div>
-    <h2 class="section-title" style="margin-bottom:32px">Запис<br>на послугу</h2>
+    <div class="section-label" style="margin-bottom:8px">// Онлайн запис</div>
+    <h2 class="section-title" style="margin-bottom:36px">Запис<br>на послугу</h2>
     <div class="step-bar">
       <div class="step-dot active" id="sdot-1">1</div><div class="step-line" id="sline-1"></div>
       <div class="step-dot" id="sdot-2">2</div><div class="step-line" id="sline-2"></div>
@@ -524,7 +409,7 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
       <div class="step-dot" id="sdot-5">5</div>
     </div>
 
-    <!-- STEP 1 -->
+    <!-- STEP 1: Service -->
     <div class="panel active" id="panel-1">
       <div class="panel-title">Послуга</div>
       <div class="panel-sub">Оберіть послугу</div>
@@ -539,34 +424,34 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
       <div class="nav-row"><span></span><button class="btn-next" onclick="goStep(2)">Далі →</button></div>
     </div>
 
-    <!-- STEP 2 -->
+    <!-- STEP 2: Date & Time -->
     <div class="panel" id="panel-2">
       <div class="panel-title">Дата та час</div>
       <div class="panel-sub">Оберіть зручний день і час</div>
-      <div class="date-pills" id="datePillsContainer"></div>
-      <div style="font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gray);margin-bottom:12px;display:none;" id="timeGridLabel">Доступний час</div>
+      <div class="date-pills" id="datePillsContainer"><!-- Generated by JS --></div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gray);margin-bottom:12px;" id="timeGridLabel" style="display:none">Доступний час</div>
       <div class="time-grid" id="timeGrid"></div>
       <div class="nav-row"><button class="btn-back" onclick="goStep(1)">← Назад</button><button class="btn-next" onclick="goStep(3)">Далі →</button></div>
     </div>
 
-    <!-- STEP 3 -->
+    <!-- STEP 3: Box -->
     <div class="panel" id="panel-3">
       <div class="panel-title">Оберіть бокс</div>
-      <div class="panel-sub" id="box-sub">Перевіряємо доступність...</div>
-      <div class="box-row" id="boxRow"></div>
+      <div class="panel-sub">Перевіряємо доступність...</div>
+      <div class="box-row" id="boxRow"><!-- Generated by JS --></div>
       <div class="nav-row"><button class="btn-back" onclick="goStep(2)">← Назад</button><button class="btn-next" onclick="goStep(4)">Далі →</button></div>
     </div>
 
-    <!-- STEP 4 -->
+    <!-- STEP 4: Contacts -->
     <div class="panel" id="panel-4">
       <div class="panel-title">Ваші контакти</div>
-      <div class="panel-sub">Вас автоматично зареєструємо в системі</div>
+      <div class="panel-sub">Ми надішлемо підтвердження в Telegram та SMS</div>
       <div class="form-label" style="margin-bottom:10px;">Тип кузова</div>
       <div class="car-type-grid">
         <div class="car-type-btn" onclick="pickCarType(this,'Седан')"><span class="car-type-icon">🚗</span><span class="car-type-name">Седан</span></div>
         <div class="car-type-btn" onclick="pickCarType(this,'Хетчбек')"><span class="car-type-icon">🚙</span><span class="car-type-name">Хетчбек</span></div>
         <div class="car-type-btn" onclick="pickCarType(this,'Кросовер')"><span class="car-type-icon">🚐</span><span class="car-type-name">Кросовер</span></div>
-        <div class="car-type-btn" onclick="pickCarType(this,'Джип / SUV')"><span class="car-type-icon">🛻</span><span class="car-type-name">Джип/SUV</span></div>
+        <div class="car-type-btn" onclick="pickCarType(this,'Джип / SUV')"><span class="car-type-icon">🛻</span><span class="car-type-name">Джип / SUV</span></div>
         <div class="car-type-btn" onclick="pickCarType(this,'Універсал')"><span class="car-type-icon">🚕</span><span class="car-type-name">Універсал</span></div>
         <div class="car-type-btn" onclick="pickCarType(this,'Купе')"><span class="car-type-icon">🏎️</span><span class="car-type-name">Купе</span></div>
         <div class="car-type-btn" onclick="pickCarType(this,'Мінівен')"><span class="car-type-icon">🚌</span><span class="car-type-name">Мінівен</span></div>
@@ -576,13 +461,13 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
         <div class="form-group"><div class="form-label">Ім'я</div><input type="text" class="field" id="fName" placeholder="Олексій Петренко"></div>
         <div class="form-group"><div class="form-label">Телефон</div><input type="tel" class="field" id="fPhone" placeholder="+380 XX XXX XX XX"></div>
         <div class="form-group"><div class="form-label">Марка та модель</div><input type="text" class="field" id="fCar" placeholder="Mercedes ML 350"></div>
-        <div class="form-group"><div class="form-label">Рік</div><input type="text" class="field" id="fYear" placeholder="2020"></div>
+        <div class="form-group"><div class="form-label">Рік випуску</div><input type="text" class="field" id="fYear" placeholder="2020"></div>
       </div>
       <div class="form-group"><div class="form-label">Коментар</div><input type="text" class="field" id="fComment" placeholder="Побажання..."></div>
       <div class="nav-row"><button class="btn-back" onclick="goStep(3)">← Назад</button><button class="btn-next" onclick="goStep(5)">Переглянути →</button></div>
     </div>
 
-    <!-- STEP 5 -->
+    <!-- STEP 5: Confirm -->
     <div class="panel" id="panel-5">
       <div id="confirmView">
         <div class="panel-title">Підтвердження</div>
@@ -602,11 +487,11 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
       <div class="success-wrap" id="successView" style="display:none">
         <span class="success-icon">✅</span>
         <div class="success-title">Записано!</div>
-        <p class="success-msg">Ваш запис підтверджено.<br>Очікуйте дзвінок від менеджера.<br>вул. Гвардійців Широнінців, 51/1</p>
+        <p class="success-msg">Ваш запис підтверджено.<br>Очікуйте дзвінок від менеджера.<br>вул. Гвардійців Широнінців, 51/1, Харків</p>
         <div class="booking-id-tag" id="bookingIdTag">ID: #1333-0001</div>
-        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-          <button class="btn-white" onclick="showPage('home')">На головну</button>
-          <button class="btn-ghost" onclick="resetBooking()">Новий запис</button>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+          <button class="btn-white" onclick="showPage('crm')">Переглянути в CRM</button>
+          <button class="btn-glass" onclick="resetBooking()">Новий запис</button>
         </div>
       </div>
     </div>
@@ -616,779 +501,768 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
 <!-- ═══ SUBSCRIPTIONS ═══ -->
 <div id="subscriptions-page" class="page">
   <div class="page-header">
-    <div class="section-label">Абонементи</div>
-    <h2 class="section-title">Плани для постійних<br>клієнтів</h2>
-    <p style="font-size:14px;color:rgba(255,255,255,0.35);margin-top:8px;font-weight:400;">Купи абонемент і отримай бонус на рахунок — витрачай на будь-які послуги</p>
+    <div class="section-label">// Абонементи</div>
+    <h2 class="section-title">Обери план<br>і заощаджуй</h2>
+    <p style="font-size:14px;color:var(--gray);margin-top:10px;margin-bottom:0;">Купи абонемент і отримай бонус — витрачай на будь-які послуги</p>
   </div>
   <div class="plans-full">
-    <div class="glass plan-full plan-silver"><div class="plan-tier">1 місяць · T-1</div><div class="plan-big-name">Silver</div><div class="plan-dur">Термін: 1 місяць</div><div class="plan-cost">10 000 ₴</div><div class="plan-bonus-tag">+ 10% бонус</div><div class="plan-account">= 11 000 ₴ на рахунок</div><div class="plan-divider"></div><ul class="plan-features"><li>11 000 ₴ на особистий рахунок</li><li>Пріоритетний запис без черги</li><li>Знижка 5% на додаткові послуги</li><li>Особистий менеджер</li></ul><button class="plan-cta-btn" onclick="openPlanModal('Silver','10 000','11 000','T-1','1','10')">Придбати Silver</button></div>
-    <div class="glass plan-full plan-gold"><div class="plan-tier">3 місяці · T-2</div><div class="plan-big-name">Gold</div><div class="plan-dur">Термін: 3 місяці</div><div class="plan-cost">30 000 ₴</div><div class="plan-bonus-tag">+ 15% бонус</div><div class="plan-account">= 34 500 ₴ на рахунок</div><div class="plan-divider"></div><ul class="plan-features"><li>34 500 ₴ на особистий рахунок</li><li>Запис поза чергою</li><li>Знижка 10% на послуги</li><li>VIP-зона очікування</li><li>Безкоштовне миття раз на місяць</li></ul><button class="plan-cta-btn" onclick="openPlanModal('Gold','30 000','34 500','T-2','3','15')">Придбати Gold</button></div>
-    <div class="glass plan-full plan-platinum"><div class="plan-tier">6 місяців · T-3</div><div class="plan-big-name">Platinum</div><div class="plan-dur">Термін: 6 місяців</div><div class="plan-cost">60 000 ₴</div><div class="plan-bonus-tag">+ 20% бонус</div><div class="plan-account">= 72 000 ₴ на рахунок</div><div class="plan-divider"></div><ul class="plan-features"><li>72 000 ₴ на особистий рахунок</li><li>Необмежений пріоритетний доступ</li><li>Знижка 15% на всі послуги</li><li>Виїзний детейлінг на запит</li><li>Щомісячне миття + полірування</li></ul><button class="plan-cta-btn" onclick="openPlanModal('Platinum','60 000','72 000','T-3','6','20')">Придбати Platinum</button></div>
+    <div class="glass plan-full plan-silver"><div class="plan-tier">T-1</div><div class="plan-big-name">SILVER</div><div class="plan-dur">Термін: 1 місяць</div><div class="plan-cost">10 000 ₴</div><div class="plan-bonus-tag">+ 10% бонус</div><div class="plan-account">= 11 000 ₴ на рахунок</div><div class="plan-divider"></div><ul class="plan-features"><li>11 000 ₴ на особистий рахунок</li><li>Пріоритетний запис без черги</li><li>Знижка 5% на додаткові послуги</li><li>Особистий менеджер</li></ul><button class="plan-cta-btn" onclick="openPlanModal('Silver','10 000','11 000','T-1','1','10')">Придбати Silver</button></div>
+    <div class="glass plan-full plan-gold"><div class="plan-tier">T-2</div><div class="plan-big-name">GOLD</div><div class="plan-dur">Термін: 3 місяці</div><div class="plan-cost">30 000 ₴</div><div class="plan-bonus-tag">+ 15% бонус</div><div class="plan-account">= 34 500 ₴ на рахунок</div><div class="plan-divider"></div><ul class="plan-features"><li>34 500 ₴ на особистий рахунок</li><li>Запис поза чергою у будь-який час</li><li>Знижка 10% на послуги</li><li>VIP-зона очікування</li><li>Безкоштовне миття раз на місяць</li></ul><button class="plan-cta-btn" onclick="openPlanModal('Gold','30 000','34 500','T-2','3','15')">Придбати Gold</button></div>
+    <div class="glass plan-full plan-platinum"><div class="plan-tier">T-3</div><div class="plan-big-name">PLATINUM</div><div class="plan-dur">Термін: 6 місяців</div><div class="plan-cost">60 000 ₴</div><div class="plan-bonus-tag">+ 20% бонус</div><div class="plan-account">= 72 000 ₴ на рахунок</div><div class="plan-divider"></div><ul class="plan-features"><li>72 000 ₴ на особистий рахунок</li><li>Необмежений пріоритетний доступ</li><li>Знижка 15% на всі послуги</li><li>Виїзний детейлінг на запит</li><li>Щомісячне миття + полірування</li><li>Персональна кімната очікування</li></ul><button class="plan-cta-btn" onclick="openPlanModal('Platinum','60 000','72 000','T-3','6','20')">Придбати Platinum</button></div>
   </div>
 </div>
 
 <!-- ═══ CRM ═══ -->
 <div id="crm-page" class="page">
-  <!-- PIN GATE -->
-  <div id="crm-gate">
-    <div class="pin-box" id="pin-box">
-      <div class="pin-title">🔐 CRM ДОСТУП</div>
-      <div class="pin-sub">Введіть PIN-код адміністратора</div>
-      <div class="pin-dots">
-        <div class="pin-dot" id="pd0"></div>
-        <div class="pin-dot" id="pd1"></div>
-        <div class="pin-dot" id="pd2"></div>
-        <div class="pin-dot" id="pd3"></div>
-      </div>
-      <div class="pin-grid">
-        <div class="glass pin-key" onclick="pinKey('1')">1</div>
-        <div class="glass pin-key" onclick="pinKey('2')">2</div>
-        <div class="glass pin-key" onclick="pinKey('3')">3</div>
-        <div class="glass pin-key" onclick="pinKey('4')">4</div>
-        <div class="glass pin-key" onclick="pinKey('5')">5</div>
-        <div class="glass pin-key" onclick="pinKey('6')">6</div>
-        <div class="glass pin-key" onclick="pinKey('7')">7</div>
-        <div class="glass pin-key" onclick="pinKey('8')">8</div>
-        <div class="glass pin-key" onclick="pinKey('9')">9</div>
-        <div class="glass pin-key" onclick="pinKey('0')">0</div>
-        <div class="glass pin-key" onclick="pinBackspace()">⌫</div>
-      </div>
-      <div class="pin-error" id="pin-error"></div>
+  <div class="crm-wrap">
+    <div class="crm-top">
+      <div><div class="section-label">// Адмін</div><h2 style="font-family:'Bebas Neue',sans-serif;font-size:44px;letter-spacing:1px;">CRM Система</h2></div>
+      <button class="btn-white" onclick="showPage('booking')">+ Новий запис</button>
     </div>
-  </div>
-
-  <!-- CRM CONTENT -->
-  <div id="crm-inner">
-    <div class="crm-wrap">
-      <div class="crm-top">
-        <div><div class="section-label">Адмін</div><h2 style="font-size:28px;font-weight:700;letter-spacing:-0.5px;">CRM Система</h2></div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          <button class="btn-white" onclick="showPage('booking')">+ Новий запис</button>
-          <button class="btn-ghost" style="padding:10px 16px;font-size:13px;" onclick="recalcAllBalances()" id="recalcBtn" title="Перерахувати баланси всіх клієнтів з абонементів">⟳ Баланси</button>
-          <button class="btn-ghost" style="padding:10px 16px;font-size:13px;" onclick="pinLock()">🔒 Вийти</button>
-        </div>
+    <div class="crm-stats-row">
+      <div class="crm-stat-card"><div class="crm-stat-num" id="stat-today">—</div><div class="crm-stat-label">Записів сьогодні</div></div>
+      <div class="crm-stat-card"><div class="crm-stat-num" id="stat-active">—</div><div class="crm-stat-label">В роботі зараз</div></div>
+      <div class="crm-stat-card"><div class="crm-stat-num" id="stat-month">—</div><div class="crm-stat-label">Цього місяця</div></div>
+      <div class="crm-stat-card"><div class="crm-stat-num" id="stat-clients">—</div><div class="crm-stat-label">Клієнтів</div></div>
+    </div>
+    <div class="crm-tabs-bar">
+      <button class="crm-tab-btn active" onclick="switchCrmTab(event,'sched')">Розклад</button>
+      <button class="crm-tab-btn" onclick="switchCrmTab(event,'boxes')">Бокси</button>
+      <button class="crm-tab-btn" onclick="switchCrmTab(event,'clients')">Клієнти</button>
+      <button class="crm-tab-btn" onclick="switchCrmTab(event,'subs')">Абонементи</button>
+    </div>
+    <!-- Schedule -->
+    <div class="crm-tab-panel active" id="tab-sched">
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+        <span style="font-size:12px;color:var(--gray);font-weight:600;">Фільтр:</span>
+        <button class="act-btn" style="border-color:rgba(255,255,255,0.2);color:var(--white);" onclick="filterBookings('all')">Всі</button>
+        <button class="act-btn" onclick="filterBookings('today')">Сьогодні</button>
+        <button class="act-btn" onclick="filterBookings('active')">В роботі</button>
+        <button class="act-btn" onclick="filterBookings('pending')">Очікують</button>
       </div>
-      <div class="crm-stats-row">
-        <div class="crm-stat-card"><div class="crm-stat-num" id="stat-today">—</div><div class="crm-stat-label">Записів сьогодні</div></div>
-        <div class="crm-stat-card"><div class="crm-stat-num" id="stat-active">—</div><div class="crm-stat-label">В роботі</div></div>
-        <div class="crm-stat-card"><div class="crm-stat-num" id="stat-month">—</div><div class="crm-stat-label">Цього місяця</div></div>
-        <div class="crm-stat-card"><div class="crm-stat-num" id="stat-clients">—</div><div class="crm-stat-label">Клієнтів</div></div>
+      <div id="scheduleTableWrap"><div class="table-loading"><span class="table-spinner"></span>Завантаження...</div></div>
+    </div>
+    <!-- Boxes -->
+    <div class="crm-tab-panel" id="tab-boxes">
+      <div class="boxes-live" id="boxesLive"><div class="table-loading" style="grid-column:1/-1"><span class="table-spinner"></span>Завантаження...</div></div>
+    </div>
+    <!-- Clients -->
+    <div class="crm-tab-panel" id="tab-clients">
+      <div style="margin-bottom:16px;">
+        <input type="text" class="field" id="clientSearch" placeholder="🔍 Пошук клієнта..." oninput="filterClients(this.value)" style="max-width:360px;">
       </div>
-      <div class="crm-tabs-bar">
-        <button class="crm-tab-btn active" onclick="switchCrmTab(event,'sched')">Розклад</button>
-        <button class="crm-tab-btn" onclick="switchCrmTab(event,'boxes')">Бокси</button>
-        <button class="crm-tab-btn" onclick="switchCrmTab(event,'clients')">Клієнти</button>
-        <button class="crm-tab-btn" onclick="switchCrmTab(event,'subs')">Абонементи</button>
-        <button class="crm-tab-btn" onclick="switchCrmTab(event,'subrequests')">🆕 Заявки</button>
-      </div>
-
-      <!-- Schedule -->
-      <div class="crm-tab-panel active" id="tab-sched">
-        <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
-          <span style="font-size:11px;color:var(--gray);font-weight:600;">Фільтр:</span>
-          <button class="act-btn" style="border-color:rgba(255,255,255,0.15);color:var(--light);" onclick="filterBookings('all')">Всі</button>
-          <button class="act-btn" onclick="filterBookings('today')">Сьогодні</button>
-          <button class="act-btn" onclick="filterBookings('active')">В роботі</button>
-          <button class="act-btn" onclick="filterBookings('pending')">Очікують</button>
-        </div>
-        <!-- Desktop table -->
-        <div class="table-scroll desktop-table" id="scheduleTableWrap"><div class="table-loading"><span class="table-spinner"></span>Завантаження...</div></div>
-        <!-- Mobile cards -->
-        <div class="crm-cards" id="scheduleCards"></div>
-      </div>
-
-      <!-- Boxes -->
-      <div class="crm-tab-panel" id="tab-boxes">
-        <div class="boxes-live" id="boxesLive"><div class="table-loading" style="grid-column:1/-1"><span class="table-spinner"></span>Завантаження...</div></div>
-      </div>
-
-      <!-- Clients -->
-      <div class="crm-tab-panel" id="tab-clients">
-        <div style="margin-bottom:14px;"><input type="text" class="field" id="clientSearch" placeholder="🔍 Пошук клієнта..." oninput="filterClients(this.value)" style="max-width:360px;"></div>
-        <div class="client-list" id="clientList"><div class="table-loading"><span class="table-spinner"></span>Завантаження...</div></div>
-      </div>
-
-      <!-- Subscriptions -->
-      <div class="crm-tab-panel" id="tab-subs">
-        <div class="table-scroll desktop-table" id="subsTableWrap"><div class="table-loading"><span class="table-spinner"></span>Завантаження...</div></div>
-        <div class="crm-cards" id="subsMobileCards"></div>
-      </div>
-
-      <!-- Sub Requests -->
-      <div class="crm-tab-panel" id="tab-subrequests">
-        <div class="table-scroll desktop-table" id="subRequestsTableWrap"><div class="table-loading"><span class="table-spinner"></span>Завантаження...</div></div>
-        <div class="crm-cards" id="subRequestsMobileCards"></div>
-      </div>
+      <div class="client-list" id="clientList"><div class="table-loading"><span class="table-spinner"></span>Завантаження...</div></div>
+    </div>
+    <!-- Subscriptions -->
+    <div class="crm-tab-panel" id="tab-subs">
+      <div id="subsTableWrap"><div class="table-loading"><span class="table-spinner"></span>Завантаження...</div></div>
     </div>
   </div>
 </div>
 
 <!-- ═══ MODALS ═══ -->
+
+<!-- Plan Modal -->
 <div class="modal-overlay" id="planModal">
   <div class="modal-box">
     <div class="modal-close" onclick="closePlanModal()">✕</div>
-    <div style="font-size:9px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:var(--gray);margin-bottom:8px;" id="m-id">T-1</div>
-    <div style="font-size:26px;font-weight:700;letter-spacing:-0.3px;margin-bottom:4px;" id="m-name">SILVER</div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gray);margin-bottom:8px;" id="m-id">T-1</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:40px;letter-spacing:1px;margin-bottom:4px;" id="m-name">SILVER</div>
     <div style="font-size:14px;color:var(--gray);margin-bottom:28px;" id="m-sub">10 000 ₴ → 11 000 ₴</div>
-    <div style="display:flex;flex-direction:column;gap:10px;">
+    <div style="display:flex;flex-direction:column;gap:12px;">
       <div class="form-group"><div class="form-label">Ім'я та прізвище</div><input type="text" class="field" id="pm-name" placeholder="Олексій Петренко"></div>
       <div class="form-group"><div class="form-label">Телефон</div><input type="tel" class="field" id="pm-phone" placeholder="+380 XX XXX XX XX"></div>
-      <div class="form-group"><div class="form-label">Telegram (необов'язково)</div><input type="text" class="field" id="pm-tg" placeholder="@username або ID"></div>
+      <div class="form-group"><div class="form-label">Telegram (необов'язково)</div><input type="text" class="field" id="pm-tg" placeholder="@username"></div>
       <div class="form-group"><div class="form-label">Спосіб оплати</div><select class="field" id="pm-pay"><option>Безготівковий переказ</option><option>Готівка в центрі</option><option>Термінал</option></select></div>
-      <button class="btn-white" style="width:100%;padding:14px;border-radius:100px;margin-top:4px;" onclick="buyPlan()">Оформити →</button>
+      <button class="btn-white" style="width:100%;padding:14px;border-radius:50px;margin-top:4px;" onclick="buyPlan()">Оформити →</button>
     </div>
   </div>
 </div>
 
+<!-- Client Details Modal -->
 <div class="modal-overlay" id="clientModal">
   <div class="modal-box modal-large">
     <div class="modal-close" onclick="closeClientModal()">✕</div>
-    <div id="clientModalContent"><div class="table-loading"><span class="table-spinner"></span>Завантаження...</div></div>
+    <div id="clientModalContent">
+      <div class="table-loading"><span class="table-spinner"></span>Завантаження...</div>
+    </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ╔══════════════════════════════════════════════════════╗
-// ║  CONFIG                                              ║
-// ╚══════════════════════════════════════════════════════╝
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw9mqrVSrAVeoMa4Np2SxYFRCxj5cW0uX1x7S50LddB7pXnz0PIvL7gPJHmLyIJ9986GQ/exec';
-const CRM_PIN = '1333'; // ← змініть на свій PIN
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  CONFIG — вставте URL після деплою Apps Script               ║
+// ╚══════════════════════════════════════════════════════════════╝
+const APPS_SCRIPT_URL = 'ВСТАВТЕ_URL_APPS_SCRIPT_ТУТ';
 
 // ═══ STATE ═══
 const S = { service:'', price:'', date:'', time:'', box:null, step:1, carType:'' };
 const _planMeta = {};
-let _allBookings=[], _allClients=[], _allSubs=[], _allSubRequests=[];
-// Cache layer
-const _cache = {};
-const CACHE_TTL = 60000; // 1 хвилина
+let _allBookings = [], _allClients = [], _allSubs = [];
+// Кеш слотів: { 'dd.mm.yyyy': [{time, available, freeBoxes}] }
+const _timesCache = {};
 
-// ═══ API ═══
-function isApiConfigured() { return APPS_SCRIPT_URL && !APPS_SCRIPT_URL.includes('ВСТАВТЕ'); }
-
-async function api(action, params={}, cacheKey=null) {
+// ═══ API LAYER ═══
+function isApiConfigured() {
+  return APPS_SCRIPT_URL && !APPS_SCRIPT_URL.includes('ВСТАВТЕ');
+}
+async function api(action, params = {}) {
   if (!isApiConfigured()) return null;
-  // Check cache
-  if (cacheKey && _cache[cacheKey] && Date.now() - _cache[cacheKey].ts < CACHE_TTL) {
-    return _cache[cacheKey].data;
-  }
   try {
     const url = new URL(APPS_SCRIPT_URL);
     url.searchParams.set('action', action);
-    Object.entries(params).forEach(([k,v]) => url.searchParams.set(k, String(v)));
+    Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, String(v)));
     const res = await fetch(url.toString());
-    if (!res.ok) throw new Error('HTTP '+res.status);
-    const data = await res.json();
-    if (cacheKey) _cache[cacheKey] = {data, ts: Date.now()};
-    return data;
-  } catch(e) {
-    console.error('[API]',action,e);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return await res.json();
+  } catch (e) {
+    console.error('[API]', action, e);
     return null;
   }
 }
 
-function clearCache(prefix='') {
-  Object.keys(_cache).forEach(k => { if(!prefix || k.startsWith(prefix)) delete _cache[k]; });
-}
-
-// ═══ AUTO-REGISTER CLIENT ═══
-async function autoRegisterClient(name, phone) {
-  if (!isApiConfigured() || !name || !phone) return;
-  try {
-    await api('autoRegister', {name, phone}, null);
-  } catch(e) {}
-}
-
 // ═══ NAV ═══
 function showPage(p) {
-  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
-  document.getElementById(p+'-page').classList.add('active');
-  document.querySelectorAll('.nav-links a').forEach(x=>x.classList.remove('active'));
-  const nl = document.getElementById('nl-'+p);
-  if (nl) { nl.classList.add('active'); if(p==='crm') nl.style.opacity='1'; }
-  window.scrollTo({top:0,behavior:'smooth'});
-  if (p==='crm') initCrmPage();
+  document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+  document.getElementById(p + '-page').classList.add('active');
+  document.querySelectorAll('.nav-links a').forEach(x => x.classList.remove('active'));
+  const nl = document.getElementById('nl-' + p);
+  if (nl) nl.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (p === 'crm') loadCRM();
 }
-function scrollToSection(id) { document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'}); }
+function scrollToSection(id) {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 function showPageAndService(page, svc, price) {
   showPage(page);
-  setTimeout(()=>{
-    document.querySelectorAll('.svc-pick').forEach(b=>{
-      if(b.querySelector('.svc-pick-name')?.textContent===svc) { b.classList.add('selected'); S.service=svc; S.price=price; }
+  setTimeout(() => {
+    document.querySelectorAll('.svc-pick').forEach(b => {
+      if (b.querySelector('.svc-pick-name')?.textContent === svc) {
+        b.classList.add('selected');
+        S.service = svc; S.price = price;
+      }
     });
-  }, 100);
-}
-function openMobileMenu() { document.getElementById('mobileMenu').classList.add('show'); document.body.style.overflow='hidden'; }
-function closeMobileMenu() { document.getElementById('mobileMenu').classList.remove('show'); document.body.style.overflow=''; }
-
-// ═══ DATE PILLS ═══
-window.addEventListener('load', initDatePills);
-
-function fmtDatePill(d) {
-  const ukDays = ['Нд','Пн','Вт','Ср','Чт','Пт','Сб'];
-  const dd = String(d.getDate()).padStart(2,'0');
-  const mm = String(d.getMonth()+1).padStart(2,'0');
-  const yyyy = d.getFullYear();
-  const dayAbbr = ukDays[d.getDay()];
-  return {label:`${dayAbbr} ${dd}.${mm}.${yyyy}`, dateStr:`${dd}.${mm}.${yyyy}`};
+  }, 120);
 }
 
+// ═══ INIT ═══
+window.addEventListener('load', () => {
+  initDatePills();
+});
+
+// ═══ DATE PILLS — 7 days ═══
 function initDatePills() {
-  const c = document.getElementById('datePillsContainer');
-  if (!c) return;
-  c.innerHTML='';
+  const container = document.getElementById('datePillsContainer');
+  container.innerHTML = '';
+  const ukDays = ['Нд','Пн','Вт','Ср','Чт','Пт','Сб'];
   const today = new Date();
-  for (let i=0; i<7; i++) {
+
+  for (let i = 0; i < 7; i++) {
     const d = new Date(today);
-    d.setDate(today.getDate()+i);
-    const {label, dateStr} = fmtDatePill(d);
+    d.setDate(today.getDate() + i);
+    const dayAbbr = ukDays[d.getDay()];
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yyyy = d.getFullYear();
+    const dateStr = `${dd}.${mm}.${yyyy}`;
+    const label = i === 0 ? `Сьогодні ${dd}.${mm}`
+                : i === 1 ? `Завтра ${dd}.${mm}`
+                : `${dayAbbr} ${dd}.${mm}`;
+
     const btn = document.createElement('button');
-    btn.className='date-pill';
-    btn.textContent=label;
-    btn.dataset.date=dateStr;
-    btn.addEventListener('click',()=>selectDate(btn,dateStr));
-    c.appendChild(btn);
+    btn.className = 'date-pill';
+    btn.textContent = label;
+    btn.dataset.date = dateStr;
+    btn.addEventListener('click', () => selectDate(btn, dateStr));
+    container.appendChild(btn);
   }
 }
 
 async function selectDate(el, dateStr) {
-  document.querySelectorAll('.date-pill').forEach(b=>b.classList.remove('selected'));
+  document.querySelectorAll('.date-pill').forEach(b => b.classList.remove('selected'));
   el.classList.add('selected');
-  S.date=dateStr; S.time='';
-  const lbl = document.getElementById('timeGridLabel');
-  if (lbl) lbl.style.display='block';
+  S.date = dateStr;
+  S.time = '';
+
   const grid = document.getElementById('timeGrid');
-  grid.innerHTML='<div class="time-loading"><span class="time-loading-spinner"></span>Завантаження часів...</div>';
-  if (!isApiConfigured()) { renderDemoTimes(); return; }
-  const data = await api('getAvailableTimesForDate',{date:dateStr},`times_${dateStr}`);
-  if (!data?.times) { renderDemoTimes(); return; }
+  grid.innerHTML = '<div class="time-loading"><span class="time-loading-spinner"></span>Завантаження...</div>';
+
+  // Якщо є кеш — одразу рендеримо
+  if (_timesCache[dateStr]) {
+    renderTimes(_timesCache[dateStr]);
+    return;
+  }
+
+  if (!isApiConfigured()) {
+    _timesCache[dateStr] = buildDemoTimes(dateStr);
+    renderTimes(_timesCache[dateStr]);
+    return;
+  }
+
+  const data = await api('getAvailableTimesForDate', { date: dateStr });
+  if (!data || !data.times) {
+    _timesCache[dateStr] = buildDemoTimes(dateStr);
+    renderTimes(_timesCache[dateStr]);
+    return;
+  }
+  _timesCache[dateStr] = data.times;
   renderTimes(data.times);
+}
+
+/** Будує демо-слоти, фільтруючи минулі години для сьогоднішньої дати */
+function buildDemoTimes(dateStr) {
+  const allSlots = ['09:00','10:00','11:00','12:00','13:00',
+                    '14:00','15:00','16:00','17:00','18:00','19:00'];
+  const busyDemo = new Set(['11:00','13:00','16:00']);
+  const todayStr = getTodayStr();
+  const isToday  = (dateStr === todayStr);
+  const now      = new Date();
+  const curH     = now.getHours();
+  const curM     = now.getMinutes();
+  const minHour  = curM > 0 ? curH + 1 : curH;
+
+  return allSlots.map(t => {
+    const h = parseInt(t);
+    if (isToday && h < minHour) return { time: t, available: false, past: true };
+    if (busyDemo.has(t))        return { time: t, available: false };
+    return { time: t, available: true, freeBoxes: ['Box 1','Box 2','Box 3'] };
+  });
 }
 
 function renderTimes(times) {
   const grid = document.getElementById('timeGrid');
-  if (!times?.length) {
-    grid.innerHTML='<div style="color:var(--gray);font-size:13px;grid-column:1/-1;padding:16px 0;">Немає доступного часу на цей день</div>';
+  if (!times || !times.length) {
+    grid.innerHTML = '<div style="color:var(--gray);font-size:13px;grid-column:1/-1;padding:16px 0;">Немає доступного часу на цей день</div>';
     return;
   }
-  grid.innerHTML='';
-  times.forEach(t=>{
-    const btn=document.createElement('button');
-    btn.className='time-btn'+(t.available?'':' busy');
-    btn.textContent=t.time;
-    if(t.available) btn.addEventListener('click',()=>pickTime(btn));
+  grid.innerHTML = '';
+  times.forEach(t => {
+    const btn = document.createElement('button');
+    if (t.past) {
+      btn.className = 'time-btn busy';
+      btn.style.opacity = '0.25';
+      btn.title = 'Час вже минув';
+    } else {
+      btn.className = 'time-btn' + (t.available ? '' : ' busy');
+    }
+    btn.textContent = t.time;
+    if (t.available && !t.past) btn.addEventListener('click', () => pickTime(btn, t));
     grid.appendChild(btn);
   });
 }
-function renderDemoTimes() {
-  renderTimes(['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00'].map(t=>({time:t,available:true})));
+
+// renderDemoTimes замінено на buildDemoTimes() вище
+
+
+
+// ═══ BOX LOADING — використовує кеш з selectDate, без зайвого API-запиту ═══
+async function loadBoxes() {
+  const container = document.getElementById('boxRow');
+  S.box = null;
+
+  // Якщо є кешовані бокси зі слоту — використовуємо їх (0 мс)
+  if (S.freeBoxes) {
+    renderBoxButtons(S.freeBoxes);
+    return;
+  }
+
+  // Інакше — один легкий запит
+  container.innerHTML = '<div style="color:var(--gray);font-size:13px;padding:16px 0;display:flex;align-items:center;gap:8px;"><span class="table-spinner" style="width:14px;height:14px;border-width:2px;display:inline-block;"></span>Перевіряємо бокси...</div>';
+
+  let freeBoxes = ['Box 1', 'Box 2', 'Box 3'];
+  if (isApiConfigured() && S.date && S.time) {
+    const data = await api('getBoxesForDateTime', { date: S.date, time: S.time });
+    if (data && data.boxes) freeBoxes = data.boxes;
+  }
+  renderBoxButtons(freeBoxes);
 }
 
-// ═══ BOXES ═══
-async function loadBoxes() {
-  const c=document.getElementById('boxRow');
-  c.innerHTML='<div style="color:var(--gray);font-size:13px;padding:16px 0;grid-column:1/-1;"><span class="time-loading-spinner" style="width:14px;height:14px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:8px;"></span>Перевіряємо бокси...</div>';
-  S.box=null;
-  let freeBoxes=['Box 1','Box 2','Box 3'];
-  if(isApiConfigured()&&S.date&&S.time) {
-    const data=await api('getBoxesForDateTime',{date:S.date,time:S.time});
-    if(data?.boxes) freeBoxes=data.boxes;
-  }
-  c.innerHTML='';
-  ['Box 1','Box 2','Box 3'].forEach(boxName=>{
-    const num=boxName.replace('Box ','');
-    const isFree=freeBoxes.includes(boxName);
-    const div=document.createElement('div');
-    div.className='box-btn'+(isFree?' box-free':' occupied');
-    div.innerHTML=`<div class="box-num">${num}</div><div class="box-label-s">Бокс</div><div class="box-avail">${isFree?'● Вільний':'● Зайнятий'}</div>`;
-    if(isFree) div.addEventListener('click',()=>pickBox(div,parseInt(num)));
-    c.appendChild(div);
+function renderBoxButtons(freeBoxes) {
+  const container = document.getElementById('boxRow');
+  container.innerHTML = '';
+  ['Box 1', 'Box 2', 'Box 3'].forEach(boxName => {
+    const num    = boxName.replace('Box ', '');
+    const isFree = freeBoxes.includes(boxName);
+    const div    = document.createElement('div');
+    div.className = 'box-btn' + (isFree ? ' box-free' : ' occupied');
+    div.innerHTML = `
+      <div class="box-num">${num}</div>
+      <div class="box-label-s">Бокс</div>
+      <div class="box-avail">${isFree ? '● Вільний' : '● Зайнятий'}</div>`;
+    if (isFree) div.addEventListener('click', () => pickBox(div, parseInt(num)));
+    container.appendChild(div);
   });
-  const sub=document.getElementById('box-sub');
-  if(sub) sub.textContent=freeBoxes.length?`Вільно ${freeBoxes.length} з 3 боксів`:'Всі бокси зайняті на цей час';
+  const freeCount = freeBoxes.length;
+  document.querySelector('#panel-3 .panel-sub').textContent =
+    freeCount ? `Вільно ${freeCount} з 3 боксів` : 'Всі бокси зайняті — оберіть інший час';
 }
 
 // ═══ BOOKING STEPS ═══
 function goStep(n) {
-  if(n===2&&!S.service){toast('Оберіть послугу');return;}
-  if(n===3&&(!S.date||!S.time)){toast('Оберіть дату і час');return;}
-  if(n===4&&!S.box){toast('Оберіть бокс');return;}
-  if(n===5){
-    if(!document.getElementById('fName').value){toast("Введіть ім'я");return;}
-    if(!document.getElementById('fPhone').value){toast('Введіть телефон');return;}
-    if(!S.carType){toast('Оберіть тип кузова');return;}
+  if (n === 2 && !S.service)            { toast('Оберіть послугу');              return; }
+  if (n === 3 && (!S.date || !S.time))  { toast('Оберіть дату і час');           return; }
+  if (n === 4 && !S.box)                { toast('Оберіть бокс');                 return; }
+  if (n === 5) {
+    if (!document.getElementById('fName').value)  { toast("Введіть ім'я");       return; }
+    if (!document.getElementById('fPhone').value) { toast('Введіть телефон');    return; }
+    if (!S.carType)                               { toast('Оберіть тип кузова'); return; }
     updateSummary();
   }
-  S.step=n;
-  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
-  document.getElementById('panel-'+n).classList.add('active');
-  for(let i=1;i<=5;i++){
-    const d=document.getElementById('sdot-'+i);
-    d.classList.remove('active','done');
-    if(i<n) d.classList.add('done');
-    if(i===n) d.classList.add('active');
-    if(i<5) document.getElementById('sline-'+i).classList.toggle('done',i<n);
+  // Якщо повертаємось з кроку 3 — скидаємо кешовані бокси щоб повторно завантажити
+  if (n === 2) S.freeBoxes = null;
+
+  S.step = n;
+  document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+  document.getElementById('panel-' + n).classList.add('active');
+  for (let i = 1; i <= 5; i++) {
+    const d = document.getElementById('sdot-' + i);
+    d.classList.remove('active', 'done');
+    if (i < n) d.classList.add('done');
+    if (i === n) d.classList.add('active');
+    if (i < 5) document.getElementById('sline-' + i).classList.toggle('done', i < n);
   }
-  if(n===3) loadBoxes();
-  window.scrollTo({top:0,behavior:'smooth'});
+  if (n === 3) loadBoxes();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function pickCarType(el,type){document.querySelectorAll('.car-type-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');S.carType=type;}
-function pickService(el,name,price){document.querySelectorAll('.svc-pick').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');S.service=name;S.price=price;}
-function pickTime(el){document.querySelectorAll('.time-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');S.time=el.textContent;}
-function pickBox(el,n){document.querySelectorAll('.box-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');S.box=n;}
-
-function updateSummary(){
-  document.getElementById('s-svc').textContent=S.service||'—';
-  document.getElementById('s-date').textContent=S.date||'—';
-  document.getElementById('s-time').textContent=S.time||'—';
-  document.getElementById('s-box').textContent=S.box?'Бокс '+S.box:'—';
-  document.getElementById('s-client').textContent=document.getElementById('fName').value||'—';
-  document.getElementById('s-cartype').textContent=S.carType||'—';
-  const car=document.getElementById('fCar').value, yr=document.getElementById('fYear').value;
-  document.getElementById('s-car').textContent=(car||'—')+(yr?' '+yr:'');
-  document.getElementById('s-price').textContent=S.price||'—';
+function pickCarType(el, type) {
+  document.querySelectorAll('.car-type-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  S.carType = type;
+}
+function pickService(el, name, price) {
+  document.querySelectorAll('.svc-pick').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  S.service = name; S.price = price;
+}
+function pickTime(el, slotData) {
+  document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  S.time = el.textContent.trim();
+  // зберігаємо вільні бокси з даних слоту (щоб не робити зайвий API-запит)
+  S.freeBoxes = (slotData && slotData.freeBoxes) ? slotData.freeBoxes : null;
+}
+function pickBox(el, n) {
+  document.querySelectorAll('.box-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  S.box = n;
+}
+function updateSummary() {
+  document.getElementById('s-svc').textContent = S.service || '—';
+  document.getElementById('s-date').textContent = S.date || '—';
+  document.getElementById('s-time').textContent = S.time || '—';
+  document.getElementById('s-box').textContent = S.box ? 'Бокс ' + S.box : '—';
+  document.getElementById('s-client').textContent = document.getElementById('fName').value || '—';
+  document.getElementById('s-cartype').textContent = S.carType || '—';
+  const car = document.getElementById('fCar').value;
+  const yr = document.getElementById('fYear').value;
+  document.getElementById('s-car').textContent = (car || '—') + (yr ? ' ' + yr : '');
+  document.getElementById('s-price').textContent = S.price || '—';
 }
 
-async function submitBooking(){
-  const btn=document.getElementById('confirmBtn');
-  btn.textContent='⏳ Відправляємо...'; btn.disabled=true;
-  const name=document.getElementById('fName').value;
-  const phone=document.getElementById('fPhone').value;
-  const params={
-    date:S.date, time:S.time, box:'Box '+S.box,
-    name, phone, service:S.service,
-    car:document.getElementById('fCar').value+' '+document.getElementById('fYear').value,
-    carType:S.carType, comment:document.getElementById('fComment').value
+async function submitBooking() {
+  const btn = document.getElementById('confirmBtn');
+  btn.textContent = '⏳ Відправляємо...';
+  btn.disabled = true;
+
+  const params = {
+    date:     S.date,
+    time:     S.time,
+    box:      'Box ' + S.box,
+    name:     document.getElementById('fName').value,
+    phone:    document.getElementById('fPhone').value,
+    service:  S.service,
+    car:      document.getElementById('fCar').value + ' ' + document.getElementById('fYear').value,
+    carType:  S.carType,
+    comment:  document.getElementById('fComment').value
   };
-  if(!isApiConfigured()){
-    await new Promise(r=>setTimeout(r,700));
-    autoRegisterClient(name,phone);
-    showSuccess('#1333-'+(Math.floor(Math.random()*9000)+1000));
-    btn.textContent='✓ Підтвердити'; btn.disabled=false;
+
+  if (!isApiConfigured()) {
+    await new Promise(r => setTimeout(r, 700));
+    showSuccess('#1333-' + (Math.floor(Math.random() * 9000) + 1000));
+    toast('⚠️ Демо-режим. Вставте URL Apps Script у CONFIG.');
+    btn.textContent = '✓ Підтвердити'; btn.disabled = false;
     return;
   }
-  const result=await api('saveBooking',params);
-  btn.textContent='✓ Підтвердити'; btn.disabled=false;
-  if(result===null){toast("❌ Помилка з'єднання");return;}
-  if(result.success===false){toast('❌ Бокс вже зайнятий! Оберіть інший.');goStep(3);return;}
-  clearCache();
-  // Auto-register
-  autoRegisterClient(name,phone);
-  showSuccess('#1333-'+(Math.floor(Math.random()*9000)+1000));
-  toast('✓ Запис створено!');
+
+  const result = await api('saveBooking', params);
+  btn.textContent = '✓ Підтвердити'; btn.disabled = false;
+
+  if (result === null) {
+    toast('❌ Помилка зʼєднання. Перевірте URL в CONFIG.'); return;
+  }
+  if (result.success === false) {
+    toast('❌ Бокс вже зайнятий! Оберіть інший час або бокс.');
+    // Інвалідуємо кеш для цього дня
+    delete _timesCache[S.date];
+    S.freeBoxes = null;
+    goStep(2); return;
+  }
+  // Після успішного запису — очищаємо кеш часів щоб наступний клієнт бачив актуальні слоти
+  delete _timesCache[S.date];
+  showSuccess('#1333-' + (Math.floor(Math.random() * 9000) + 1000));
+  toast('✓ Запис створено! Сповіщення відправлено адміну.');
 }
 
-function showSuccess(id){
-  document.getElementById('bookingIdTag').textContent='ID: '+id;
-  document.getElementById('confirmView').style.display='none';
-  document.getElementById('successView').style.display='block';
-  window.scrollTo({top:0,behavior:'smooth'});
+function showSuccess(id) {
+  document.getElementById('bookingIdTag').textContent = 'ID: ' + id;
+  document.getElementById('confirmView').style.display = 'none';
+  document.getElementById('successView').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-function resetBooking(){
-  S.service='';S.price='';S.date='';S.time='';S.box=null;S.carType='';
-  document.getElementById('confirmView').style.display='block';
-  document.getElementById('successView').style.display='none';
-  document.querySelectorAll('.svc-pick,.time-btn,.box-btn,.date-pill,.car-type-btn').forEach(x=>x.classList.remove('selected'));
-  ['fName','fPhone','fCar','fYear','fComment'].forEach(id=>document.getElementById(id).value='');
+function resetBooking() {
+  S.service = ''; S.price = ''; S.date = ''; S.time = '';
+  S.box = null; S.carType = ''; S.freeBoxes = null;
+  // очищаємо кеш сьогоднішнього дня
+  delete _timesCache[getTodayStr()];
+  document.getElementById('confirmView').style.display = 'block';
+  document.getElementById('successView').style.display = 'none';
+  document.querySelectorAll('.svc-pick,.time-btn,.box-btn,.date-pill,.car-type-btn')
+    .forEach(x => x.classList.remove('selected'));
+  ['fName','fPhone','fCar','fYear','fComment']
+    .forEach(id => document.getElementById(id).value = '');
   initDatePills();
-  document.getElementById('timeGrid').innerHTML='';
+  document.getElementById('timeGrid').innerHTML = '';
   goStep(1);
 }
 
-// ═══ PIN / CRM GATE ═══
-let _pinBuffer='';
-let _crmUnlocked = sessionStorage.getItem('crm_unlocked')==='1';
+// ═══ CRM ═══
+async function loadCRM() {
+  const today = new Date();
+  const dd = String(today.getDate()).padStart(2,'0');
+  const mm = String(today.getMonth()+1).padStart(2,'0');
+  const yyyy = today.getFullYear();
+  const todayStr = `${dd}.${mm}.${yyyy}`;
+  const monthStr = `${mm}.${yyyy}`;
 
-function initCrmPage(){
-  if(_crmUnlocked){ showCrmInner(); loadCRM(); }
-  else { showPinGate(); }
-}
-function showPinGate(){
-  document.getElementById('crm-gate').style.display='flex';
-  document.getElementById('crm-inner').classList.remove('show');
-}
-function showCrmInner(){
-  document.getElementById('crm-gate').style.display='none';
-  document.getElementById('crm-inner').classList.add('show');
-}
-function pinKey(k){
-  if(_pinBuffer.length>=4) return;
-  _pinBuffer+=k;
-  updatePinDots();
-  if(_pinBuffer.length===4) setTimeout(checkPin,200);
-}
-function pinBackspace(){ _pinBuffer=_pinBuffer.slice(0,-1); updatePinDots(); document.getElementById('pin-error').textContent=''; }
-function updatePinDots(){
-  for(let i=0;i<4;i++) document.getElementById('pd'+i).classList.toggle('filled',i<_pinBuffer.length);
-}
-function checkPin(){
-  if(_pinBuffer===CRM_PIN){
-    sessionStorage.setItem('crm_unlocked','1');
-    _crmUnlocked=true;
-    showCrmInner();
-    loadCRM();
-  } else {
-    document.getElementById('pin-error').textContent='Невірний PIN';
-    _pinBuffer='';
-    updatePinDots();
-    // Shake animation
-    const pb=document.getElementById('pin-box');
-    pb.style.transform='translateX(10px)';
-    setTimeout(()=>{pb.style.transform='translateX(-10px)';},80);
-    setTimeout(()=>{pb.style.transform='';},160);
-    pb.style.transition='transform 0.08s ease';
-  }
-}
-function pinLock(){
-  sessionStorage.removeItem('crm_unlocked');
-  _crmUnlocked=false; _pinBuffer='';
-  updatePinDots();
-  document.getElementById('pin-error').textContent='';
-  showPinGate();
-}
-
-// Keyboard support for PIN
-document.addEventListener('keydown', e=>{
-  const page=document.getElementById('crm-page');
-  if(!page?.classList.contains('active')) return;
-  if(_crmUnlocked) return;
-  if(e.key>='0'&&e.key<='9') pinKey(e.key);
-  if(e.key==='Backspace') pinBackspace();
-});
-
-// ═══ CRM DATA LOADING ═══
-async function loadCRM(){
-  const today=new Date();
-  const dd=String(today.getDate()).padStart(2,'0');
-  const mm=String(today.getMonth()+1).padStart(2,'0');
-  const yyyy=today.getFullYear();
-  const todayStr=`${dd}.${mm}.${yyyy}`;
-
-  if(!isApiConfigured()){
-    renderDemoSchedule(); renderDemoBoxes(); renderDemoClients(); renderDemoSubs(); renderDemoSubRequests();
-    setStats(4,1,12,24); return;
+  if (!isApiConfigured()) {
+    renderDemoSchedule();
+    renderDemoBoxes();
+    renderDemoClients();
+    renderDemoSubs();
+    setStats(4, 1, 12, 24);
+    return;
   }
 
-  // ✅ PARALLEL loading for speed
-  const [bRes,cRes,sRes,srRes]=await Promise.all([
-    api('getAllBookings',{},'allBookings'),
-    api('getAllClients',{},'allClients'),
-    api('getAllSubs',{},'allSubs'),
-    api('getAllSubRequests',{},'allSubRequests')
+  // Load all data in parallel
+  const [bRes, cRes, sRes] = await Promise.all([
+    api('getAllBookings'),
+    api('getAllClients'),
+    api('getAllSubs')
   ]);
 
-  _allBookings=bRes?.bookings||[];
-  _allClients=cRes?.clients||[];
-  _allSubs=sRes?.subs||[];
-  _allSubRequests=srRes?.requests||[];
+  _allBookings = bRes?.bookings || [];
+  _allClients  = cRes?.clients  || [];
+  _allSubs     = sRes?.subs     || [];
 
-  const todayCount=_allBookings.filter(b=>b.date===todayStr).length;
-  const activeCount=_allBookings.filter(b=>b.status?.includes('роботі')).length;
-  const monthPfx=`${mm}.${yyyy}`;
-  const monthCount=_allBookings.filter(b=>b.date?.endsWith('.'+yyyy)&&b.date?.includes('.'+mm+'.')).length;
+  // Stats
+  const todayCount  = _allBookings.filter(b => b.date === todayStr).length;
+  const activeCount = _allBookings.filter(b => b.status.includes('роботі')).length;
+  const monthCount  = _allBookings.filter(b => b.date && b.date.includes(monthStr.slice(0,2)+'.' + monthStr.slice(3))).length;
 
-  setStats(todayCount,activeCount,monthCount,_allClients.length);
-  renderSchedule(_allBookings,'all');
-  renderBoxes(_allBookings,todayStr);
+  setStats(todayCount, activeCount, monthCount, _allClients.length);
+  renderSchedule(_allBookings, 'all');
+  renderBoxes(_allBookings, todayStr);
   renderClients(_allClients);
   renderSubs(_allSubs);
-  renderSubRequests(_allSubRequests);
 }
 
-function setStats(t,a,m,c){
-  document.getElementById('stat-today').textContent=isNaN(t)?0:t;
-  document.getElementById('stat-active').textContent=isNaN(a)?0:a;
-  document.getElementById('stat-month').textContent=isNaN(m)?0:m;
-  document.getElementById('stat-clients').textContent=isNaN(c)?0:c;
+function setStats(t, a, m, c) {
+  document.getElementById('stat-today').textContent   = t;
+  document.getElementById('stat-active').textContent  = a;
+  document.getElementById('stat-month').textContent   = m;
+  document.getElementById('stat-clients').textContent = c;
 }
 
-// ─── Schedule ────────────────────────────────────────────
-function filterBookings(filter){
-  const today=new Date();
-  const dd=String(today.getDate()).padStart(2,'0'), mm=String(today.getMonth()+1).padStart(2,'0'), yyyy=today.getFullYear();
-  const todayStr=`${dd}.${mm}.${yyyy}`;
-  let f=_allBookings;
-  if(filter==='today') f=_allBookings.filter(b=>b.date===todayStr);
-  if(filter==='active') f=_allBookings.filter(b=>b.status?.includes('роботі'));
-  if(filter==='pending') f=_allBookings.filter(b=>b.status?.includes('Очікує')||b.status?.includes('Підтверджено'));
-  renderSchedule(f,filter);
+// ─── Schedule ────────────────────────────────────────────────
+function filterBookings(filter) {
+  const today = new Date();
+  const dd = String(today.getDate()).padStart(2,'0');
+  const mm = String(today.getMonth()+1).padStart(2,'0');
+  const yyyy = today.getFullYear();
+  const todayStr = `${dd}.${mm}.${yyyy}`;
+
+  let filtered = _allBookings;
+  if (filter === 'today')   filtered = _allBookings.filter(b => b.date === todayStr);
+  if (filter === 'active')  filtered = _allBookings.filter(b => b.status.includes('роботі'));
+  if (filter === 'pending') filtered = _allBookings.filter(b => b.status.includes('Очікує') || b.status.includes('Підтверджено'));
+  renderSchedule(filtered, filter);
 }
 
-function statusBadgeClass(s){
-  if(!s) return 'badge-gray';
-  if(s.includes('роботі')) return 'badge-orange';
-  if(s.includes('Виконано')||s.includes('Завершено')) return 'badge-green';
-  if(s.includes('Підтверджено')||s.includes('підтверджено')) return 'badge-green';
-  if(s.includes('Очікує')) return 'badge-yellow';
-  if(s.includes('Скасовано')) return 'badge-red';
-  if(s.includes('Заморож')) return 'badge-blue';
+function statusBadgeClass(status) {
+  if (!status) return 'badge-gray';
+  if (status.includes('роботі') || status.includes('Роботі')) return 'badge-orange';
+  if (status.includes('Виконано') || status.includes('Завершено')) return 'badge-green';
+  if (status.includes('Підтверджено') || status.includes('підтвержено')) return 'badge-green';
+  if (status.includes('Очікує')) return 'badge-yellow';
+  if (status.includes('Скасовано')) return 'badge-red';
+  if (status.includes('Заморожено') || status.includes('Заморожений')) return 'badge-blue';
   return 'badge-gray';
 }
 
-function renderSchedule(bookings){
-  // Desktop
-  const wrap=document.getElementById('scheduleTableWrap');
-  // Mobile
-  const cards=document.getElementById('scheduleCards');
-  if(!bookings.length){
-    wrap.innerHTML='<div class="table-loading" style="color:var(--gray);">Записів не знайдено</div>';
-    cards.innerHTML='<div style="color:var(--gray);font-size:14px;padding:20px 0;">Записів не знайдено</div>';
+function renderSchedule(bookings, filter) {
+  const wrap = document.getElementById('scheduleTableWrap');
+  if (!bookings.length) {
+    wrap.innerHTML = '<div class="table-loading" style="color:var(--gray);">Записів не знайдено</div>';
     return;
   }
-  // Desktop table
-  wrap.innerHTML=`<table class="crm-table"><thead><tr><th>#</th><th>Клієнт</th><th>Дата/Час</th><th>Послуга</th><th>Бокс</th><th>Статус</th><th>Дії</th></tr></thead><tbody>${
-    bookings.map(b=>`<tr>
-      <td style="font-size:10px;color:var(--gray);">${b.id}</td>
+  const rows = bookings.map(b => `
+    <tr>
+      <td style="font-size:11px;color:var(--gray);">${b.id}</td>
       <td><b>${b.clientName}</b><br><span style="font-size:11px;color:var(--gray);">${b.phone}</span></td>
       <td>${b.date}<br><span style="font-size:11px;color:var(--gray);">${b.time}</span></td>
-      <td style="max-width:120px;">${b.service}</td>
-      <td><span style="font-size:15px;font-weight:700;letter-spacing:-0.3px;">${b.box.replace('Box ','')}</span></td>
-      <td><span class="badge ${statusBadgeClass(b.status)}">${b.status||'—'}</span></td>
+      <td>${b.service}</td>
+      <td><span style="font-family:'Bebas Neue';font-size:20px;">${b.box.replace('Box ','')}</span></td>
+      <td><span class="badge ${statusBadgeClass(b.status)}">${b.status || '—'}</span></td>
       <td>
         <button class="act-btn act-btn-green" onclick="updateBookingStatusUI('${b.id}','▶ В роботі')" title="Почати">▶</button>
         <button class="act-btn act-btn-green" onclick="updateBookingStatusUI('${b.id}','✅ Виконано')" title="Виконано">✓</button>
         <button class="act-btn act-btn-yellow" onclick="updateBookingStatusUI('${b.id}','⏳ Очікує')" title="Очікує">⏸</button>
-        <button class="act-btn act-btn-red" onclick="updateBookingStatusUI('${b.id}','❌ Скасовано')" title="Скасувати">✕</button>
-      </td></tr>`).join('')
-  }</tbody></table>`;
-  // Mobile cards
-  cards.innerHTML=bookings.map(b=>`
-    <div class="crm-card">
-      <div class="crm-card-header">
-        <div><div class="crm-card-title">${b.clientName}</div><div class="crm-card-sub">${b.phone}</div></div>
-        <span class="badge ${statusBadgeClass(b.status)}">${b.status||'—'}</span>
-      </div>
-      <div class="crm-card-meta">
-        <span class="crm-card-tag">📅 ${b.date} ${b.time}</span>
-        <span class="crm-card-tag">🏠 Бокс ${b.box.replace('Box ','')}</span>
-        <span class="crm-card-tag">🔧 ${b.service}</span>
-      </div>
-      <div class="crm-card-actions">
-        <button class="act-btn act-btn-green" onclick="updateBookingStatusUI('${b.id}','▶ В роботі')">▶ В роботі</button>
-        <button class="act-btn act-btn-green" onclick="updateBookingStatusUI('${b.id}','✅ Виконано')">✓ Готово</button>
-        <button class="act-btn act-btn-red" onclick="updateBookingStatusUI('${b.id}','❌ Скасовано')">✕</button>
-      </div>
-    </div>`).join('');
+        <button class="act-btn act-btn-red"   onclick="updateBookingStatusUI('${b.id}','❌ Скасовано')" title="Скасувати">✕</button>
+      </td>
+    </tr>`).join('');
+
+  wrap.innerHTML = `
+    <table class="crm-table">
+      <thead><tr><th>#</th><th>Клієнт</th><th>Дата/Час</th><th>Послуга</th><th>Бокс</th><th>Статус</th><th>Дії</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
 }
 
-async function updateBookingStatusUI(bookingId,newStatus){
-  const result=await api('updateBookingStatus',{bookingId,status:newStatus});
-  const b=_allBookings.find(x=>x.id===bookingId);
-  if(b) b.status=newStatus;
-  filterBookings('all');
-  toast(result?.success||result===null?'✓ Статус змінено':'❌ Помилка');
-}
-
-// ─── Boxes ───────────────────────────────────────────────
-function renderBoxes(bookings,todayStr){
-  const today=new Date();
-  const nowTime=String(today.getHours()).padStart(2,'0')+':'+String(today.getMinutes()).padStart(2,'0');
-  const todayBookings=bookings.filter(b=>b.date===todayStr);
-  const c=document.getElementById('boxesLive');
-  c.innerHTML=['1','2','3'].map(num=>{
-    const boxName='Box '+num;
-    const active=todayBookings.find(b=>b.box===boxName&&(b.status?.includes('роботі')||b.status?.includes('Підтверджено')));
-    const isBusy=!!active;
-    return `<div class="box-live ${isBusy?'busy':'free'}">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
-        <span style="font-size:22px;font-weight:700;letter-spacing:-0.5px;">БОКС ${num}</span>
-        <span class="badge ${isBusy?'badge-orange':'badge-green'}">${isBusy?'В роботі':'Вільний'}</span>
-      </div>
-      ${isBusy?`<div style="font-size:15px;font-weight:700;margin-bottom:3px;">${active.clientName}</div>
-        <div style="font-size:13px;color:var(--gray);">${active.service}</div>
-        <div style="font-size:12px;color:var(--gray);margin-top:8px;">⏰ ${active.time}</div>
-      `:`<div style="font-size:13px;color:var(--green);font-weight:600;">● Готовий до роботи</div>
-        <div style="font-size:12px;color:var(--gray);margin-top:6px;">Зараз: ${nowTime}</div>`}
-    </div>`;
-  }).join('');
-}
-
-// ─── Clients ─────────────────────────────────────────────
-function getSubBadge(clientId){
-  const s=_allSubs.filter(x=>x.clientId===clientId&&x.status?.includes('Активний'));
-  if(!s.length) return '<span class="badge badge-gray">без плану</span>';
-  const nm=(s[s.length-1].typeName||'').toLowerCase();
-  if(nm.includes('platinum')) return '<span class="badge badge-platinum">PLATINUM</span>';
-  if(nm.includes('gold')) return '<span class="badge badge-gold">GOLD</span>';
-  return '<span class="badge badge-silver">SILVER</span>';
-}
-// Парсить будь-який формат балансу: "245 000 грн", 245000, "0 грн" → число
-function safeBalance(val){
-  if(!val && val!==0) return 0;
-  if(typeof val==='number') return isNaN(val)?0:val;
-  const n=parseFloat(String(val).replace(/[^\d.]/g,''));
-  return isNaN(n)?0:n;
-}
-function fmtBalance(val){
-  const n=safeBalance(val);
-  return n>0?n.toLocaleString('uk-UA')+' ₴':'0 ₴';
-}
-
-function renderClients(clients){
-  const list=document.getElementById('clientList');
-  if(!clients.length){list.innerHTML='<div style="color:var(--gray);font-size:14px;padding:20px 0;">Клієнтів не знайдено</div>';return;}
-  list.innerHTML=clients.map(c=>{
-    const initials=(c.name||'NA').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
-    const visits=_allBookings.filter(b=>b.clientId===c.clientId).length;
-    const bal=safeBalance(c.balance);
-    return `<div class="client-row" onclick="openClientModal('${c.clientId}')">
-      <div class="client-av">${initials}</div>
-      <div class="client-info">
-        <div class="client-name-s">${c.name}</div>
-        <div class="client-meta-s">${c.phone} · ${visits} візит${visits===1?'':'ів'} · <span style="color:${bal>0?'var(--green)':'var(--gray)'};font-weight:600;">${fmtBalance(bal)}</span></div>
-      </div>
-      ${getSubBadge(c.clientId)}
-      <span class="client-arrow">›</span>
-    </div>`;
-  }).join('');
-}
-function filterClients(q){
-  const lq=q.toLowerCase();
-  renderClients(_allClients.filter(c=>c.name.toLowerCase().includes(lq)||c.phone.includes(lq)||c.clientId.toLowerCase().includes(lq)));
-}
-
-// ─── Subscriptions ────────────────────────────────────────
-function renderSubs(subs){
-  const wrap=document.getElementById('subsTableWrap');
-  const mc=document.getElementById('subsMobileCards');
-  if(!subs.length){wrap.innerHTML='<div class="table-loading" style="color:var(--gray);">Абонементів не знайдено</div>';mc.innerHTML='';return;}
-  wrap.innerHTML=`<table class="crm-table"><thead><tr><th>ID</th><th>Клієнт</th><th>План</th><th>Поповнено</th><th>Залишок</th><th>Діє до</th><th>Статус</th><th>Дії</th></tr></thead><tbody>${
-    subs.map(s=>{
-      const bal=safeBalance(s.balance);
-      const balColor=bal>0?'color:var(--green)':'color:var(--red)';
-      const planBadge=s.typeName?.toLowerCase().includes('gold')?'badge-gold':s.typeName?.toLowerCase().includes('platinum')?'badge-platinum':'badge-silver';
-      return `<tr>
-        <td style="font-size:10px;color:var(--gray);">${s.subId}</td>
-        <td><b>${s.clientName}</b></td>
-        <td><span class="badge ${planBadge}">${s.typeName}</span></td>
-        <td>${safeBalance(s.amount).toLocaleString('uk-UA')} ₴</td>
-        <td style="${balColor};font-weight:700;">${bal.toLocaleString('uk-UA')} ₴</td>
-        <td style="font-size:12px;">${s.endDate||'—'}</td>
-        <td><span class="badge ${statusBadgeClass(s.status)}">${s.status||'—'}</span></td>
-        <td>
-          <button class="act-btn act-btn-green" onclick="updateSubStatusUI('${s.subId}','✅ Активний')">✓</button>
-          <button class="act-btn act-btn-blue" onclick="updateSubStatusUI('${s.subId}','❄️ Заморожений')">❄</button>
-          <button class="act-btn act-btn-red" onclick="updateSubStatusUI('${s.subId}','❌ Неактивний')">✕</button>
-        </td></tr>`;
-    }).join('')
-  }</tbody></table>`;
-  mc.innerHTML=subs.map(s=>`
-    <div class="crm-card">
-      <div class="crm-card-header">
-        <div><div class="crm-card-title">${s.clientName}</div><div class="crm-card-sub">${s.subId}</div></div>
-        <span class="badge ${s.typeName?.toLowerCase().includes('gold')?'badge-gold':s.typeName?.toLowerCase().includes('platinum')?'badge-platinum':'badge-silver'}">${s.typeName}</span>
-      </div>
-      <div class="crm-card-meta">
-        <span class="crm-card-tag">💰 ${safeBalance(s.amount).toLocaleString('uk-UA')} ₴</span>
-        <span class="crm-card-tag" style="color:${safeBalance(s.balance)>0?'var(--green)':'var(--red)'}">Залишок: ${safeBalance(s.balance).toLocaleString('uk-UA')} ₴</span>
-        <span class="crm-card-tag">📅 до ${s.endDate||'—'}</span>
-      </div>
-      <div style="margin-bottom:8px;"><span class="badge ${statusBadgeClass(s.status)}">${s.status||'—'}</span></div>
-      <div class="crm-card-actions">
-        <button class="act-btn act-btn-green" onclick="updateSubStatusUI('${s.subId}','✅ Активний')">✓ Активний</button>
-        <button class="act-btn act-btn-blue" onclick="updateSubStatusUI('${s.subId}','❄️ Заморожений')">❄ Заморозити</button>
-        <button class="act-btn act-btn-red" onclick="updateSubStatusUI('${s.subId}','❌ Неактивний')">✕</button>
-      </div>
-    </div>`).join('');
-}
-async function updateSubStatusUI(subId,newStatus){
-  const result=await api('updateSubStatus',{subId,status:newStatus});
-  const s=_allSubs.find(x=>x.subId===subId);
-  if(s) s.status=newStatus;
-  renderSubs(_allSubs);
-  toast(result?.success||result===null?'✓ Статус оновлено':'❌ Помилка');
-}
-
-// ─── Sub Requests ─────────────────────────────────────────
-function renderSubRequests(requests){
-  const wrap=document.getElementById('subRequestsTableWrap');
-  const mc=document.getElementById('subRequestsMobileCards');
-  if(!requests.length){wrap.innerHTML='<div class="table-loading" style="color:var(--gray);">Заявок не знайдено</div>';mc.innerHTML='';return;}
-  wrap.innerHTML=`<table class="crm-table"><thead><tr><th>ID</th><th>Клієнт</th><th>План</th><th>Сума</th><th>Дата</th><th>Статус</th><th>Дії</th></tr></thead><tbody>${
-    requests.map(r=>`<tr>
-      <td style="font-size:10px;color:var(--gray);">${r.requestId}</td>
-      <td><b>${r.clientName}</b><br><span style="font-size:11px;color:var(--gray);">${r.clientId}</span></td>
-      <td><span class="badge ${r.typeName?.toLowerCase().includes('gold')?'badge-gold':r.typeName?.toLowerCase().includes('platinum')?'badge-platinum':'badge-silver'}">${r.typeName}</span></td>
-      <td style="font-weight:700;">${safeBalance(r.amount).toLocaleString('uk-UA')} ₴</td>
-      <td style="font-size:12px;">${r.createdDate||'—'}</td>
-      <td><span class="badge ${r.status?.includes('Нова')?'badge-yellow':r.status?.includes('Підтверджена')?'badge-green':'badge-red'}">${r.status||'—'}</span></td>
-      <td>
-        <button class="act-btn act-btn-green" onclick="updateSubRequestStatusUI('${r.requestId}','✅ Підтверджена')">✓</button>
-        <button class="act-btn act-btn-red" onclick="updateSubRequestStatusUI('${r.requestId}','❌ Відхилена')">✕</button>
-      </td></tr>`).join('')
-  }</tbody></table>`;
-  mc.innerHTML=requests.map(r=>`
-    <div class="crm-card">
-      <div class="crm-card-header">
-        <div><div class="crm-card-title">${r.clientName}</div><div class="crm-card-sub">${r.requestId} · ${r.createdDate||'—'}</div></div>
-        <span class="badge ${r.status?.includes('Нова')?'badge-yellow':r.status?.includes('Підтверджена')?'badge-green':'badge-red'}">${r.status||'—'}</span>
-      </div>
-      <div class="crm-card-meta">
-        <span class="crm-card-tag ${r.typeName?.toLowerCase().includes('gold')?'badge-gold':r.typeName?.toLowerCase().includes('platinum')?'badge-platinum':''}">${r.typeName}</span>
-        <span class="crm-card-tag">💰 ${safeBalance(r.amount).toLocaleString('uk-UA')} ₴</span>
-      </div>
-      <div class="crm-card-actions">
-        <button class="act-btn act-btn-green" onclick="updateSubRequestStatusUI('${r.requestId}','✅ Підтверджена')">✓ Підтвердити</button>
-        <button class="act-btn act-btn-red" onclick="updateSubRequestStatusUI('${r.requestId}','❌ Відхилена')">✕ Відхилити</button>
-      </div>
-    </div>`).join('');
-}
-async function updateSubRequestStatusUI(requestId,newStatus){
-  let result;
-  if(newStatus.includes('Підтверджена')) result=await api('confirmSubRequest',{requestId});
-  else result=await api('rejectSubRequest',{requestId});
-  const r=_allSubRequests.find(x=>x.requestId===requestId);
-  if(r) r.status=newStatus;
-  renderSubRequests(_allSubRequests);
-  toast(result?.success||result===null?'✓ Заявка оновлена':'❌ Помилка');
-}
-
-// ─── Client Modal ─────────────────────────────────────────
-async function openClientModal(clientId){
-  document.getElementById('clientModal').classList.add('show');
-  document.getElementById('clientModalContent').innerHTML='<div class="table-loading"><span class="table-spinner"></span>Завантаження...</div>';
-  let data;
-  if(isApiConfigured()) data=await api('getClientFull',{clientId});
-  else {
-    const c=_allClients.find(x=>x.clientId===clientId)||{};
-    data={client:c,subs:_allSubs.filter(s=>s.clientId===clientId),history:[],bookings:_allBookings.filter(b=>b.clientId===clientId)};
+async function updateBookingStatusUI(bookingId, newStatus) {
+  const result = await api('updateBookingStatus', { bookingId, status: newStatus });
+  if (result === null) {
+    // demo mode
+    const b = _allBookings.find(x => x.id === bookingId);
+    if (b) b.status = newStatus;
+    filterBookings('all');
+    toast('✓ Статус змінено (демо)');
+    return;
   }
-  if(!data?.client){document.getElementById('clientModalContent').innerHTML='<p style="color:var(--gray)">Дані не знайдено</p>';return;}
-  const {client,subs,history,bookings}=data;
-  const initials=(client.name||'NA').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
-  const subsHtml=(subs||[]).length?(subs||[]).map(s=>`
+  if (result?.success) {
+    const b = _allBookings.find(x => x.id === bookingId);
+    if (b) b.status = newStatus;
+    filterBookings('all');
+    toast('✓ Статус запису оновлено');
+  } else {
+    toast('❌ Не вдалось оновити статус');
+  }
+}
+
+// ─── Boxes ───────────────────────────────────────────────────
+function renderBoxes(bookings, todayStr) {
+  const today = new Date();
+  const hh = today.getHours();
+  const mm2 = String(today.getMinutes()).padStart(2,'0');
+  const nowTime = String(hh).padStart(2,'0') + ':' + mm2;
+
+  const todayBookings = bookings.filter(b => b.date === todayStr);
+  const container = document.getElementById('boxesLive');
+  const boxes = ['1','2','3'];
+
+  container.innerHTML = boxes.map(num => {
+    const boxName = 'Box ' + num;
+    const active = todayBookings.find(b => b.box === boxName &&
+      (b.status.includes('роботі') || b.status.includes('Підтверджено')));
+    const isBusy = !!active;
+    return `
+      <div class="box-live ${isBusy ? 'busy' : 'free'}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
+          <span style="font-family:'Bebas Neue';font-size:28px;">БОКС ${num}</span>
+          <span class="badge ${isBusy ? 'badge-orange' : 'badge-green'}">${isBusy ? 'В роботі' : 'Вільний'}</span>
+        </div>
+        ${isBusy ? `
+          <div style="font-size:15px;font-weight:700;margin-bottom:4px;">${active.clientName}</div>
+          <div style="font-size:13px;color:var(--gray);">${active.service}</div>
+          <div style="font-size:12px;color:var(--gray);margin-top:8px;">⏰ ${active.time}</div>` : `
+          <div style="font-size:13px;color:var(--green);font-weight:600;">● Готовий до роботи</div>
+          <div style="font-size:12px;color:var(--gray);margin-top:8px;">Зараз: ${nowTime}</div>`}
+      </div>`;
+  }).join('');
+}
+
+// ─── Clients ─────────────────────────────────────────────────
+function getSubBadge(subs, clientId) {
+  const csubs = subs.filter(s => s.clientId === clientId && s.status.includes('Активний'));
+  if (!csubs.length) return '<span class="badge badge-gray">без плану</span>';
+  const s = csubs[csubs.length - 1];
+  const nm = (s.typeName || '').toLowerCase();
+  if (nm.includes('platinum')) return '<span class="badge badge-platinum">PLATINUM</span>';
+  if (nm.includes('gold'))     return '<span class="badge badge-gold">GOLD</span>';
+  if (nm.includes('silver'))   return '<span class="badge badge-silver">SILVER</span>';
+  return `<span class="badge badge-gray">${s.typeName}</span>`;
+}
+
+function renderClients(clients) {
+  const list = document.getElementById('clientList');
+  if (!clients.length) {
+    list.innerHTML = '<div style="color:var(--gray);font-size:14px;padding:20px 0;">Клієнтів не знайдено</div>';
+    return;
+  }
+  list.innerHTML = clients.map(c => {
+    const initials = (c.name || 'NA').split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
+    const visits   = c.visits !== undefined ? c.visits : _allBookings.filter(b => b.clientId === c.clientId).length;
+    const bal      = Math.round(c.balance || 0);
+    return `
+      <div class="client-row" onclick="openClientModal('${c.clientId}')">
+        <div class="client-av">${initials}</div>
+        <div class="client-info">
+          <div class="client-name-s">${c.name}</div>
+          <div class="client-meta-s">${c.phone || '—'} · ${visits} візит${visits === 1 ? '' : 'ів'} · ${bal.toLocaleString('uk-UA')} ₴</div>
+        </div>
+        ${getSubBadge(_allSubs, c.clientId)}
+        <span class="client-arrow">›</span>
+      </div>`;
+  }).join('');
+}
+
+function filterClients(query) {
+  const q = query.toLowerCase();
+  const filtered = _allClients.filter(c =>
+    c.name.toLowerCase().includes(q) ||
+    c.phone.includes(q) ||
+    c.clientId.toLowerCase().includes(q)
+  );
+  renderClients(filtered);
+}
+
+// ─── Subscriptions ────────────────────────────────────────────
+function renderSubs(subs) {
+  const wrap = document.getElementById('subsTableWrap');
+  if (!subs.length) {
+    wrap.innerHTML = '<div class="table-loading" style="color:var(--gray);">Абонементів не знайдено</div>';
+    return;
+  }
+  const rows = subs.map(s => {
+    const bal      = Math.round(s.balance || 0);
+    const balColor = bal > 0 ? 'color:var(--green)' : 'color:var(--red)';
+    const visits   = s.visits || 0;
+    const nm       = (s.typeName || '').toLowerCase();
+    const badgeCls = nm.includes('platinum') ? 'badge-platinum'
+                   : nm.includes('gold')     ? 'badge-gold'
+                   :                           'badge-silver';
+    return `
+      <tr>
+        <td style="font-size:11px;color:var(--gray);">${s.subId}</td>
+        <td><b>${s.clientName}</b></td>
+        <td><span class="badge ${badgeCls}">${s.typeName}</span></td>
+        <td>${Math.round(s.amount||0).toLocaleString('uk-UA')} ₴</td>
+        <td style="${balColor};font-weight:700;">${bal.toLocaleString('uk-UA')} ₴</td>
+        <td style="text-align:center;font-weight:700;">${visits}</td>
+        <td style="font-size:12px;">${s.endDate || '—'}</td>
+        <td><span class="badge ${statusBadgeClass(s.status)}">${s.status || '—'}</span></td>
+        <td>
+          <button class="act-btn act-btn-green"  onclick="updateSubStatusUI('${s.subId}','✅ Активний')"    title="Активувати">✓</button>
+          <button class="act-btn act-btn-blue"   onclick="updateSubStatusUI('${s.subId}','❄️ Заморожений')" title="Заморозити">❄</button>
+          <button class="act-btn act-btn-red"    onclick="updateSubStatusUI('${s.subId}','❌ Неактивний')"  title="Деактивувати">✕</button>
+        </td>
+      </tr>`;
+  }).join('');
+
+  wrap.innerHTML = `
+    <table class="crm-table">
+      <thead>
+        <tr>
+          <th>ID</th><th>Клієнт</th><th>План</th>
+          <th>Поповнено</th><th>Залишок</th><th>Візити</th>
+          <th>Діє до</th><th>Статус</th><th>Дії</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+}
+
+async function updateSubStatusUI(subId, newStatus) {
+  const result = await api('updateSubStatus', { subId, status: newStatus });
+  if (result === null) {
+    const s = _allSubs.find(x => x.subId === subId);
+    if (s) s.status = newStatus;
+    renderSubs(_allSubs);
+    toast('✓ Статус змінено (демо)');
+    return;
+  }
+  if (result?.success) {
+    const s = _allSubs.find(x => x.subId === subId);
+    if (s) s.status = newStatus;
+    renderSubs(_allSubs);
+    toast('✓ Статус абонементу оновлено');
+  } else {
+    toast('❌ Не вдалось оновити статус');
+  }
+}
+
+// ─── Client Details Modal ────────────────────────────────────
+async function openClientModal(clientId) {
+  document.getElementById('clientModal').classList.add('show');
+  document.getElementById('clientModalContent').innerHTML =
+    '<div class="table-loading"><span class="table-spinner"></span>Завантаження...</div>';
+
+  let data;
+  if (isApiConfigured()) {
+    data = await api('getClientFull', { clientId });
+  } else {
+    // demo data
+    const c = _allClients.find(x => x.clientId === clientId) || {};
+    data = {
+      client:   c,
+      subs:     _allSubs.filter(s => s.clientId === clientId),
+      history:  [],
+      bookings: _allBookings.filter(b => b.clientId === clientId)
+    };
+  }
+
+  if (!data || !data.client) {
+    document.getElementById('clientModalContent').innerHTML = '<p style="color:var(--gray)">Дані не знайдено</p>';
+    return;
+  }
+
+  const { client, subs, history, bookings } = data;
+  const initials = (client.name || 'NA').split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
+
+  const subsHtml = (subs || []).length ? (subs||[]).map(s => `
     <div class="sub-card-mini">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <span class="badge ${s.typeName?.toLowerCase().includes('gold')?'badge-gold':s.typeName?.toLowerCase().includes('platinum')?'badge-platinum':'badge-silver'}">${s.typeName}</span>
+      <div class="sub-card-mini-header">
+        <span class="badge ${s.typeName?.toLowerCase().includes('gold') ? 'badge-gold' : s.typeName?.toLowerCase().includes('platinum') ? 'badge-platinum' : 'badge-silver'}">${s.typeName}</span>
         <span class="badge ${statusBadgeClass(s.status)}">${s.status}</span>
       </div>
-      <div style="font-size:20px;font-weight:700;color:var(--green);">${safeBalance(s.balance).toLocaleString('uk-UA')} ₴</div>
-      <div style="font-size:12px;color:var(--gray);margin-top:2px;">Поповнено: ${safeBalance(s.amount).toLocaleString('uk-UA')} ₴ · До: ${s.endDate||'—'}</div>
+      <div class="sub-card-mini-balance">${Math.round(s.balance||0).toLocaleString('uk-UA')} ₴</div>
+      <div style="font-size:12px;color:var(--gray);">Поповнено: ${Math.round(s.amount||0).toLocaleString('uk-UA')} ₴ · До: ${s.endDate || '—'}</div>
       <div class="sub-status-btns">
-        <button class="act-btn act-btn-green" onclick="updateSubStatusUI('${s.subId}','✅ Активний');openClientModal('${clientId}')">✓ Активний</button>
-        <button class="act-btn act-btn-blue" onclick="updateSubStatusUI('${s.subId}','❄️ Заморожений');openClientModal('${clientId}')">❄</button>
-        <button class="act-btn act-btn-red" onclick="updateSubStatusUI('${s.subId}','❌ Неактивний');openClientModal('${clientId}')">✕</button>
+        <button class="act-btn act-btn-green"  onclick="updateSubStatusUI('${s.subId}','✅ Активний');openClientModal('${clientId}')">✓ Активний</button>
+        <button class="act-btn act-btn-blue"   onclick="updateSubStatusUI('${s.subId}','❄️ Заморожений');openClientModal('${clientId}')">❄ Заморозити</button>
+        <button class="act-btn act-btn-red"    onclick="updateSubStatusUI('${s.subId}','❌ Неактивний');openClientModal('${clientId}')">✕ Деактивувати</button>
       </div>
-    </div>`).join(''):'<div style="color:var(--gray);font-size:13px;">Абонементів немає</div>';
-  const booksHtml=(bookings||[]).length?(bookings||[]).slice(0,10).map(b=>`
+    </div>`).join('') : '<div style="color:var(--gray);font-size:13px;">Абонементів немає</div>';
+
+  const booksHtml = (bookings || []).length ? (bookings||[]).slice(0,10).map(b => `
     <div class="history-item">
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <span style="font-weight:600;">${b.service}</span>
-        <span class="badge ${statusBadgeClass(b.status)}" style="font-size:8px;">${b.status}</span>
+        <span class="badge ${statusBadgeClass(b.status)}" style="font-size:9px;">${b.status}</span>
       </div>
-      <div style="color:var(--gray);margin-top:2px;font-size:12px;">${b.date} ${b.time} · ${b.box}</div>
-    </div>`):'<div style="color:var(--gray);font-size:13px;">Записів немає</div>';
-  const histHtml=(history||[]).length?(history||[]).slice(0,15).map(h=>`
+      <div style="color:var(--gray);margin-top:3px;">${b.date} ${b.time} · ${b.box}</div>
+    </div>`).join('') : '<div style="color:var(--gray);font-size:13px;">Записів немає</div>';
+
+  const histHtml = (history || []).length ? (history||[]).slice(0,15).map(h => `
     <div class="history-item">
-      <div style="display:flex;justify-content:space-between;"><span>${h.service}</span><span style="color:var(--green);font-weight:700;">${Math.round(h.cost||0)} ₴</span></div>
+      <div style="display:flex;justify-content:space-between;">
+        <span>${h.service}</span>
+        <span style="color:var(--green);font-weight:700;">${Math.round(h.cost||0)} ₴</span>
+      </div>
       <div style="color:var(--gray);font-size:12px;margin-top:2px;">${h.date}</div>
-    </div>`):'<div style="color:var(--gray);font-size:13px;">Історії немає</div>';
-  document.getElementById('clientModalContent').innerHTML=`
-    <div style="display:flex;align-items:center;gap:14px;margin-bottom:22px;">
-      <div style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0;">${initials}</div>
-      <div><div style="font-size:22px;font-weight:700;letter-spacing:-0.5px;letter-spacing:0.5px;">${client.name}</div><div style="font-size:12px;color:var(--gray);">${client.clientId} · ${client.phone}</div></div>
+    </div>`).join('') : '<div style="color:var(--gray);font-size:13px;">Історії немає</div>';
+
+  document.getElementById('clientModalContent').innerHTML = `
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;">${initials}</div>
+      <div>
+        <div style="font-family:'Bebas Neue';font-size:28px;letter-spacing:1px;">${client.name}</div>
+        <div style="font-size:13px;color:var(--gray);">${client.clientId} · ${client.phone || '—'}</div>
+      </div>
     </div>
     <div class="client-tabs">
       <button class="client-tab-btn active" onclick="switchClientTab(event,'info')">Інфо</button>
@@ -1399,10 +1273,11 @@ async function openClientModal(clientId){
     <div class="client-tab-pane active" id="cpane-info">
       <div class="info-row"><span class="info-key">ID</span><span class="info-val">${client.clientId}</span></div>
       <div class="info-row"><span class="info-key">Ім'я</span><span class="info-val">${client.name}</span></div>
-      <div class="info-row"><span class="info-key">Телефон</span><span class="info-val">${client.phone}</span></div>
-      <div class="info-row"><span class="info-key">Telegram ID</span><span class="info-val">${client.telegramId||'—'}</span></div>
-      <div class="info-row"><span class="info-key">Зареєстрований</span><span class="info-val">${client.registered||'—'}</span></div>
-      <div class="info-row"><span class="info-key">Баланс</span><span class="info-val" style="color:var(--green);">${fmtBalance(client.balance)}</span></div>
+      <div class="info-row"><span class="info-key">Телефон</span><span class="info-val"><a href="tel:${client.phone}" style="color:#fff;text-decoration:none;">${client.phone || '—'}</a></span></div>
+      <div class="info-row"><span class="info-key">Telegram ID</span><span class="info-val">${client.telegramId || '—'}</span></div>
+      <div class="info-row"><span class="info-key">Зареєстрований</span><span class="info-val">${client.registered || '—'}</span></div>
+      <div class="info-row"><span class="info-key">Баланс</span><span class="info-val" style="color:var(--green);">${Math.round(client.balance||0).toLocaleString('uk-UA')} ₴</span></div>
+      <div class="info-row"><span class="info-key">Кількість візитів</span><span class="info-val" style="font-weight:700;">${client.visits !== undefined ? client.visits : (history||[]).length}</span></div>
       <div class="info-row"><span class="info-key">Абонементів</span><span class="info-val">${(subs||[]).length}</span></div>
       <div class="info-row"><span class="info-key">Записів</span><span class="info-val">${(bookings||[]).length}</span></div>
     </div>
@@ -1410,79 +1285,106 @@ async function openClientModal(clientId){
     <div class="client-tab-pane" id="cpane-cbooks">${booksHtml}</div>
     <div class="client-tab-pane" id="cpane-chist">${histHtml}</div>`;
 }
-function switchClientTab(e,id){
-  document.querySelectorAll('.client-tab-btn').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.client-tab-pane').forEach(p=>p.classList.remove('active'));
-  e.target.classList.add('active');
-  document.getElementById('cpane-'+id).classList.add('active');
-}
-function closeClientModal(){document.getElementById('clientModal').classList.remove('show');}
 
-// ─── Demo data ────────────────────────────────────────────
-function getTodayStr(){const d=new Date();return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear();}
-function renderDemoSchedule(){_allBookings=[{id:'#1333-0042',date:getTodayStr(),time:'09:00',box:'Box 1',clientId:'C-001',clientName:'Андрій Коваль',phone:'+380671234567',service:'Кераміка',status:'🔶 В роботі'},{id:'#1333-0043',date:getTodayStr(),time:'11:00',box:'Box 2',clientId:'C-002',clientName:'Марина Ткач',phone:'+380932345678',service:'Хімчистка',status:'✅ Підтверджено'},{id:'#1333-0044',date:getTodayStr(),time:'13:00',box:'Box 3',clientId:'C-003',clientName:'Дмитро Іванченко',phone:'+380503456789',service:'Полірування',status:'⏳ Очікує'}];renderSchedule(_allBookings,'all');}
-function renderDemoBoxes(){renderBoxes(_allBookings,getTodayStr());}
-function renderDemoClients(){_allClients=[{clientId:'C-001',name:'Андрій Коваль',phone:'+380671234567',telegramId:'123456',registered:'01.01.2025',balance:28200},{clientId:'C-002',name:'Марина Ткач',phone:'+380932345678',telegramId:'234567',registered:'15.02.2025',balance:67500},{clientId:'C-003',name:'Дмитро Іванченко',phone:'+380503456789',telegramId:'',registered:'10.03.2025',balance:1500}];renderClients(_allClients);}
-function renderDemoSubs(){_allSubs=[{subId:'A-041',clientId:'C-001',clientName:'Андрій Коваль',typeName:'Gold',amount:34500,balance:28200,endDate:'15.08.2026',status:'✅ Активний'},{subId:'A-039',clientId:'C-002',clientName:'Марина Ткач',typeName:'Platinum',amount:72000,balance:67500,endDate:'20.11.2026',status:'✅ Активний'}];renderSubs(_allSubs);}
-function renderDemoSubRequests(){_allSubRequests=[{requestId:'SR-0001',clientName:'Іван Петренко',clientId:'C-004',typeName:'Gold',amount:30000,createdDate:getTodayStr(),status:'🆕 Нова заявка'}];renderSubRequests(_allSubRequests);setStats(3,1,12,3);}
+function switchClientTab(e, id) {
+  document.querySelectorAll('.client-tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.client-tab-pane').forEach(p => p.classList.remove('active'));
+  e.target.classList.add('active');
+  document.getElementById('cpane-' + id).classList.add('active');
+}
+function closeClientModal() {
+  document.getElementById('clientModal').classList.remove('show');
+}
+
+// ─── Demo data for CRM ────────────────────────────────────────
+function renderDemoSchedule() {
+  _allBookings = [
+    {id:'#1333-0042',date:getTodayStr(),time:'09:00',box:'Box 1',clientId:'C-001',clientName:'Андрій Коваль',phone:'+380671234567',service:'Кераміка',status:'🔶 В роботі',note:''},
+    {id:'#1333-0043',date:getTodayStr(),time:'11:00',box:'Box 2',clientId:'C-002',clientName:'Марина Ткач',phone:'+380932345678',service:'Хімчистка',status:'✅ Підтверджено',note:''},
+    {id:'#1333-0044',date:getTodayStr(),time:'13:00',box:'Box 3',clientId:'C-003',clientName:'Дмитро Іванченко',phone:'+380503456789',service:'Полірування',status:'⏳ Очікує',note:''},
+  ];
+  renderSchedule(_allBookings, 'all');
+}
+function renderDemoBoxes() {
+  renderBoxes(_allBookings, getTodayStr());
+}
+function renderDemoClients() {
+  _allClients = [
+    {clientId:'C-001',name:'Андрій Коваль',phone:'+380671234567',telegramId:'123456',registered:'01.01.2025',balance:28200},
+    {clientId:'C-002',name:'Марина Ткач',phone:'+380932345678',telegramId:'234567',registered:'15.02.2025',balance:67500},
+    {clientId:'C-003',name:'Дмитро Іванченко',phone:'+380503456789',telegramId:'',registered:'10.03.2025',balance:1500},
+    {clientId:'C-004',name:'Олена Мороз',phone:'+380664567890',telegramId:'456789',registered:'05.04.2025',balance:0},
+  ];
+  renderClients(_allClients);
+}
+function renderDemoSubs() {
+  _allSubs = [
+    {subId:'A-041',clientId:'C-001',clientName:'Андрій Коваль',typeName:'Gold',amount:34500,balance:28200,endDate:'15.08.2026',status:'✅ Активний',visits:8},
+    {subId:'A-039',clientId:'C-002',clientName:'Марина Ткач',typeName:'Platinum',amount:72000,balance:67500,endDate:'20.11.2026',status:'✅ Активний',visits:3},
+    {subId:'A-043',clientId:'C-003',clientName:'Дмитро Іванченко',typeName:'Silver',amount:11000,balance:1500,endDate:'19.06.2026',status:'⚠️ Закінчується',visits:5},
+  ];
+  renderSubs(_allSubs);
+  setStats(3, 1, 12, 4);
+}
+function getTodayStr() {
+  const d = new Date();
+  return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear();
+}
 
 // ═══ CRM TABS ═══
-function switchCrmTab(e,id){
-  document.querySelectorAll('.crm-tab-btn').forEach(x=>x.classList.remove('active'));
-  document.querySelectorAll('.crm-tab-panel').forEach(x=>x.classList.remove('active'));
+function switchCrmTab(e, id) {
+  document.querySelectorAll('.crm-tab-btn').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.crm-tab-panel').forEach(x => x.classList.remove('active'));
   e.target.classList.add('active');
-  document.getElementById('tab-'+id).classList.add('active');
+  document.getElementById('tab-' + id).classList.add('active');
 }
 
 // ═══ PLAN MODAL ═══
-function openPlanModal(name,price,account,id,months,bonus){
-  Object.assign(_planMeta,{name,price,account,id,months,bonus:'+'+bonus+'%'});
-  document.getElementById('m-id').textContent=id;
-  document.getElementById('m-name').textContent=name.toUpperCase();
-  document.getElementById('m-sub').textContent=price.replace(' ','')+' ₴ → '+account.replace(' ','')+' ₴ на рахунок';
+function openPlanModal(name, price, account, id, months, bonus) {
+  _planMeta.name    = name;
+  _planMeta.price   = price;
+  _planMeta.account = account;
+  _planMeta.id      = id;
+  _planMeta.months  = months;
+  _planMeta.bonus   = '+' + bonus + '%';
+  document.getElementById('m-id').textContent   = id;
+  document.getElementById('m-name').textContent = name.toUpperCase();
+  document.getElementById('m-sub').textContent  = price.replace(' ','') + ' ₴ → ' + account.replace(' ','') + ' ₴ на рахунок';
   document.getElementById('planModal').classList.add('show');
 }
-function closePlanModal(){document.getElementById('planModal').classList.remove('show');}
+function closePlanModal() { document.getElementById('planModal').classList.remove('show'); }
+async function buyPlan() {
+  const nm = document.getElementById('pm-name').value.trim();
+  const ph = document.getElementById('pm-phone').value.trim();
+  const tg = document.getElementById('pm-tg').value.trim();
+  if (!nm || !ph) { toast('Заповніть ім\'я та телефон'); return; }
 
-async function buyPlan(){
-  const nm=document.getElementById('pm-name').value.trim();
-  const ph=document.getElementById('pm-phone').value.trim();
-  const tg=document.getElementById('pm-tg').value.trim();
-  if(!nm||!ph){toast("Заповніть ім'я та телефон");return;}
-  if(isApiConfigured()){
-    const result=await api('saveSubOrder',{subId:_planMeta.id,subName:_planMeta.name,months:_planMeta.months,price:_planMeta.price.replace(/\s/g,''),account:_planMeta.account.replace(/\s/g,''),bonus:_planMeta.bonus,name:nm,phone:ph,tg});
-    if(!result?.success){toast('❌ Помилка. Спробуйте пізніше.');return;}
-    // Auto-register client
-    autoRegisterClient(nm,ph);
+  if (isApiConfigured()) {
+    await api('saveSubOrder', {
+      subId:   _planMeta.id,
+      subName: _planMeta.name,
+      months:  _planMeta.months,
+      price:   _planMeta.price.replace(/\s/g,''),
+      account: _planMeta.account.replace(/\s/g,''),
+      bonus:   _planMeta.bonus,
+      name:    nm,
+      phone:   ph,
+      tg:      tg
+    });
   }
   closePlanModal();
-  toast("✓ Заявку відправлено! Зв'яжемося найближчим часом.");
+  toast('✓ Заявку відправлено! Ми зв\'яжемося з вами найближчим часом.');
 }
 
-document.getElementById('planModal').addEventListener('click',function(e){if(e.target===this)closePlanModal();});
-document.getElementById('clientModal').addEventListener('click',function(e){if(e.target===this)closeClientModal();});
-
-// ═══ RECALC ALL BALANCES ═══
-async function recalcAllBalances(){
-  const btn=document.getElementById('recalcBtn');
-  if(btn){btn.textContent='⟳ ...';btn.disabled=true;}
-  const result=await api('recalcAllBalances');
-  if(btn){btn.textContent='⟳ Баланси';btn.disabled=false;}
-  if(result?.success){
-    toast(`✅ Баланси оновлено для ${result.updated} клієнтів`);
-    // Перезавантажуємо дані
-    clearCache();
-    await loadCRM();
-  } else {
-    toast('❌ Помилка перерахунку');
-  }
-}
+document.getElementById('planModal').addEventListener('click', function(e) { if (e.target === this) closePlanModal(); });
+document.getElementById('clientModal').addEventListener('click', function(e) { if (e.target === this) closeClientModal(); });
 
 // ═══ TOAST ═══
-function toast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),3500);
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
 }
 </script>
 </body>
