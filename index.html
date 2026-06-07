@@ -662,8 +662,9 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
     <div class="crm-wrap">
       <div class="crm-top">
         <div><div class="section-label">Адмін</div><h2 style="font-size:28px;font-weight:700;letter-spacing:-0.5px;">CRM Система</h2></div>
-        <div style="display:flex;gap:8px;align-items:center;">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
           <button class="btn-white" onclick="showPage('booking')">+ Новий запис</button>
+          <button class="btn-ghost" style="padding:10px 16px;font-size:13px;" onclick="recalcAllBalances()" id="recalcBtn" title="Перерахувати баланси всіх клієнтів з абонементів">⟳ Баланси</button>
           <button class="btn-ghost" style="padding:10px 16px;font-size:13px;" onclick="pinLock()">🔒 Вийти</button>
         </div>
       </div>
@@ -752,16 +753,13 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
 // ╔══════════════════════════════════════════════════════╗
 // ║  CONFIG                                              ║
 // ╚══════════════════════════════════════════════════════╝
-const APPS = 'https://script.google.com/macros/s/AKfycbw9mqrVSrAVeoMa4Np2SxYFRCxj5cW0uX1x7S50LddB7pXnz0PIvL7gPJHmLyIJ9986GQ/exec';
-const CRM_PASS_KEY = '1333admin';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw9mqrVSrAVeoMa4Np2SxYFRCxj5cW0uX1x7S50LddB7pXnz0PIvL7gPJHmLyIJ9986GQ/exec';
+const CRM_PIN = '1333'; // ← змініть на свій PIN
 
 // ═══ STATE ═══
-const S = { date: null, time: null, box: null, availBoxes: [], bookings: [], clients: [], subs: [] };
-const CACHE = { bookings: null, ts: 0, ttl: 25000 };
-let curSub = null;
-
-const UA_DS = ['Нд','Пн','Вт','Ср','Чт','Пт','Сб'];
-const UA_MO = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
+const S = { service:'', price:'', date:'', time:'', box:null, step:1, carType:'' };
+const _planMeta = {};
+let _allBookings=[], _allClients=[], _allSubs=[], _allSubRequests=[];
 // Cache layer
 const _cache = {};
 const CACHE_TTL = 60000; // 1 хвилина
@@ -803,26 +801,26 @@ async function autoRegisterClient(name, phone) {
 }
 
 // ═══ NAV ═══
-function go(name) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
-  document.getElementById('page-' + name)?.classList.add('on');
-  document.querySelectorAll('.nl').forEach(l => l.classList.remove('on'));
-  const map = { home:0, booking:1, services:2, subs:3, about:4 };
-  if (map[name] !== undefined) document.querySelectorAll('.nl')[map[name]]?.classList.add('on');
-  window.scrollTo(0, 0);
-  if (name === 'booking') initBook();
-  if (name === 'services') showPrices('wash', document.querySelector('.ptab'));
-  if (name === 'home') initHome();
+function showPage(p) {
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.getElementById(p+'-page').classList.add('active');
+  document.querySelectorAll('.nav-links a').forEach(x=>x.classList.remove('active'));
+  const nl = document.getElementById('nl-'+p);
+  if (nl) { nl.classList.add('active'); if(p==='crm') nl.style.opacity='1'; }
+  window.scrollTo({top:0,behavior:'smooth'});
+  if (p==='crm') initCrmPage();
 }
-document.addEventListener('keydown', e => {
-  if (e.ctrlKey && e.shiftKey && e.key === 'A') openCRM();
-});
-function openCRM() {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
-  document.getElementById('page-crm')?.classList.add('on');
-  document.querySelectorAll('.nl').forEach(l => l.classList.remove('on'));
-  setTimeout(() => document.getElementById('crm-pass')?.focus(), 100);
+function scrollToSection(id) { document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'}); }
+function showPageAndService(page, svc, price) {
+  showPage(page);
+  setTimeout(()=>{
+    document.querySelectorAll('.svc-pick').forEach(b=>{
+      if(b.querySelector('.svc-pick-name')?.textContent===svc) { b.classList.add('selected'); S.service=svc; S.price=price; }
+    });
+  }, 100);
 }
+function openMobileMenu() { document.getElementById('mobileMenu').classList.add('show'); document.body.style.overflow='hidden'; }
+function closeMobileMenu() { document.getElementById('mobileMenu').classList.remove('show'); document.body.style.overflow=''; }
 
 // ═══ DATE PILLS ═══
 window.addEventListener('load', initDatePills);
@@ -1100,10 +1098,10 @@ async function loadCRM(){
 }
 
 function setStats(t,a,m,c){
-  document.getElementById('stat-today').textContent=t;
-  document.getElementById('stat-active').textContent=a;
-  document.getElementById('stat-month').textContent=m;
-  document.getElementById('stat-clients').textContent=c;
+  document.getElementById('stat-today').textContent=isNaN(t)?0:t;
+  document.getElementById('stat-active').textContent=isNaN(a)?0:a;
+  document.getElementById('stat-month').textContent=isNaN(m)?0:m;
+  document.getElementById('stat-clients').textContent=isNaN(c)?0:c;
 }
 
 // ─── Schedule ────────────────────────────────────────────
@@ -1216,15 +1214,31 @@ function getSubBadge(clientId){
   if(nm.includes('gold')) return '<span class="badge badge-gold">GOLD</span>';
   return '<span class="badge badge-silver">SILVER</span>';
 }
+// Парсить будь-який формат балансу: "245 000 грн", 245000, "0 грн" → число
+function safeBalance(val){
+  if(!val && val!==0) return 0;
+  if(typeof val==='number') return isNaN(val)?0:val;
+  const n=parseFloat(String(val).replace(/[^\d.]/g,''));
+  return isNaN(n)?0:n;
+}
+function fmtBalance(val){
+  const n=safeBalance(val);
+  return n>0?n.toLocaleString('uk-UA')+' ₴':'0 ₴';
+}
+
 function renderClients(clients){
   const list=document.getElementById('clientList');
   if(!clients.length){list.innerHTML='<div style="color:var(--gray);font-size:14px;padding:20px 0;">Клієнтів не знайдено</div>';return;}
   list.innerHTML=clients.map(c=>{
     const initials=(c.name||'NA').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
     const visits=_allBookings.filter(b=>b.clientId===c.clientId).length;
+    const bal=safeBalance(c.balance);
     return `<div class="client-row" onclick="openClientModal('${c.clientId}')">
       <div class="client-av">${initials}</div>
-      <div class="client-info"><div class="client-name-s">${c.name}</div><div class="client-meta-s">${c.phone} · ${visits} візит${visits===1?'':'ів'} · ${c.balance?Math.round(c.balance)+' ₴':'0 ₴'}</div></div>
+      <div class="client-info">
+        <div class="client-name-s">${c.name}</div>
+        <div class="client-meta-s">${c.phone} · ${visits} візит${visits===1?'':'ів'} · <span style="color:${bal>0?'var(--green)':'var(--gray)'};font-weight:600;">${fmtBalance(bal)}</span></div>
+      </div>
       ${getSubBadge(c.clientId)}
       <span class="client-arrow">›</span>
     </div>`;
@@ -1242,14 +1256,14 @@ function renderSubs(subs){
   if(!subs.length){wrap.innerHTML='<div class="table-loading" style="color:var(--gray);">Абонементів не знайдено</div>';mc.innerHTML='';return;}
   wrap.innerHTML=`<table class="crm-table"><thead><tr><th>ID</th><th>Клієнт</th><th>План</th><th>Поповнено</th><th>Залишок</th><th>Діє до</th><th>Статус</th><th>Дії</th></tr></thead><tbody>${
     subs.map(s=>{
-      const bal=Math.round(s.balance||0);
+      const bal=safeBalance(s.balance);
       const balColor=bal>0?'color:var(--green)':'color:var(--red)';
       const planBadge=s.typeName?.toLowerCase().includes('gold')?'badge-gold':s.typeName?.toLowerCase().includes('platinum')?'badge-platinum':'badge-silver';
       return `<tr>
         <td style="font-size:10px;color:var(--gray);">${s.subId}</td>
         <td><b>${s.clientName}</b></td>
         <td><span class="badge ${planBadge}">${s.typeName}</span></td>
-        <td>${Math.round(s.amount||0).toLocaleString('uk-UA')} ₴</td>
+        <td>${safeBalance(s.amount).toLocaleString('uk-UA')} ₴</td>
         <td style="${balColor};font-weight:700;">${bal.toLocaleString('uk-UA')} ₴</td>
         <td style="font-size:12px;">${s.endDate||'—'}</td>
         <td><span class="badge ${statusBadgeClass(s.status)}">${s.status||'—'}</span></td>
@@ -1267,8 +1281,8 @@ function renderSubs(subs){
         <span class="badge ${s.typeName?.toLowerCase().includes('gold')?'badge-gold':s.typeName?.toLowerCase().includes('platinum')?'badge-platinum':'badge-silver'}">${s.typeName}</span>
       </div>
       <div class="crm-card-meta">
-        <span class="crm-card-tag">💰 ${Math.round(s.amount||0).toLocaleString('uk-UA')} ₴</span>
-        <span class="crm-card-tag" style="color:${(s.balance||0)>0?'var(--green)':'var(--red)'}">Залишок: ${Math.round(s.balance||0).toLocaleString('uk-UA')} ₴</span>
+        <span class="crm-card-tag">💰 ${safeBalance(s.amount).toLocaleString('uk-UA')} ₴</span>
+        <span class="crm-card-tag" style="color:${safeBalance(s.balance)>0?'var(--green)':'var(--red)'}">Залишок: ${safeBalance(s.balance).toLocaleString('uk-UA')} ₴</span>
         <span class="crm-card-tag">📅 до ${s.endDate||'—'}</span>
       </div>
       <div style="margin-bottom:8px;"><span class="badge ${statusBadgeClass(s.status)}">${s.status||'—'}</span></div>
@@ -1297,7 +1311,7 @@ function renderSubRequests(requests){
       <td style="font-size:10px;color:var(--gray);">${r.requestId}</td>
       <td><b>${r.clientName}</b><br><span style="font-size:11px;color:var(--gray);">${r.clientId}</span></td>
       <td><span class="badge ${r.typeName?.toLowerCase().includes('gold')?'badge-gold':r.typeName?.toLowerCase().includes('platinum')?'badge-platinum':'badge-silver'}">${r.typeName}</span></td>
-      <td style="font-weight:700;">${Math.round(r.amount||0).toLocaleString('uk-UA')} ₴</td>
+      <td style="font-weight:700;">${safeBalance(r.amount).toLocaleString('uk-UA')} ₴</td>
       <td style="font-size:12px;">${r.createdDate||'—'}</td>
       <td><span class="badge ${r.status?.includes('Нова')?'badge-yellow':r.status?.includes('Підтверджена')?'badge-green':'badge-red'}">${r.status||'—'}</span></td>
       <td>
@@ -1313,7 +1327,7 @@ function renderSubRequests(requests){
       </div>
       <div class="crm-card-meta">
         <span class="crm-card-tag ${r.typeName?.toLowerCase().includes('gold')?'badge-gold':r.typeName?.toLowerCase().includes('platinum')?'badge-platinum':''}">${r.typeName}</span>
-        <span class="crm-card-tag">💰 ${Math.round(r.amount||0).toLocaleString('uk-UA')} ₴</span>
+        <span class="crm-card-tag">💰 ${safeBalance(r.amount).toLocaleString('uk-UA')} ₴</span>
       </div>
       <div class="crm-card-actions">
         <button class="act-btn act-btn-green" onclick="updateSubRequestStatusUI('${r.requestId}','✅ Підтверджена')">✓ Підтвердити</button>
@@ -1350,8 +1364,8 @@ async function openClientModal(clientId){
         <span class="badge ${s.typeName?.toLowerCase().includes('gold')?'badge-gold':s.typeName?.toLowerCase().includes('platinum')?'badge-platinum':'badge-silver'}">${s.typeName}</span>
         <span class="badge ${statusBadgeClass(s.status)}">${s.status}</span>
       </div>
-      <div style="font-size:20px;font-weight:700;color:var(--green);">${Math.round(s.balance||0).toLocaleString('uk-UA')} ₴</div>
-      <div style="font-size:12px;color:var(--gray);margin-top:2px;">Поповнено: ${Math.round(s.amount||0).toLocaleString('uk-UA')} ₴ · До: ${s.endDate||'—'}</div>
+      <div style="font-size:20px;font-weight:700;color:var(--green);">${safeBalance(s.balance).toLocaleString('uk-UA')} ₴</div>
+      <div style="font-size:12px;color:var(--gray);margin-top:2px;">Поповнено: ${safeBalance(s.amount).toLocaleString('uk-UA')} ₴ · До: ${s.endDate||'—'}</div>
       <div class="sub-status-btns">
         <button class="act-btn act-btn-green" onclick="updateSubStatusUI('${s.subId}','✅ Активний');openClientModal('${clientId}')">✓ Активний</button>
         <button class="act-btn act-btn-blue" onclick="updateSubStatusUI('${s.subId}','❄️ Заморожений');openClientModal('${clientId}')">❄</button>
@@ -1388,7 +1402,7 @@ async function openClientModal(clientId){
       <div class="info-row"><span class="info-key">Телефон</span><span class="info-val">${client.phone}</span></div>
       <div class="info-row"><span class="info-key">Telegram ID</span><span class="info-val">${client.telegramId||'—'}</span></div>
       <div class="info-row"><span class="info-key">Зареєстрований</span><span class="info-val">${client.registered||'—'}</span></div>
-      <div class="info-row"><span class="info-key">Баланс</span><span class="info-val" style="color:var(--green);">${Math.round(client.balance||0)} ₴</span></div>
+      <div class="info-row"><span class="info-key">Баланс</span><span class="info-val" style="color:var(--green);">${fmtBalance(client.balance)}</span></div>
       <div class="info-row"><span class="info-key">Абонементів</span><span class="info-val">${(subs||[]).length}</span></div>
       <div class="info-row"><span class="info-key">Записів</span><span class="info-val">${(bookings||[]).length}</span></div>
     </div>
@@ -1448,14 +1462,27 @@ async function buyPlan(){
 document.getElementById('planModal').addEventListener('click',function(e){if(e.target===this)closePlanModal();});
 document.getElementById('clientModal').addEventListener('click',function(e){if(e.target===this)closeClientModal();});
 
+// ═══ RECALC ALL BALANCES ═══
+async function recalcAllBalances(){
+  const btn=document.getElementById('recalcBtn');
+  if(btn){btn.textContent='⟳ ...';btn.disabled=true;}
+  const result=await api('recalcAllBalances');
+  if(btn){btn.textContent='⟳ Баланси';btn.disabled=false;}
+  if(result?.success){
+    toast(`✅ Баланси оновлено для ${result.updated} клієнтів`);
+    // Перезавантажуємо дані
+    clearCache();
+    await loadCRM();
+  } else {
+    toast('❌ Помилка перерахунку');
+  }
+}
+
 // ═══ TOAST ═══
-function toast(msg, type = 'ok') {
-  const t = document.getElementById('toast');
-  if (!t) return;
-  t.innerHTML = (type === 'ok' ? '✓' : '⚠') + ' ' + msg;
-  t.className = 'toast on ' + type;
-  clearTimeout(t._t);
-  t._t = setTimeout(() => t.classList.remove('on'), 3500);
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3500);
 }
 </script>
 </body>
