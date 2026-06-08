@@ -1225,19 +1225,19 @@ function getSubBadge(clientId){
   return '<span class="badge badge-silver">SILVER</span>';
 }
 // Парсить будь-який формат балансу: "245 000 грн", 245000, "0 грн" → число
-// Якщо число > 100000, то ймовірно це результат помилки формату % в Google Sheets - ділимо на 100
+// Якщо строка містить % — це помилка формату Google Sheets, ділимо на 100. Числа не торкаємо.
 function safeBalance(val){
   if(!val && val!==0) return 0;
   if(typeof val==='number') {
-    if (isNaN(val)) return 0;
-    // Якщо число більше 100000, ймовірно це помилка формату % - ділимо на 100
-    if (val > 100000) return Math.round(val / 100);
-    return val;
+    return isNaN(val) ? 0 : val;  // ✅ Числа приймаємо як є, не ділимо
   }
-  let n=parseFloat(String(val).replace(/[^\d.]/g,''));
+  const strVal = String(val);
+  let n = parseFloat(strVal.replace(/[^\d.]/g,''));
   if (isNaN(n)) return 0;
-  // Джерела помилки: "1100000%" → 1100000
-  if (String(val).includes('%') && n > 100000) n = n / 100;
+  // ✅ Тільки якщо СТРОКА містить % - ділимо на 100 (помилка Google Sheets)
+  if (strVal.includes('%') && n > 100000) {
+    return Math.round(n / 100);
+  }
   return n;
 }
 function fmtBalance(val){
