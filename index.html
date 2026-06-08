@@ -1085,7 +1085,7 @@ async function loadCRM(){
   const [bRes,cRes,sRes,srRes]=await Promise.all([
     api('getAllBookings',{},'allBookings'),
     api('getAllClients',{},'allClients'),
-    api('getAllSubsWithVisits',{},'allSubsWithVisits'),
+    api('getAllSubs',{},'allSubs'),
     api('getAllSubRequests',{},'allSubRequests')
   ]);
 
@@ -1151,7 +1151,7 @@ function renderSchedule(bookings){
   wrap.innerHTML=`<table class="crm-table"><thead><tr><th>#</th><th>Клієнт</th><th>Дата/Час</th><th>Послуга</th><th>Бокс</th><th>Статус</th><th>Дії</th></tr></thead><tbody>${
     bookings.map(b=>`<tr>
       <td style="font-size:10px;color:var(--gray);">${b.id}</td>
-      <td><b>${b.clientName}</b><br><span style="font-size:11px;color:var(--gray);">${b.phone}</span></td>
+      <td><b>${b.clientName}</b><br><span style="font-size:11px;color:var(--gray);">${formatPhoneDisplay(b.phone)}</span></td>
       <td>${b.date}<br><span style="font-size:11px;color:var(--gray);">${b.time}</span></td>
       <td style="max-width:120px;">${b.service}</td>
       <td><span style="font-size:15px;font-weight:700;letter-spacing:-0.3px;">${b.box.replace('Box ','')}</span></td>
@@ -1167,7 +1167,7 @@ function renderSchedule(bookings){
   cards.innerHTML=bookings.map(b=>`
     <div class="crm-card">
       <div class="crm-card-header">
-        <div><div class="crm-card-title">${b.clientName}</div><div class="crm-card-sub">${b.phone}</div></div>
+        <div><div class="crm-card-title">${b.clientName}</div><div class="crm-card-sub">${formatPhoneDisplay(b.phone)}</div></div>
         <span class="badge ${statusBadgeClass(b.status)}">${b.status||'—'}</span>
       </div>
       <div class="crm-card-meta">
@@ -1225,15 +1225,35 @@ function getSubBadge(clientId){
   return '<span class="badge badge-silver">SILVER</span>';
 }
 // Парсить будь-який формат балансу: "245 000 грн", 245000, "0 грн" → число
+// Якщо число > 100000, то ймовірно це результат помилки формату % в Google Sheets - ділимо на 100
 function safeBalance(val){
   if(!val && val!==0) return 0;
-  if(typeof val==='number') return isNaN(val)?0:val;
-  const n=parseFloat(String(val).replace(/[^\d.]/g,''));
-  return isNaN(n)?0:n;
+  if(typeof val==='number') {
+    if (isNaN(val)) return 0;
+    // Якщо число більше 100000, ймовірно це помилка формату % - ділимо на 100
+    if (val > 100000) return Math.round(val / 100);
+    return val;
+  }
+  let n=parseFloat(String(val).replace(/[^\d.]/g,''));
+  if (isNaN(n)) return 0;
+  // Джерела помилки: "1100000%" → 1100000
+  if (String(val).includes('%') && n > 100000) n = n / 100;
+  return n;
 }
 function fmtBalance(val){
   const n=safeBalance(val);
   return n>0?n.toLocaleString('uk-UA')+' ₴':'0 ₴';
+}
+// Форматує номер телефону як +38(093)129 61 96
+function formatPhoneDisplay(phone){
+  if(!phone) return '';
+  let normalized=String(phone).replace(/\D/g,'');
+  if(normalized.length===10) normalized='38'+normalized;
+  else if(!normalized.startsWith('38')) normalized='38'+normalized.slice(-10);
+  if(!/^38\d{10}$/.test(normalized)) return phone;
+  const match=normalized.match(/^38(\d{3})(\d{3})(\d{2})(\d{2})$/);
+  if(match) return `+${match[0].slice(0,2)}(${match[1]})${match[2]} ${match[3]} ${match[4]}`;
+  return phone;
 }
 
 function renderClients(clients){
@@ -1247,7 +1267,7 @@ function renderClients(clients){
       <div class="client-av">${initials}</div>
       <div class="client-info">
         <div class="client-name-s">${c.name}</div>
-        <div class="client-meta-s">${c.phone} · ${visits} візит${visits===1?'':'ів'} · <span style="color:${bal>0?'var(--green)':'var(--gray)'};font-weight:600;">${fmtBalance(bal)}</span></div>
+        <div class="client-meta-s">${formatPhoneDisplay(c.phone)} · ${visits} візит${visits===1?'':'ів'} · <span style="color:${bal>0?'var(--green)':'var(--gray)'};font-weight:600;">${fmtBalance(bal)}</span></div>
       </div>
       ${getSubBadge(c.clientId)}
       <span class="client-arrow">›</span>
@@ -1310,7 +1330,7 @@ async function updateSubStatusUI(subId,newStatus){
   const s=_allSubs.find(x=>x.subId===subId);
   if(s) s.status=newStatus;
   renderSubs(_allSubs);
-  clearCache('allSubs'); clearCache('allSubsWithVisits');
+  clearCache('allSubs');
   toast(result?.success||result===null?'✓ Статус оновлено':'❌ Помилка');
 }
 
@@ -1401,7 +1421,7 @@ async function openClientModal(clientId){
   document.getElementById('clientModalContent').innerHTML=`
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:22px;">
       <div style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0;">${initials}</div>
-      <div><div style="font-size:22px;font-weight:700;letter-spacing:-0.5px;letter-spacing:0.5px;">${client.name}</div><div style="font-size:12px;color:var(--gray);">${client.clientId} · ${client.phone}</div></div>
+      <div><div style="font-size:22px;font-weight:700;letter-spacing:-0.5px;letter-spacing:0.5px;">${client.name}</div><div style="font-size:12px;color:var(--gray);">${client.clientId} · ${formatPhoneDisplay(client.phone)}</div></div>
     </div>
     <div class="client-tabs">
       <button class="client-tab-btn active" onclick="switchClientTab(event,'info')">Інфо</button>
@@ -1412,7 +1432,7 @@ async function openClientModal(clientId){
     <div class="client-tab-pane active" id="cpane-info">
       <div class="info-row"><span class="info-key">ID</span><span class="info-val">${client.clientId}</span></div>
       <div class="info-row"><span class="info-key">Ім'я</span><span class="info-val">${client.name}</span></div>
-      <div class="info-row"><span class="info-key">Телефон</span><span class="info-val">${client.phone||client.phoneRaw||'—'}</span></div>
+      <div class="info-row"><span class="info-key">Телефон</span><span class="info-val">${formatPhoneDisplay(client.phone||client.phoneRaw||'')}</span></div>
       <div class="info-row"><span class="info-key">Telegram ID</span><span class="info-val">${client.telegramId||'—'}</span></div>
       <div class="info-row"><span class="info-key">Зареєстрований</span><span class="info-val">${client.registered||'—'}</span></div>
       <div class="info-row"><span class="info-key">Баланс</span><span class="info-val" style="color:var(--green);">${fmtBalance(client.balance)}</span></div>
@@ -1482,7 +1502,6 @@ async function recalcAllBalances(){
   const result=await api('recalcAllBalances');
   if(btn){btn.textContent='⟳ Баланси';btn.disabled=false;}
   clearCache('allSubs');
-  clearCache('allSubsWithVisits');
   if(result?.success){
     toast(`✅ Баланси оновлено для ${result.updated} клієнтів`);
     // Перезавантажуємо дані
