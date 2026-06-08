@@ -869,7 +869,7 @@ async function selectDate(el, dateStr) {
   if (!data?.times) { renderDemoTimes(); return; }
   // Зберігаємо дані боксів для кроку 3 (щоб не робити ще один запит)
   S._cachedBoxesForTimes = {};
-  data.times.forEach(t => { S._cachedBoxesForTimes[t.time] = isPastTimeSlotClient(dateStr,t.time) ? [] : t.freeBoxes; });
+  data.times.forEach(t => { S._cachedBoxesForTimes[t.time] = t.freeBoxes; });
   renderTimes(data.times);
 }
 
@@ -881,23 +881,41 @@ function renderTimes(times) {
   }
   grid.innerHTML='';
   times.forEach(t=>{
-    const isAvailable = !!t.available && !isPastTimeSlotClient(S.date, t.time);
     const btn=document.createElement('button');
-    btn.className='time-btn'+(isAvailable?'':' busy');
+    if (t.past) {
+      // ✅ Минулий час — повністю сіре, не клікабельне
+      btn.className='time-btn busy';
+      btn.style.opacity='0.2';
+      btn.title='Час вже минув';
+    } else {
+      btn.className='time-btn'+(t.available?'':' busy');
+      if(t.available) btn.addEventListener('click',()=>pickTime(btn,t));
+    }
     btn.textContent=t.time;
-    if(isAvailable) btn.addEventListener('click',()=>pickTime(btn));
     grid.appendChild(btn);
   });
 }
 function renderDemoTimes() {
-  renderTimes(['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00'].map(t=>({time:t,available:true})));
-}
+  const allSlots = ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'];
+  const busyDemo = new Set(['11:00','13:00','16:00']);
+  const todayStr = getTodayStr();
+  const isToday  = (S.date === todayStr);
+  const now      = new Date();
+  const curH     = now.getHours();
+  const curM     = now.getMinutes();
+  const minHour  = curM > 0 ? curH + 1 : curH;
 
-function isPastTimeSlotClient(dateStr,timeStr){
-  if(!dateStr || !timeStr || dateStr !== getTodayStr()) return false;
-  const hour = parseInt(String(timeStr).split(':')[0],10);
-  if(isNaN(hour)) return false;
-  return hour <= new Date().getHours();
+  const times = allSlots.map(t => {
+    const h = parseInt(t);
+    if (isToday && h < minHour) return { time: t, available: false, past: true };
+    if (busyDemo.has(t))        return { time: t, available: false };
+    return { time: t, available: true, freeBoxes: ['Box 1','Box 2','Box 3'] };
+  });
+
+  // Зберігаємо бокси і для демо-режиму
+  S._cachedBoxesForTimes = {};
+  times.forEach(t => { S._cachedBoxesForTimes[t.time] = t.freeBoxes || []; });
+  renderTimes(times);
 }
 
 // ═══ BOXES ═══
@@ -906,11 +924,10 @@ async function loadBoxes() {
   c.innerHTML='<div style="color:var(--gray);font-size:13px;padding:16px 0;grid-column:1/-1;"><span class="time-loading-spinner" style="width:14px;height:14px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:8px;"></span>Перевіряємо бокси...</div>';
   S.box=null;
   let freeBoxes=['Box 1','Box 2','Box 3'];
-  if (isPastTimeSlotClient(S.date, S.time)) freeBoxes=[];
   // ✅ Якщо є кеш з попереднього запиту selectDate — беремо з нього (миттєво!)
-  if (freeBoxes.length && S._cachedBoxesForTimes && S.time && S._cachedBoxesForTimes[S.time] !== undefined) {
+  if (S._cachedBoxesForTimes && S.time && S._cachedBoxesForTimes[S.time] !== undefined) {
     freeBoxes = S._cachedBoxesForTimes[S.time];
-  } else if(freeBoxes.length && isApiConfigured()&&S.date&&S.time) {
+  } else if(isApiConfigured()&&S.date&&S.time) {
     const data=await api('getBoxesForDateTime',{date:S.date,time:S.time});
     if(data?.boxes) freeBoxes=data.boxes;
   }
@@ -955,7 +972,15 @@ function goStep(n) {
 
 function pickCarType(el,type){document.querySelectorAll('.car-type-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');S.carType=type;}
 function pickService(el,name,price){document.querySelectorAll('.svc-pick').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');S.service=name;S.price=price;}
-function pickTime(el){document.querySelectorAll('.time-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');S.time=el.textContent.trim();S.box=null;}
+function pickTime(el, slotData){
+  document.querySelectorAll('.time-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+  S.time=el.textContent.trim();
+  S.box=null;
+  // ✅ Зберігаємо freeBoxes з даних слоту — крок 3 відкривається миттєво
+  if (slotData?.freeBoxes) S._cachedBoxesForTimes = S._cachedBoxesForTimes || {};
+  if (slotData?.freeBoxes) S._cachedBoxesForTimes[S.time] = slotData.freeBoxes;
+}
 function pickBox(el,n){document.querySelectorAll('.box-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');S.box=n;}
 
 function updateSummary(){
@@ -973,9 +998,8 @@ function updateSummary(){
 async function submitBooking(){
   const btn=document.getElementById('confirmBtn');
   btn.textContent='⏳ Відправляємо...'; btn.disabled=true;
-  const name=document.getElementById('fName').value;
-  const phone=formatPhoneDisplay(document.getElementById('fPhone').value);
-  document.getElementById('fPhone').value=phone;
+  const name=document.getElementById('fName').value.trim();
+  const phone=document.getElementById('fPhone').value.trim();
   const params={
     date:S.date, time:S.time, box:'Box '+S.box,
     name, phone, service:S.service,
@@ -984,20 +1008,28 @@ async function submitBooking(){
   };
   if(!isApiConfigured()){
     await new Promise(r=>setTimeout(r,700));
-    autoRegisterClient(name,phone);
     showSuccess('#1333-'+(Math.floor(Math.random()*9000)+1000));
+    toast('⚠️ Демо-режим. Вставте URL в APPS_SCRIPT_URL.');
     btn.textContent='✓ Підтвердити'; btn.disabled=false;
     return;
   }
   const result=await api('saveBooking',params);
   btn.textContent='✓ Підтвердити'; btn.disabled=false;
-  if(result===null){toast("❌ Помилка з'єднання");return;}
-  if(result.success===false){toast('❌ Бокс вже зайнятий! Оберіть інший.');goStep(3);return;}
-  clearCache();
-  // Auto-register
-  autoRegisterClient(name,phone);
+  if(result===null){toast("❌ Помилка зʼєднання. Перевірте URL.");return;}
+  if(result.success===false){
+    // ✅ Після відмови — інвалідуємо кеш і повертаємо до вибору часу
+    clearCache(`timesBoxes_${S.date}`);
+    S._cachedBoxesForTimes=null;
+    toast('❌ Бокс вже зайнятий! Оберіть інший час.');
+    goStep(2);
+    return;
+  }
+  // ✅ Інвалідуємо кеш для цієї дати
+  clearCache(`timesBoxes_${S.date}`);
+  S._cachedBoxesForTimes=null;
+  clearCache('allBookings');
   showSuccess('#1333-'+(Math.floor(Math.random()*9000)+1000));
-  toast('✓ Запис створено!');
+  toast('✓ Запис створено! Адмін отримав сповіщення.');
 }
 
 function showSuccess(id){
@@ -1095,7 +1127,7 @@ async function loadCRM(){
   const [bRes,cRes,sRes,srRes]=await Promise.all([
     api('getAllBookings',{},'allBookings'),
     api('getAllClients',{},'allClients'),
-    api('getAllSubs',{},'allSubs'),
+    api('getAllSubsWithVisits',{},'allSubsWithVisits'),
     api('getAllSubRequests',{},'allSubRequests')
   ]);
 
@@ -1161,7 +1193,7 @@ function renderSchedule(bookings){
   wrap.innerHTML=`<table class="crm-table"><thead><tr><th>#</th><th>Клієнт</th><th>Дата/Час</th><th>Послуга</th><th>Бокс</th><th>Статус</th><th>Дії</th></tr></thead><tbody>${
     bookings.map(b=>`<tr>
       <td style="font-size:10px;color:var(--gray);">${b.id}</td>
-      <td><b>${b.clientName}</b><br><span style="font-size:11px;color:var(--gray);">${formatPhoneDisplay(b.phone)}</span></td>
+      <td><b>${b.clientName}</b><br><span style="font-size:11px;color:var(--gray);">${b.phone}</span></td>
       <td>${b.date}<br><span style="font-size:11px;color:var(--gray);">${b.time}</span></td>
       <td style="max-width:120px;">${b.service}</td>
       <td><span style="font-size:15px;font-weight:700;letter-spacing:-0.3px;">${b.box.replace('Box ','')}</span></td>
@@ -1177,7 +1209,7 @@ function renderSchedule(bookings){
   cards.innerHTML=bookings.map(b=>`
     <div class="crm-card">
       <div class="crm-card-header">
-        <div><div class="crm-card-title">${b.clientName}</div><div class="crm-card-sub">${formatPhoneDisplay(b.phone)}</div></div>
+        <div><div class="crm-card-title">${b.clientName}</div><div class="crm-card-sub">${b.phone}</div></div>
         <span class="badge ${statusBadgeClass(b.status)}">${b.status||'—'}</span>
       </div>
       <div class="crm-card-meta">
@@ -1196,11 +1228,16 @@ function renderSchedule(bookings){
 async function updateBookingStatusUI(bookingId,newStatus){
   const result=await api('updateBookingStatus',{bookingId,status:newStatus});
   const b=_allBookings.find(x=>x.id===bookingId);
-  if(b) b.status=newStatus;
-  clearCache();
-  if(result?.success) await loadCRM();
-  else filterBookings('all');
-  toast(result?.success||result===null?'✓ Статус змінено':'❌ Помилка');
+  if(b){
+    b.status=newStatus;
+    // ✅ Якщо виконано — інвалідуємо кеш часів для дня запису (звільняємо слот)
+    if(newStatus.includes('Виконано') && b.date){
+      clearCache(`timesBoxes_${b.date}`);
+    }
+  }
+  filterBookings('all');
+  const ok = result?.success || result===null;
+  toast(ok ? `✓ Статус: ${newStatus}` : '❌ Помилка зміни статусу');
 }
 
 // ─── Boxes ───────────────────────────────────────────────
@@ -1237,36 +1274,15 @@ function getSubBadge(clientId){
   return '<span class="badge badge-silver">SILVER</span>';
 }
 // Парсить будь-який формат балансу: "245 000 грн", 245000, "0 грн" → число
-// Якщо строка містить % — це помилка формату Google Sheets, ділимо на 100. Числа не торкаємо.
 function safeBalance(val){
   if(!val && val!==0) return 0;
-  let n;
-  if(typeof val==='number') {
-    n = val;
-  } else {
-    const strVal = String(val);
-    n = parseFloat(strVal.replace(/\s/g,'').replace(',','.').replace(/[^\d.-]/g,''));
-    if (isNaN(n)) return 0;
-    if (strVal.includes('%')) n = n / 100;
-  }
-  if (isNaN(n)) return 0;
-  if (n >= 200000 && n % 100 === 0) n = n / 100;
-  return Math.round(n * 100) / 100;
+  if(typeof val==='number') return isNaN(val)?0:val;
+  const n=parseFloat(String(val).replace(/[^\d.]/g,''));
+  return isNaN(n)?0:n;
 }
 function fmtBalance(val){
   const n=safeBalance(val);
   return n>0?n.toLocaleString('uk-UA')+' ₴':'0 ₴';
-}
-// Форматує номер телефону як +38(093)129 61 96
-function formatPhoneDisplay(phone){
-  if(!phone) return '';
-  let normalized=String(phone).replace(/\D/g,'');
-  if(normalized.length===10) normalized='38'+normalized;
-  else if(!normalized.startsWith('38')) normalized='38'+normalized.slice(-10);
-  if(!/^38\d{10}$/.test(normalized)) return phone;
-  const match=normalized.match(/^38(\d{3})(\d{3})(\d{2})(\d{2})$/);
-  if(match) return `+${match[0].slice(0,2)}(${match[1]})${match[2]} ${match[3]} ${match[4]}`;
-  return phone;
 }
 
 function renderClients(clients){
@@ -1280,7 +1296,7 @@ function renderClients(clients){
       <div class="client-av">${initials}</div>
       <div class="client-info">
         <div class="client-name-s">${c.name}</div>
-        <div class="client-meta-s">${formatPhoneDisplay(c.phone)} · ${visits} візит${visits===1?'':'ів'} · <span style="color:${bal>0?'var(--green)':'var(--gray)'};font-weight:600;">${fmtBalance(bal)}</span></div>
+        <div class="client-meta-s">${c.phone} · ${visits} візит${visits===1?'':'ів'} · <span style="color:${bal>0?'var(--green)':'var(--gray)'};font-weight:600;">${fmtBalance(bal)}</span></div>
       </div>
       ${getSubBadge(c.clientId)}
       <span class="client-arrow">›</span>
@@ -1342,9 +1358,8 @@ async function updateSubStatusUI(subId,newStatus){
   const result=await api('updateSubStatus',{subId,status:newStatus});
   const s=_allSubs.find(x=>x.subId===subId);
   if(s) s.status=newStatus;
-  clearCache();
-  if(result?.success) await loadCRM();
-  else renderSubs(_allSubs);
+  renderSubs(_allSubs);
+  clearCache('allSubs'); clearCache('allSubsWithVisits');
   toast(result?.success||result===null?'✓ Статус оновлено':'❌ Помилка');
 }
 
@@ -1388,9 +1403,7 @@ async function updateSubRequestStatusUI(requestId,newStatus){
   else result=await api('rejectSubRequest',{requestId});
   const r=_allSubRequests.find(x=>x.requestId===requestId);
   if(r) r.status=newStatus;
-  clearCache();
-  if(result?.success) await loadCRM();
-  else renderSubRequests(_allSubRequests);
+  renderSubRequests(_allSubRequests);
   toast(result?.success||result===null?'✓ Заявка оновлена':'❌ Помилка');
 }
 
@@ -1437,7 +1450,7 @@ async function openClientModal(clientId){
   document.getElementById('clientModalContent').innerHTML=`
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:22px;">
       <div style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0;">${initials}</div>
-      <div><div style="font-size:22px;font-weight:700;letter-spacing:-0.5px;letter-spacing:0.5px;">${client.name}</div><div style="font-size:12px;color:var(--gray);">${client.clientId} · ${formatPhoneDisplay(client.phone)}</div></div>
+      <div><div style="font-size:22px;font-weight:700;letter-spacing:-0.5px;letter-spacing:0.5px;">${client.name}</div><div style="font-size:12px;color:var(--gray);">${client.clientId} · ${client.phone}</div></div>
     </div>
     <div class="client-tabs">
       <button class="client-tab-btn active" onclick="switchClientTab(event,'info')">Інфо</button>
@@ -1448,7 +1461,7 @@ async function openClientModal(clientId){
     <div class="client-tab-pane active" id="cpane-info">
       <div class="info-row"><span class="info-key">ID</span><span class="info-val">${client.clientId}</span></div>
       <div class="info-row"><span class="info-key">Ім'я</span><span class="info-val">${client.name}</span></div>
-      <div class="info-row"><span class="info-key">Телефон</span><span class="info-val">${formatPhoneDisplay(client.phone||client.phoneRaw||'')}</span></div>
+      <div class="info-row"><span class="info-key">Телефон</span><span class="info-val">${client.phone||client.phoneRaw||'—'}</span></div>
       <div class="info-row"><span class="info-key">Telegram ID</span><span class="info-val">${client.telegramId||'—'}</span></div>
       <div class="info-row"><span class="info-key">Зареєстрований</span><span class="info-val">${client.registered||'—'}</span></div>
       <div class="info-row"><span class="info-key">Баланс</span><span class="info-val" style="color:var(--green);">${fmtBalance(client.balance)}</span></div>
@@ -1495,8 +1508,7 @@ function closePlanModal(){document.getElementById('planModal').classList.remove(
 
 async function buyPlan(){
   const nm=document.getElementById('pm-name').value.trim();
-  const ph=formatPhoneDisplay(document.getElementById('pm-phone').value.trim());
-  document.getElementById('pm-phone').value=ph;
+  const ph=document.getElementById('pm-phone').value.trim();
   const tg=document.getElementById('pm-tg').value.trim();
   if(!nm||!ph){toast("Заповніть ім'я та телефон");return;}
   if(isApiConfigured()){
@@ -1519,6 +1531,7 @@ async function recalcAllBalances(){
   const result=await api('recalcAllBalances');
   if(btn){btn.textContent='⟳ Баланси';btn.disabled=false;}
   clearCache('allSubs');
+  clearCache('allSubsWithVisits');
   if(result?.success){
     toast(`✅ Баланси оновлено для ${result.updated} клієнтів`);
     // Перезавантажуємо дані
