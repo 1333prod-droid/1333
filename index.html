@@ -869,7 +869,7 @@ async function selectDate(el, dateStr) {
   if (!data?.times) { renderDemoTimes(); return; }
   // Зберігаємо дані боксів для кроку 3 (щоб не робити ще один запит)
   S._cachedBoxesForTimes = {};
-  data.times.forEach(t => { S._cachedBoxesForTimes[t.time] = t.freeBoxes; });
+  data.times.forEach(t => { S._cachedBoxesForTimes[t.time] = isPastTimeSlotClient(dateStr,t.time) ? [] : t.freeBoxes; });
   renderTimes(data.times);
 }
 
@@ -881,15 +881,23 @@ function renderTimes(times) {
   }
   grid.innerHTML='';
   times.forEach(t=>{
+    const isAvailable = !!t.available && !isPastTimeSlotClient(S.date, t.time);
     const btn=document.createElement('button');
-    btn.className='time-btn'+(t.available?'':' busy');
+    btn.className='time-btn'+(isAvailable?'':' busy');
     btn.textContent=t.time;
-    if(t.available) btn.addEventListener('click',()=>pickTime(btn));
+    if(isAvailable) btn.addEventListener('click',()=>pickTime(btn));
     grid.appendChild(btn);
   });
 }
 function renderDemoTimes() {
   renderTimes(['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00'].map(t=>({time:t,available:true})));
+}
+
+function isPastTimeSlotClient(dateStr,timeStr){
+  if(!dateStr || !timeStr || dateStr !== getTodayStr()) return false;
+  const hour = parseInt(String(timeStr).split(':')[0],10);
+  if(isNaN(hour)) return false;
+  return hour <= new Date().getHours();
 }
 
 // ═══ BOXES ═══
@@ -898,10 +906,11 @@ async function loadBoxes() {
   c.innerHTML='<div style="color:var(--gray);font-size:13px;padding:16px 0;grid-column:1/-1;"><span class="time-loading-spinner" style="width:14px;height:14px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:8px;"></span>Перевіряємо бокси...</div>';
   S.box=null;
   let freeBoxes=['Box 1','Box 2','Box 3'];
+  if (isPastTimeSlotClient(S.date, S.time)) freeBoxes=[];
   // ✅ Якщо є кеш з попереднього запиту selectDate — беремо з нього (миттєво!)
-  if (S._cachedBoxesForTimes && S.time && S._cachedBoxesForTimes[S.time] !== undefined) {
+  if (freeBoxes.length && S._cachedBoxesForTimes && S.time && S._cachedBoxesForTimes[S.time] !== undefined) {
     freeBoxes = S._cachedBoxesForTimes[S.time];
-  } else if(isApiConfigured()&&S.date&&S.time) {
+  } else if(freeBoxes.length && isApiConfigured()&&S.date&&S.time) {
     const data=await api('getBoxesForDateTime',{date:S.date,time:S.time});
     if(data?.boxes) freeBoxes=data.boxes;
   }
@@ -965,7 +974,8 @@ async function submitBooking(){
   const btn=document.getElementById('confirmBtn');
   btn.textContent='⏳ Відправляємо...'; btn.disabled=true;
   const name=document.getElementById('fName').value;
-  const phone=document.getElementById('fPhone').value;
+  const phone=formatPhoneDisplay(document.getElementById('fPhone').value);
+  document.getElementById('fPhone').value=phone;
   const params={
     date:S.date, time:S.time, box:'Box '+S.box,
     name, phone, service:S.service,
@@ -1187,7 +1197,9 @@ async function updateBookingStatusUI(bookingId,newStatus){
   const result=await api('updateBookingStatus',{bookingId,status:newStatus});
   const b=_allBookings.find(x=>x.id===bookingId);
   if(b) b.status=newStatus;
-  filterBookings('all');
+  clearCache();
+  if(result?.success) await loadCRM();
+  else filterBookings('all');
   toast(result?.success||result===null?'✓ Статус змінено':'❌ Помилка');
 }
 
@@ -1228,17 +1240,18 @@ function getSubBadge(clientId){
 // Якщо строка містить % — це помилка формату Google Sheets, ділимо на 100. Числа не торкаємо.
 function safeBalance(val){
   if(!val && val!==0) return 0;
+  let n;
   if(typeof val==='number') {
-    return isNaN(val) ? 0 : val;  // ✅ Числа приймаємо як є, не ділимо
+    n = val;
+  } else {
+    const strVal = String(val);
+    n = parseFloat(strVal.replace(/\s/g,'').replace(',','.').replace(/[^\d.-]/g,''));
+    if (isNaN(n)) return 0;
+    if (strVal.includes('%')) n = n / 100;
   }
-  const strVal = String(val);
-  let n = parseFloat(strVal.replace(/[^\d.]/g,''));
   if (isNaN(n)) return 0;
-  // ✅ Тільки якщо СТРОКА містить % - ділимо на 100 (помилка Google Sheets)
-  if (strVal.includes('%') && n > 100000) {
-    return Math.round(n / 100);
-  }
-  return n;
+  if (n >= 200000 && n % 100 === 0) n = n / 100;
+  return Math.round(n * 100) / 100;
 }
 function fmtBalance(val){
   const n=safeBalance(val);
@@ -1329,8 +1342,9 @@ async function updateSubStatusUI(subId,newStatus){
   const result=await api('updateSubStatus',{subId,status:newStatus});
   const s=_allSubs.find(x=>x.subId===subId);
   if(s) s.status=newStatus;
-  renderSubs(_allSubs);
-  clearCache('allSubs');
+  clearCache();
+  if(result?.success) await loadCRM();
+  else renderSubs(_allSubs);
   toast(result?.success||result===null?'✓ Статус оновлено':'❌ Помилка');
 }
 
@@ -1374,7 +1388,9 @@ async function updateSubRequestStatusUI(requestId,newStatus){
   else result=await api('rejectSubRequest',{requestId});
   const r=_allSubRequests.find(x=>x.requestId===requestId);
   if(r) r.status=newStatus;
-  renderSubRequests(_allSubRequests);
+  clearCache();
+  if(result?.success) await loadCRM();
+  else renderSubRequests(_allSubRequests);
   toast(result?.success||result===null?'✓ Заявка оновлена':'❌ Помилка');
 }
 
@@ -1479,7 +1495,8 @@ function closePlanModal(){document.getElementById('planModal').classList.remove(
 
 async function buyPlan(){
   const nm=document.getElementById('pm-name').value.trim();
-  const ph=document.getElementById('pm-phone').value.trim();
+  const ph=formatPhoneDisplay(document.getElementById('pm-phone').value.trim());
+  document.getElementById('pm-phone').value=ph;
   const tg=document.getElementById('pm-tg').value.trim();
   if(!nm||!ph){toast("Заповніть ім'я та телефон");return;}
   if(isApiConfigured()){
