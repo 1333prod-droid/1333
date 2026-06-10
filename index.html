@@ -607,6 +607,8 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
         <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
           <button class="btn-white" onclick="showPage('home')">На головну</button>
           <button class="btn-ghost" onclick="resetBooking()">Новий запис</button>
+          <button class="btn-ghost" onclick="cancelLastBooking()">Скасувати</button>
+          <button class="btn-ghost" onclick="rescheduleLastBooking()">Перенести</button>
         </div>
       </div>
     </div>
@@ -665,6 +667,8 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
           <button class="btn-white" onclick="showPage('booking')">+ Новий запис</button>
           <button class="btn-ghost" style="padding:10px 16px;font-size:13px;" onclick="recalcAllBalances()" id="recalcBtn" title="Перерахувати баланси всіх клієнтів з абонементів">⟳ Баланси</button>
+          <button class="btn-ghost" style="padding:10px 16px;font-size:13px;" onclick="broadcastUi()">↗ Розсилка</button>
+          <button class="btn-ghost" style="padding:10px 16px;font-size:13px;" onclick="runMaintenanceUi()">⚙ KPI</button>
           <button class="btn-ghost" style="padding:10px 16px;font-size:13px;" onclick="pinLock()">🔒 Вийти</button>
         </div>
       </div>
@@ -690,6 +694,16 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
           <button class="act-btn" onclick="filterBookings('today')">Сьогодні</button>
           <button class="act-btn" onclick="filterBookings('active')">В роботі</button>
           <button class="act-btn" onclick="filterBookings('pending')">Очікують</button>
+          <input type="text" class="field" id="bookingSearch" placeholder="Пошук..." oninput="applyBookingControls()" style="max-width:180px;padding:9px 11px;font-size:12px;">
+          <select class="field" id="bookingSort" onchange="applyBookingControls()" style="max-width:180px;padding:9px 11px;font-size:12px;">
+            <option value="dateAsc">Дата ↑</option>
+            <option value="dateDesc">Дата ↓</option>
+            <option value="clientAsc">Клієнт А-Я</option>
+            <option value="statusAsc">Статус</option>
+          </select>
+          <button class="act-btn" onclick="exportCrmCsv('bookings')">Excel</button>
+          <button class="act-btn" onclick="exportCrmPdf('bookings')">PDF</button>
+          <button class="act-btn" onclick="printCrm('bookings')">Друк</button>
         </div>
         <!-- Desktop table -->
         <div class="table-scroll desktop-table" id="scheduleTableWrap"><div class="table-loading"><span class="table-spinner"></span>Завантаження...</div></div>
@@ -704,7 +718,7 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
 
       <!-- Clients -->
       <div class="crm-tab-panel" id="tab-clients">
-        <div style="margin-bottom:14px;"><input type="text" class="field" id="clientSearch" placeholder="🔍 Пошук клієнта..." oninput="filterClients(this.value)" style="max-width:360px;"></div>
+        <div style="margin-bottom:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;"><input type="text" class="field" id="clientSearch" placeholder="🔍 Пошук клієнта..." oninput="filterClients(this.value)" style="max-width:360px;"><button class="act-btn" onclick="exportCrmCsv('clients')">Excel</button><button class="act-btn" onclick="exportCrmPdf('clients')">PDF</button><button class="act-btn" onclick="printCrm('clients')">Друк</button></div>
         <div class="client-list" id="clientList"><div class="table-loading"><span class="table-spinner"></span>Завантаження...</div></div>
       </div>
 
@@ -754,12 +768,18 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
 // ║  CONFIG                                              ║
 // ╚══════════════════════════════════════════════════════╝
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw9mqrVSrAVeoMa4Np2SxYFRCxj5cW0uX1x7S50LddB7pXnz0PIvL7gPJHmLyIJ9986GQ/exec';
-const CRM_PIN = '1333'; // ← змініть на свій PIN
+const CRM_TOKEN_KEY = 'crm_admin_token';
+const PUBLIC_API_ACTIONS = new Set([
+  'getTimesAndBoxes','getAvailableTimesForDate','getBoxesForDateTime',
+  'saveBooking','cancelBooking','rescheduleBooking','saveSubOrder','autoRegister','verifyCrmPin'
+]);
 
 // ═══ STATE ═══
 const S = { service:'', price:'', date:'', time:'', box:null, step:1, carType:'' };
 const _planMeta = {};
 let _allBookings=[], _allClients=[], _allSubs=[], _allSubRequests=[];
+let _crmToken = sessionStorage.getItem(CRM_TOKEN_KEY) || '';
+let _bookingFilter='all';
 // Cache layer
 const _cache = {};
 const CACHE_TTL = 90000; // 1.5 хвилини (для майбутніх дат)
@@ -776,10 +796,15 @@ async function api(action, params={}, cacheKey=null) {
   try {
     const url = new URL(APPS_SCRIPT_URL);
     url.searchParams.set('action', action);
+    if (_crmToken && !PUBLIC_API_ACTIONS.has(action)) url.searchParams.set('adminToken', _crmToken);
     Object.entries(params).forEach(([k,v]) => url.searchParams.set(k, String(v)));
     const res = await fetch(url.toString());
     if (!res.ok) throw new Error('HTTP '+res.status);
     const data = await res.json();
+    if (data?.unauthorized) {
+      clearCrmSession();
+      return data;
+    }
     if (cacheKey) _cache[cacheKey] = {data, ts: Date.now()};
     return data;
   } catch(e) {
@@ -792,11 +817,18 @@ function clearCache(prefix='') {
   Object.keys(_cache).forEach(k => { if(!prefix || k.startsWith(prefix)) delete _cache[k]; });
 }
 
+function clearCrmSession(){
+  sessionStorage.removeItem(CRM_TOKEN_KEY);
+  _crmToken='';
+  _crmUnlocked=false;
+  clearCache();
+}
+
 // ═══ AUTO-REGISTER CLIENT ═══
 async function autoRegisterClient(name, phone) {
   if (!isApiConfigured() || !name || !phone) return;
   try {
-    await api('autoRegister', {name, phone}, null);
+    await api('autoRegister', {name, phone, source:'Сайт'}, null);
   } catch(e) {}
 }
 
@@ -1020,15 +1052,17 @@ async function submitBooking(){
     // ✅ Після відмови — інвалідуємо кеш і повертаємо до вибору часу
     clearCache(`timesBoxes_${S.date}`);
     S._cachedBoxesForTimes=null;
-    toast('❌ Бокс вже зайнятий! Оберіть інший час.');
-    goStep(2);
+    toast(result.error?`❌ ${result.error}`:'❌ Бокс вже зайнятий! Оберіть інший час.');
+    if(!result.error||result.error.includes('зайнятий')||result.error.includes('busy')) goStep(2);
     return;
   }
   // ✅ Інвалідуємо кеш для цієї дати
   clearCache(`timesBoxes_${S.date}`);
   S._cachedBoxesForTimes=null;
   clearCache('allBookings');
-  showSuccess('#1333-'+(Math.floor(Math.random()*9000)+1000));
+  S.lastBookingId=result.bookingId||('');
+  S.lastBookingPhone=phone;
+  showSuccess(S.lastBookingId||('#1333-'+(Math.floor(Math.random()*9000)+1000)));
   toast('✓ Запис створено! Адмін отримав сповіщення.');
 }
 
@@ -1039,7 +1073,7 @@ function showSuccess(id){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function resetBooking(){
-  S.service='';S.price='';S.date='';S.time='';S.box=null;S.carType='';
+  S.service='';S.price='';S.date='';S.time='';S.box=null;S.carType='';S.lastBookingId='';S.lastBookingPhone='';
   document.getElementById('confirmView').style.display='block';
   document.getElementById('successView').style.display='none';
   document.querySelectorAll('.svc-pick,.time-btn,.box-btn,.date-pill,.car-type-btn').forEach(x=>x.classList.remove('selected'));
@@ -1049,9 +1083,41 @@ function resetBooking(){
   goStep(1);
 }
 
+async function cancelLastBooking(){
+  if(!S.lastBookingId){toast('ID запису не знайдено');return;}
+  const result=await api('cancelBooking',{bookingId:S.lastBookingId,phone:S.lastBookingPhone||document.getElementById('fPhone').value});
+  if(result?.success){
+    clearCache(`timesBoxes_${S.date}`);
+    toast('✓ Запис скасовано');
+  } else {
+    toast('❌ Не вдалося скасувати запис');
+  }
+}
+
+async function rescheduleLastBooking(){
+  if(!S.lastBookingId){toast('ID запису не знайдено');return;}
+  const newDate=prompt('Нова дата у форматі ДД.ММ.РРРР',S.date||getTodayStr());
+  if(!newDate) return;
+  const newTime=prompt('Новий час у форматі HH:MM',S.time||'10:00');
+  if(!newTime) return;
+  const newBox=prompt('Новий бокс: Box 1, Box 2 або Box 3',S.box?'Box '+S.box:'Box 1');
+  if(!newBox) return;
+  const result=await api('rescheduleBooking',{bookingId:S.lastBookingId,phone:S.lastBookingPhone||document.getElementById('fPhone').value,date:newDate,time:newTime,box:newBox});
+  if(result?.success){
+    clearCache(`timesBoxes_${S.date}`);
+    clearCache(`timesBoxes_${newDate}`);
+    S.date=newDate;S.time=newTime;S.box=parseInt(String(newBox).replace(/[^\d]/g,''))||S.box;
+    updateSummary();
+    toast('✓ Запис перенесено');
+  } else {
+    toast(result?.error==='box busy'?'❌ Бокс зайнятий':'❌ Не вдалося перенести запис');
+  }
+}
+
 // ═══ PIN / CRM GATE ═══
 let _pinBuffer='';
-let _crmUnlocked = sessionStorage.getItem('crm_unlocked')==='1';
+let _pinChecking=false;
+let _crmUnlocked = !!_crmToken;
 
 function initCrmPage(){
   if(_crmUnlocked){ showCrmInner(); loadCRM(); }
@@ -1075,27 +1141,34 @@ function pinBackspace(){ _pinBuffer=_pinBuffer.slice(0,-1); updatePinDots(); doc
 function updatePinDots(){
   for(let i=0;i<4;i++) document.getElementById('pd'+i).classList.toggle('filled',i<_pinBuffer.length);
 }
-function checkPin(){
-  if(_pinBuffer===CRM_PIN){
-    sessionStorage.setItem('crm_unlocked','1');
+async function checkPin(){
+  if(_pinChecking) return;
+  _pinChecking=true;
+  document.getElementById('pin-error').textContent='Перевіряємо...';
+  const result=await api('verifyCrmPin',{pin:_pinBuffer});
+  _pinChecking=false;
+  if(result?.success&&result.token){
+    _crmToken=result.token;
+    sessionStorage.setItem(CRM_TOKEN_KEY,_crmToken);
     _crmUnlocked=true;
-    showCrmInner();
-    loadCRM();
-  } else {
-    document.getElementById('pin-error').textContent='Невірний PIN';
     _pinBuffer='';
     updatePinDots();
-    // Shake animation
-    const pb=document.getElementById('pin-box');
-    pb.style.transform='translateX(10px)';
-    setTimeout(()=>{pb.style.transform='translateX(-10px)';},80);
-    setTimeout(()=>{pb.style.transform='';},160);
-    pb.style.transition='transform 0.08s ease';
+    showCrmInner();
+    loadCRM();
+    return;
   }
+  document.getElementById('pin-error').textContent=result?.error||'Невірний PIN';
+  _pinBuffer='';
+  updatePinDots();
+  const pb=document.getElementById('pin-box');
+  pb.style.transform='translateX(10px)';
+  setTimeout(()=>{pb.style.transform='translateX(-10px)';},80);
+  setTimeout(()=>{pb.style.transform='';},160);
+  pb.style.transition='transform 0.08s ease';
 }
 function pinLock(){
-  sessionStorage.removeItem('crm_unlocked');
-  _crmUnlocked=false; _pinBuffer='';
+  clearCrmSession();
+  _pinBuffer='';
   updatePinDots();
   document.getElementById('pin-error').textContent='';
   showPinGate();
@@ -1131,6 +1204,12 @@ async function loadCRM(){
     api('getAllSubRequests',{},'allSubRequests')
   ]);
 
+  if([bRes,cRes,sRes,srRes].some(r=>r?.unauthorized)){
+    pinLock();
+    toast('Сесія CRM закінчилась. Увійдіть ще раз.');
+    return;
+  }
+
   _allBookings=bRes?.bookings||[];
   _allClients=cRes?.clients||[];
   _allSubs=sRes?.subs||[];
@@ -1142,7 +1221,7 @@ async function loadCRM(){
   const monthCount=_allBookings.filter(b=>b.date?.endsWith('.'+yyyy)&&b.date?.includes('.'+mm+'.')).length;
 
   setStats(todayCount,activeCount,monthCount,_allClients.length);
-  renderSchedule(_allBookings,'all');
+  filterBookings(_bookingFilter||'all');
   renderBoxes(_allBookings,todayStr);
   renderClients(_allClients);
   renderSubs(_allSubs);
@@ -1158,14 +1237,91 @@ function setStats(t,a,m,c){
 
 // ─── Schedule ────────────────────────────────────────────
 function filterBookings(filter){
+  _bookingFilter=filter;
+  applyBookingControls();
+}
+
+function applyBookingControls(){
+  renderSchedule(getFilteredSortedBookings());
+}
+
+function getFilteredSortedBookings(){
   const today=new Date();
   const dd=String(today.getDate()).padStart(2,'0'), mm=String(today.getMonth()+1).padStart(2,'0'), yyyy=today.getFullYear();
   const todayStr=`${dd}.${mm}.${yyyy}`;
   let f=_allBookings;
-  if(filter==='today') f=_allBookings.filter(b=>b.date===todayStr);
-  if(filter==='active') f=_allBookings.filter(b=>b.status?.includes('роботі'));
-  if(filter==='pending') f=_allBookings.filter(b=>b.status?.includes('Очікує')||b.status?.includes('Підтверджено'));
-  renderSchedule(f,filter);
+  if(_bookingFilter==='today') f=_allBookings.filter(b=>b.date===todayStr);
+  if(_bookingFilter==='active') f=_allBookings.filter(b=>b.status?.includes('роботі'));
+  if(_bookingFilter==='pending') f=_allBookings.filter(b=>b.status?.includes('Очікує')||b.status?.includes('Підтверджено'));
+  const q=(document.getElementById('bookingSearch')?.value||'').toLowerCase().trim();
+  if(q) f=f.filter(b=>[b.id,b.clientName,b.phone,b.service,b.box,b.status,b.source].join(' ').toLowerCase().includes(q));
+  const sort=document.getElementById('bookingSort')?.value||'dateAsc';
+  f=[...f].sort((a,b)=>{
+    if(sort==='clientAsc') return String(a.clientName).localeCompare(String(b.clientName),'uk');
+    if(sort==='statusAsc') return String(a.status).localeCompare(String(b.status),'uk');
+    const av=parseBookingDate(a), bv=parseBookingDate(b);
+    return sort==='dateDesc'?bv-av:av-bv;
+  });
+  return f;
+}
+
+function parseBookingDate(b){
+  const [d,m,y]=String(b.date||'01.01.1970').split('.').map(Number);
+  const [hh,mm]=String(b.time||'00:00').split(':').map(Number);
+  return new Date(y||1970,(m||1)-1,d||1,hh||0,mm||0).getTime();
+}
+
+function getExportRows(scope){
+  if(scope==='bookings') {
+    return {
+      title:'Записи',
+      headers:['ID','Клієнт','Телефон','Дата','Час','Бокс','Послуга','Статус','Источник'],
+      rows:getFilteredSortedBookings().map(b=>[b.id,b.clientName,b.phone,b.date,b.time,b.box,b.service,b.status,b.source||''])
+    };
+  }
+  if(scope==='clients') {
+    return {
+      title:'Клієнти',
+      headers:['ClientID','Імʼя','Телефон','Telegram','Статус','Баланс','Візити','Джерело'],
+      rows:_allClients.map(c=>[c.clientId,c.name,c.phone,c.telegramId,c.status,fmtBalance(c.balance),c.visits||0,c.source||''])
+    };
+  }
+  return {title:'CRM',headers:[],rows:[]};
+}
+
+function exportCrmCsv(scope){
+  const data=getExportRows(scope);
+  const csv=[data.headers,...data.rows].map(row=>row.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(';')).join('\n');
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`1333_${scope}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function renderPrintableHtml(scope){
+  const data=getExportRows(scope);
+  return `<html><head><title>${data.title}</title><style>
+    body{font-family:Arial,sans-serif;color:#111;padding:24px}
+    h1{font-size:20px}
+    table{width:100%;border-collapse:collapse;font-size:12px}
+    th,td{border:1px solid #ddd;padding:7px;text-align:left}
+    th{background:#f3f4f6}
+  </style></head><body><h1>1333 Car Center · ${data.title}</h1><table><thead><tr>${data.headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${data.rows.map(r=>`<tr>${r.map(v=>`<td>${String(v??'')}</td>`).join('')}</tr>`).join('')}</tbody></table></body></html>`;
+}
+
+function printCrm(scope){
+  const w=window.open('','_blank');
+  if(!w){toast('Дозвольте спливаюче вікно для друку');return;}
+  w.document.write(renderPrintableHtml(scope));
+  w.document.close();
+  w.focus();
+  w.print();
+}
+
+function exportCrmPdf(scope){
+  printCrm(scope);
 }
 
 function statusBadgeClass(s){
@@ -1190,18 +1346,20 @@ function renderSchedule(bookings){
     return;
   }
   // Desktop table
-  wrap.innerHTML=`<table class="crm-table"><thead><tr><th>#</th><th>Клієнт</th><th>Дата/Час</th><th>Послуга</th><th>Бокс</th><th>Статус</th><th>Дії</th></tr></thead><tbody>${
+  wrap.innerHTML=`<table class="crm-table"><thead><tr><th>#</th><th>Клієнт</th><th>Дата/Час</th><th>Послуга</th><th>Бокс</th><th>Джерело</th><th>Статус</th><th>Дії</th></tr></thead><tbody>${
     bookings.map(b=>`<tr>
       <td style="font-size:10px;color:var(--gray);">${b.id}</td>
       <td><b>${b.clientName}</b><br><span style="font-size:11px;color:var(--gray);">${b.phone}</span></td>
       <td>${b.date}<br><span style="font-size:11px;color:var(--gray);">${b.time}</span></td>
       <td style="max-width:120px;">${b.service}</td>
       <td><span style="font-size:15px;font-weight:700;letter-spacing:-0.3px;">${b.box.replace('Box ','')}</span></td>
+      <td style="font-size:11px;color:var(--gray);">${b.source||'—'}</td>
       <td><span class="badge ${statusBadgeClass(b.status)}">${b.status||'—'}</span></td>
       <td>
         <button class="act-btn act-btn-green" onclick="updateBookingStatusUI('${b.id}','▶ В роботі')" title="Почати">▶</button>
         <button class="act-btn act-btn-green" onclick="updateBookingStatusUI('${b.id}','✅ Виконано')" title="Виконано">✓</button>
         <button class="act-btn act-btn-yellow" onclick="updateBookingStatusUI('${b.id}','⏳ Очікує')" title="Очікує">⏸</button>
+        <button class="act-btn" onclick="rescheduleBookingUI('${b.id}','${b.phone}')" title="Перенести">↔</button>
         <button class="act-btn act-btn-red" onclick="updateBookingStatusUI('${b.id}','❌ Скасовано')" title="Скасувати">✕</button>
       </td></tr>`).join('')
   }</tbody></table>`;
@@ -1220,6 +1378,7 @@ function renderSchedule(bookings){
       <div class="crm-card-actions">
         <button class="act-btn act-btn-green" onclick="updateBookingStatusUI('${b.id}','▶ В роботі')">▶ В роботі</button>
         <button class="act-btn act-btn-green" onclick="updateBookingStatusUI('${b.id}','✅ Виконано')">✓ Готово</button>
+        <button class="act-btn" onclick="rescheduleBookingUI('${b.id}','${b.phone}')">↔</button>
         <button class="act-btn act-btn-red" onclick="updateBookingStatusUI('${b.id}','❌ Скасовано')">✕</button>
       </div>
     </div>`).join('');
@@ -1240,6 +1399,27 @@ async function updateBookingStatusUI(bookingId,newStatus){
   toast(ok ? `✓ Статус: ${newStatus}` : '❌ Помилка зміни статусу');
 }
 
+async function rescheduleBookingUI(bookingId,phone){
+  const b=_allBookings.find(x=>x.id===bookingId)||{};
+  const newDate=prompt('Нова дата ДД.ММ.РРРР',b.date||getTodayStr());
+  if(!newDate) return;
+  const newTime=prompt('Новий час HH:MM',b.time||'10:00');
+  if(!newTime) return;
+  const newBox=prompt('Новий бокс',b.box||'Box 1');
+  if(!newBox) return;
+  const result=await api('rescheduleBooking',{bookingId,phone,date:newDate,time:newTime,box:newBox});
+  if(result?.success){
+    Object.assign(b,{date:newDate,time:newTime,box:newBox,status:'✅ Підтверджено'});
+    clearCache(`timesBoxes_${newDate}`);
+    clearCache('allBookings');
+    applyBookingControls();
+    renderBoxes(_allBookings,getTodayStr());
+    toast('✓ Запис перенесено');
+  } else {
+    toast(result?.error==='box busy'?'❌ Бокс зайнятий':'❌ Помилка переносу');
+  }
+}
+
 // ─── Boxes ───────────────────────────────────────────────
 function renderBoxes(bookings,todayStr){
   const today=new Date();
@@ -1250,18 +1430,30 @@ function renderBoxes(bookings,todayStr){
     const boxName='Box '+num;
     const active=todayBookings.find(b=>b.box===boxName&&(b.status?.includes('роботі')||b.status?.includes('Підтверджено')));
     const isBusy=!!active;
+    const releaseText=isBusy?getReleaseText(active.time):'';
     return `<div class="box-live ${isBusy?'busy':'free'}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
         <span style="font-size:22px;font-weight:700;letter-spacing:-0.5px;">БОКС ${num}</span>
-        <span class="badge ${isBusy?'badge-orange':'badge-green'}">${isBusy?'В роботі':'Вільний'}</span>
+        <span class="badge ${isBusy?'badge-orange':'badge-green'}">${isBusy?'Зайнятий':'Вільний'}</span>
       </div>
       ${isBusy?`<div style="font-size:15px;font-weight:700;margin-bottom:3px;">${active.clientName}</div>
         <div style="font-size:13px;color:var(--gray);">${active.service}</div>
         <div style="font-size:12px;color:var(--gray);margin-top:8px;">⏰ ${active.time}</div>
+        <div style="font-size:12px;color:var(--orange);margin-top:5px;">${releaseText}</div>
       `:`<div style="font-size:13px;color:var(--green);font-weight:600;">● Готовий до роботи</div>
         <div style="font-size:12px;color:var(--gray);margin-top:6px;">Зараз: ${nowTime}</div>`}
     </div>`;
   }).join('');
+}
+
+function getReleaseText(startTime){
+  const [hh,mm]=(startTime||'00:00').split(':').map(Number);
+  const end=new Date();
+  end.setHours((hh||0)+1,mm||0,0,0);
+  const diff=end.getTime()-Date.now();
+  if(diff<=0) return 'Звільняється зараз';
+  const mins=Math.ceil(diff/60000);
+  return `Звільниться через ${Math.floor(mins/60)} год ${String(mins%60).padStart(2,'0')} хв`;
 }
 
 // ─── Clients ─────────────────────────────────────────────
@@ -1290,14 +1482,15 @@ function renderClients(clients){
   if(!clients.length){list.innerHTML='<div style="color:var(--gray);font-size:14px;padding:20px 0;">Клієнтів не знайдено</div>';return;}
   list.innerHTML=clients.map(c=>{
     const initials=(c.name||'NA').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
-    const visits=_allBookings.filter(b=>b.clientId===c.clientId).length;
+    const visits=c.visits||_allBookings.filter(b=>b.clientId===c.clientId).length;
     const bal=safeBalance(c.balance);
     return `<div class="client-row" onclick="openClientModal('${c.clientId}')">
       <div class="client-av">${initials}</div>
       <div class="client-info">
         <div class="client-name-s">${c.name}</div>
-        <div class="client-meta-s">${c.phone} · ${visits} візит${visits===1?'':'ів'} · <span style="color:${bal>0?'var(--green)':'var(--gray)'};font-weight:600;">${fmtBalance(bal)}</span></div>
+        <div class="client-meta-s">${c.phone} · ${visits} візит${visits===1?'':'ів'} · ${c.source||'—'} · <span style="color:${bal>0?'var(--green)':'var(--gray)'};font-weight:600;">${fmtBalance(bal)}</span></div>
       </div>
+      <span class="badge ${c.status?.includes('VIP')?'badge-gold':c.status?.includes('Черный')||c.status?.includes('Архив')?'badge-red':'badge-green'}">${c.status||'Активный'}</span>
       ${getSubBadge(c.clientId)}
       <span class="client-arrow">›</span>
     </div>`;
@@ -1463,8 +1656,13 @@ async function openClientModal(clientId){
       <div class="info-row"><span class="info-key">Ім'я</span><span class="info-val">${client.name}</span></div>
       <div class="info-row"><span class="info-key">Телефон</span><span class="info-val">${client.phone||client.phoneRaw||'—'}</span></div>
       <div class="info-row"><span class="info-key">Telegram ID</span><span class="info-val">${client.telegramId||'—'}</span></div>
+      <div class="info-row"><span class="info-key">Статус</span><span class="info-val">${client.status||'Активный'}</span></div>
       <div class="info-row"><span class="info-key">Зареєстрований</span><span class="info-val">${client.registered||'—'}</span></div>
       <div class="info-row"><span class="info-key">Баланс</span><span class="info-val" style="color:var(--green);">${fmtBalance(client.balance)}</span></div>
+      <div class="info-row"><span class="info-key">Покупок</span><span class="info-val">${fmtBalance(client.totalPurchases||0)}</span></div>
+      <div class="info-row"><span class="info-key">Середній чек</span><span class="info-val">${fmtBalance(client.averageCheck||0)}</span></div>
+      <div class="info-row"><span class="info-key">Останній візит</span><span class="info-val">${client.lastVisit||'—'}</span></div>
+      <div class="info-row"><span class="info-key">Джерело</span><span class="info-val">${client.source||'—'}</span></div>
       <div class="info-row"><span class="info-key">Абонементів</span><span class="info-val">${(subs||[]).length}</span></div>
       <div class="info-row"><span class="info-key">Записів</span><span class="info-val">${(bookings||[]).length}</span></div>
     </div>
@@ -1539,6 +1737,25 @@ async function recalcAllBalances(){
     await loadCRM();
   } else {
     toast('❌ Помилка перерахунку');
+  }
+}
+
+async function broadcastUi(){
+  const message=prompt('Текст Telegram-розсилки');
+  if(!message) return;
+  const segment=confirm('Надіслати тільки VIP?')?'vip':'all';
+  const result=await api('broadcastTelegram',{message,segment});
+  toast(result?.success?`✓ Надіслано: ${result.sent}`:'❌ Помилка розсилки');
+}
+
+async function runMaintenanceUi(){
+  const result=await api('runMaintenance');
+  if(result?.success){
+    clearCache();
+    await loadCRM();
+    toast('✓ KPI, резервна копія і метрики оновлені');
+  } else {
+    toast('❌ Помилка оновлення KPI');
   }
 }
 
