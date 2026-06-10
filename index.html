@@ -1327,7 +1327,7 @@ function exportCrmPdf(scope){
 function statusBadgeClass(s){
   if(!s) return 'badge-gray';
   if(s.includes('роботі')) return 'badge-orange';
-  if(s.includes('Виконано')||s.includes('Завершено')) return 'badge-green';
+  if(s.includes('Виконано')||s.includes('Готово')||s.includes('Завершено')) return 'badge-green';
   if(s.includes('Підтверджено')||s.includes('підтверджено')) return 'badge-green';
   if(s.includes('Очікує')) return 'badge-yellow';
   if(s.includes('Скасовано')) return 'badge-red';
@@ -1385,12 +1385,20 @@ function renderSchedule(bookings){
 }
 
 async function updateBookingStatusUI(bookingId,newStatus){
-  const result=await api('updateBookingStatus',{bookingId,status:newStatus});
+  const params={bookingId,status:newStatus};
+  if(newStatus.includes('Виконано')||newStatus.includes('Готово')){
+    const costInput = prompt('Сума списання (грн). Залиште порожнім для завершення без списання:','');
+    if(costInput===null) return;
+    const cost = costInput.trim() ? Number(String(costInput).replace(',','.').replace(/[^\d.]/g,'')) : 0;
+    if(costInput.trim() && (isNaN(cost) || cost < 0)) { toast('Введіть правильну суму'); return; }
+    if(cost > 0) params.cost = cost;
+  }
+  const result=await api('updateBookingStatus',params);
   const b=_allBookings.find(x=>x.id===bookingId);
   if(b){
     b.status=newStatus;
     // ✅ Якщо виконано — інвалідуємо кеш часів для дня запису (звільняємо слот)
-    if(newStatus.includes('Виконано') && b.date){
+    if((newStatus.includes('Виконано')||newStatus.includes('Готово')) && b.date){
       clearCache(`timesBoxes_${b.date}`);
     }
   }
