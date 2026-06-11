@@ -1,4 +1,4 @@
-// ==================== BOT 1333 CAR CENTER v8.0 ====================
+/// ==================== BOT 1333 CAR CENTER v8.0 ====================
 // ✅ v8 ЗМІНИ:
 //   • recalcClientBalance() — авто-перерахунок балансу з абонементів
 //   • handleMarkVisit — списує кошти з абонементу + оновлює баланс клієнта
@@ -7,14 +7,16 @@
 //   • updateClientBalance() — єдина точка оновлення балансу
 //   • syncAllBalances() — ручна функція для синхронізації всіх балансів
 
-const BOT_TOKEN = "8351312682:AAHKXJWOOcGuF1DTP9ulC_z_zTz8Jsq2mzk";
-const ADMIN_ID = 240212361;
-const SPREADSHEET_ID = "1Yut81wa4ZwXpCmL0K3wxhwjREP0TdWy5TVBB2GnAcLI";
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbw9mqrVSrAVeoMa4Np2SxYFRCxj5cW0uX1x7S50LddB7pXnz0PIvL7gPJHmLyIJ9986GQ/exec";
+const scriptProperties = PropertiesService.getScriptProperties();
+const BOT_TOKEN = scriptProperties.getProperty("BOT_TOKEN") || "";
+const ADMIN_ID = Number(scriptProperties.getProperty("ADMIN_ID") || 0);
+const SPREADSHEET_ID = scriptProperties.getProperty("SPREADSHEET_ID") || "";
+const WEBAPP_URL = scriptProperties.getProperty("WEBAPP_URL") || "";
 const PHONE = "+380 77 001 13 33";
 const ADDRESS = "вул.Гвардійців-Широнінців 51/1";
 const TZ = "Europe/Kyiv";
-const scriptProperties = PropertiesService.getScriptProperties();
+const CRM_SESSION_TTL_SECONDS = 21600;
+const SCHEMA_VERSION = "audit-v7-2026-06-10";
 
 const SHEET_CLIENTS      = "👥 Клієнти";
 const SHEET_TYPES        = "💎 Типи абонементів";
@@ -25,23 +27,163 @@ const SHEET_BOOKINGS     = "📝 Записи на послуги";
 const SHEET_HISTORY      = "📜 Історія";
 const SHEET_SUB_REQUESTS = "📬 Заявки на абонементи";
 const SHEET_SUB_REQUESTS_ALTS = ["🔔 Заявки абонементів","Заявки абонементів"];
+const SHEET_ERRORS       = "⚠️ Системные ошибки";
+const SHEET_AUDIT_LOG    = "🧾 Журнал операций";
+const SHEET_ANALYTICS    = "📊 Аналітика";
 
 const DAY_NAMES       = ["Неділя","Понеділок","Вівторок","Середа","Четвер","П'ятниця","Субота"];
 const DAY_NAMES_SHORT = ["Нд","Пн","Вт","Ср","Чт","Пт","Сб"];
+const CLIENT_STATUS_ACTIVE = "Активный";
+const CLIENT_STATUS_ARCHIVE = "Архив";
+const CLIENT_STATUS_BLACKLIST = "Черный список";
+
+const PUBLIC_ACTIONS = {
+  getTimesAndBoxes: true,
+  getAvailableTimesForDate: true,
+  getBoxesForDateTime: true,
+  saveBooking: true,
+  cancelBooking: true,
+  rescheduleBooking: true,
+  saveSubOrder: true,
+  autoRegister: true,
+  verifyCrmPin: true
+};
+
+let __spreadsheet = null;
+let __sheetCache = {};
 
 // ─────────────────────── HELPERS ───────────────────────────
 
+function requireConfig(name) {
+  const value = scriptProperties.getProperty(name);
+  if (value === null || value === undefined || String(value).trim() === "") {
+    throw new Error("Missing Script Property: " + name);
+  }
+  return value;
+}
+
+function getSpreadsheet() {
+  if (!__spreadsheet) __spreadsheet = SpreadsheetApp.openById(requireConfig("SPREADSHEET_ID"));
+  return __spreadsheet;
+}
+
 function getSheet(name) {
-  return SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(name);
+  if (!name) return null;
+  if (!__sheetCache[name]) {
+    __sheetCache[name] = getSpreadsheet().getSheetByName(name);
+  }
+  return __sheetCache[name];
 }
 
 function safeGetRangeValues(sheet, startRow, startCol, numRows, numCols) {
   if (!sheet) return [];
   const last = sheet.getLastRow();
   if (last < startRow) return [];
-  const rows = Math.min(numRows, last - startRow + 1);
+  const rows = last - startRow + 1;
   if (rows <= 0) return [];
-  return sheet.getRange(startRow, startCol, rows, numCols).getValues();
+  const cols = numCols || Math.max(1, sheet.getLastColumn() - startCol + 1);
+  return sheet.getRange(startRow, startCol, rows, cols).getValues();
+}
+
+function jsonResponse(result) {
+  return ContentService
+    .createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function getOrCreateSheet(name) {
+  let sheet = getSheet(name);
+  if (!sheet) {
+    sheet = getSpreadsheet().insertSheet(name);
+    __sheetCache[name] = sheet;
+  }
+  return sheet;
+}
+
+function ensureSheetHeaders(name, headers) {
+  const sheet = getOrCreateSheet(name);
+  const lastCol = Math.max(sheet.getLastColumn(), 1);
+  const existing = sheet.getRange(1, 1, 1, lastCol).getValues()[0].map(v => String(v || "").trim());
+  const hasHeaders = existing.some(Boolean);
+  sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+  if (!hasHeaders) sheet.setFrozenRows(1);
+  return sheet;
+}
+
+function ensureSchema(force) {
+  if (!force && scriptProperties.getProperty("SCHEMA_VERSION") === SCHEMA_VERSION) return;
+  ensureSheetHeaders(SHEET_CLIENTS, [
+    "ClientID", "ПІБ", "Телефон", "Telegram ID", "Статус", "Дата реєстрації",
+    "Баланс", "Количество посещений", "Общая сумма покупок", "Средний чек",
+    "Последнее посещение", "Источник клиента", "Комментарий администратора"
+  ]);
+  ensureSheetHeaders(SHEET_SUBS, [
+    "ClientID", "SubscriptionID", "TypeID", "Клієнт", "Тип", "Сума",
+    "Дата покупки", "Дата окончания", "Витрачено", "Залишок", "Статус",
+    "Кто продал", "Способ оплаты", "Скидка", "Промокод", "Дата активации"
+  ]);
+  ensureSheetHeaders(SHEET_BOOKINGS, [
+    "BookingID", "Дата", "День", "Час", "Бокс", "ClientID", "Клієнт",
+    "Телефон", "Послуга", "Статус", "Примітка", "Источник записи"
+  ]);
+  ensureSheetHeaders(SHEET_HISTORY, [
+    "HistoryID", "Дата", "ClientID", "Клієнт", "SubscriptionID", "Операція",
+    "Сума", "Коментар", "Кто выполнил операцию", "Изменение баланса", "До", "После"
+  ]);
+  ensureSheetHeaders(SHEET_SUB_REQUESTS, [
+    "RequestID", "ClientID", "Клієнт", "Telegram ID", "TypeID", "Тип",
+    "Сума", "Дата створення", "Статус", "Причина отказа", "Дата обработки", "Кто обработал"
+  ]);
+  ensureSheetHeaders(SHEET_ERRORS, ["Дата", "Пользователь", "Функция", "Ошибка", "StackTrace"]);
+  ensureSheetHeaders(SHEET_AUDIT_LOG, ["Дата", "Пользователь", "Операция", "Сущность", "ID", "До", "После", "Комментарий"]);
+  ensureSheetHeaders(SHEET_ANALYTICS, ["KPI", "Значение", "Обновлено"]);
+  scriptProperties.setProperty("SCHEMA_VERSION", SCHEMA_VERSION);
+}
+
+function logError(functionName, error, user) {
+  try {
+    const sheet = ensureSheetHeaders(SHEET_ERRORS, ["Дата", "Пользователь", "Функция", "Ошибка", "StackTrace"]);
+    sheet.appendRow([
+      Utilities.formatDate(new Date(), TZ, "dd.MM.yyyy HH:mm:ss"),
+      String(user || ""),
+      String(functionName || ""),
+      String(error && error.message ? error.message : error),
+      String(error && error.stack ? error.stack : "")
+    ]);
+  } catch (logErr) {
+    Logger.log("logError failed: " + logErr);
+  }
+}
+
+function logAction(user, operation, entity, entityId, beforeValue, afterValue, comment) {
+  try {
+    const sheet = ensureSheetHeaders(SHEET_AUDIT_LOG, ["Дата", "Пользователь", "Операция", "Сущность", "ID", "До", "После", "Комментарий"]);
+    sheet.appendRow([
+      Utilities.formatDate(new Date(), TZ, "dd.MM.yyyy HH:mm:ss"),
+      String(user || ""),
+      String(operation || ""),
+      String(entity || ""),
+      String(entityId || ""),
+      beforeValue === undefined ? "" : String(beforeValue),
+      afterValue === undefined ? "" : String(afterValue),
+      String(comment || "")
+    ]);
+  } catch (e) {
+    logError("logAction", e, user);
+  }
+}
+
+function withScriptLock(functionName, fn, user) {
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(30000);
+    return fn();
+  } catch (e) {
+    logError(functionName, e, user);
+    throw e;
+  } finally {
+    try { lock.releaseLock(); } catch (releaseErr) {}
+  }
 }
 
 function fmtDate(d) {
@@ -71,12 +213,109 @@ function fmt(num) { return Math.round(num * 100) / 100; }
 // ──── NORMALIZE PHONE ────────────────────────────────────────
 function normalizePhone(phone) {
   if (!phone) return "";
-  let p = String(phone).replace(/[\s\-\(\)]/g, "");
-  p = p.replace(/[^\d+]/g, "");
-  if (p.startsWith("0") && p.length === 10) p = "+38" + p;
-  if (p.startsWith("380") && !p.startsWith("+")) p = "+" + p;
-  if (/^38\d{10}$/.test(p)) p = "+" + p;
-  return p;
+  let digits = String(phone).replace(/\D/g, "");
+  // Нормалізуємо до 12 цифр (380XXXXXXXXX)
+  if (digits.startsWith("380") && digits.length === 12) {
+    // вже OK
+  } else if (digits.startsWith("0") && digits.length === 10) {
+    digits = "38" + digits;
+  } else if (digits.length === 9) {
+    digits = "380" + digits;
+  } else if (digits.startsWith("38") && digits.length === 11) {
+    digits = "3" + digits;
+  }
+  // Формат: +38(0XX)XXX XX XX
+  if (digits.length === 12 && digits.startsWith("38")) {
+    return `+38(${digits.slice(2,5)})${digits.slice(5,8)} ${digits.slice(8,10)} ${digits.slice(10,12)}`;
+  }
+  return phone.startsWith("+") ? phone : "+" + digits;
+}
+
+function sha256Hex(value) {
+  return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, String(value), Utilities.Charset.UTF_8)
+    .map(b => (b < 0 ? b + 256 : b).toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function secureCompare(a, b) {
+  a = String(a || "");
+  b = String(b || "");
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
+function isCrmPinValid(pin) {
+  const hash = scriptProperties.getProperty("CRM_PIN_HASH");
+  if (hash) return secureCompare(sha256Hex(pin), String(hash).toLowerCase());
+  const plain = scriptProperties.getProperty("CRM_PIN");
+  return !!plain && secureCompare(String(pin), String(plain));
+}
+
+function createAdminSession() {
+  const token = Utilities.getUuid() + "-" + Utilities.getUuid();
+  CacheService.getScriptCache().put("crm_session_" + token, "1", CRM_SESSION_TTL_SECONDS);
+  return token;
+}
+
+function isValidAdminToken(token) {
+  if (!token) return false;
+  return CacheService.getScriptCache().get("crm_session_" + token) === "1";
+}
+
+function verifyCrmPin(pin) {
+  if (!isCrmPinValid(pin)) {
+    logAction("web", "Неверный PIN", "CRM", "", "", "", "Попытка входа");
+    return { success: false, error: "Невірний PIN" };
+  }
+  const token = createAdminSession();
+  logAction("web", "Вход в CRM", "CRM", "", "", "ok", "Серверная авторизация");
+  return { success: true, token, expiresIn: CRM_SESSION_TTL_SECONDS };
+}
+
+function requiresAdminAuth(action) {
+  return action && !PUBLIC_ACTIONS[action];
+}
+
+function invalidateBookingCache(dateStr) {
+  try {
+    const cache = CacheService.getScriptCache();
+    if (dateStr) cache.remove("timesBoxes_" + dateStr);
+    if (dateStr) cache.remove("avail_" + dateStr);
+  } catch (e) {}
+}
+
+function asDate(value) {
+  if (!value) return null;
+  if (value instanceof Date) return value;
+  if (typeof value === "number") {
+    const dt = new Date((Math.floor(value) - 25569) * 86400 * 1000);
+    return isNaN(dt.getTime()) ? null : dt;
+  }
+  const parts = String(value).trim().match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  if (!parts) return null;
+  const dt = new Date(Number(parts[3]), Number(parts[2]) - 1, Number(parts[1]));
+  return isNaN(dt.getTime()) ? null : dt;
+}
+
+function isPastDate(value) {
+  const dt = asDate(value);
+  if (!dt) return false;
+  const today = new Date();
+  const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const dateOnly = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+  return dateOnly < todayOnly;
+}
+
+function isActiveStatus(status) {
+  const s = String(status || "");
+  return s.includes("Активний") || s.includes("Активный") || s.includes("✅");
+}
+
+function isClientBlockedStatus(status) {
+  const s = String(status || "");
+  return s.includes(CLIENT_STATUS_BLACKLIST) || s.includes(CLIENT_STATUS_ARCHIVE);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -91,7 +330,7 @@ function updateClientBalance(clientId) {
   if (!subsSheet || !clientSheet) return 0;
   
   // Рахуємо суму балансів по всіх активних абонементах
-  const subsData = safeGetRangeValues(subsSheet, 2, 1, 500, 11);
+  const subsData = safeGetRangeValues(subsSheet, 2, 1, null, 16);
   let totalBalance = 0;
   
   subsData.forEach(r => {
@@ -99,14 +338,14 @@ function updateClientBalance(clientId) {
     if (String(r[0]).trim() !== String(clientId).trim()) return;
     const status = String(r[10]).trim();
     // Враховуємо тільки активні абонементи
-    if (status.includes("Активний") || status.includes("✅")) {
+    if (isActiveStatus(status)) {
       const bal = parseFloat(r[9]) || 0;
       totalBalance += bal;
     }
   });
   
   // Записуємо в колонку G (індекс 7) листа Клієнти
-  const clientsData = safeGetRangeValues(clientSheet, 2, 1, 500, 1);
+  const clientsData = safeGetRangeValues(clientSheet, 2, 1, null, 1);
   for (let i = 0; i < clientsData.length; i++) {
     if (String(clientsData[i][0]).trim() === String(clientId).trim()) {
       clientSheet.getRange(i + 2, 7).setValue(totalBalance);
@@ -122,7 +361,7 @@ function syncAllBalances() {
   const clientSheet = getSheet(SHEET_CLIENTS);
   if (!clientSheet) return;
   
-  const clientsData = safeGetRangeValues(clientSheet, 2, 1, 500, 1);
+  const clientsData = safeGetRangeValues(clientSheet, 2, 1, null, 1);
   let count = 0;
   
   clientsData.forEach(r => {
@@ -144,7 +383,7 @@ function deductFromSub(clientId, subId, cost) {
   const sheet = getSheet(SHEET_SUBS);
   if (!sheet) return false;
   
-  const data = safeGetRangeValues(sheet, 2, 1, 500, 11);
+  const data = safeGetRangeValues(sheet, 2, 1, null, 16);
   
   for (let i = 0; i < data.length; i++) {
     if (!data[i][1]) continue;
@@ -161,14 +400,8 @@ function deductFromSub(clientId, subId, cost) {
     
     const newBalance = currentBalance - cost;
     const newSpent   = currentSpent + cost;
-    
-    sheet.getRange(i + 2, 9).setValue(newSpent);   // колонка I — витрачено
-    sheet.getRange(i + 2, 10).setValue(newBalance); // колонка J — залишок
-    
-    // Якщо баланс 0 — закрити абонемент
-    if (newBalance <= 0) {
-      sheet.getRange(i + 2, 11).setValue("⛔ Вичерпано");
-    }
+    const newStatus = newBalance <= 0 ? "⛔ Вичерпано" : data[i][10];
+    sheet.getRange(i + 2, 9, 1, 3).setValues([[newSpent, newBalance, newStatus]]);
     
     Logger.log(`✅ Списано ${cost} грн з ${subId}. Залишок: ${newBalance}`);
     
@@ -181,46 +414,74 @@ function deductFromSub(clientId, subId, cost) {
   return false;
 }
 
+function findSubForCost(clientId, cost) {
+  if (!clientId || !cost || cost <= 0) return null;
+  const subs = getClientSubs(clientId)
+    .filter(s => isActiveStatus(s.status) && parseFloat(s.balance) >= cost);
+  if (!subs.length) return null;
+  subs.sort((a, b) => parseFloat(b.balance) - parseFloat(a.balance));
+  return subs[0].subId;
+}
+
+function markVisit(clientId, subId, service, cost, note, actor) {
+  return withScriptLock("markVisit", function() {
+    assertForeignKeys({ clientId, subId });
+    const client = findClientById(clientId);
+    const beforeBalance = getClientLiveBalance(clientId);
+    const deducted = deductFromSub(clientId, subId, cost);
+    if (!deducted) return { success: false, error: "Недостатньо коштів" };
+    const afterBalance = getClientLiveBalance(clientId);
+    addToHistory("", clientId, client?.name || "", fmtDate(new Date()), service, cost, note, actor, afterBalance - beforeBalance, beforeBalance, afterBalance, subId);
+    updateClientMetrics(clientId);
+    logAction(actor || "admin", "Списание", "Subscription", subId, beforeBalance, afterBalance, service);
+    return { success: true, beforeBalance, afterBalance };
+  }, actor || "admin");
+}
+
 // ──── AUTO-REGISTER CLIENT ────────────────────────────────────
-function autoRegisterClient(name, phone) {
+function autoRegisterClient(name, phone, telegramId, source) {
   if (!name || !phone) return null;
-  const normPhone = normalizePhone(phone);
-  
-  const sheet = getSheet(SHEET_CLIENTS);
-  if (!sheet) return null;
-  
-  const data = safeGetRangeValues(sheet, 2, 1, 500, 8);
-  
-  for (let i = 0; i < data.length; i++) {
-    if (data[i][0] && normalizePhone(String(data[i][2])) === normPhone) {
-      Logger.log("✅ Клієнт вже є: " + data[i][0]);
-      return String(data[i][0]);
+  return withScriptLock("autoRegisterClient", function() {
+    const normPhone = normalizePhone(phone);
+    const tg = String(telegramId || "").trim();
+    const sheet = getSheet(SHEET_CLIENTS);
+    if (!sheet) return null;
+
+    const data = safeGetRangeValues(sheet, 2, 1, null, 13);
+    for (let i = 0; i < data.length; i++) {
+      if (!data[i][0]) continue;
+      const samePhone = normPhone && normalizePhone(String(data[i][2])) === normPhone;
+      const sameTelegram = tg && String(data[i][3]).trim() === tg;
+      if (samePhone || sameTelegram) {
+        const row = i + 2;
+        const updates = data[i].slice(0, 13);
+        if (!updates[2] && normPhone) updates[2] = normPhone;
+        if (!updates[3] && tg) updates[3] = tg;
+        if (!updates[4]) updates[4] = CLIENT_STATUS_ACTIVE;
+        if (!updates[11] && source) updates[11] = source;
+        sheet.getRange(row, 1, 1, updates.length).setValues([updates]);
+        Logger.log("✅ Клієнт вже є: " + data[i][0]);
+        return String(data[i][0]);
+      }
     }
-  }
-  
-  const row = getNextRow(SHEET_CLIENTS);
-  const clientId = genClientId();
-  
-  try {
-    sheet.getRange(row, 1).setValue(clientId);
-    sheet.getRange(row, 2).setValue(name);
-    sheet.getRange(row, 3).setValue(phone);
-    sheet.getRange(row, 4).setValue("");
-    sheet.getRange(row, 6).setValue(fmtDate(new Date()));
-    sheet.getRange(row, 7).setValue(0);
-    
+
+    const row = getNextRow(SHEET_CLIENTS);
+    const clientId = genClientId();
+    sheet.getRange(row, 1, 1, 13).setValues([[
+      clientId, name, normPhone, tg, CLIENT_STATUS_ACTIVE, fmtDate(new Date()), 0,
+      0, 0, 0, "", source || "Сайт", ""
+    ]]);
+
     Logger.log("🆕 Авто-реєстрація: " + clientId + " " + name);
-    
+    logAction(source || "web", "Создание клиента", "Client", clientId, "", name, normPhone);
+
     sendMessage(ADMIN_ID,
-      `👤 <b>НОВИЙ КЛІЄНТ (з сайту)</b>\n\n` +
-      `🆔 ${clientId}\n👤 ${name}\n📱 ${phone}`
+      `👤 <b>НОВИЙ КЛІЄНТ</b>\n\n` +
+      `🆔 ${clientId}\n👤 ${name}\n📱 ${normPhone}\n📌 ${source || "Сайт"}`
     );
-    
+
     return clientId;
-  } catch(e) {
-    Logger.log("❌ autoRegisterClient error: " + e);
-    return null;
-  }
+  }, source || "web");
 }
 
 // ──── LINK TELEGRAM ID ────────────────────────────────────────
@@ -229,7 +490,7 @@ function linkTelegramId(phone, telegramId) {
   const sheet = getSheet(SHEET_CLIENTS);
   if (!sheet) return false;
   
-  const data = safeGetRangeValues(sheet, 2, 1, 500, 8);
+  const data = safeGetRangeValues(sheet, 2, 1, null, 13);
   
   for (let i = 0; i < data.length; i++) {
     if (!data[i][0]) continue;
@@ -251,25 +512,25 @@ function linkTelegramId(phone, telegramId) {
 // ─────────────────────── ID GENERATORS ─────────────────────────
 
 function genClientId() {
-  const data = safeGetRangeValues(getSheet(SHEET_CLIENTS), 2, 1, 500, 1);
+  const data = safeGetRangeValues(getSheet(SHEET_CLIENTS), 2, 1, null, 1);
   let max = 0;
   data.forEach(r => { if (r[0]) { const m = String(r[0]).match(/C-(\d+)/); if (m) max = Math.max(max, +m[1]); }});
   return "C-" + String(max + 1).padStart(3, "0");
 }
 function genBookingId() {
-  const data = safeGetRangeValues(getSheet(SHEET_BOOKINGS), 2, 1, 500, 1);
+  const data = safeGetRangeValues(getSheet(SHEET_BOOKINGS), 2, 1, null, 1);
   let max = 0;
   data.forEach(r => { if (r[0]) { const m = String(r[0]).match(/B-(\d+)/); if (m) max = Math.max(max, +m[1]); }});
   return "B-" + String(max + 1).padStart(4, "0");
 }
 function genSubId() {
-  const data = safeGetRangeValues(getSheet(SHEET_SUBS), 2, 1, 500, 2);
+  const data = safeGetRangeValues(getSheet(SHEET_SUBS), 2, 1, null, 2);
   let max = 0;
   data.forEach(r => { if (r[1]) { const m = String(r[1]).match(/A-(\d+)/); if (m) max = Math.max(max, +m[1]); }});
   return "A-" + String(max + 1).padStart(3, "0");
 }
 function genHistoryId() {
-  const data = safeGetRangeValues(getSheet(SHEET_HISTORY), 2, 1, 500, 1);
+  const data = safeGetRangeValues(getSheet(SHEET_HISTORY), 2, 1, null, 1);
   let max = 0;
   data.forEach(r => { if (r[0]) { const m = String(r[0]).match(/H-(\d+)/); if (m) max = Math.max(max, +m[1]); }});
   return "H-" + String(max + 1).padStart(4, "0");
@@ -277,7 +538,7 @@ function genHistoryId() {
 function genSubRequestId() {
   const sheet = getSubRequestSheet();
   if (!sheet) return "SR-0001";
-  const data = safeGetRangeValues(sheet, 2, 1, 500, 1);
+  const data = safeGetRangeValues(sheet, 2, 1, null, 1);
   let max = 0;
   data.forEach(r => { if (r[0]) { const m = String(r[0]).match(/SR-(\d+)/); if (m) max = Math.max(max, +m[1]); }});
   return "SR-" + String(max + 1).padStart(4, "0");
@@ -286,7 +547,7 @@ function genSubRequestId() {
 function getNextRow(sheetName) {
   const sheet = getSheet(sheetName);
   if (!sheet) return 2;
-  const data = safeGetRangeValues(sheet, 2, 1, 1000, 1);
+  const data = safeGetRangeValues(sheet, 2, 1, null, 1);
   for (let i = 0; i < data.length; i++) { if (!data[i][0]) return i + 2; }
   return sheet.getLastRow() + 1;
 }
@@ -294,6 +555,10 @@ function getNextRow(sheetName) {
 // ─────────────────────── TELEGRAM API ──────────────────────────
 
 function sendMessage(chatId, text, keyboard = null) {
+  if (!BOT_TOKEN) {
+    logError("sendMessage", new Error("Missing BOT_TOKEN Script Property"), chatId);
+    return null;
+  }
   const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
   const payload = { chat_id: chatId, text, parse_mode: "HTML" };
   if (keyboard) payload.reply_markup = JSON.stringify(keyboard);
@@ -307,6 +572,7 @@ function sendMessage(chatId, text, keyboard = null) {
 
 function answerCallback(callbackId, text = "") {
   try {
+    if (!BOT_TOKEN) throw new Error("Missing BOT_TOKEN Script Property");
     UrlFetchApp.fetch(`https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`, {
       method: "post", contentType: "application/json",
       payload: JSON.stringify({ callback_query_id: callbackId, text }),
@@ -321,14 +587,22 @@ function createReplyKeyboard(rows) { return { keyboard: rows, resize_keyboard: t
 // ─────────────────────── CLIENT QUERIES ────────────────────────
 
 function findClientByTelegram(telegramId) {
-  const data = safeGetRangeValues(getSheet(SHEET_CLIENTS), 2, 1, 500, 8);
+  const data = safeGetRangeValues(getSheet(SHEET_CLIENTS), 2, 1, null, 13);
   for (let i = 0; i < data.length; i++) {
     if (data[i][0] && String(data[i][3]).trim() === String(telegramId).trim()) {
       // ✅ Беремо актуальний баланс з абонементів, а не з кешу в таблиці
       const liveBalance = getClientLiveBalance(String(data[i][0]));
       return {
         clientId: data[i][0], name: data[i][1], phone: data[i][2],
-        registered: parseDate(data[i][5]), balance: liveBalance
+        telegramId: String(data[i][3] || '').trim(),
+        status: String(data[i][4] || CLIENT_STATUS_ACTIVE),
+        registered: parseDate(data[i][5]), balance: liveBalance,
+        visits: Number(data[i][7]) || 0,
+        totalPurchases: Number(data[i][8]) || 0,
+        averageCheck: Number(data[i][9]) || 0,
+        lastVisit: parseDate(data[i][10]),
+        source: String(data[i][11] || ""),
+        adminComment: String(data[i][12] || "")
       };
     }
   }
@@ -336,14 +610,21 @@ function findClientByTelegram(telegramId) {
 }
 
 function findClientById(clientId) {
-  const data = safeGetRangeValues(getSheet(SHEET_CLIENTS), 2, 1, 500, 8);
+  const data = safeGetRangeValues(getSheet(SHEET_CLIENTS), 2, 1, null, 13);
   for (let i = 0; i < data.length; i++) {
     if (String(data[i][0]).trim() === String(clientId).trim()) {
       const liveBalance = getClientLiveBalance(String(data[i][0]));
       return {
         clientId: data[i][0], name: data[i][1], phone: data[i][2],
         telegramId: String(data[i][3] || '').trim(),
-        registered: parseDate(data[i][5]), balance: liveBalance
+        status: String(data[i][4] || CLIENT_STATUS_ACTIVE),
+        registered: parseDate(data[i][5]), balance: liveBalance,
+        visits: Number(data[i][7]) || 0,
+        totalPurchases: Number(data[i][8]) || 0,
+        averageCheck: Number(data[i][9]) || 0,
+        lastVisit: parseDate(data[i][10]),
+        source: String(data[i][11] || ""),
+        adminComment: String(data[i][12] || "")
       };
     }
   }
@@ -352,13 +633,15 @@ function findClientById(clientId) {
 
 function findClientByPhone(phone) {
   const normPhone = normalizePhone(phone);
-  const data = safeGetRangeValues(getSheet(SHEET_CLIENTS), 2, 1, 500, 8);
+  const data = safeGetRangeValues(getSheet(SHEET_CLIENTS), 2, 1, null, 13);
   for (let i = 0; i < data.length; i++) {
     if (data[i][0] && normalizePhone(String(data[i][2])) === normPhone) {
       const liveBalance = getClientLiveBalance(String(data[i][0]));
       return {
         row: i + 2, clientId: data[i][0], name: data[i][1], phone: data[i][2],
-        telegramId: String(data[i][3]).trim(), balance: liveBalance
+        telegramId: String(data[i][3]).trim(),
+        status: String(data[i][4] || CLIENT_STATUS_ACTIVE),
+        balance: liveBalance
       };
     }
   }
@@ -368,13 +651,13 @@ function findClientByPhone(phone) {
 // ✅ Живий баланс клієнта — рахується з абонементів в реальному часі
 function getClientLiveBalance(clientId) {
   if (!clientId) return 0;
-  const subsData = safeGetRangeValues(getSheet(SHEET_SUBS), 2, 1, 500, 11);
+  const subsData = safeGetRangeValues(getSheet(SHEET_SUBS), 2, 1, null, 16);
   let total = 0;
   subsData.forEach(r => {
     if (!r[0]) return;
     if (String(r[0]).trim() !== String(clientId).trim()) return;
     const status = String(r[10]).trim();
-    if (status.includes("Активний") || status.includes("✅")) {
+    if (isActiveStatus(status)) {
       total += parseFloat(r[9]) || 0;
     }
   });
@@ -384,14 +667,14 @@ function getClientLiveBalance(clientId) {
 // ─────────────────────── DATA GETTERS ──────────────────────────
 
 function getTypes() {
-  const data = safeGetRangeValues(getSheet(SHEET_TYPES), 2, 1, 50, 6);
+  const data = safeGetRangeValues(getSheet(SHEET_TYPES), 2, 1, null, 6);
   return data.filter(r => r[0]).map(r => ({
     id: r[0], name: r[1], months: r[2], price: r[3], bonus: r[4], amount: r[5]
   }));
 }
 
 function getClientSubs(clientId) {
-  const data = safeGetRangeValues(getSheet(SHEET_SUBS), 2, 1, 500, 11);
+  const data = safeGetRangeValues(getSheet(SHEET_SUBS), 2, 1, null, 16);
   return data
     .map((r, i) => ({ ...r, _row: i + 2 }))
     .filter(r => String(r[0]).trim() === String(clientId).trim() && r[1])
@@ -399,30 +682,34 @@ function getClientSubs(clientId) {
       row: r._row, subId: r[1], typeName: r[4], amount: r[5],
       startDate: parseDate(r[6]), endDate: parseDate(r[7]),
       spent: parseFloat(r[8]) || 0, balance: parseFloat(r[9]) || 0,
-      status: r[10]
+      status: r[10], soldBy: r[11] || "", paymentMethod: r[12] || "",
+      discount: r[13] || "", promoCode: r[14] || "", activationDate: parseDate(r[15])
     }));
 }
 
 function getClientHistory(clientId) {
-  const data = safeGetRangeValues(getSheet(SHEET_HISTORY), 2, 1, 500, 8);
+  const data = safeGetRangeValues(getSheet(SHEET_HISTORY), 2, 1, null, 12);
   return data.filter(r => String(r[2]).trim() === String(clientId).trim())
-    .map(r => ({ date: parseDate(r[1]), service: r[5], cost: r[6] }));
+    .map(r => ({
+      date: parseDate(r[1]), service: r[5], cost: r[6], note: r[7],
+      actor: r[8] || "", balanceChange: r[9] || "", before: r[10] || "", after: r[11] || ""
+    }));
 }
 
 function getClientBookings(clientId) {
   const sheet = getSheet(SHEET_BOOKINGS);
   if (!sheet) return [];
-  const data = safeGetRangeValues(sheet, 2, 1, 500, 11);
+  const data = safeGetRangeValues(sheet, 2, 1, null, 12);
   return data.filter(r => r[0] && String(r[5]).trim() === String(clientId).trim()).map(row => ({
     id: String(row[0]),
     date: row[1] instanceof Date ? fmtDate(row[1]) : String(row[1]).trim(),
     time: row[3] instanceof Date ? Utilities.formatDate(row[3], TZ, "HH:mm") : String(row[3]).trim(),
-    box: String(row[4]), service: String(row[8]), status: String(row[9])
+    box: String(row[4]), service: String(row[8]), status: String(row[9]), note: String(row[10] || ""), source: String(row[11] || "")
   }));
 }
 
 function getPriceByType(carType) {
-  const data = safeGetRangeValues(getSheet(SHEET_PRICE), 2, 1, 100, 4);
+  const data = safeGetRangeValues(getSheet(SHEET_PRICE), 2, 1, null, 4);
   const services = {};
   data.forEach(r => {
     if (r[0] === carType && !services[r[1]])
@@ -436,7 +723,7 @@ function getPriceByType(carType) {
 function getScheduleForDay(dayName) {
   const sheet = getSheet(SHEET_SCHEDULE);
   if (!sheet) return null;
-  const data = safeGetRangeValues(sheet, 2, 1, 7, 8);
+  const data = safeGetRangeValues(sheet, 2, 1, null, 8);
   for (let i = 0; i < data.length; i++) {
     if (String(data[i][0]).trim() === dayName) {
       return { day: data[i][0], box1_open: data[i][1], box1_close: data[i][2],
@@ -507,12 +794,378 @@ function getBoxesForTime(dateStr, timeStr) {
   return boxes;
 }
 
+function getBoxReleaseText(dateStr, boxName) {
+  const sheet = getSheet(SHEET_BOOKINGS);
+  const data = safeGetRangeValues(sheet, 2, 1, null, 12);
+  const now = new Date();
+  const nowMinutes = Number(Utilities.formatDate(now, TZ, "H")) * 60 + Number(Utilities.formatDate(now, TZ, "m"));
+  let best = null;
+  data.forEach(r => {
+    if (!r[0]) return;
+    const bDate = r[1] instanceof Date ? fmtDate(r[1]) : String(r[1]).trim();
+    const bBox = String(r[4]).trim();
+    const status = String(r[9]).trim();
+    if (bDate !== dateStr || bBox !== boxName) return;
+    if (!(status.includes("роботі") || status.includes("Підтверджено") || status.includes("Очікує"))) return;
+    const time = r[3] instanceof Date ? Utilities.formatDate(r[3], TZ, "HH:mm") : normalizeTime(r[3]);
+    const h = parseTimeString(time);
+    if (h === null) return;
+    const releaseMinutes = (h + 1) * 60;
+    if (releaseMinutes >= nowMinutes && (best === null || releaseMinutes < best)) best = releaseMinutes;
+  });
+  if (best === null) return "";
+  const diff = best - nowMinutes;
+  if (diff <= 0) return "звільняється зараз";
+  return "через " + Math.floor(diff / 60) + " год " + String(diff % 60).padStart(2, "0") + " хв";
+}
+
+function getClientRow(clientId) {
+  const data = safeGetRangeValues(getSheet(SHEET_CLIENTS), 2, 1, null, 13);
+  for (let i = 0; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(clientId).trim()) {
+      return { row: i + 2, values: data[i] };
+    }
+  }
+  return null;
+}
+
+function clientExists(clientId) {
+  return !!getClientRow(clientId);
+}
+
+function typeExists(typeId) {
+  return getTypes().some(t => String(t.id).trim() === String(typeId).trim());
+}
+
+function subscriptionExists(subId, clientId) {
+  const data = safeGetRangeValues(getSheet(SHEET_SUBS), 2, 1, null, 16);
+  return data.some(r =>
+    String(r[1]).trim() === String(subId).trim() &&
+    (!clientId || String(r[0]).trim() === String(clientId).trim())
+  );
+}
+
+function assertClientAllowed(clientId) {
+  const found = getClientRow(clientId);
+  if (!found) throw new Error("ClientID not found: " + clientId);
+  const status = found.values[4] || CLIENT_STATUS_ACTIVE;
+  if (isClientBlockedStatus(status)) throw new Error("Client is blocked/archived: " + clientId);
+  return found;
+}
+
+function assertForeignKeys(keys) {
+  if (keys.clientId) assertClientAllowed(keys.clientId);
+  if (keys.typeId && !typeExists(keys.typeId)) throw new Error("TypeID not found: " + keys.typeId);
+  if (keys.subId && !subscriptionExists(keys.subId, keys.clientId)) throw new Error("SubscriptionID not found: " + keys.subId);
+}
+
+function updateClientMetrics(clientId) {
+  const client = getClientRow(clientId);
+  if (!client) return false;
+  const histData = safeGetRangeValues(getSheet(SHEET_HISTORY), 2, 1, null, 12);
+  const subData = safeGetRangeValues(getSheet(SHEET_SUBS), 2, 1, null, 16);
+  let visits = 0;
+  let visitTotal = 0;
+  let lastVisit = null;
+  histData.forEach(r => {
+    if (!r[0] || String(r[2]).trim() !== String(clientId).trim()) return;
+    visits++;
+    visitTotal += parseFloat(r[6]) || 0;
+    const d = asDate(r[1]);
+    if (d && (!lastVisit || d > lastVisit)) lastVisit = d;
+  });
+  let totalPurchases = 0;
+  subData.forEach(r => {
+    if (!r[0] || String(r[0]).trim() !== String(clientId).trim()) return;
+    totalPurchases += parseFloat(r[5]) || 0;
+  });
+  const averageCheck = visits ? visitTotal / visits : 0;
+  const rowValues = client.values.slice(0, 13);
+  rowValues[4] = rowValues[4] || CLIENT_STATUS_ACTIVE;
+  rowValues[6] = getClientLiveBalance(clientId);
+  rowValues[7] = visits;
+  rowValues[8] = totalPurchases;
+  rowValues[9] = fmt(averageCheck);
+  rowValues[10] = lastVisit ? fmtDate(lastVisit) : "";
+  getSheet(SHEET_CLIENTS).getRange(client.row, 1, 1, rowValues.length).setValues([rowValues]);
+  return true;
+}
+
+function syncClientMetrics() {
+  const data = safeGetRangeValues(getSheet(SHEET_CLIENTS), 2, 1, null, 13);
+  let count = 0;
+  data.forEach(r => {
+    if (r[0] && updateClientMetrics(String(r[0]).trim())) count++;
+  });
+  return count;
+}
+
+function expireSubscriptions() {
+  return withScriptLock("expireSubscriptions", function() {
+    const sheet = getSheet(SHEET_SUBS);
+    const data = safeGetRangeValues(sheet, 2, 1, null, 16);
+    let count = 0;
+    data.forEach((r, i) => {
+      if (!r[0] || !r[1]) return;
+      const status = String(r[10] || "");
+      if (!isActiveStatus(status)) return;
+      if (!isPastDate(r[7])) return;
+      sheet.getRange(i + 2, 11).setValue("⛔ Просрочен");
+      updateClientBalance(String(r[0]));
+      updateClientMetrics(String(r[0]));
+      logAction("system", "Автозакрытие абонемента", "Subscription", r[1], status, "⛔ Просрочен", parseDate(r[7]));
+      count++;
+    });
+    return count;
+  }, "system");
+}
+
+function createDailyBackup() {
+  try {
+    const backupName = "Backup_" + Utilities.formatDate(new Date(), TZ, "yyyy_MM_dd");
+    const file = DriveApp.getFileById(requireConfig("SPREADSHEET_ID"));
+    const parents = file.getParents();
+    const folder = parents.hasNext() ? parents.next() : DriveApp.getRootFolder();
+    const existing = folder.getFilesByName(backupName);
+    if (existing.hasNext()) return { created: false, name: backupName };
+    file.makeCopy(backupName, folder);
+    logAction("system", "Backup", "Spreadsheet", backupName, "", "created", "");
+    return { created: true, name: backupName };
+  } catch (e) {
+    // Помилка дозволів Drive або інша проблема — залогуємо і продовжуємо
+    Logger.log("⚠️ Резервна копія не створена: " + e.message);
+    return { created: false, error: e.message };
+  }
+}
+
+function mergeDuplicateClients() {
+  return withScriptLock("mergeDuplicateClients", function() {
+    const clientSheet = getSheet(SHEET_CLIENTS);
+    const data = safeGetRangeValues(clientSheet, 2, 1, null, 13);
+    const seen = {};
+    let merged = 0;
+    data.forEach((r, i) => {
+      if (!r[0]) return;
+      const keys = [];
+      const phone = normalizePhone(String(r[2] || ""));
+      const tg = String(r[3] || "").trim();
+      if (phone) keys.push("p:" + phone);
+      if (tg) keys.push("t:" + tg);
+      let primary = null;
+      keys.forEach(k => { if (!primary && seen[k]) primary = seen[k]; });
+      if (!primary) {
+        keys.forEach(k => seen[k] = String(r[0]));
+        return;
+      }
+      const duplicateId = String(r[0]);
+      if (duplicateId === primary) return;
+      replaceClientId(duplicateId, primary);
+      const rowValues = r.slice(0, 13);
+      rowValues[4] = CLIENT_STATUS_ARCHIVE;
+      rowValues[12] = "Merged into " + primary + " " + Utilities.formatDate(new Date(), TZ, "dd.MM.yyyy HH:mm");
+      clientSheet.getRange(i + 2, 1, 1, rowValues.length).setValues([rowValues]);
+      updateClientMetrics(primary);
+      logAction("system", "Объединение дубля", "Client", duplicateId, duplicateId, primary, phone || tg);
+      merged++;
+    });
+    return merged;
+  }, "system");
+}
+
+function replaceClientId(oldId, newId) {
+  const updates = [
+    { sheet: getSheet(SHEET_SUBS), col: 1 },
+    { sheet: getSheet(SHEET_BOOKINGS), col: 6 },
+    { sheet: getSheet(SHEET_HISTORY), col: 3 },
+    { sheet: getSubRequestSheet(), col: 2 }
+  ];
+  updates.forEach(cfg => {
+    if (!cfg.sheet) return;
+    const data = safeGetRangeValues(cfg.sheet, 2, cfg.col, null, 1);
+    data.forEach((r, i) => {
+      if (String(r[0]).trim() === String(oldId).trim()) {
+        cfg.sheet.getRange(i + 2, cfg.col).setValue(newId);
+      }
+    });
+  });
+}
+
+function calculateAnalytics() {
+  const clients = safeGetRangeValues(getSheet(SHEET_CLIENTS), 2, 1, null, 13).filter(r => r[0]);
+  const subs = safeGetRangeValues(getSheet(SHEET_SUBS), 2, 1, null, 16).filter(r => r[0]);
+  const history = safeGetRangeValues(getSheet(SHEET_HISTORY), 2, 1, null, 12).filter(r => r[0]);
+  const bookings = safeGetRangeValues(getSheet(SHEET_BOOKINGS), 2, 1, null, 12).filter(r => r[0]);
+  const todayStr = Utilities.formatDate(new Date(), TZ, "dd.MM.yyyy");
+  const now = new Date();
+  const weekStart = new Date(now);
+  weekStart.setDate(now.getDate() - 7);
+  const monthKey = Utilities.formatDate(now, TZ, "MM.yyyy");
+
+  const saleRows = subs.map(r => ({ amount: parseFloat(r[5]) || 0, date: asDate(r[6]), service: String(r[4] || ""), clientId: String(r[0]) }));
+  const salesToday = saleRows.filter(x => x.date && fmtDate(x.date) === todayStr).reduce((s, x) => s + x.amount, 0);
+  const salesWeek = saleRows.filter(x => x.date && x.date >= weekStart).reduce((s, x) => s + x.amount, 0);
+  const salesMonth = saleRows.filter(x => x.date && Utilities.formatDate(x.date, TZ, "MM.yyyy") === monthKey).reduce((s, x) => s + x.amount, 0);
+  const totalRevenue = saleRows.reduce((s, x) => s + x.amount, 0) + history.reduce((s, r) => s + (parseFloat(r[6]) || 0), 0);
+  const orderCount = saleRows.length + history.length;
+  const serviceRevenue = history.reduce((s, r) => s + (parseFloat(r[6]) || 0), 0);
+  const subRevenue = saleRows.reduce((s, x) => s + x.amount, 0);
+  const serviceCounts = {};
+  history.forEach(r => { const key = String(r[5] || "—"); serviceCounts[key] = (serviceCounts[key] || 0) + 1; });
+  bookings.forEach(r => { const key = String(r[8] || "—").split("|")[0].trim(); serviceCounts[key] = (serviceCounts[key] || 0) + 1; });
+  const popularService = Object.keys(serviceCounts).sort((a, b) => serviceCounts[b] - serviceCounts[a])[0] || "—";
+  const carTypes = {};
+  bookings.forEach(r => {
+    const match = String(r[8] || "").match(/\|\s*([^|]+)$/);
+    const key = match ? match[1].trim() : "—";
+    carTypes[key] = (carTypes[key] || 0) + 1;
+  });
+  const popularCar = Object.keys(carTypes).sort((a, b) => carTypes[b] - carTypes[a])[0] || "—";
+  const clientRevenue = {};
+  saleRows.forEach(x => clientRevenue[x.clientId] = (clientRevenue[x.clientId] || 0) + x.amount);
+  history.forEach(r => { const cid = String(r[2] || ""); clientRevenue[cid] = (clientRevenue[cid] || 0) + (parseFloat(r[6]) || 0); });
+  const topClientId = Object.keys(clientRevenue).sort((a, b) => clientRevenue[b] - clientRevenue[a])[0] || "";
+  const topClient = clients.find(r => String(r[0]) === topClientId);
+  const todayBookings = bookings.filter(r => (r[1] instanceof Date ? fmtDate(r[1]) : String(r[1]).trim()) === todayStr);
+  const busyBoxes = todayBookings.filter(r => {
+    const s = String(r[9] || "");
+    return s.includes("роботі") || s.includes("Підтверджено") || s.includes("Очікує");
+  }).length;
+  const activeClients = new Set(bookings.map(r => String(r[5] || "")).concat(history.map(r => String(r[2] || "")))).size;
+  const repeatClients = clients.filter(c => (Number(c[7]) || 0) > 1).length;
+
+  return [
+    ["Количество клиентов", clients.length],
+    ["Активные абонементы", subs.filter(r => isActiveStatus(r[10])).length],
+    ["Продажи сегодня", salesToday],
+    ["Продажи недели", salesWeek],
+    ["Продажи месяца", salesMonth],
+    ["Средний чек", orderCount ? fmt(totalRevenue / orderCount) : 0],
+    ["Доход по услугам", serviceRevenue],
+    ["Доход по абонементам", subRevenue],
+    ["Самая популярная услуга", popularService],
+    ["Самый популярный тип авто", popularCar],
+    ["Самый прибыльный клиент", topClient ? `${topClient[1]} (${topClientId})` : "—"],
+    ["Загрузка боксов", `${busyBoxes}/3`],
+    ["Процент повторных клиентов", clients.length ? fmt((repeatClients / clients.length) * 100) + "%" : "0%"],
+    ["Клиентов с активностью", activeClients]
+  ];
+}
+
+function updateAnalyticsSheet() {
+  const sheet = ensureSheetHeaders(SHEET_ANALYTICS, ["KPI", "Значение", "Обновлено"]);
+  const updated = Utilities.formatDate(new Date(), TZ, "dd.MM.yyyy HH:mm:ss");
+  const rows = calculateAnalytics().map(r => [r[0], r[1], updated]);
+  if (sheet.getLastRow() > 1) sheet.getRange(2, 1, sheet.getLastRow() - 1, 3).clearContent();
+  if (rows.length) sheet.getRange(2, 1, rows.length, 3).setValues(rows);
+  return rows;
+}
+
+function sendVisitReminders() {
+  const data = safeGetRangeValues(getSheet(SHEET_BOOKINGS), 2, 1, null, 12);
+  let sent = 0;
+  data.forEach(r => {
+    if (!r[0] || !r[5]) return;
+    const status = String(r[9] || "");
+    if (!(status.includes("Підтверджено") || status.includes("Очікує"))) return;
+    const dt = asDate(r[1]);
+    const hour = parseTimeString(r[3]);
+    if (!dt || hour === null) return;
+    dt.setHours(hour, 0, 0, 0);
+    const diffHours = (dt.getTime() - new Date().getTime()) / 3600000;
+    [[24, "24h"], [1, "1h"]].forEach(([target, label]) => {
+      if (diffHours < target || diffHours > target + 1) return;
+      const key = `reminder_visit_${r[0]}_${label}`;
+      if (scriptProperties.getProperty(key)) return;
+      const client = findClientById(String(r[5]));
+      if (client?.telegramId) {
+        sendMessage(client.telegramId, `⏰ <b>Нагадування про запис</b>\n\n📅 ${fmtDate(dt)} ${normalizeTime(r[3])}\n🏠 ${r[4]}\n🔧 ${r[8]}`);
+        scriptProperties.setProperty(key, "1");
+        sent++;
+      }
+    });
+  });
+  return sent;
+}
+
+function sendSubscriptionExpiryReminders() {
+  const data = safeGetRangeValues(getSheet(SHEET_SUBS), 2, 1, null, 16);
+  let sent = 0;
+  data.forEach(r => {
+    if (!r[0] || !r[1] || !isActiveStatus(r[10])) return;
+    const end = asDate(r[7]);
+    if (!end) return;
+    const today = new Date();
+    const days = Math.ceil((new Date(end.getFullYear(), end.getMonth(), end.getDate()) - new Date(today.getFullYear(), today.getMonth(), today.getDate())) / 86400000);
+    if ([7, 3, 1].indexOf(days) === -1) return;
+    const key = `reminder_sub_${r[1]}_${days}`;
+    if (scriptProperties.getProperty(key)) return;
+    const client = findClientById(String(r[0]));
+    if (client?.telegramId) {
+      sendMessage(client.telegramId, `💎 <b>Абонемент скоро закінчиться</b>\n\n${r[4]}\n📅 До: ${parseDate(r[7])}\n⏳ Залишилось: ${days} дн.`);
+      scriptProperties.setProperty(key, "1");
+      sent++;
+    }
+  });
+  return sent;
+}
+
+function broadcastTelegram(message, segment, actor) {
+  if (!message) return { success: false, sent: 0, error: "message required" };
+  const clients = safeGetRangeValues(getSheet(SHEET_CLIENTS), 2, 1, null, 13).filter(r => r[0] && r[3]);
+  let sent = 0;
+  clients.forEach(r => {
+    const status = String(r[4] || CLIENT_STATUS_ACTIVE);
+    if (isClientBlockedStatus(status)) return;
+    if (segment === "vip" && !status.includes("VIP")) return;
+    if (sendMessage(String(r[3]).trim(), message)) sent++;
+  });
+  logAction(actor || "CRM", "Массовая рассылка", "Telegram", segment || "all", "", sent, "");
+  return { success: true, sent };
+}
+
+function runDailyMaintenance(force) {
+  const key = Utilities.formatDate(new Date(), TZ, "yyyy_MM_dd");
+  if (!force && scriptProperties.getProperty("DAILY_MAINTENANCE_DATE") === key) return { skipped: true };
+  const expired = expireSubscriptions();
+  const merged = mergeDuplicateClients();
+  const balances = syncAllBalances();
+  const metrics = syncClientMetrics();
+  const analytics = updateAnalyticsSheet().length;
+  let backup = { created: false };
+  try { backup = createDailyBackup(); } catch (e) { logError("createDailyBackup", e, "system"); }
+  scriptProperties.setProperty("DAILY_MAINTENANCE_DATE", key);
+  return { skipped: false, expired, merged, balances, metrics, analytics, backup };
+}
+
+function runHourlyReminders() {
+  return {
+    visits: sendVisitReminders(),
+    subscriptions: sendSubscriptionExpiryReminders()
+  };
+}
+
+function setupProduction() {
+  ensureSchema(true);
+  installProductionTriggers();
+  return runDailyMaintenance(true);
+}
+
+function installProductionTriggers() {
+  const managed = ["runDailyMaintenance", "runHourlyReminders"];
+  ScriptApp.getProjectTriggers().forEach(t => {
+    if (managed.indexOf(t.getHandlerFunction()) !== -1) ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger("runDailyMaintenance").timeBased().everyDays(1).atHour(3).create();
+  ScriptApp.newTrigger("runHourlyReminders").timeBased().everyHours(1).create();
+  return true;
+}
+
 // ─────────────────────── BOOKING ───────────────────────────────
 
 function isBoxBooked(dateStr, timeStr, boxName) {
   const sheet = getSheet(SHEET_BOOKINGS);
   if (!sheet) return false;
-  const data = safeGetRangeValues(sheet, 2, 1, 500, 11);
+  const data = safeGetRangeValues(sheet, 2, 1, null, 12);
   const normInputTime = normalizeTime(timeStr);
   for (let i = 0; i < data.length; i++) {
     if (!data[i][0]) continue;
@@ -524,7 +1177,8 @@ function isBoxBooked(dateStr, timeStr, boxName) {
     else bTime = String(bTime).trim();
     const bBox    = String(data[i][4]).trim();
     const bStatus = String(data[i][9]).trim();
-    if (bDate === dateStr && bBox === boxName && bStatus.includes("Підтверджено")) {
+    if (bDate === dateStr && bBox === boxName &&
+        (bStatus.includes("Підтверджено") || bStatus.includes("Очікує") || bStatus.includes("роботі"))) {
       if (normalizeTime(bTime) === normInputTime) return true;
     }
   }
@@ -540,32 +1194,79 @@ function isTimeFullyBooked(dateStr, timeStr) {
   return !all.length || all.every(b => isBoxBooked(dateStr, timeStr, b));
 }
 
-function saveBooking(dateStr, timeStr, boxName, clientId, clientName, phone, service) {
+function saveBooking(dateStr, timeStr, boxName, clientId, clientName, phone, service, source, note, actor) {
+  return withScriptLock("saveBooking", function() {
+    const sheet = getSheet(SHEET_BOOKINGS);
+    if (!sheet) return false;
+    assertForeignKeys({ clientId });
+    if (isBoxBooked(dateStr, timeStr, boxName)) {
+      Logger.log("❌ Бокс вже зайнятий: " + boxName);
+      return false;
+    }
+    const row = getNextRow(SHEET_BOOKINGS);
+    const [day, month, year] = dateStr.split(".");
+    const d = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    const dayName = DAY_NAMES[d.getDay()];
+    const normTime = normalizeTime(timeStr);
+    const bookingId = genBookingId();
+    sheet.getRange(row, 1, 1, 12).setValues([[
+      bookingId, dateStr, dayName, normTime, boxName, clientId, clientName,
+      normalizePhone(phone), service, "✅ Підтверджено", note || "", source || "Администратор"
+    ]]);
+    invalidateBookingCache(dateStr);
+    logAction(actor || source || "web", "Запись", "Booking", bookingId, "", "✅ Підтверджено", `${dateStr} ${normTime} ${boxName}`);
+    return bookingId;
+  }, actor || source || "web");
+}
+
+function findBookingById(bookingId) {
   const sheet = getSheet(SHEET_BOOKINGS);
-  if (!sheet) return false;
-  if (isBoxBooked(dateStr, timeStr, boxName)) {
-    Logger.log("❌ Бокс вже зайнятий: " + boxName);
-    return false;
+  const data = safeGetRangeValues(sheet, 2, 1, null, 12);
+  for (let i = 0; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(bookingId).trim()) {
+      return { row: i + 2, values: data[i] };
+    }
   }
-  const row = getNextRow(SHEET_BOOKINGS);
-  const [day, month, year] = dateStr.split(".");
-  const d = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-  const dayName = DAY_NAMES[d.getDay()];
-  const normTime = normalizeTime(timeStr);
-  try {
-    sheet.getRange(row, 1).setValue(genBookingId());
-    sheet.getRange(row, 2).setValue(dateStr);
-    sheet.getRange(row, 3).setValue(dayName);
-    sheet.getRange(row, 4).setValue(normTime);
-    sheet.getRange(row, 5).setValue(boxName);
-    sheet.getRange(row, 6).setValue(clientId);
-    sheet.getRange(row, 7).setValue(clientName);
-    sheet.getRange(row, 8).setValue(phone);
-    sheet.getRange(row, 9).setValue(service);
-    sheet.getRange(row, 10).setValue("✅ Підтверджено");
-    sheet.getRange(row, 11).setValue("Автозапис");
-    return true;
-  } catch(e) { Logger.log("❌ saveBooking error: " + e); return false; }
+  return null;
+}
+
+function cancelBooking(bookingId, phone, actor) {
+  return withScriptLock("cancelBooking", function() {
+    const booking = findBookingById(bookingId);
+    if (!booking) return { success: false, error: "booking not found" };
+    const bookingPhone = normalizePhone(String(booking.values[7] || ""));
+    if (phone && bookingPhone !== normalizePhone(phone)) return { success: false, error: "phone mismatch" };
+    const oldStatus = String(booking.values[9] || "");
+    getSheet(SHEET_BOOKINGS).getRange(booking.row, 10).setValue("❌ Скасовано клієнтом");
+    const dateStr = booking.values[1] instanceof Date ? fmtDate(booking.values[1]) : String(booking.values[1]).trim();
+    invalidateBookingCache(dateStr);
+    logAction(actor || "client", "Отмена", "Booking", bookingId, oldStatus, "❌ Скасовано клієнтом", bookingPhone);
+    return { success: true };
+  }, actor || "client");
+}
+
+function rescheduleBooking(bookingId, phone, newDate, newTime, newBox, actor) {
+  return withScriptLock("rescheduleBooking", function() {
+    const booking = findBookingById(bookingId);
+    if (!booking) return { success: false, error: "booking not found" };
+    const bookingPhone = normalizePhone(String(booking.values[7] || ""));
+    if (phone && bookingPhone !== normalizePhone(phone)) return { success: false, error: "phone mismatch" };
+    if (isBoxBooked(newDate, newTime, newBox)) return { success: false, error: "box busy" };
+
+    const oldDate = booking.values[1] instanceof Date ? fmtDate(booking.values[1]) : String(booking.values[1]).trim();
+    const oldValue = `${oldDate} ${booking.values[3]} ${booking.values[4]}`;
+    const [day, month, year] = newDate.split(".");
+    const d = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    const dayName = DAY_NAMES[d.getDay()];
+    getSheet(SHEET_BOOKINGS).getRange(booking.row, 2, 1, 4).setValues([[
+      newDate, dayName, normalizeTime(newTime), newBox
+    ]]);
+    getSheet(SHEET_BOOKINGS).getRange(booking.row, 10).setValue("✅ Підтверджено");
+    invalidateBookingCache(oldDate);
+    invalidateBookingCache(newDate);
+    logAction(actor || "client", "Перенос", "Booking", bookingId, oldValue, `${newDate} ${newTime} ${newBox}`, bookingPhone);
+    return { success: true };
+  }, actor || "client");
 }
 
 // ─────────────────────── SUBSCRIPTION REQUESTS ─────────────────
@@ -578,78 +1279,130 @@ function getSubRequestSheet() {
 }
 
 function saveSubscriptionRequest(clientId, clientName, telegramId, typeId, typeName, amount) {
-  const sheet = getSubRequestSheet();
-  if (!sheet) return false;
-  const row = getNextRow(sheet.getName());
-  const requestId = genSubRequestId();
-  try {
-    sheet.getRange(row, 1).setValue(requestId);
-    sheet.getRange(row, 2).setValue(clientId);
-    sheet.getRange(row, 3).setValue(clientName);
-    sheet.getRange(row, 4).setValue(telegramId);
-    sheet.getRange(row, 5).setValue(typeId);
-    sheet.getRange(row, 6).setValue(typeName);
-    sheet.getRange(row, 7).setValue(amount);
-    sheet.getRange(row, 8).setValue(fmtDate(new Date()));
-    sheet.getRange(row, 9).setValue("🆕 Нова заявка");
+  return withScriptLock("saveSubscriptionRequest", function() {
+    const sheet = getSubRequestSheet();
+    if (!sheet) return false;
+    assertForeignKeys({ clientId, typeId });
+    const row = getNextRow(sheet.getName());
+    const requestId = genSubRequestId();
+    sheet.getRange(row, 1, 1, 12).setValues([[
+      requestId, clientId, clientName, telegramId, typeId, typeName,
+      Number(amount) || 0, fmtDate(new Date()), "🆕 Нова заявка", "", "", ""
+    ]]);
+    sheet.getRange(row, 7).setNumberFormat("#,##0");
+    logAction(telegramId || "web", "Заявка на абонемент", "SubscriptionRequest", requestId, "", "🆕 Нова заявка", typeName);
     return requestId;
-  } catch(e) { Logger.log("❌ saveSubscriptionRequest: " + e); return false; }
+  }, telegramId || "web");
 }
 
 function getSubscriptionRequests() {
   const sheet = getSubRequestSheet();
   if (!sheet) return [];
-  return safeGetRangeValues(sheet, 2, 1, 500, 9).filter(r => r[0]).map((r, i) => ({
+  return safeGetRangeValues(sheet, 2, 1, null, 12).filter(r => r[0]).map((r, i) => ({
     row: i + 2, requestId: String(r[0]), clientId: String(r[1]), clientName: String(r[2]),
     telegramId: String(r[3]), typeId: String(r[4]), typeName: String(r[5]),
-    amount: r[6] || 0, createdDate: parseDate(r[7]), status: String(r[8])
+    amount: r[6] || 0, createdDate: parseDate(r[7]), status: String(r[8]),
+    rejectReason: String(r[9] || ""), processedDate: parseDate(r[10]), processedBy: String(r[11] || "")
   }));
 }
 
-function updateSubscriptionRequestStatus(requestId, newStatus) {
+function updateSubscriptionRequestStatus(requestId, newStatus, actor, reason) {
   const sheet = getSubRequestSheet();
   if (!sheet) return false;
-  const data = safeGetRangeValues(sheet, 2, 1, 500, 1);
+  const data = safeGetRangeValues(sheet, 2, 1, null, 12);
   for (let i = 0; i < data.length; i++) {
     if (String(data[i][0]) === String(requestId)) {
-      sheet.getRange(i + 2, 9).setValue(newStatus);
+      sheet.getRange(i + 2, 9, 1, 4).setValues([[
+        newStatus,
+        reason || data[i][9] || "",
+        fmtDate(new Date()),
+        actor || ""
+      ]]);
+      logAction(actor || "admin", "Обработка заявки", "SubscriptionRequest", requestId, data[i][8], newStatus, reason || "");
       return true;
     }
   }
   return false;
 }
 
-function confirmSubscriptionRequest(requestId) {
-  const req = getSubscriptionRequests().find(r => r.requestId === requestId);
-  if (!req) return false;
-  try {
+function sellSubscription(clientId, typeId, actor, options, skipLock) {
+  const runner = function() {
+    assertForeignKeys({ clientId, typeId });
+    const tClient = findClientById(clientId);
+    const type = getTypes().find(t => String(t.id) === String(typeId));
+    if (!type || !tClient) return { success: false, error: "client or type not found" };
+
     const sheet = getSheet(SHEET_SUBS);
     const row = getNextRow(SHEET_SUBS);
     const subId = genSubId();
-    const pDate = new Date(), eDate = new Date();
-    const type = getTypes().find(t => t.id === req.typeId);
-    if (type) eDate.setMonth(eDate.getMonth() + (type.months || 1));
-    
-    sheet.getRange(row, 1).setValue(req.clientId);
-    sheet.getRange(row, 2).setValue(subId);
-    sheet.getRange(row, 3).setValue(req.typeId);
-    sheet.getRange(row, 4).setValue(req.clientName);
-    sheet.getRange(row, 5).setValue(req.typeName);
-    sheet.getRange(row, 6).setValue(req.amount);
-    sheet.getRange(row, 7).setValue(fmtDate(pDate));
-    sheet.getRange(row, 8).setValue(fmtDate(eDate));
-    sheet.getRange(row, 9).setValue(0);         // витрачено = 0
-    sheet.getRange(row, 10).setValue(req.amount); // залишок = повна сума
-    sheet.getRange(row, 11).setValue("✅ Активний");
-    
-    updateSubscriptionRequestStatus(requestId, "✅ Підтверджена");
-    
-    // ✅ ОНОВЛЮЄМО БАЛАНС КЛІЄНТА
-    Utilities.sleep(300);
-    updateClientBalance(req.clientId);
-    
+    const pDate = new Date();
+    const eDate = new Date();
+    eDate.setMonth(eDate.getMonth() + (Number(type.months) || 1));
+    const amount = Number(options?.amount || type.amount || 0);
+    const rowValues = [
+      clientId,
+      subId,
+      typeId,
+      options?.clientName || tClient.name,
+      options?.typeName || type.name,
+      amount,
+      fmtDate(pDate),
+      fmtDate(eDate),
+      0,
+      amount,
+      "✅ Активний",
+      actor || "admin",
+      options?.paymentMethod || "",
+      options?.discount || "",
+      options?.promoCode || "",
+      options?.activationDate || fmtDate(pDate)
+    ];
+    sheet.getRange(row, 1, 1, rowValues.length).setValues([rowValues]);
+    const newBalance = updateClientBalance(clientId);
+    updateClientMetrics(clientId);
+    logAction(actor || "admin", "Продажа абонемента", "Subscription", subId, "", amount, type.name);
+    return { success: true, subId, endDate: fmtDate(eDate), amount, newBalance };
+  };
+  return skipLock ? runner() : withScriptLock("sellSubscription", runner, actor || "admin");
+}
+
+function confirmSubscriptionRequest(requestId, actor) {
+  return withScriptLock("confirmSubscriptionRequest", function() {
+    const req = getSubscriptionRequests().find(r => r.requestId === requestId);
+    if (!req) return false;
+    assertForeignKeys({ clientId: req.clientId, typeId: req.typeId });
+    const sold = sellSubscription(req.clientId, req.typeId, actor || "admin", {
+      clientName: req.clientName,
+      typeName: req.typeName,
+      amount: req.amount,
+      paymentMethod: "Заявка",
+      activationDate: fmtDate(new Date())
+    }, true);
+    if (!sold || !sold.success) return false;
+    updateSubscriptionRequestStatus(requestId, "✅ Підтверджена", actor || "admin", "");
     return true;
-  } catch(e) { Logger.log("❌ confirmSubscriptionRequest: " + e); return false; }
+  }, actor || "admin");
+}
+
+// ─────────────────────── SUB STATUS HELPER ──────────────────────
+
+/** Змінює статус абонементу (для бота) */
+function updateSubStatusBot(subId, newStatus) {
+  return withScriptLock("updateSubStatusBot", function() {
+    const sheet = getSheet(SHEET_SUBS);
+    if (!sheet) return false;
+    const data = safeGetRangeValues(sheet, 2, 1, null, 16);
+    for (let i = 0; i < data.length; i++) {
+      if (String(data[i][1]).trim() === String(subId).trim()) {
+        const oldStatus = String(data[i][10] || "");
+        sheet.getRange(i + 2, 11).setValue(newStatus);
+        try { if (data[i][0]) { updateClientBalance(String(data[i][0])); updateClientMetrics(String(data[i][0])); } } catch(e) {}
+        logAction("Telegram admin", "Редактирование", "Subscription", subId, oldStatus, newStatus, "status");
+        return true;
+      }
+    }
+    return false;
+  }, "Telegram admin");
 }
 
 // ─────────────────────── STATE ─────────────────────────────────
@@ -666,6 +1419,8 @@ function deleteState(userId) { scriptProperties.deleteProperty('user_' + userId)
 // ─────────────────────── WEBHOOK ───────────────────────────────
 
 function setWebhook() {
+  requireConfig("BOT_TOKEN");
+  requireConfig("WEBAPP_URL");
   const url = `https://api.telegram.org/bot${BOT_TOKEN}/setWebhook?url=${WEBAPP_URL}`;
   try { UrlFetchApp.fetch(url); Logger.log("✅ Webhook встановлено"); }
   catch(e) { Logger.log("❌ Webhook: " + e); }
@@ -673,10 +1428,11 @@ function setWebhook() {
 
 function doPost(e) {
   try {
+    ensureSchema();
     const update = JSON.parse(e.postData.contents);
     if (update.message) handleMessage(update.message);
     if (update.callback_query) handleCallback(update.callback_query);
-  } catch(err) { Logger.log("doPost error: " + err); }
+  } catch(err) { Logger.log("doPost error: " + err); logError("doPost", err, "telegram"); }
 }
 
 // ─────────────────────── MESSAGE HANDLER ───────────────────────
@@ -737,17 +1493,8 @@ function handleMessage(message) {
   const state = getState(userId);
 
   if (state && state.action === "registration" && state.step === 1) {
-    const sheet = getSheet(SHEET_CLIENTS);
-    const row = getNextRow(SHEET_CLIENTS);
-    const clientId = genClientId();
     try {
-      sheet.getRange(row, 1).setValue(clientId);
-      sheet.getRange(row, 2).setValue(text);
-      sheet.getRange(row, 3).setValue(state.phone);
-      sheet.getRange(row, 4).setValue(String(userId));
-      sheet.getRange(row, 6).setValue(fmtDate(new Date()));
-      sheet.getRange(row, 7).setValue(0);
-      Utilities.sleep(500);
+      const clientId = autoRegisterClient(text, state.phone, String(userId), "Telegram");
       sendMessage(chatId, `✅ <b>Реєстрація готова!</b>\n\n🆔 ${clientId}\n👤 ${text}\n📱 ${state.phone}`);
       const newClient = findClientByTelegram(userId);
       if (newClient) showMainMenu(chatId, newClient);
@@ -764,14 +1511,30 @@ function handleMessage(message) {
   if (text === "📋 Мої абонементи") {
     const subs = getClientSubs(client.clientId);
     if (!subs.length) { sendMessage(chatId, "📋 <b>Абонементи не знайдені</b>"); return; }
-    let msg = "📋 <b>АБОНЕМЕНТИ:</b>\n\n";
+
     subs.forEach((s, i) => {
-      msg += `${i+1}. <b>${s.typeName}</b>\n` +
-             `💰 Залишок: ${fmt(s.balance)} грн\n` +
-             `✅ Витрачено: ${fmt(s.spent)} грн\n` +
-             `📅 До: ${s.endDate}\n${s.status}\n\n`;
+      const msg =
+        `📋 <b>${i+1}. ${s.typeName}</b>\n` +
+        `🆔 ${s.subId}\n` +
+        `💰 Залишок: <b>${fmt(s.balance)} грн</b>\n` +
+        `✅ Витрачено: ${fmt(s.spent)} грн\n` +
+        `📅 До: ${s.endDate}\n` +
+        `${s.status}`;
+
+      // ✅ Кнопки управління залежно від статусу
+      const buttons = [];
+      if (s.status.includes("Активний")) {
+        buttons.push([{ text: "❄️ Заморозити",   callback_data: `sub_freeze_${s.subId}`      }]);
+        buttons.push([{ text: "❌ Деактивувати", callback_data: `sub_deactivate_${s.subId}` }]);
+      } else if (s.status.includes("Заморожений")) {
+        buttons.push([{ text: "✅ Активувати",    callback_data: `sub_activate_${s.subId}`    }]);
+        buttons.push([{ text: "❌ Деактивувати", callback_data: `sub_deactivate_${s.subId}` }]);
+      } else {
+        buttons.push([{ text: "✅ Активувати",    callback_data: `sub_activate_${s.subId}`    }]);
+      }
+      const keyboard = buttons.length ? createInlineKeyboard(buttons) : null;
+      sendMessage(chatId, msg, keyboard);
     });
-    sendMessage(chatId, msg);
     return;
   }
 
@@ -892,10 +1655,26 @@ function handleCallback(callbackQuery) {
 
   if (data.startsWith("book_date_")) {
     const dateStr = data.replace("book_date_", "");
-    const times = getTimesForDate(dateStr);
-    if (!times.length) { sendMessage(chatId, "❌ На цю дату нема часу. Оберіть іншу."); return; }
+
+    // ✅ Фільтрація минулих годин для сьогодні
+    const todayStr = Utilities.formatDate(new Date(), TZ, "dd.MM.yyyy");
+    const isToday  = (dateStr === todayStr);
+    let allTimes   = getTimesForDate(dateStr);
+
+    if (isToday) {
+      const now     = new Date();
+      const curH    = parseInt(Utilities.formatDate(now, TZ, "HH"));
+      const curM    = parseInt(Utilities.formatDate(now, TZ, "mm"));
+      const minHour = curM > 0 ? curH + 1 : curH;
+      allTimes = allTimes.filter(t => parseInt(t.split(':')[0]) >= minHour);
+    }
+
+    if (!allTimes.length) {
+      sendMessage(chatId, "❌ На цю дату нема доступного часу. Оберіть іншу дату.");
+      return;
+    }
     setState(userId, { action: "booking", date: dateStr });
-    const buttons = times.map(t => [{ text: `⏰ ${t}`, callback_data: `book_time_${t}` }]);
+    const buttons = allTimes.map(t => [{ text: `⏰ ${t}`, callback_data: `book_time_${t}` }]);
     sendMessage(chatId, `📅 ${dateStr}\n\n⏰ <b>Оберіть час:</b>`, createInlineKeyboard(buttons));
     return;
   }
@@ -914,7 +1693,7 @@ function handleCallback(callbackQuery) {
   if (data.startsWith("book_box_")) {
     const box = data.replace("book_box_", "");
     if (!state || !client) { sendMessage(chatId, "❌ Помилка"); return; }
-    const ok = saveBooking(state.date, state.time, box, client.clientId, client.name, client.phone, "Запис через бот");
+    const ok = saveBooking(state.date, state.time, box, client.clientId, client.name, client.phone, "Запис через бот", "Telegram", "", "Telegram " + userId);
     if (ok) {
       sendMessage(chatId, `✅ <b>Запис готовий!</b>\n\n📅 ${state.date}\n⏰ ${state.time}\n🏠 ${box}\n\nОчікуємо на вас! 🚗`);
       sendMessage(ADMIN_ID, `📝 <b>НОВИЙ ЗАПИС!</b>\n\n👤 ${client.name}\n📅 ${state.date} ${state.time}\n🏠 ${box}`);
@@ -950,7 +1729,7 @@ function handleCallback(callbackQuery) {
 
   if (data.startsWith("confirm_sub_")) {
     const requestId = data.replace("confirm_sub_", "");
-    const ok = confirmSubscriptionRequest(requestId);
+    const ok = confirmSubscriptionRequest(requestId, "Telegram admin " + userId);
     answerCallback(callbackQuery.id, ok ? "✅ Підтверджено!" : "❌ Помилка");
     sendMessage(ADMIN_ID, ok ? `✅ Заявка ${requestId} підтверджена!` : `❌ Помилка підтвердження ${requestId}`);
     if (ok) {
@@ -963,7 +1742,7 @@ function handleCallback(callbackQuery) {
 
   if (data.startsWith("reject_sub_")) {
     const requestId = data.replace("reject_sub_", "");
-    const ok = updateSubscriptionRequestStatus(requestId, "❌ Відхилена");
+    const ok = updateSubscriptionRequestStatus(requestId, "❌ Відхилена", "Telegram admin " + userId, "");
     answerCallback(callbackQuery.id, "❌ Відхилено");
     sendMessage(ADMIN_ID, `❌ Заявка ${requestId} відхилена`);
     if (ok) {
@@ -983,31 +1762,12 @@ function handleCallback(callbackQuery) {
     const type = getTypes().find(t => String(t.id) === String(typeId));
     if (!type || !tClient) { sendMessage(chatId, "❌ Помилка: клієнт або тип не знайдено"); return; }
     try {
-      const sheet = getSheet(SHEET_SUBS);
-      const row = getNextRow(SHEET_SUBS);
-      const subId = genSubId();
-      const eDate = new Date();
-      eDate.setMonth(eDate.getMonth() + (type.months || 1));
-      sheet.getRange(row, 1).setValue(clientId);
-      sheet.getRange(row, 2).setValue(subId);
-      sheet.getRange(row, 3).setValue(typeId);
-      sheet.getRange(row, 4).setValue(tClient.name);
-      sheet.getRange(row, 5).setValue(type.name);
-      sheet.getRange(row, 6).setValue(type.amount || 0);
-      sheet.getRange(row, 7).setValue(fmtDate(new Date()));
-      sheet.getRange(row, 8).setValue(fmtDate(eDate));
-      sheet.getRange(row, 9).setValue(0);
-      sheet.getRange(row, 10).setValue(type.amount || 0);
-      sheet.getRange(row, 11).setValue("✅ Активний");
-      
-      // ✅ ОНОВЛЮЄМО БАЛАНС КЛІЄНТА
-      Utilities.sleep(300);
-      const newBalance = updateClientBalance(clientId);
-      
-      sendMessage(chatId, `✅ <b>Продано!</b>\n💎 ${type.name}\n💰 ${type.amount} грн\n👤 ${tClient.name}\n💳 Новий баланс: ${fmt(newBalance)} грн`);
+      const sold = sellSubscription(clientId, typeId, "Telegram admin " + userId, { paymentMethod: "Telegram" });
+      if (!sold?.success) { sendMessage(chatId, "❌ Помилка продажу"); return; }
+      sendMessage(chatId, `✅ <b>Продано!</b>\n💎 ${type.name}\n💰 ${sold.amount} грн\n👤 ${tClient.name}\n💳 Новий баланс: ${fmt(sold.newBalance)} грн`);
       
       if (tClient.telegramId && tClient.telegramId !== '0' && tClient.telegramId !== '')
-        sendMessage(tClient.telegramId, `🎉 <b>Ви придбали ${type.name}!</b>\n\n💰 ${type.amount} грн на рахунку\n📅 До: ${fmtDate(eDate)}\n\nДякуємо! 🚗`);
+        sendMessage(tClient.telegramId, `🎉 <b>Ви придбали ${type.name}!</b>\n\n💰 ${sold.amount} грн на рахунку\n📅 До: ${sold.endDate}\n\nДякуємо! 🚗`);
     } catch(e) { sendMessage(chatId, "❌ Помилка: " + e); }
     return;
   }
@@ -1019,6 +1779,37 @@ function handleCallback(callbackQuery) {
       setState(userId, { ...curState, step: 2, clientId, subId });
       sendMessage(chatId, `🎫 <b>${subId}</b>\n\n🔧 <b>Послуга:</b>`);
     }
+    return;
+  }
+
+  // ✅ УПРАВЛІННЯ АБОНЕМЕНТАМИ — заморозка, активація, деактивація
+  if (data.startsWith("sub_freeze_")) {
+    const subId = data.replace("sub_freeze_", "");
+    const ok = updateSubStatusBot(subId, "❄️ Заморожений");
+    answerCallback(callbackQuery.id, ok ? "❄️ Заморожено" : "❌ Помилка");
+    sendMessage(chatId, ok
+      ? `❄️ <b>Абонемент заморожено</b>\n\nID: ${subId}\nДля розморозки натисніть ✅ Активувати`
+      : "❌ Не вдалося заморозити абонемент");
+    return;
+  }
+
+  if (data.startsWith("sub_activate_")) {
+    const subId = data.replace("sub_activate_", "");
+    const ok = updateSubStatusBot(subId, "✅ Активний");
+    answerCallback(callbackQuery.id, ok ? "✅ Активовано" : "❌ Помилка");
+    sendMessage(chatId, ok
+      ? `✅ <b>Абонемент активовано</b>\n\nID: ${subId}`
+      : "❌ Не вдалося активувати абонемент");
+    return;
+  }
+
+  if (data.startsWith("sub_deactivate_")) {
+    const subId = data.replace("sub_deactivate_", "");
+    const ok = updateSubStatusBot(subId, "❌ Неактивний");
+    answerCallback(callbackQuery.id, ok ? "❌ Деактивовано" : "❌ Помилка");
+    sendMessage(chatId, ok
+      ? `❌ <b>Абонемент деактивовано</b>\n\nID: ${subId}`
+      : "❌ Не вдалося деактивувати абонемент");
     return;
   }
 }
@@ -1034,15 +1825,7 @@ function handleAddClient(chatId, userId, text, state) {
     sendMessage(chatId, "💬 <b>Telegram ID (або '-'):</b>");
   } else if (state.step === 3) {
     try {
-      const sheet = getSheet(SHEET_CLIENTS);
-      const row = getNextRow(SHEET_CLIENTS);
-      const clientId = genClientId();
-      sheet.getRange(row, 1).setValue(clientId);
-      sheet.getRange(row, 2).setValue(state.name);
-      sheet.getRange(row, 3).setValue(state.phone);
-      sheet.getRange(row, 4).setValue(text === "-" ? "" : text);
-      sheet.getRange(row, 6).setValue(fmtDate(new Date()));
-      sheet.getRange(row, 7).setValue(0);
+      const clientId = autoRegisterClient(state.name, state.phone, text === "-" ? "" : text, "Администратор");
       deleteState(userId);
       sendMessage(chatId, `✅ ${clientId} — ${state.name} — додано!`);
       showAdminMenu(chatId);
@@ -1094,28 +1877,13 @@ function handleMarkVisit(chatId, userId, text, state) {
   }
   else if (state.step === 4) {
     try {
-      // ✅ Списуємо з абонементу
-      const deducted = deductFromSub(state.clientId, state.subId, state.cost);
-      if (!deducted) {
+      const visit = markVisit(state.clientId, state.subId, state.service, state.cost, text === "-" ? "" : text, "Telegram admin " + userId);
+      if (!visit?.success) {
         sendMessage(chatId, `❌ Недостатньо коштів на абонементі!\nПеревірте баланс та повторіть.`);
         deleteState(userId);
         return;
       }
-      
-      // Записуємо в історію
-      const sheet = getSheet(SHEET_HISTORY);
-      const row = getNextRow(SHEET_HISTORY);
-      sheet.getRange(row, 1).setValue(genHistoryId());
-      sheet.getRange(row, 2).setValue(fmtDate(new Date()));
-      sheet.getRange(row, 3).setValue(state.clientId);
-      sheet.getRange(row, 4).setValue(state.clientName);
-      sheet.getRange(row, 5).setValue(state.subId || "");
-      sheet.getRange(row, 6).setValue(state.service);
-      sheet.getRange(row, 7).setValue(state.cost);
-      sheet.getRange(row, 8).setValue(text === "-" ? "" : text);
-      
-      // Отримуємо актуальний баланс після списання
-      const newBalance = getClientLiveBalance(state.clientId);
+      const newBalance = visit.afterBalance;
       
       deleteState(userId);
       sendMessage(chatId,
@@ -1146,7 +1914,7 @@ function handleMarkVisit(chatId, userId, text, state) {
 
 function showClientsList(chatId) {
   const clientSheet = getSheet(SHEET_CLIENTS);
-  const data = safeGetRangeValues(clientSheet, 2, 1, 100, 8);
+  const data = safeGetRangeValues(clientSheet, 2, 1, null, 13);
   let msg = "👥 <b>КЛІЄНТИ:</b>\n\n", count = 0;
   data.forEach(r => {
     if (r[0]) {
@@ -1160,35 +1928,11 @@ function showClientsList(chatId) {
 }
 
 function showAnalytics(chatId) {
-  const sData = getSheet(SHEET_SUBS)    ? safeGetRangeValues(getSheet(SHEET_SUBS),    2, 1, 500, 11) : [];
-  const hData = getSheet(SHEET_HISTORY) ? safeGetRangeValues(getSheet(SHEET_HISTORY), 2, 1, 500, 8)  : [];
-  const cData = getSheet(SHEET_CLIENTS) ? safeGetRangeValues(getSheet(SHEET_CLIENTS), 2, 1, 500, 8)  : [];
-  
-  let totalSold = 0, totalSpent = 0, totalBalance = 0;
-  sData.forEach(r => {
-    if (!r[0]) return;
-    totalSold    += parseFloat(r[5]) || 0;
-    totalSpent   += parseFloat(r[8]) || 0;
-    const status = String(r[10]).trim();
-    if (status.includes("Активний") || status.includes("✅")) {
-      totalBalance += parseFloat(r[9]) || 0;
-    }
-  });
-  
-  let visitTotal = 0;
-  hData.forEach(r => { visitTotal += parseFloat(r[6]) || 0; });
-  
-  const activeClients = cData.filter(r => r[0]).length;
-  const activeSubs = sData.filter(r => r[0] && (String(r[10]).includes("Активний") || String(r[10]).includes("✅"))).length;
-  
+  const rows = calculateAnalytics();
+  updateAnalyticsSheet();
   sendMessage(chatId,
     `📊 <b>АНАЛІТИКА</b>\n\n` +
-    `💰 Продано абонементів: ${fmt(totalSold)} грн\n` +
-    `✅ Відпрацьовано: ${fmt(totalSpent)} грн\n` +
-    `💳 Залишок у клієнтів: ${fmt(totalBalance)} грн\n\n` +
-    `👥 Клієнтів: ${activeClients}\n` +
-    `📋 Активних абонементів: ${activeSubs}\n` +
-    `✅ Візитів всього: ${hData.filter(r => r[0]).length}`
+    rows.map(r => `• ${r[0]}: <b>${r[1]}</b>`).join("\n")
   );
 }
 
@@ -1224,111 +1968,359 @@ function showAdminMenu(chatId) {
   sendMessage(chatId, "👨‍💼 <b>АДМІН ПАНЕЛЬ</b>\n\n/syncbalances — синхронізувати всі баланси", keyboard);
 }
 
+// ─────────────────────── ADD TO HISTORY ────────────────────────
+function addToHistory(bookingId, clientId, clientName, date, service, cost, note, actor, balanceChange, beforeBalance, afterBalance, subId) {
+  const sheet = getSheet(SHEET_HISTORY);
+  if (!sheet) return false;
+  try {
+    const row = getNextRow(SHEET_HISTORY);
+    sheet.getRange(row, 1, 1, 12).setValues([[
+      genHistoryId(),
+      date || fmtDate(new Date()),
+      String(clientId || ""),
+      String(clientName || ""),
+      String(subId || ""),
+      String(service || ""),
+      cost || 0,
+      String(note || ""),
+      String(actor || ""),
+      balanceChange === undefined ? "" : balanceChange,
+      beforeBalance === undefined ? "" : beforeBalance,
+      afterBalance === undefined ? "" : afterBalance
+    ]]);
+    Logger.log("✅ Додано до Історії: " + (clientName||clientId) + " — " + service);
+    return true;
+  } catch(e) {
+    Logger.log("❌ addToHistory error: " + e);
+    return false;
+  }
+}
+
 // ─────────────────────── doGet (REST API) ──────────────────────
 
 function doGet(e) {
   const action = e.parameter.action || '';
   let result = {};
+  const cache = CacheService.getScriptCache();
+  try {
+    ensureSchema();
 
-  if (action === 'getAvailableTimesForDate') {
-    const dateStr = e.parameter.date;
-    const allTimes = getTimesForDate(dateStr);
-    result = {
-      times: allTimes.map(time => {
+    if (action === 'verifyCrmPin') {
+      return jsonResponse(verifyCrmPin(e.parameter.pin || ""));
+    }
+
+    try { runDailyMaintenance(false); } catch (maintenanceErr) { logError("runDailyMaintenance", maintenanceErr, "system"); }
+
+    if (requiresAdminAuth(action) && !isValidAdminToken(e.parameter.adminToken || "")) {
+      logAction("web", "Unauthorized API", "CRM", action, "", "", "Нет или истек adminToken");
+      return jsonResponse({ success: false, unauthorized: true, error: "Unauthorized" });
+    }
+
+  // ── 1. Час + бокси разом (один запит замість двох) ─────────────
+  if (action === 'getTimesAndBoxes') {
+    const dateStr   = e.parameter.date;
+    const todayStr  = Utilities.formatDate(new Date(), TZ, "dd.MM.yyyy");
+    const isToday   = (dateStr === todayStr);
+    const cacheKey  = isToday ? null : 'timesBoxes_' + dateStr;
+
+    if (cacheKey) {
+      const cached = cache.get(cacheKey);
+      if (cached) { result = JSON.parse(cached); }
+    }
+
+    if (!result.times) {
+      // ✅ Фільтр минулого часу для сьогодні
+      const now    = new Date();
+      const curH   = parseInt(Utilities.formatDate(now, TZ, "HH"));
+      const curM   = parseInt(Utilities.formatDate(now, TZ, "mm"));
+      const minHour = isToday ? (curM > 0 ? curH + 1 : curH) : 0;
+
+      const allTimes = getTimesForDate(dateStr);
+      const times = allTimes.map(time => {
+        const timeHour = parseInt(time.split(':')[0]);
+        if (isToday && timeHour < minHour) {
+          return { time, available: false, past: true, freeBoxes: [] };
+        }
         const boxes     = getBoxesForTime(dateStr, time);
         const freeBoxes = boxes.filter(b => !isBoxBooked(dateStr, time, b));
         return { time, available: freeBoxes.length > 0, freeBoxes };
-      }),
-      date: dateStr
-    };
+      });
+
+      result = { times, date: dateStr };
+      // Кешуємо тільки майбутні дати (2 хвилини)
+      if (cacheKey) cache.put(cacheKey, JSON.stringify(result), 120);
+    }
   }
+
+  // ── 2. Доступний час (legacy — зі старим клієнтом) ─────────────
+  else if (action === 'getAvailableTimesForDate') {
+    const dateStr  = e.parameter.date;
+    const todayStr = Utilities.formatDate(new Date(), TZ, "dd.MM.yyyy");
+    const isToday  = (dateStr === todayStr);
+    const cacheKey = isToday ? null : 'avail_' + dateStr;
+
+    if (cacheKey) {
+      const cached = cache.get(cacheKey);
+      if (cached) { result = JSON.parse(cached); }
+    }
+
+    if (!result.times) {
+      const now     = new Date();
+      const curH    = parseInt(Utilities.formatDate(now, TZ, "HH"));
+      const curM    = parseInt(Utilities.formatDate(now, TZ, "mm"));
+      const minHour = isToday ? (curM > 0 ? curH + 1 : curH) : 0;
+
+      const allTimes = getTimesForDate(dateStr);
+      const times = allTimes.map(time => {
+        const timeHour = parseInt(time.split(':')[0]);
+        if (isToday && timeHour < minHour) {
+          return { time, available: false, past: true, freeBoxes: [] };
+        }
+        const boxes     = getBoxesForTime(dateStr, time);
+        const freeBoxes = boxes.filter(b => !isBoxBooked(dateStr, time, b));
+        return { time, available: freeBoxes.length > 0, freeBoxes };
+      });
+
+      result = { times, date: dateStr };
+      if (cacheKey) cache.put(cacheKey, JSON.stringify(result), 120);
+    }
+  }
+
+  // ── 3. Вільні бокси для часу ────────────────────────────────────
   else if (action === 'getBoxesForDateTime') {
     result = { boxes: getAvailableBoxes(e.parameter.date, e.parameter.time) };
   }
+
+  else if (action === 'cancelBooking') {
+    result = cancelBooking(e.parameter.bookingId, e.parameter.phone, "client");
+  }
+
+  else if (action === 'rescheduleBooking') {
+    result = rescheduleBooking(
+      e.parameter.bookingId,
+      e.parameter.phone,
+      e.parameter.date,
+      e.parameter.time,
+      e.parameter.box,
+      "client"
+    );
+  }
+
+  // ── 4. Усі записи ───────────────────────────────────────────────
   else if (action === 'getAllBookings') {
     const sheet = getSheet(SHEET_BOOKINGS);
-    const data  = safeGetRangeValues(sheet, 2, 1, 500, 11);
+    const data  = safeGetRangeValues(sheet, 2, 1, null, 12);
     result = {
       bookings: data.filter(r => r[0]).map((row, idx) => ({
-        row: idx + 2, id: String(row[0]),
-        date: row[1] instanceof Date ? fmtDate(row[1]) : String(row[1]).trim(),
-        day: String(row[2]),
-        time: row[3] instanceof Date ? Utilities.formatDate(row[3], TZ, "HH:mm") : String(row[3]).trim(),
-        box: String(row[4]), clientId: String(row[5]), clientName: String(row[6]),
-        phone: String(row[7]), service: String(row[8]), status: String(row[9]),
-        note: String(row[10] || '')
+        row:        idx + 2,
+        id:         String(row[0]),
+        date:       row[1] instanceof Date ? fmtDate(row[1]) : String(row[1]).trim(),
+        day:        String(row[2]),
+        time:       row[3] instanceof Date ? Utilities.formatDate(row[3], TZ, "HH:mm") : String(row[3]).trim(),
+        box:        String(row[4]),
+        clientId:   String(row[5]),
+        clientName: String(row[6]),
+        phone:      normalizePhone(String(row[7])),
+        service:    String(row[8]),
+        status:     String(row[9]),
+        note:       String(row[10] || ''),
+        source:     String(row[11] || '')
       }))
     };
   }
+
+  // ── 5. Усі клієнти ──────────────────────────────────────────────
   else if (action === 'getAllClients') {
     const sheet = getSheet(SHEET_CLIENTS);
-    const data  = safeGetRangeValues(sheet, 2, 1, 500, 8);
+    const data  = safeGetRangeValues(sheet, 2, 1, null, 13);
     result = {
       clients: data.filter(r => r[0]).map(row => ({
         clientId:   String(row[0]),
         name:       String(row[1]),
-        phone:      String(row[2]),
+        phone:      normalizePhone(String(row[2])),
         telegramId: String(row[3] || ''),
+        status:     String(row[4] || CLIENT_STATUS_ACTIVE),
         registered: parseDate(row[5]),
-        balance:    getClientLiveBalance(String(row[0]))  // ✅ живий баланс
+        balance:    getClientLiveBalance(String(row[0])),
+        visits:     Number(row[7]) || 0,
+        totalPurchases: Number(row[8]) || 0,
+        averageCheck: Number(row[9]) || 0,
+        lastVisit:  parseDate(row[10]),
+        source:     String(row[11] || ''),
+        adminComment: String(row[12] || '')
       }))
     };
   }
+
+  // ── 6. Повна інформація про клієнта ────────────────────────────
   else if (action === 'getClientFull') {
-    const cid = e.parameter.clientId;
+    const cid    = e.parameter.clientId;
+    const client = findClientById(cid);
+    if (client) client.phone = normalizePhone(String(client.phone || ''));
     result = {
-      client:   findClientById(cid),
+      client,
       subs:     getClientSubs(cid),
       history:  getClientHistory(cid),
       bookings: getClientBookings(cid)
     };
   }
+
+  // ── 7. Усі абонементи БЕЗ візитів (legacy) ─────────────────────
   else if (action === 'getAllSubs') {
     const sheet = getSheet(SHEET_SUBS);
-    const data  = safeGetRangeValues(sheet, 2, 1, 500, 11);
+    const data  = safeGetRangeValues(sheet, 2, 1, null, 16);
     result = {
       subs: data.filter(r => r[0]).map((row, idx) => ({
         row: idx + 2, clientId: String(row[0]), subId: String(row[1]),
         typeId: String(row[2]), clientName: String(row[3]), typeName: String(row[4]),
         amount: row[5] || 0, startDate: parseDate(row[6]), endDate: parseDate(row[7]),
-        spent: row[8] || 0, balance: row[9] || 0, status: String(row[10])
+        spent: row[8] || 0, balance: row[9] || 0, status: String(row[10]),
+        soldBy: String(row[11] || ''), paymentMethod: String(row[12] || ''),
+        discount: row[13] || '', promoCode: String(row[14] || ''), activationDate: parseDate(row[15])
       }))
     };
   }
-  else if (action === 'updateBookingStatus') {
-    const sheet = getSheet(SHEET_BOOKINGS);
-    const data  = safeGetRangeValues(sheet, 2, 1, 500, 1);
-    let updated = false;
-    for (let i = 0; i < data.length; i++) {
-      if (String(data[i][0]) === e.parameter.bookingId) {
-        sheet.getRange(i + 2, 10).setValue(e.parameter.status);
-        updated = true; break;
+
+  // ── 8. ✅ Усі абонементи З кількістю візитів ────────────────────
+  else if (action === 'getAllSubsWithVisits') {
+    // Рахуємо візити з Історії
+    const histSheet = getSheet(SHEET_HISTORY);
+    const histData  = histSheet ? safeGetRangeValues(histSheet, 2, 1, null, 3) : [];
+    const visitMap  = {};
+    histData.forEach(r => {
+      if (r[0] && r[2]) {
+        const cid = String(r[2]).trim();
+        visitMap[cid] = (visitMap[cid] || 0) + 1;
       }
-    }
-    result = { success: updated };
-  }
-  else if (action === 'updateSubStatus') {
+    });
+
     const sheet = getSheet(SHEET_SUBS);
-    const data  = safeGetRangeValues(sheet, 2, 1, 500, 2);
-    let updated = false;
-    for (let i = 0; i < data.length; i++) {
-      if (String(data[i][1]) === e.parameter.subId) {
-        sheet.getRange(i + 2, 11).setValue(e.parameter.status);
-        updated = true; break;
-      }
-    }
-    result = { success: updated };
+    const data  = safeGetRangeValues(sheet, 2, 1, null, 16);
+    result = {
+      subs: data.filter(r => r[0]).map((row, idx) => ({
+        row:        idx + 2,
+        clientId:   String(row[0]),
+        subId:      String(row[1]),
+        typeId:     String(row[2]),
+        clientName: String(row[3]),
+        typeName:   String(row[4]),
+        amount:     parseFloat(row[5]) || 0,
+        startDate:  parseDate(row[6]),
+        endDate:    parseDate(row[7]),
+        spent:      parseFloat(row[8]) || 0,
+        balance:    parseFloat(row[9]) || 0,
+        status:     String(row[10]),
+        visitCount: visitMap[String(row[0])] || 0,
+        soldBy:     String(row[11] || ''),
+        paymentMethod: String(row[12] || ''),
+        discount:   row[13] || '',
+        promoCode:  String(row[14] || ''),
+        activationDate: parseDate(row[15])
+      }))
+    };
   }
+
+  // ── 9. ✅ Оновити статус запису + запис в Історію ───────────────
+  else if (action === 'updateBookingStatus') {
+    result = withScriptLock("updateBookingStatus", function() {
+      const bookingId = e.parameter.bookingId;
+      const newStatus = String(e.parameter.status || "");
+      const cost = Number(String(e.parameter.cost || 0).replace(/[^\d.]/g, "")) || 0;
+      const note = String(e.parameter.note || "Запис виконано");
+      const sheet = getSheet(SHEET_BOOKINGS);
+      const data = safeGetRangeValues(sheet, 2, 1, null, 12);
+      let updated = false;
+      let bData = null;
+      let oldStatus = "";
+      let bookingRow = -1;
+      let beforeBalance = 0;
+      let subIdForDeduction = null;
+
+      for (let i = 0; i < data.length; i++) {
+        if (String(data[i][0]) === bookingId) {
+          oldStatus = String(data[i][9] || "");
+          bData = {
+            date:       data[i][1] instanceof Date ? fmtDate(data[i][1]) : String(data[i][1]).trim(),
+            clientId:   String(data[i][5]),
+            clientName: String(data[i][6]),
+            service:    String(data[i][8])
+          };
+          bookingRow = i + 2;
+          if ((newStatus.includes("Виконано") || newStatus.includes("Готово")) && cost > 0) {
+            subIdForDeduction = e.parameter.subId || findSubForCost(bData.clientId, cost);
+            if (!subIdForDeduction) return { success: false, error: "Абонемент не знайдено або недостатньо коштів" };
+            beforeBalance = getClientLiveBalance(bData.clientId);
+            const deducted = deductFromSub(bData.clientId, subIdForDeduction, cost);
+            if (!deducted) return { success: false, error: "Недостатньо коштів на абонементі" };
+          }
+          sheet.getRange(bookingRow, 10).setValue(newStatus);
+          updated = true;
+          break;
+        }
+      }
+
+      if (updated && bData && (newStatus.includes('Виконано') || newStatus.includes('Готово'))) {
+        if (cost > 0 && subIdForDeduction) {
+          const afterBalance = getClientLiveBalance(bData.clientId);
+          addToHistory(bookingId, bData.clientId, bData.clientName,
+                       bData.date, bData.service, cost, note, 'CRM',
+                       afterBalance - beforeBalance, beforeBalance, afterBalance, subIdForDeduction);
+        } else {
+          addToHistory(bookingId, bData.clientId, bData.clientName,
+                       bData.date, bData.service, 0, note, 'CRM', 0, "", "", "");
+        }
+        updateClientMetrics(bData.clientId);
+      }
+      if (bData?.date) invalidateBookingCache(bData.date);
+      if (updated) logAction("CRM", newStatus.includes("Скасовано") ? "Отмена" : "Редактирование", "Booking", bookingId, oldStatus, newStatus, "");
+      return { success: updated };
+    }, "CRM");
+  }
+
+  // ── 10. Оновити статус абонементу ──────────────────────────────
+  else if (action === 'updateSubStatus') {
+    result = withScriptLock("updateSubStatus", function() {
+      const sheet = getSheet(SHEET_SUBS);
+      const data  = safeGetRangeValues(sheet, 2, 1, null, 16);
+      let updated = false;
+      let clientId = "";
+      let oldStatus = "";
+      for (let i = 0; i < data.length; i++) {
+        if (String(data[i][1]) === e.parameter.subId) {
+          clientId = String(data[i][0] || "");
+          oldStatus = String(data[i][10] || "");
+          sheet.getRange(i + 2, 11).setValue(e.parameter.status);
+          updated = true; break;
+        }
+      }
+      if (updated && clientId) {
+        updateClientBalance(clientId);
+        updateClientMetrics(clientId);
+        logAction("CRM", "Редактирование", "Subscription", e.parameter.subId, oldStatus, e.parameter.status, "status");
+      }
+      return { success: updated };
+    }, "CRM");
+  }
+
+  // ── 11. ✅ Зберегти запис з сайту + автореєстрація ──────────────
   else if (action === 'saveBooking') {
     const name  = e.parameter.name  || 'Гість';
-    const phone = e.parameter.phone || '';
-    const clientId = autoRegisterClient(name, phone) || ('web-' + Date.now());
-    const saved = saveBooking(
+    const phone = normalizePhone(e.parameter.phone || '');
+    const clientId = autoRegisterClient(name, phone, "", "Сайт");
+    if (!clientId) {
+      result = { success: false, error: 'Не вдалося зареєструвати клієнта' };
+    } else {
+    const bookingId = saveBooking(
       e.parameter.date, e.parameter.time, e.parameter.box,
       clientId, name, phone,
-      (e.parameter.service || '') + (e.parameter.car ? ' | ' + e.parameter.car : '')
+      (e.parameter.service || '') + (e.parameter.car ? ' | ' + e.parameter.car : ''),
+      "Сайт",
+      e.parameter.comment || "",
+      "web"
     );
-    if (saved) {
+    if (bookingId) {
+      // Інвалідуємо кеш часів
+      invalidateBookingCache(e.parameter.date);
       sendMessage(ADMIN_ID,
         `🌐 <b>ЗАПИС З САЙТУ!</b>\n\n` +
         `👤 ${name}\n📱 ${phone}\n` +
@@ -1337,24 +2329,29 @@ function doGet(e) {
         `🚗 ${e.parameter.car||'—'} · ${e.parameter.carType||'—'}`
       );
     }
-    result = { success: saved };
+    result = { success: !!bookingId, bookingId: bookingId || null };
+    }
   }
+
+  // ── 12. Заявка на абонемент з сайту ────────────────────────────
   else if (action === 'saveSubOrder') {
     try {
-      const name  = e.parameter.name  || 'Гість';
-      const phone = e.parameter.phone || '';
-      const clientId = autoRegisterClient(name, phone) || ('web-' + Date.now());
+      const name     = e.parameter.name  || 'Гість';
+      const phone    = normalizePhone(e.parameter.phone || '');
+      const clientId = autoRegisterClient(name, phone, e.parameter.tg || '', "Сайт");
+      if (!clientId) throw new Error('Не вдалося зареєструвати клієнта');
       const requestId = saveSubscriptionRequest(
         clientId, name, e.parameter.tg || '',
         e.parameter.subId, e.parameter.subName,
-        Number(e.parameter.price) || 0
+        Number(String(e.parameter.account || e.parameter.price || 0).replace(/[^\d.]/g, '')) || 0
       );
       if (requestId) {
         sendMessage(ADMIN_ID,
           `💎 <b>НОВА ЗАЯВКА НА АБОНЕМЕНТ!</b>\n\n` +
           `👤 ${name}\n📱 ${phone}\n💬 Telegram: ${e.parameter.tg||'—'}\n\n` +
           `🏷 <b>${e.parameter.subName}</b>\n📅 ${e.parameter.months} міс.\n` +
-          `💰 ${Number(e.parameter.price).toLocaleString('uk-UA')} грн → ${Number(e.parameter.account).toLocaleString('uk-UA')} грн (+${e.parameter.bonus})\n\n` +
+          `💰 ${Number(String(e.parameter.price||0).replace(/[^\d.]/g,'')).toLocaleString('uk-UA')} грн` +
+          ` → ${Number(String(e.parameter.account||0).replace(/[^\d.]/g,'')).toLocaleString('uk-UA')} грн (+${e.parameter.bonus})\n\n` +
           `ID заявки: ${requestId}`,
           createInlineKeyboard([[
             { text: "✅ Підтвердити", callback_data: `confirm_sub_${requestId}` },
@@ -1367,14 +2364,15 @@ function doGet(e) {
       }
     } catch(err) { result = { success: false, error: err.toString() }; }
   }
+
+  // ── 13. Заявки на абонементи ────────────────────────────────────
   else if (action === 'getAllSubRequests') {
     result = { requests: getSubscriptionRequests() };
   }
-  else if (action === 'updateSubRequestStatus') {
-    result = { success: updateSubscriptionRequestStatus(e.parameter.requestId, e.parameter.status) };
-  }
+
+  // ── 14. Підтвердити заявку ─────────────────────────────────────
   else if (action === 'confirmSubRequest') {
-    const ok = confirmSubscriptionRequest(e.parameter.requestId);
+    const ok = confirmSubscriptionRequest(e.parameter.requestId, "CRM");
     if (ok) {
       const req = getSubscriptionRequests().find(r => r.requestId === e.parameter.requestId);
       if (req?.telegramId && req.telegramId !== 'undefined')
@@ -1382,8 +2380,10 @@ function doGet(e) {
     }
     result = { success: ok };
   }
+
+  // ── 15. Відхилити заявку ───────────────────────────────────────
   else if (action === 'rejectSubRequest') {
-    const ok = updateSubscriptionRequestStatus(e.parameter.requestId, '❌ Відхилена');
+    const ok = updateSubscriptionRequestStatus(e.parameter.requestId, '❌ Відхилена', "CRM", e.parameter.reason || "");
     if (ok) {
       const req = getSubscriptionRequests().find(r => r.requestId === e.parameter.requestId);
       if (req?.telegramId && req.telegramId !== 'undefined')
@@ -1391,29 +2391,60 @@ function doGet(e) {
     }
     result = { success: ok };
   }
+
+  // ── 16. Оновити статус заявки ──────────────────────────────────
+  else if (action === 'updateSubRequestStatus') {
+    result = { success: updateSubscriptionRequestStatus(e.parameter.requestId, e.parameter.status, "CRM", e.parameter.reason || "") };
+  }
+
+  // ── 17. Автореєстрація клієнта ─────────────────────────────────
   else if (action === 'autoRegister') {
     const name  = e.parameter.name  || '';
     const phone = e.parameter.phone || '';
     if (!name || !phone) {
       result = { success: false, error: 'name and phone required' };
     } else {
-      const clientId = autoRegisterClient(name, phone);
+      const clientId = autoRegisterClient(name, phone, e.parameter.telegramId || "", e.parameter.source || "Сайт");
       result = { success: !!clientId, clientId: clientId || null };
     }
   }
-  // ✅ НОВИЙ endpoint: синхронізація балансів
-  else if (action === 'syncBalances') {
+
+  // ── 18. ✅ Перерахувати всі баланси (кнопка в CRM) ──────────────
+  else if (action === 'recalcAllBalances') {
     const count = syncAllBalances();
-    result = { success: true, synced: count };
-  }
-  // ✅ НОВИЙ endpoint: отримати баланс клієнта
-  else if (action === 'getClientBalance') {
-    const cid = e.parameter.clientId;
-    const balance = getClientLiveBalance(cid);
-    result = { clientId: cid, balance };
+    const metrics = syncClientMetrics();
+    result = { success: true, updated: count, metrics };
   }
 
-  return ContentService
-    .createTextOutput(JSON.stringify(result))
-    .setMimeType(ContentService.MimeType.JSON);
+  // ── 19. Синхронізація балансів ─────────────────────────────────
+  else if (action === 'syncBalances') {
+    const count = syncAllBalances();
+    const metrics = syncClientMetrics();
+    result = { success: true, synced: count, metrics };
+  }
+
+  else if (action === 'runMaintenance') {
+    result = { success: true, maintenance: runDailyMaintenance(true) };
+  }
+
+  else if (action === 'getAnalytics') {
+    result = { success: true, analytics: calculateAnalytics().map(r => ({ kpi: r[0], value: r[1] })) };
+  }
+
+  else if (action === 'broadcastTelegram') {
+    result = broadcastTelegram(e.parameter.message || "", e.parameter.segment || "all", "CRM");
+  }
+
+  // ── 20. Баланс одного клієнта ──────────────────────────────────
+  else if (action === 'getClientBalance') {
+    const cid = e.parameter.clientId;
+    result = { clientId: cid, balance: getClientLiveBalance(cid) };
+  }
+
+  } catch (err) {
+    logError(action || "doGet", err, e?.parameter?.adminToken ? "crm" : "web");
+    result = { success: false, error: String(err && err.message ? err.message : err) };
+  }
+
+  return jsonResponse(result);
 }
