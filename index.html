@@ -382,6 +382,14 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
 .mobile-menu a:hover{opacity:0.6;}
 .mobile-menu-close{position:absolute;top:20px;right:20px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--white);width:42px;height:42px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 
+/* PERSONAL ACCOUNT MODAL */
+#profileModal .modal-box { border-color: var(--accent); background: rgba(10, 10, 16, 0.9); }
+.auth-panel { display: none; }
+.auth-panel.active { display: block; }
+.pd-stat-card { padding: 18px 16px; border-radius: 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); }
+.pd-stat-card.accent { border-color: var(--accent); background: rgba(167, 139, 250, 0.05); }
+.pd-history-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.04); }
+
 @media(max-width:768px){
   nav{padding:0 16px;}
   .nav-links{display:none;}
@@ -443,6 +451,7 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
       <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
       @1333_car_center
     </a>
+    <button class="nav-insta" onclick="openProfileModal()" style="border-color: var(--accent); color: var(--white); background: rgba(167, 139, 250, 0.1); cursor: pointer;">👤 Кабінет</button>
     <button class="nav-btn" onclick="showPage('booking')">Записатись</button>
     <button class="nav-menu-btn" onclick="openMobileMenu()">☰</button>
   </div>
@@ -761,8 +770,75 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<!-- PERSONAL ACCOUNT MODAL -->
+    <div class="modal-overlay" id="profileModal">
+      <div class="modal-box modal-large">
+        <div class="modal-close" onclick="closeProfileModal()">✕</div>
+        
+        <!-- Auth Step: Phone input -->
+        <div id="auth-phone-step" class="auth-panel active">
+          <div class="panel-title" style="color: var(--accent);">🔑 Особистий кабінет</div>
+          <div class="panel-sub">Введіть Ваш номер телефону для входу</div>
+          <div class="form-group">
+            <div class="form-label">Телефон</div>
+            <input type="tel" class="field" id="authPhone" placeholder="+380 XX XXX XX XX">
+          </div>
+          <div style="display:flex; gap:10px; margin-top:20px;">
+            <button class="btn-white" style="flex:1;" onclick="sendVerificationCode()">Надіслати код</button>
+          </div>
+          <div id="auth-phone-error" style="color: var(--red); font-size:12px; margin-top:10px;"></div>
+        </div>
 
+        <!-- Auth Step: Code verification -->
+        <div id="auth-code-step" class="auth-panel">
+          <div class="panel-title" style="color: var(--accent);">🔐 Перевірка коду</div>
+          <div class="panel-sub" id="auth-code-subtitle">Ми надіслали 4-значний код у Ваш Telegram</div>
+          <div class="form-group">
+            <div class="form-label">4-значний код</div>
+            <input type="text" class="field" id="authCode" placeholder="XXXX" maxlength="4" style="text-align:center; font-size:24px; letter-spacing:8px;">
+          </div>
+          <div style="display:flex; gap:10px; margin-top:20px;">
+            <button class="btn-white" style="flex:1;" onclick="verifyVerificationCode()">Підтвердити</button>
+            <button class="btn-ghost" onclick="showAuthPhoneStep()">← Назад</button>
+          </div>
+          <div id="auth-code-error" style="color: var(--red); font-size:12px; margin-top:10px;"></div>
+        </div>
+
+        <!-- Profile Dashboard (Logged in) -->
+        <div id="profile-dashboard" class="auth-panel">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
+            <div>
+              <div class="panel-title" id="pd-client-name" style="color: var(--accent);">Вітаємо!</div>
+              <div class="panel-sub" id="pd-client-id">ID: C-000</div>
+            </div>
+            <button class="btn-ghost" style="padding:8px 16px; border-color:var(--red); color:var(--red);" onclick="logoutClient()">Вийти ➔</button>
+          </div>
+
+          <div class="crm-stats-row" style="grid-template-columns: repeat(2,1fr); margin-bottom:20px;">
+            <div class="pd-stat-card accent">
+              <div class="crm-stat-num" id="pd-balance" style="color:var(--green)">0 ₴</div>
+              <div class="crm-stat-label">Особистий баланс</div>
+            </div>
+            <div class="pd-stat-card">
+              <div class="crm-stat-num" id="pd-visits">0</div>
+              <div class="crm-stat-label">Всього візитів</div>
+            </div>
+          </div>
+
+          <div style="margin-bottom:20px;">
+            <div class="form-label" style="margin-bottom:8px;">Ваші активні абонементи</div>
+            <div id="pd-active-subs-container"></div>
+          </div>
+
+          <div>
+            <div class="form-label" style="margin-bottom:8px;">Останні 5 візитів</div>
+            <div id="pd-history-container" style="display:flex; flex-direction:column; gap:8px;"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+<div class="toast" id="toast"></div>
 <script>
 // ╔══════════════════════════════════════════════════════╗
 // ║  CONFIG                                              ║
@@ -780,6 +856,233 @@ const _planMeta = {};
 let _allBookings=[], _allClients=[], _allSubs=[], _allSubRequests=[];
 let _crmToken = sessionStorage.getItem(CRM_TOKEN_KEY) || '';
 let _bookingFilter='all';
+let _bookingInitData = null;
+    let _clientToken = localStorage.getItem('client_token') || '';
+    let _clientId = localStorage.getItem('client_id') || '';
+
+    window.addEventListener('load', async () => {
+      initDatePills();
+      await fetchBookingInitData();
+      await initClientSession();
+    });
+
+    async function fetchBookingInitData() {
+      if (!isApiConfigured()) return;
+      const data = await api('getBookingInitData');
+      if (data) _bookingInitData = data;
+    }
+
+    function getLocalTimesAndBoxes(dateStr) {
+      if (!_bookingInitData) return { times: [], date: dateStr };
+      
+      const ukDays = ['Неділя','Понеділок','Вівторок','Середа','Четвер','П\'ятниця','Субота'];
+      const [d, m, y] = dateStr.split('.').map(Number);
+      const dateObj = new Date(y, m - 1, d);
+      const dayName = ukDays[dateObj.getDay()];
+      
+      const sched = _bookingInitData.schedule.find(s => s.day === dayName);
+      if (!sched || sched.status === 'Вихідний') return { times: [], date: dateStr };
+      
+      const parseTime = (s) => {
+        if (!s) return null;
+        return parseInt(s.split(':')[0]);
+      };
+      
+      const timesSet = new Set();
+      const addBoxTimes = (open, close) => {
+        const oh = parseTime(open), ch = parseTime(close);
+        if (oh === null || ch === null) return;
+        for (let h = oh; h < ch; h++) timesSet.add(String(h).padStart(2, '0') + ':00');
+      };
+      
+      addBoxTimes(sched.box1_open, sched.box1_close);
+      addBoxTimes(sched.box2_open, sched.box2_close);
+      addBoxTimes(sched.box3_open, sched.box3_close);
+      
+      const sortedTimes = Array.from(timesSet).sort();
+      const dateBookings = _bookingInitData.bookings.filter(b => b.date === dateStr);
+      
+      const todayStr = getTodayStr();
+      const isToday = (dateStr === todayStr);
+      const now = new Date();
+      const curH = now.getHours();
+      const curM = now.getMinutes();
+      const minHour = curM > 0 ? curH + 1 : curH;
+      
+      const finalTimes = sortedTimes.map(timeStr => {
+        const hour = parseInt(timeStr.split(':')[0]);
+        if (isToday && hour < minHour) {
+          return { time: timeStr, available: false, past: true, freeBoxes: [] };
+        }
+        
+        const activeBoxes = [];
+        const checkBox = (open, close, name) => {
+          const oh = parseTime(open), ch = parseTime(close);
+          if (oh !== null && ch !== null && hour >= oh && hour < ch) activeBoxes.push(name);
+        };
+        
+        checkBox(sched.box1_open, sched.box1_close, 'Box 1');
+        checkBox(sched.box2_open, sched.box2_close, 'Box 2');
+        checkBox(sched.box3_open, sched.box3_close, 'Box 3');
+        
+        const freeBoxes = activeBoxes.filter(boxName => {
+          return !dateBookings.some(b => b.time === timeStr && b.box === boxName);
+        });
+        
+        return { time: timeStr, available: freeBoxes.length > 0, freeBoxes: freeBoxes };
+      });
+      
+      return { times: finalTimes, date: dateStr };
+    }
+
+    // Заміна існуючої функції selectDate
+    async function selectDate(el, dateStr) {
+      document.querySelectorAll('.date-pill').forEach(b=>b.classList.remove('selected'));
+      el.classList.add('selected');
+      S.date=dateStr; S.time=''; S.box=null;
+      const lbl = document.getElementById('timeGridLabel');
+      if (lbl) lbl.style.display='block';
+      const grid = document.getElementById('timeGrid');
+      
+      if (!_bookingInitData) {
+        grid.innerHTML='<div class="time-loading"><span class="time-loading-spinner"></span>Завантаження...</div>';
+        await fetchBookingInitData();
+      }
+      
+      const result = getLocalTimesAndBoxes(dateStr);
+      S._cachedBoxesForTimes = {};
+      result.times.forEach(t => { S._cachedBoxesForTimes[t.time] = t.freeBoxes; });
+      renderTimes(result.times);
+    }
+
+    // ═══ PERSONAL ACCOUNT LOGIC ═══
+    async function initClientSession() {
+      if (_clientToken && _clientId) {
+        const res = await api('getClientProfileData', { clientId: _clientId, clientToken: _clientToken });
+        if (res && res.success) {
+          renderProfileDashboard(res);
+        } else {
+          logoutClient();
+        }
+      }
+    }
+
+    function openProfileModal() {
+      document.getElementById('profileModal').classList.add('show');
+      if (_clientToken && _clientId) {
+        showProfileDashboardOnly();
+      } else {
+        showAuthPhoneStep();
+      }
+    }
+
+    function closeProfileModal() { document.getElementById('profileModal').classList.remove('show'); }
+
+    function showAuthPhoneStep() {
+      document.querySelectorAll('.auth-panel').forEach(el => el.classList.remove('active'));
+      document.getElementById('auth-phone-step').classList.add('active');
+    }
+
+    function showCodeStep() {
+      document.querySelectorAll('.auth-panel').forEach(el => el.classList.remove('active'));
+      document.getElementById('auth-code-step').classList.add('active');
+    }
+
+    function showProfileDashboardOnly() {
+      document.querySelectorAll('.auth-panel').forEach(el => el.classList.remove('active'));
+      document.getElementById('profile-dashboard').classList.add('active');
+    }
+
+    async function sendVerificationCode() {
+      const phone = document.getElementById('authPhone').value.trim();
+      const err = document.getElementById('auth-phone-error');
+      err.textContent = '';
+      if (!phone) { err.textContent = 'Введіть номер телефону'; return; }
+      
+      const res = await api('sendClientAuthCode', { phone });
+      if (res && res.success) {
+        document.getElementById('auth-code-subtitle').innerHTML = `Ми надіслали 4-значний код у Ваш Telegram за номером <b>${phone}</b>`;
+        showCodeStep();
+      } else {
+        err.textContent = res ? res.error : 'Помилка надсилання коду';
+      }
+    }
+
+    async function verifyVerificationCode() {
+      const phone = document.getElementById('authPhone').value.trim();
+      const code = document.getElementById('authCode').value.trim();
+      const err = document.getElementById('auth-code-error');
+      err.textContent = '';
+      if (!code || code.length !== 4) { err.textContent = 'Введіть 4-значний код'; return; }
+
+      const res = await api('verifyClientAuthCode', { phone, code });
+      if (res && res.success && res.clientToken) {
+        _clientToken = res.clientToken;
+        _clientId = res.clientId;
+        localStorage.setItem('client_token', _clientToken);
+        localStorage.setItem('client_id', _clientId);
+        
+        const profileRes = await api('getClientProfileData', { clientId: _clientId, clientToken: _clientToken });
+        if (profileRes && profileRes.success) {
+          renderProfileDashboard(profileRes);
+          showProfileDashboardOnly();
+        }
+      } else {
+        err.textContent = res ? res.error : 'Невірний або застарілий код';
+      }
+    }
+
+    function renderProfileDashboard(data) {
+      document.getElementById('pd-client-name').textContent = 'Вітаємо, ' + data.profile.name + '!';
+      document.getElementById('pd-client-id').textContent = 'ID: ' + data.profile.clientId + ' · ' + data.profile.phone;
+      document.getElementById('pd-balance').textContent = (data.profile.balance || 0).toLocaleString('uk-UA') + ' ₴';
+      document.getElementById('pd-visits').textContent = data.profile.visits || 0;
+
+      const subsContainer = document.getElementById('pd-active-subs-container');
+      subsContainer.innerHTML = '';
+      const activeSubs = data.subs || [];
+      if (activeSubs.length) {
+        activeSubs.forEach(s => {
+          subsContainer.innerHTML += `
+            <div class="sub-card-mini" style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 8px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span class="badge badge-silver">${s.typeName}</span>
+                <span class="badge badge-green">${s.status}</span>
+              </div>
+              <div style="font-size:18px; font-weight:700; color:var(--green); margin-top:6px;">${(s.balance || 0).toLocaleString('uk-UA')} ₴</div>
+              <div style="font-size:11px; color:var(--gray); margin-top:2px;">До: ${s.endDate || '—'}</div>
+            </div>`;
+        });
+      } else {
+        subsContainer.innerHTML = '<div class="sub-card-mini" style="background: rgba(255,255,255,0.02); text-align:center; color:var(--gray);">Немає активних абонементів</div>';
+      }
+
+      const histContainer = document.getElementById('pd-history-container');
+      histContainer.innerHTML = '';
+      const historyList = data.history || [];
+      if (historyList.length) {
+        historyList.forEach(h => {
+          histContainer.innerHTML += `
+            <div class="pd-history-item">
+              <div>
+                <div style="font-weight:600; font-size:13px;">${h.service}</div>
+                <div style="color:var(--gray); font-size:11px; margin-top:2px;">📅 ${h.date}</div>
+              </div>
+              <div style="color:var(--green); font-weight:700; font-size:13px;">${Math.round(h.cost || 0)} ₴</div>
+            </div>`;
+        });
+      } else {
+        histContainer.innerHTML = '<div style="color:var(--gray); font-size:13px; text-align:center; padding:10px 0;">Історія візитів порожня</div>';
+      }
+    }
+
+    function logoutClient() {
+      localStorage.removeItem('client_token');
+      localStorage.removeItem('client_id');
+      _clientToken = '';
+      _clientId = '';
+      showAuthPhoneStep();
+    }
 // Cache layer
 const _cache = {};
 const CACHE_TTL = 90000; // 1.5 хвилини (для майбутніх дат)
