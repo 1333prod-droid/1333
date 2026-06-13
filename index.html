@@ -5,7 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>1333 Car Center — Детейлінг Харків</title>
 <meta name="description" content="Детейлінг центр у Харкові. Антигравійна плівка, хімчистка, полірування.">
+<!-- ✅ v9 PERF: Preconnect до Apps Script + редірект-домену Google —
+     браузер починає DNS/TLS-хендшейк ще ДО першого реального запиту,
+     що економить 200-500мс на кожному виклику API -->
+<link rel="preconnect" href="https://script.google.com">
+<link rel="dns-prefetch" href="https://script.google.com">
+<link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
+<link rel="dns-prefetch" href="https://script.googleusercontent.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- ✅ v9 NEW: Chart.js для дашборду "Аналітика" -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" defer></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
@@ -287,6 +296,34 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;height:64px;
 .crm-card-tag{font-size:11px;color:var(--gray);background:rgba(255,255,255,0.05);padding:3px 10px;border-radius:100px;}
 .crm-card-actions{display:flex;gap:6px;flex-wrap:wrap;}
 
+/* ═══ ANALYTICS DASHBOARD ═══ */
+.an-kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px;}
+.an-kpi-card{padding:16px 14px;border-radius:16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);position:relative;overflow:hidden;}
+.an-kpi-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(34,197,94,0.06),transparent 60%);pointer-events:none;}
+.an-kpi-num{font-size:24px;font-weight:700;line-height:1.1;color:var(--white);letter-spacing:-0.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.an-kpi-label{font-size:9px;color:var(--gray);font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-top:4px;}
+.an-kpi-card.accent-green .an-kpi-num{color:var(--green);}
+.an-kpi-card.accent-accent .an-kpi-num{color:var(--accent);}
+
+.an-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+.an-grid .an-card.full{grid-column:1/-1;}
+.an-card{padding:20px;border-radius:18px;background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.07);}
+.an-card-title{font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--light);margin-bottom:14px;}
+.an-card-sub{font-size:11px;color:var(--gray);margin-top:-10px;margin-bottom:14px;}
+.an-chart-wrap{position:relative;height:240px;}
+.an-chart-wrap.small{height:200px;}
+.an-empty{display:flex;align-items:center;justify-content:center;height:100%;color:var(--gray);font-size:13px;}
+.an-legend-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:11px;color:var(--gray);}
+.an-legend-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle;}
+.an-refresh-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.an-refresh-bar .an-updated{font-size:11px;color:var(--gray);}
+
+@media (max-width:900px){
+  .an-kpi-row{grid-template-columns:repeat(2,1fr);}
+  .an-grid{grid-template-columns:1fr;}
+  .an-chart-wrap{height:220px;}
+}
+
 /* BADGES */
 .badge{display:inline-flex;align-items:center;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:3px 9px;border-radius:100px;}
 .badge-green{background:rgba(34,197,94,0.1);color:#22c55e;border:1px solid rgba(34,197,94,0.2);}
@@ -382,83 +419,6 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
 .mobile-menu a:hover{opacity:0.6;}
 .mobile-menu-close{position:absolute;top:20px;right:20px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--white);width:42px;height:42px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 
-/* ════ v10 GLOBAL TRANSITIONS (cubic-bezier premium) ════ */
-*{transition-timing-function:cubic-bezier(0.4,0,0.2,1);}
-.btn-white,.btn-ghost,.btn-next,.btn-back,.act-btn,.plan-home-btn,.plan-cta-btn,.svc-full-btn,.pin-key,.crm-tab-btn,.client-tab-btn,.nav-btn,.modal-close{transition:all 0.25s cubic-bezier(0.4,0,0.2,1);}
-.btn-white:active,.btn-next:active,.plan-cta-btn:active,.svc-full-btn:active{transform:scale(0.97);}
-.act-btn:active,.pin-key:active{transform:scale(0.95);}
-button:disabled{opacity:0.5!important;cursor:not-allowed!important;transform:none!important;}
-
-/* ════ PAGE FADE-IN ════ */
-.page.active{animation:pageFadeIn 0.35s cubic-bezier(0.4,0,0.2,1) both;}
-@keyframes pageFadeIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
-
-/* ════ MODAL OPEN ANIMATION ════ */
-.modal-overlay.show .modal-box{animation:modalSlideIn 0.28s cubic-bezier(0.4,0,0.2,1) both;}
-@keyframes modalSlideIn{from{opacity:0;transform:translateY(24px) scale(0.97);}to{opacity:1;transform:translateY(0) scale(1);}}
-
-/* ════ PERSONAL ACCOUNT MODAL ════ */
-#profileModal .modal-box{border-color:rgba(167,139,250,0.25);background:rgba(8,8,14,0.96);}
-.auth-panel{display:none;}
-.auth-panel.active{display:block;animation:fadeIn 0.3s ease both;}
-
-/* ── Cabinet header (mirrors CRM client card header) ── */
-.pd-client-header{display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid rgba(255,255,255,0.06);}
-.pd-avatar{width:52px;height:52px;border-radius:50%;background:rgba(167,139,250,0.12);border:1.5px solid rgba(167,139,250,0.3);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:var(--accent);flex-shrink:0;transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);}
-.pd-avatar:hover{transform:scale(1.06);}
-.pd-header-info{flex:1;min-width:0;}
-.pd-name{font-size:20px;font-weight:700;letter-spacing:-0.3px;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.pd-sub-meta{font-size:12px;color:var(--gray);margin-top:3px;}
-.pd-logout-btn{background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);color:#ef4444;padding:7px 14px;border-radius:8px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.25s cubic-bezier(0.4,0,0.2,1);white-space:nowrap;flex-shrink:0;}
-.pd-logout-btn:hover{background:rgba(239,68,68,0.14);transform:scale(0.97);}
-
-/* ── Stats grid 2×2 (mirrors CRM .crm-stat-card) ── */
-.pd-stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:18px;}
-.pd-stat{padding:16px;border-radius:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);transition:border-color 0.25s,background 0.25s;}
-.pd-stat:hover{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.12);}
-.pd-stat.accent{background:rgba(167,139,250,0.07);border-color:rgba(167,139,250,0.2);}
-.pd-stat.green-stat{background:rgba(34,197,94,0.05);border-color:rgba(34,197,94,0.18);}
-.pd-stat-num{font-size:22px;font-weight:700;letter-spacing:-0.5px;line-height:1;color:var(--white);}
-.pd-stat.accent .pd-stat-num{color:var(--accent);}
-.pd-stat.green-stat .pd-stat-num{color:var(--green);}
-.pd-stat-label{font-size:9px;color:var(--gray);font-weight:600;letter-spacing:1.2px;margin-top:5px;text-transform:uppercase;}
-
-/* ── Cabinet tabs (mirrors .client-tabs) ── */
-.pd-tabs{display:flex;gap:3px;margin-bottom:16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:4px;}
-.pd-tab{flex:1;padding:8px 10px;border-radius:9px;background:none;border:none;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:var(--gray);cursor:pointer;transition:all 0.25s cubic-bezier(0.4,0,0.2,1);text-align:center;}
-.pd-tab.active{background:rgba(255,255,255,0.1);color:var(--white);}
-.pd-pane{display:none;}
-.pd-pane.active{display:block;animation:fadeIn 0.25s ease both;}
-
-/* ── Sub card (mirrors .sub-card-mini) ── */
-.pd-sub-card{padding:16px;border-radius:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);margin-bottom:8px;transition:border-color 0.25s,background 0.25s;}
-.pd-sub-card:hover{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.12);}
-.pd-sub-balance{font-size:22px;font-weight:700;color:var(--green);margin:6px 0 3px;}
-.pd-sub-meta-row{font-size:11px;color:var(--gray);}
-
-/* ── No sub notice ── */
-.pd-no-sub{text-align:center;padding:28px 16px;background:rgba(255,255,255,0.02);border:1px dashed rgba(255,255,255,0.07);border-radius:14px;}
-.pd-no-sub-icon{font-size:28px;margin-bottom:10px;}
-.pd-no-sub-title{font-size:14px;font-weight:600;color:rgba(255,255,255,0.6);margin-bottom:5px;}
-.pd-no-sub-hint{font-size:12px;color:var(--gray);line-height:1.5;}
-
-/* ── History / booking item ── */
-.pd-item{display:flex;justify-content:space-between;align-items:flex-start;padding:11px 0;border-bottom:1px solid rgba(255,255,255,0.04);transition:background 0.2s;}
-.pd-item:last-child{border-bottom:none;}
-.pd-item-svc{font-size:13px;font-weight:600;margin-bottom:3px;}
-.pd-item-meta{font-size:11px;color:var(--gray);}
-.pd-item-right{text-align:right;flex-shrink:0;margin-left:10px;}
-.pd-item-amount{font-size:13px;font-weight:700;color:var(--green);}
-.pd-item-status{font-size:10px;margin-top:2px;}
-
-/* ── Source badge for "без абонементу" ── */
-.source-tag-no-sub{display:inline-flex;align-items:center;gap:4px;font-size:9px;color:rgba(249,115,22,0.8);background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.18);padding:2px 8px;border-radius:100px;font-weight:600;letter-spacing:0.5px;}
-
-/* ── Auth step improvements ── */
-.auth-send-btn{width:100%;padding:13px;border-radius:100px;background:rgba(255,255,255,0.93);color:#050507;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.25s cubic-bezier(0.4,0,0.2,1);margin-top:4px;}
-.auth-send-btn:hover{background:#fff;transform:scale(0.98);}
-.auth-send-btn:disabled{opacity:0.55;cursor:not-allowed;transform:none;}
-
 @media(max-width:768px){
   nav{padding:0 16px;}
   .nav-links{display:none;}
@@ -520,7 +480,6 @@ button:disabled{opacity:0.5!important;cursor:not-allowed!important;transform:non
       <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
       @1333_car_center
     </a>
-    <button class="nav-insta" onclick="openProfileModal()" style="border-color: var(--accent); color: var(--white); background: rgba(167, 139, 250, 0.1); cursor: pointer;">👤 Кабінет</button>
     <button class="nav-btn" onclick="showPage('booking')">Записатись</button>
     <button class="nav-menu-btn" onclick="openMobileMenu()">☰</button>
   </div>
@@ -762,6 +721,7 @@ button:disabled{opacity:0.5!important;cursor:not-allowed!important;transform:non
         <button class="crm-tab-btn" onclick="switchCrmTab(event,'clients')">Клієнти</button>
         <button class="crm-tab-btn" onclick="switchCrmTab(event,'subs')">Абонементи</button>
         <button class="crm-tab-btn" onclick="switchCrmTab(event,'subrequests')">🆕 Заявки</button>
+        <button class="crm-tab-btn" onclick="switchCrmTab(event,'analytics')">📊 Аналітика</button>
       </div>
 
       <!-- Schedule -->
@@ -811,9 +771,69 @@ button:disabled{opacity:0.5!important;cursor:not-allowed!important;transform:non
         <div class="table-scroll desktop-table" id="subRequestsTableWrap"><div class="table-loading"><span class="table-spinner"></span>Завантаження...</div></div>
         <div class="crm-cards" id="subRequestsMobileCards"></div>
       </div>
+
+      <!-- ✅ v9 NEW: Analytics Dashboard -->
+      <div class="crm-tab-panel" id="tab-analytics">
+        <div class="an-refresh-bar">
+          <span class="an-updated" id="anUpdated">Завантаження…</span>
+          <button class="act-btn" onclick="loadAnalyticsTab(true)">⟳ Оновити</button>
+        </div>
+
+        <div class="an-kpi-row" id="anKpiRow">
+          <div class="an-kpi-card"><div class="an-kpi-num">—</div><div class="an-kpi-label">Клієнти</div></div>
+          <div class="an-kpi-card accent-green"><div class="an-kpi-num">—</div><div class="an-kpi-label">Активні абонементи</div></div>
+          <div class="an-kpi-card"><div class="an-kpi-num">—</div><div class="an-kpi-label">Продажі сьогодні</div></div>
+          <div class="an-kpi-card"><div class="an-kpi-num">—</div><div class="an-kpi-label">Продажі місяця</div></div>
+          <div class="an-kpi-card accent-accent"><div class="an-kpi-num">—</div><div class="an-kpi-label">Загальний дохід</div></div>
+        </div>
+
+        <div class="an-grid">
+          <div class="an-card full">
+            <div class="an-card-title">📈 Динаміка доходу · останні 14 днів</div>
+            <div class="an-chart-wrap"><canvas id="chartRevenueTrend"></canvas></div>
+          </div>
+
+          <div class="an-card">
+            <div class="an-card-title">💰 Структура доходу</div>
+            <div class="an-card-sub" id="anRevenueSplitSub">Послуги vs Абонементи</div>
+            <div class="an-chart-wrap small"><canvas id="chartRevenueSplit"></canvas></div>
+          </div>
+
+          <div class="an-card">
+            <div class="an-card-title">🔧 Топ послуг</div>
+            <div class="an-card-sub">За кількістю виконань</div>
+            <div class="an-chart-wrap small"><canvas id="chartTopServices"></canvas></div>
+          </div>
+
+          <div class="an-card">
+            <div class="an-card-title">📋 Статуси записів</div>
+            <div class="an-card-sub">За останні 30 днів</div>
+            <div class="an-chart-wrap small"><canvas id="chartBookingStatuses"></canvas></div>
+          </div>
+
+          <div class="an-card">
+            <div class="an-card-title">💎 Абонементи за типом</div>
+            <div class="an-card-sub">Активні зараз</div>
+            <div class="an-chart-wrap small"><canvas id="chartSubsByType"></canvas></div>
+          </div>
+
+          <div class="an-card">
+            <div class="an-card-title">👥 Нові клієнти</div>
+            <div class="an-card-sub">Реєстрації за 14 днів</div>
+            <div class="an-chart-wrap small"><canvas id="chartNewClients"></canvas></div>
+          </div>
+
+          <div class="an-card">
+            <div class="an-card-title">🏠 Завантаженість боксів</div>
+            <div class="an-card-sub">Всі активні записи</div>
+            <div class="an-chart-wrap small"><canvas id="chartBoxLoad"></canvas></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
+
 
 <!-- ═══ MODALS ═══ -->
 <div class="modal-overlay" id="planModal">
@@ -839,95 +859,8 @@ button:disabled{opacity:0.5!important;cursor:not-allowed!important;transform:non
   </div>
 </div>
 
-<!-- PERSONAL ACCOUNT MODAL -->
-    <div class="modal-overlay" id="profileModal">
-      <div class="modal-box modal-large">
-        <div class="modal-close" onclick="closeProfileModal()">✕</div>
-        
-        <!-- Auth Step: Phone input -->
-        <div id="auth-phone-step" class="auth-panel active">
-          <div class="panel-title" style="color: var(--accent);">🔑 Особистий кабінет</div>
-          <div class="panel-sub">Введіть Ваш номер телефону для входу</div>
-          <div class="form-group">
-            <div class="form-label">Телефон</div>
-            <input type="tel" class="field" id="authPhone" placeholder="+380 XX XXX XX XX">
-          </div>
-          <div style="margin-top:20px;">
-            <button class="auth-send-btn" id="authSendBtn" onclick="sendVerificationCode()">Надіслати код у Telegram →</button>
-          </div>
-          <div id="auth-phone-error" style="color:var(--red);font-size:12px;margin-top:10px;min-height:16px;"></div>
-        </div>
-
-        <!-- Auth Step: Code verification -->
-        <div id="auth-code-step" class="auth-panel">
-          <div class="panel-title" style="color: var(--accent);">🔐 Перевірка коду</div>
-          <div class="panel-sub" id="auth-code-subtitle">Ми надіслали 4-значний код у Ваш Telegram</div>
-          <div class="form-group">
-            <div class="form-label">4-значний код</div>
-            <input type="text" class="field" id="authCode" placeholder="XXXX" maxlength="4" style="text-align:center; font-size:24px; letter-spacing:8px;">
-          </div>
-          <div style="display:flex;gap:10px;margin-top:20px;">
-            <button class="auth-send-btn" id="authVerifyBtn" style="flex:1;" onclick="verifyVerificationCode()">Підтвердити →</button>
-            <button class="btn-ghost" onclick="showAuthPhoneStep()">← Назад</button>
-          </div>
-          <div id="auth-code-error" style="color:var(--red);font-size:12px;margin-top:10px;min-height:16px;"></div>
-        </div>
-
-        <!-- Profile Dashboard v10 (mirrors CRM client card) -->
-        <div id="profile-dashboard" class="auth-panel">
-
-          <!-- Header: avatar + name + logout -->
-          <div class="pd-client-header">
-            <div class="pd-avatar" id="pd-avatar">—</div>
-            <div class="pd-header-info">
-              <div class="pd-name" id="pd-client-name">—</div>
-              <div class="pd-sub-meta" id="pd-client-meta">ID: — · —</div>
-            </div>
-            <button class="pd-logout-btn" onclick="logoutClient()">Вийти ➔</button>
-          </div>
-
-          <!-- Stats 2×2 grid -->
-          <div class="pd-stats-grid">
-            <div class="pd-stat accent">
-              <div class="pd-stat-num" id="pd-balance">0 ₴</div>
-              <div class="pd-stat-label">Баланс абонементу</div>
-            </div>
-            <div class="pd-stat">
-              <div class="pd-stat-num" id="pd-visits">0</div>
-              <div class="pd-stat-label">Всього візитів</div>
-            </div>
-            <div class="pd-stat green-stat">
-              <div class="pd-stat-num" id="pd-total-purchases">0 ₴</div>
-              <div class="pd-stat-label">Витрачено всього</div>
-            </div>
-            <div class="pd-stat">
-              <div class="pd-stat-num" id="pd-avg-check">0 ₴</div>
-              <div class="pd-stat-label">Середній чек</div>
-            </div>
-          </div>
-
-          <!-- Tabs: Абонементи / Записи / Історія -->
-          <div class="pd-tabs">
-            <button class="pd-tab active" onclick="switchPdTab(this,'subs')">📋 Абонементи</button>
-            <button class="pd-tab" onclick="switchPdTab(this,'bookings')">📅 Записи</button>
-            <button class="pd-tab" onclick="switchPdTab(this,'history')">📜 Історія</button>
-          </div>
-
-          <div class="pd-pane active" id="pd-pane-subs">
-            <div id="pd-subs-content"></div>
-          </div>
-          <div class="pd-pane" id="pd-pane-bookings">
-            <div id="pd-bookings-content"></div>
-          </div>
-          <div class="pd-pane" id="pd-pane-history">
-            <div id="pd-history-content"></div>
-          </div>
-
-        </div>
-
-      </div>
-    </div>
 <div class="toast" id="toast"></div>
+
 <script>
 // ╔══════════════════════════════════════════════════════╗
 // ║  CONFIG                                              ║
@@ -945,233 +878,6 @@ const _planMeta = {};
 let _allBookings=[], _allClients=[], _allSubs=[], _allSubRequests=[];
 let _crmToken = sessionStorage.getItem(CRM_TOKEN_KEY) || '';
 let _bookingFilter='all';
-let _bookingInitData = null;
-    let _clientToken = localStorage.getItem('client_token') || '';
-    let _clientId = localStorage.getItem('client_id') || '';
-
-    window.addEventListener('load', async () => {
-      initDatePills();
-      await fetchBookingInitData();
-      await initClientSession();
-    });
-
-    async function fetchBookingInitData() {
-      if (!isApiConfigured()) return;
-      const data = await api('getBookingInitData');
-      if (data) _bookingInitData = data;
-    }
-
-    function getLocalTimesAndBoxes(dateStr) {
-      if (!_bookingInitData) return { times: [], date: dateStr };
-      
-      const ukDays = ['Неділя','Понеділок','Вівторок','Середа','Четвер','П\'ятниця','Субота'];
-      const [d, m, y] = dateStr.split('.').map(Number);
-      const dateObj = new Date(y, m - 1, d);
-      const dayName = ukDays[dateObj.getDay()];
-      
-      const sched = _bookingInitData.schedule.find(s => s.day === dayName);
-      if (!sched || sched.status === 'Вихідний') return { times: [], date: dateStr };
-      
-      const parseTime = (s) => {
-        if (!s) return null;
-        return parseInt(s.split(':')[0]);
-      };
-      
-      const timesSet = new Set();
-      const addBoxTimes = (open, close) => {
-        const oh = parseTime(open), ch = parseTime(close);
-        if (oh === null || ch === null) return;
-        for (let h = oh; h < ch; h++) timesSet.add(String(h).padStart(2, '0') + ':00');
-      };
-      
-      addBoxTimes(sched.box1_open, sched.box1_close);
-      addBoxTimes(sched.box2_open, sched.box2_close);
-      addBoxTimes(sched.box3_open, sched.box3_close);
-      
-      const sortedTimes = Array.from(timesSet).sort();
-      const dateBookings = _bookingInitData.bookings.filter(b => b.date === dateStr);
-      
-      const todayStr = getTodayStr();
-      const isToday = (dateStr === todayStr);
-      const now = new Date();
-      const curH = now.getHours();
-      const curM = now.getMinutes();
-      const minHour = curM > 0 ? curH + 1 : curH;
-      
-      const finalTimes = sortedTimes.map(timeStr => {
-        const hour = parseInt(timeStr.split(':')[0]);
-        if (isToday && hour < minHour) {
-          return { time: timeStr, available: false, past: true, freeBoxes: [] };
-        }
-        
-        const activeBoxes = [];
-        const checkBox = (open, close, name) => {
-          const oh = parseTime(open), ch = parseTime(close);
-          if (oh !== null && ch !== null && hour >= oh && hour < ch) activeBoxes.push(name);
-        };
-        
-        checkBox(sched.box1_open, sched.box1_close, 'Box 1');
-        checkBox(sched.box2_open, sched.box2_close, 'Box 2');
-        checkBox(sched.box3_open, sched.box3_close, 'Box 3');
-        
-        const freeBoxes = activeBoxes.filter(boxName => {
-          return !dateBookings.some(b => b.time === timeStr && b.box === boxName);
-        });
-        
-        return { time: timeStr, available: freeBoxes.length > 0, freeBoxes: freeBoxes };
-      });
-      
-      return { times: finalTimes, date: dateStr };
-    }
-
-    // Заміна існуючої функції selectDate
-    async function selectDate(el, dateStr) {
-      document.querySelectorAll('.date-pill').forEach(b=>b.classList.remove('selected'));
-      el.classList.add('selected');
-      S.date=dateStr; S.time=''; S.box=null;
-      const lbl = document.getElementById('timeGridLabel');
-      if (lbl) lbl.style.display='block';
-      const grid = document.getElementById('timeGrid');
-      
-      if (!_bookingInitData) {
-        grid.innerHTML='<div class="time-loading"><span class="time-loading-spinner"></span>Завантаження...</div>';
-        await fetchBookingInitData();
-      }
-      
-      const result = getLocalTimesAndBoxes(dateStr);
-      S._cachedBoxesForTimes = {};
-      result.times.forEach(t => { S._cachedBoxesForTimes[t.time] = t.freeBoxes; });
-      renderTimes(result.times);
-    }
-
-    // ═══ PERSONAL ACCOUNT LOGIC ═══
-    async function initClientSession() {
-      if (_clientToken && _clientId) {
-        const res = await api('getClientProfileData', { clientId: _clientId, clientToken: _clientToken });
-        if (res && res.success) {
-          renderProfileDashboard(res);
-        } else {
-          logoutClient();
-        }
-      }
-    }
-
-    function openProfileModal() {
-      document.getElementById('profileModal').classList.add('show');
-      if (_clientToken && _clientId) {
-        showProfileDashboardOnly();
-      } else {
-        showAuthPhoneStep();
-      }
-    }
-
-    function closeProfileModal() { document.getElementById('profileModal').classList.remove('show'); }
-
-    function showAuthPhoneStep() {
-      document.querySelectorAll('.auth-panel').forEach(el => el.classList.remove('active'));
-      document.getElementById('auth-phone-step').classList.add('active');
-    }
-
-    function showCodeStep() {
-      document.querySelectorAll('.auth-panel').forEach(el => el.classList.remove('active'));
-      document.getElementById('auth-code-step').classList.add('active');
-    }
-
-    function showProfileDashboardOnly() {
-      document.querySelectorAll('.auth-panel').forEach(el => el.classList.remove('active'));
-      document.getElementById('profile-dashboard').classList.add('active');
-    }
-
-    async function sendVerificationCode() {
-      const phone = document.getElementById('authPhone').value.trim();
-      const err = document.getElementById('auth-phone-error');
-      err.textContent = '';
-      if (!phone) { err.textContent = 'Введіть номер телефону'; return; }
-      
-      const res = await api('sendClientAuthCode', { phone });
-      if (res && res.success) {
-        document.getElementById('auth-code-subtitle').innerHTML = `Ми надіслали 4-значний код у Ваш Telegram за номером <b>${phone}</b>`;
-        showCodeStep();
-      } else {
-        err.textContent = res ? res.error : 'Помилка надсилання коду';
-      }
-    }
-
-    async function verifyVerificationCode() {
-      const phone = document.getElementById('authPhone').value.trim();
-      const code = document.getElementById('authCode').value.trim();
-      const err = document.getElementById('auth-code-error');
-      err.textContent = '';
-      if (!code || code.length !== 4) { err.textContent = 'Введіть 4-значний код'; return; }
-
-      const res = await api('verifyClientAuthCode', { phone, code });
-      if (res && res.success && res.clientToken) {
-        _clientToken = res.clientToken;
-        _clientId = res.clientId;
-        localStorage.setItem('client_token', _clientToken);
-        localStorage.setItem('client_id', _clientId);
-        
-        const profileRes = await api('getClientProfileData', { clientId: _clientId, clientToken: _clientToken });
-        if (profileRes && profileRes.success) {
-          renderProfileDashboard(profileRes);
-          showProfileDashboardOnly();
-        }
-      } else {
-        err.textContent = res ? res.error : 'Невірний або застарілий код';
-      }
-    }
-
-    function renderProfileDashboard(data) {
-      document.getElementById('pd-client-name').textContent = 'Вітаємо, ' + data.profile.name + '!';
-      document.getElementById('pd-client-id').textContent = 'ID: ' + data.profile.clientId + ' · ' + data.profile.phone;
-      document.getElementById('pd-balance').textContent = (data.profile.balance || 0).toLocaleString('uk-UA') + ' ₴';
-      document.getElementById('pd-visits').textContent = data.profile.visits || 0;
-
-      const subsContainer = document.getElementById('pd-active-subs-container');
-      subsContainer.innerHTML = '';
-      const activeSubs = data.subs || [];
-      if (activeSubs.length) {
-        activeSubs.forEach(s => {
-          subsContainer.innerHTML += `
-            <div class="sub-card-mini" style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 8px;">
-              <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span class="badge badge-silver">${s.typeName}</span>
-                <span class="badge badge-green">${s.status}</span>
-              </div>
-              <div style="font-size:18px; font-weight:700; color:var(--green); margin-top:6px;">${(s.balance || 0).toLocaleString('uk-UA')} ₴</div>
-              <div style="font-size:11px; color:var(--gray); margin-top:2px;">До: ${s.endDate || '—'}</div>
-            </div>`;
-        });
-      } else {
-        subsContainer.innerHTML = '<div class="sub-card-mini" style="background: rgba(255,255,255,0.02); text-align:center; color:var(--gray);">Немає активних абонементів</div>';
-      }
-
-      const histContainer = document.getElementById('pd-history-container');
-      histContainer.innerHTML = '';
-      const historyList = data.history || [];
-      if (historyList.length) {
-        historyList.forEach(h => {
-          histContainer.innerHTML += `
-            <div class="pd-history-item">
-              <div>
-                <div style="font-weight:600; font-size:13px;">${h.service}</div>
-                <div style="color:var(--gray); font-size:11px; margin-top:2px;">📅 ${h.date}</div>
-              </div>
-              <div style="color:var(--green); font-weight:700; font-size:13px;">${Math.round(h.cost || 0)} ₴</div>
-            </div>`;
-        });
-      } else {
-        histContainer.innerHTML = '<div style="color:var(--gray); font-size:13px; text-align:center; padding:10px 0;">Історія візитів порожня</div>';
-      }
-    }
-
-    function logoutClient() {
-      localStorage.removeItem('client_token');
-      localStorage.removeItem('client_id');
-      _clientToken = '';
-      _clientId = '';
-      showAuthPhoneStep();
-    }
 // Cache layer
 const _cache = {};
 const CACHE_TTL = 90000; // 1.5 хвилини (для майбутніх дат)
@@ -1247,7 +953,16 @@ function openMobileMenu() { document.getElementById('mobileMenu').classList.add(
 function closeMobileMenu() { document.getElementById('mobileMenu').classList.remove('show'); document.body.style.overflow=''; }
 
 // ═══ DATE PILLS ═══
-window.addEventListener('load', initDatePills);
+window.addEventListener('load', () => {
+  initDatePills();
+  // ✅ v9 PERF: "розігріваємо" з'єднання з Apps Script у фоні відразу при
+  // завантаженні сторінки. Перший виклик контейнера Google найдовший —
+  // якщо зробити його непомітно зараз, то коли користувач реально
+  // обере дату на кроці бронювання, відповідь прийде набагато швидше.
+  if (isApiConfigured()) {
+    api('getTimesAndBoxes', { date: getTodayStr() }).catch(()=>{});
+  }
+});
 
 function fmtDatePill(d) {
   const ukDays = ['Нд','Пн','Вт','Ср','Чт','Пт','Сб'];
@@ -2092,6 +1807,233 @@ function switchCrmTab(e,id){
   document.querySelectorAll('.crm-tab-panel').forEach(x=>x.classList.remove('active'));
   e.target.classList.add('active');
   document.getElementById('tab-'+id).classList.add('active');
+  // ✅ v9 NEW: дашборд аналітики вантажиться лиш при першому відкритті
+  // (важкий запит — повний прохід по таблицях), далі кешується на 90с
+  if (id==='analytics') loadAnalyticsTab(false);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ✅ v9 NEW: ДАШБОРД "АНАЛІТИКА" — KPI + графіки (Chart.js)
+// Дані: дохід (НОВА аналітика), візуал: картки + графіки (СТАРИЙ стиль)
+// ═══════════════════════════════════════════════════════════════
+const _charts = {};
+const AN_PALETTE = ['#22c55e','#a78bfa','#f97316','#eab308','#3b82f6','#ef4444','#06b6d4'];
+
+function fmtMoneyShort(v){
+  const n = Number(v)||0;
+  return n.toLocaleString('uk-UA',{maximumFractionDigits:0})+' ₴';
+}
+
+function ensureChartDefaults(){
+  if (!window.Chart || window.Chart._cfg1333) return;
+  Chart.defaults.font.family = "'Inter', sans-serif";
+  Chart.defaults.font.size = 11;
+  Chart.defaults.color = 'rgba(255,255,255,0.55)';
+  Chart.defaults.plugins.legend.labels.boxWidth = 10;
+  Chart.defaults.plugins.legend.labels.padding = 12;
+  Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(10,10,16,0.92)';
+  Chart.defaults.plugins.tooltip.borderColor = 'rgba(255,255,255,0.1)';
+  Chart.defaults.plugins.tooltip.borderWidth = 1;
+  Chart.defaults.plugins.tooltip.padding = 10;
+  Chart.defaults.plugins.tooltip.titleFont = {weight:'600'};
+  Chart._cfg1333 = true;
+}
+
+function upsertChart(canvasId, config){
+  const el = document.getElementById(canvasId);
+  if (!el || !window.Chart) return;
+  if (_charts[canvasId]) _charts[canvasId].destroy();
+  _charts[canvasId] = new Chart(el, config);
+}
+
+async function loadAnalyticsTab(force){
+  const updEl = document.getElementById('anUpdated');
+  if (force) clearCache('analyticsFull');
+  if (updEl) updEl.textContent = 'Завантаження…';
+
+  if (!isApiConfigured()) { renderDemoAnalytics(); return; }
+
+  const data = await api('getAnalyticsFull', {}, 'analyticsFull');
+  if (data?.unauthorized) { pinLock(); toast('Сесія CRM закінчилась. Увійдіть ще раз.'); return; }
+  if (!data?.success) { if (updEl) updEl.textContent = 'Помилка завантаження'; toast('Не вдалося завантажити аналітику'); return; }
+
+  renderAnalyticsKpis(data.kpis||[]);
+  renderAnalyticsCharts(data.charts||{}, data.kpis||[]);
+
+  if (updEl) {
+    const now = new Date();
+    updEl.textContent = 'Оновлено ' + String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  }
+}
+
+function renderAnalyticsKpis(kpis){
+  const map = {};
+  kpis.forEach(k => map[k.kpi] = k.value);
+  const row = document.getElementById('anKpiRow');
+  if (!row) return;
+  const cards = [
+    { label:'Клієнти',             value: map['Клієнти'] ?? 0,             money:false },
+    { label:'Активні абонементи',  value: map['Активні абонементи'] ?? 0,  money:false, cls:'accent-green' },
+    { label:'Продажі сьогодні',    value: map['Продажі сьогодні'] ?? 0,    money:true  },
+    { label:'Продажі місяця',      value: map['Продажі місяця'] ?? 0,      money:true  },
+    { label:'Загальний дохід',     value: map['Загальний дохід'] ?? 0,     money:true, cls:'accent-accent' }
+  ];
+  row.innerHTML = cards.map(c => `
+    <div class="an-kpi-card ${c.cls||''}">
+      <div class="an-kpi-num">${c.money ? fmtMoneyShort(c.value) : c.value}</div>
+      <div class="an-kpi-label">${c.label}</div>
+    </div>`).join('');
+}
+
+function renderAnalyticsCharts(charts, kpis){
+  ensureChartDefaults();
+  renderRevenueTrendChart(charts.revenueTrend||[]);
+  renderRevenueSplitChart(kpis||[]);
+  renderTopServicesChart(charts.topServices||[]);
+  renderBookingStatusesChart(charts.bookingStatuses||[]);
+  renderSubsByTypeChart(charts.subsByType||[]);
+  renderNewClientsChart(charts.newClientsTrend||[]);
+  renderBoxLoadChart(charts.boxLoad||[]);
+}
+
+// ── 1. Динаміка доходу за 14 днів (лінійний, 2 ряди) ──────────────
+function renderRevenueTrendChart(trend){
+  upsertChart('chartRevenueTrend', {
+    type:'line',
+    data:{
+      labels: trend.map(t=>t.label),
+      datasets:[
+        {label:'Послуги', data: trend.map(t=>t.services), borderColor:'#22c55e', backgroundColor:'rgba(34,197,94,0.12)', fill:true, tension:0.35, pointRadius:0, borderWidth:2},
+        {label:'Абонементи', data: trend.map(t=>t.subs), borderColor:'#a78bfa', backgroundColor:'rgba(167,139,250,0.10)', fill:true, tension:0.35, pointRadius:0, borderWidth:2}
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:'index', intersect:false},
+      scales:{
+        x:{ grid:{display:false}, ticks:{maxRotation:0, autoSkip:true, maxTicksLimit:7} },
+        y:{ grid:{color:'rgba(255,255,255,0.05)'}, border:{display:false}, ticks:{ callback:v => v>=1000 ? (v/1000)+'k' : v } }
+      },
+      plugins:{ legend:{ position:'top', align:'end' } }
+    }
+  });
+}
+
+// ── 2. Структура доходу: Послуги vs Абонементи (донат) ─────────────
+function renderRevenueSplitChart(kpis){
+  const map = {}; kpis.forEach(k => map[k.kpi] = Number(k.value)||0);
+  const services = map['Дохід (послуги)']||0;
+  const subsVal  = map['Дохід (абонементи)']||0;
+  const sub = document.getElementById('anRevenueSplitSub');
+  if (sub) sub.textContent = `Послуги ${fmtMoneyShort(services)} · Абонементи ${fmtMoneyShort(subsVal)}`;
+  upsertChart('chartRevenueSplit', {
+    type:'doughnut',
+    data:{ labels:['Послуги','Абонементи'], datasets:[{ data:[services,subsVal], backgroundColor:['#22c55e','#a78bfa'], borderWidth:0 }] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'68%', plugins:{ legend:{ position:'bottom' } } }
+  });
+}
+
+// ── 3. Топ послуг (горизонтальний бар) ─────────────────────────────
+function renderTopServicesChart(items){
+  upsertChart('chartTopServices', {
+    type:'bar',
+    data:{ labels: items.map(i=>i.name), datasets:[{ data: items.map(i=>i.count), backgroundColor:'#22c55e', borderRadius:6, maxBarThickness:22 }] },
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      scales:{
+        x:{ grid:{color:'rgba(255,255,255,0.05)'}, border:{display:false}, ticks:{ precision:0 } },
+        y:{ grid:{display:false} }
+      },
+      plugins:{ legend:{display:false} }
+    }
+  });
+}
+
+// ── 4. Статуси записів за 30 днів (донат) ──────────────────────────
+const AN_STATUS_COLORS = [
+  ['Скасовано', '#ef4444'],
+  ['Виконано',  '#22c55e'],
+  ['Готово',    '#22c55e'],
+  ['роботі',    '#f97316'],
+  ['Підтверджено', '#3b82f6'],
+  ['Очікує',    '#eab308']
+];
+function colorForStatus(name){
+  for (const [key,color] of AN_STATUS_COLORS) if (String(name).includes(key)) return color;
+  return '#6b7280';
+}
+function renderBookingStatusesChart(items){
+  upsertChart('chartBookingStatuses', {
+    type:'doughnut',
+    data:{ labels: items.map(i=>i.name), datasets:[{ data: items.map(i=>i.count), backgroundColor: items.map(i=>colorForStatus(i.name)), borderWidth:0 }] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'62%', plugins:{ legend:{ position:'bottom', labels:{font:{size:10}} } } }
+  });
+}
+
+// ── 5. Активні абонементи за типом (донат) ─────────────────────────
+function renderSubsByTypeChart(items){
+  upsertChart('chartSubsByType', {
+    type:'doughnut',
+    data:{ labels: items.map(i=>i.name), datasets:[{ data: items.map(i=>i.count), backgroundColor: items.map((_,i)=>AN_PALETTE[i%AN_PALETTE.length]), borderWidth:0 }] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'62%', plugins:{ legend:{ position:'bottom' } } }
+  });
+}
+
+// ── 6. Нові клієнти за 14 днів (бар) ───────────────────────────────
+function renderNewClientsChart(trend){
+  upsertChart('chartNewClients', {
+    type:'bar',
+    data:{ labels: trend.map(t=>t.label), datasets:[{ data: trend.map(t=>t.count), backgroundColor:'#a78bfa', borderRadius:4, maxBarThickness:18 }] },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      scales:{
+        x:{ grid:{display:false}, ticks:{ maxRotation:0, autoSkip:true, maxTicksLimit:7 } },
+        y:{ grid:{color:'rgba(255,255,255,0.05)'}, border:{display:false}, ticks:{ precision:0 } }
+      },
+      plugins:{ legend:{display:false} }
+    }
+  });
+}
+
+// ── 7. Завантаженість боксів (бар) ─────────────────────────────────
+function renderBoxLoadChart(items){
+  upsertChart('chartBoxLoad', {
+    type:'bar',
+    data:{ labels: items.map(i=>i.name), datasets:[{ data: items.map(i=>i.count), backgroundColor:['#22c55e','#3b82f6','#f97316'], borderRadius:8, maxBarThickness:46 }] },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      scales:{
+        x:{ grid:{display:false} },
+        y:{ grid:{color:'rgba(255,255,255,0.05)'}, border:{display:false}, ticks:{ precision:0 } }
+      },
+      plugins:{ legend:{display:false} }
+    }
+  });
+}
+
+// ── DEMO MODE (без API) ─────────────────────────────────────────────
+function renderDemoAnalytics(){
+  const days = [];
+  for (let i=13;i>=0;i--) {
+    const d = new Date(); d.setDate(d.getDate()-i);
+    days.push(String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0'));
+  }
+  renderAnalyticsKpis([
+    {kpi:'Клієнти', value:24}, {kpi:'Активні абонементи', value:9},
+    {kpi:'Продажі сьогодні', value:2400}, {kpi:'Продажі місяця', value:58200},
+    {kpi:'Загальний дохід', value:184500},
+    {kpi:'Дохід (послуги)', value:62300}, {kpi:'Дохід (абонементи)', value:122200}
+  ]);
+  renderAnalyticsCharts({
+    revenueTrend: days.map((label,i)=>({label, services: 800+Math.round(Math.sin(i/2)*400+400), subs: i%4===0?6000:0})),
+    topServices: [{name:'Мийка',count:18},{name:'Кераміка',count:9},{name:'Полірування',count:7},{name:'Хімчистка',count:5},{name:'Антигравій',count:3}],
+    bookingStatuses: [{name:'Підтверджено',count:12},{name:'В роботі',count:3},{name:'Готово',count:21},{name:'Скасовано',count:2}],
+    subsByType: [{name:'Silver',count:4},{name:'Gold',count:3},{name:'Platinum',count:2}],
+    newClientsTrend: days.map((label,i)=>({label, count: i%3===0?2:(i%5===0?1:0)})),
+    boxLoad: [{name:'Box 1',count:14},{name:'Box 2',count:11},{name:'Box 3',count:9}]
+  }, [{kpi:'Дохід (послуги)', value:62300},{kpi:'Дохід (абонементи)', value:122200}]);
+  const updEl = document.getElementById('anUpdated');
+  if (updEl) updEl.textContent = 'Демо-режим';
 }
 
 // ═══ PLAN MODAL ═══
