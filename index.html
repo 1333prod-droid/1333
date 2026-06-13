@@ -382,13 +382,82 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
 .mobile-menu a:hover{opacity:0.6;}
 .mobile-menu-close{position:absolute;top:20px;right:20px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--white);width:42px;height:42px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 
-/* PERSONAL ACCOUNT MODAL */
-#profileModal .modal-box { border-color: var(--accent); background: rgba(10, 10, 16, 0.9); }
-.auth-panel { display: none; }
-.auth-panel.active { display: block; }
-.pd-stat-card { padding: 18px 16px; border-radius: 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); }
-.pd-stat-card.accent { border-color: var(--accent); background: rgba(167, 139, 250, 0.05); }
-.pd-history-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.04); }
+/* ════ v10 GLOBAL TRANSITIONS (cubic-bezier premium) ════ */
+*{transition-timing-function:cubic-bezier(0.4,0,0.2,1);}
+.btn-white,.btn-ghost,.btn-next,.btn-back,.act-btn,.plan-home-btn,.plan-cta-btn,.svc-full-btn,.pin-key,.crm-tab-btn,.client-tab-btn,.nav-btn,.modal-close{transition:all 0.25s cubic-bezier(0.4,0,0.2,1);}
+.btn-white:active,.btn-next:active,.plan-cta-btn:active,.svc-full-btn:active{transform:scale(0.97);}
+.act-btn:active,.pin-key:active{transform:scale(0.95);}
+button:disabled{opacity:0.5!important;cursor:not-allowed!important;transform:none!important;}
+
+/* ════ PAGE FADE-IN ════ */
+.page.active{animation:pageFadeIn 0.35s cubic-bezier(0.4,0,0.2,1) both;}
+@keyframes pageFadeIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+
+/* ════ MODAL OPEN ANIMATION ════ */
+.modal-overlay.show .modal-box{animation:modalSlideIn 0.28s cubic-bezier(0.4,0,0.2,1) both;}
+@keyframes modalSlideIn{from{opacity:0;transform:translateY(24px) scale(0.97);}to{opacity:1;transform:translateY(0) scale(1);}}
+
+/* ════ PERSONAL ACCOUNT MODAL ════ */
+#profileModal .modal-box{border-color:rgba(167,139,250,0.25);background:rgba(8,8,14,0.96);}
+.auth-panel{display:none;}
+.auth-panel.active{display:block;animation:fadeIn 0.3s ease both;}
+
+/* ── Cabinet header (mirrors CRM client card header) ── */
+.pd-client-header{display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid rgba(255,255,255,0.06);}
+.pd-avatar{width:52px;height:52px;border-radius:50%;background:rgba(167,139,250,0.12);border:1.5px solid rgba(167,139,250,0.3);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:var(--accent);flex-shrink:0;transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);}
+.pd-avatar:hover{transform:scale(1.06);}
+.pd-header-info{flex:1;min-width:0;}
+.pd-name{font-size:20px;font-weight:700;letter-spacing:-0.3px;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pd-sub-meta{font-size:12px;color:var(--gray);margin-top:3px;}
+.pd-logout-btn{background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);color:#ef4444;padding:7px 14px;border-radius:8px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.25s cubic-bezier(0.4,0,0.2,1);white-space:nowrap;flex-shrink:0;}
+.pd-logout-btn:hover{background:rgba(239,68,68,0.14);transform:scale(0.97);}
+
+/* ── Stats grid 2×2 (mirrors CRM .crm-stat-card) ── */
+.pd-stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:18px;}
+.pd-stat{padding:16px;border-radius:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);transition:border-color 0.25s,background 0.25s;}
+.pd-stat:hover{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.12);}
+.pd-stat.accent{background:rgba(167,139,250,0.07);border-color:rgba(167,139,250,0.2);}
+.pd-stat.green-stat{background:rgba(34,197,94,0.05);border-color:rgba(34,197,94,0.18);}
+.pd-stat-num{font-size:22px;font-weight:700;letter-spacing:-0.5px;line-height:1;color:var(--white);}
+.pd-stat.accent .pd-stat-num{color:var(--accent);}
+.pd-stat.green-stat .pd-stat-num{color:var(--green);}
+.pd-stat-label{font-size:9px;color:var(--gray);font-weight:600;letter-spacing:1.2px;margin-top:5px;text-transform:uppercase;}
+
+/* ── Cabinet tabs (mirrors .client-tabs) ── */
+.pd-tabs{display:flex;gap:3px;margin-bottom:16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:4px;}
+.pd-tab{flex:1;padding:8px 10px;border-radius:9px;background:none;border:none;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:var(--gray);cursor:pointer;transition:all 0.25s cubic-bezier(0.4,0,0.2,1);text-align:center;}
+.pd-tab.active{background:rgba(255,255,255,0.1);color:var(--white);}
+.pd-pane{display:none;}
+.pd-pane.active{display:block;animation:fadeIn 0.25s ease both;}
+
+/* ── Sub card (mirrors .sub-card-mini) ── */
+.pd-sub-card{padding:16px;border-radius:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);margin-bottom:8px;transition:border-color 0.25s,background 0.25s;}
+.pd-sub-card:hover{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.12);}
+.pd-sub-balance{font-size:22px;font-weight:700;color:var(--green);margin:6px 0 3px;}
+.pd-sub-meta-row{font-size:11px;color:var(--gray);}
+
+/* ── No sub notice ── */
+.pd-no-sub{text-align:center;padding:28px 16px;background:rgba(255,255,255,0.02);border:1px dashed rgba(255,255,255,0.07);border-radius:14px;}
+.pd-no-sub-icon{font-size:28px;margin-bottom:10px;}
+.pd-no-sub-title{font-size:14px;font-weight:600;color:rgba(255,255,255,0.6);margin-bottom:5px;}
+.pd-no-sub-hint{font-size:12px;color:var(--gray);line-height:1.5;}
+
+/* ── History / booking item ── */
+.pd-item{display:flex;justify-content:space-between;align-items:flex-start;padding:11px 0;border-bottom:1px solid rgba(255,255,255,0.04);transition:background 0.2s;}
+.pd-item:last-child{border-bottom:none;}
+.pd-item-svc{font-size:13px;font-weight:600;margin-bottom:3px;}
+.pd-item-meta{font-size:11px;color:var(--gray);}
+.pd-item-right{text-align:right;flex-shrink:0;margin-left:10px;}
+.pd-item-amount{font-size:13px;font-weight:700;color:var(--green);}
+.pd-item-status{font-size:10px;margin-top:2px;}
+
+/* ── Source badge for "без абонементу" ── */
+.source-tag-no-sub{display:inline-flex;align-items:center;gap:4px;font-size:9px;color:rgba(249,115,22,0.8);background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.18);padding:2px 8px;border-radius:100px;font-weight:600;letter-spacing:0.5px;}
+
+/* ── Auth step improvements ── */
+.auth-send-btn{width:100%;padding:13px;border-radius:100px;background:rgba(255,255,255,0.93);color:#050507;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.25s cubic-bezier(0.4,0,0.2,1);margin-top:4px;}
+.auth-send-btn:hover{background:#fff;transform:scale(0.98);}
+.auth-send-btn:disabled{opacity:0.55;cursor:not-allowed;transform:none;}
 
 @media(max-width:768px){
   nav{padding:0 16px;}
@@ -783,10 +852,10 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
             <div class="form-label">Телефон</div>
             <input type="tel" class="field" id="authPhone" placeholder="+380 XX XXX XX XX">
           </div>
-          <div style="display:flex; gap:10px; margin-top:20px;">
-            <button class="btn-white" style="flex:1;" onclick="sendVerificationCode()">Надіслати код</button>
+          <div style="margin-top:20px;">
+            <button class="auth-send-btn" id="authSendBtn" onclick="sendVerificationCode()">Надіслати код у Telegram →</button>
           </div>
-          <div id="auth-phone-error" style="color: var(--red); font-size:12px; margin-top:10px;"></div>
+          <div id="auth-phone-error" style="color:var(--red);font-size:12px;margin-top:10px;min-height:16px;"></div>
         </div>
 
         <!-- Auth Step: Code verification -->
@@ -797,43 +866,63 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
             <div class="form-label">4-значний код</div>
             <input type="text" class="field" id="authCode" placeholder="XXXX" maxlength="4" style="text-align:center; font-size:24px; letter-spacing:8px;">
           </div>
-          <div style="display:flex; gap:10px; margin-top:20px;">
-            <button class="btn-white" style="flex:1;" onclick="verifyVerificationCode()">Підтвердити</button>
+          <div style="display:flex;gap:10px;margin-top:20px;">
+            <button class="auth-send-btn" id="authVerifyBtn" style="flex:1;" onclick="verifyVerificationCode()">Підтвердити →</button>
             <button class="btn-ghost" onclick="showAuthPhoneStep()">← Назад</button>
           </div>
-          <div id="auth-code-error" style="color: var(--red); font-size:12px; margin-top:10px;"></div>
+          <div id="auth-code-error" style="color:var(--red);font-size:12px;margin-top:10px;min-height:16px;"></div>
         </div>
 
-        <!-- Profile Dashboard (Logged in) -->
+        <!-- Profile Dashboard v10 (mirrors CRM client card) -->
         <div id="profile-dashboard" class="auth-panel">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
-            <div>
-              <div class="panel-title" id="pd-client-name" style="color: var(--accent);">Вітаємо!</div>
-              <div class="panel-sub" id="pd-client-id">ID: C-000</div>
+
+          <!-- Header: avatar + name + logout -->
+          <div class="pd-client-header">
+            <div class="pd-avatar" id="pd-avatar">—</div>
+            <div class="pd-header-info">
+              <div class="pd-name" id="pd-client-name">—</div>
+              <div class="pd-sub-meta" id="pd-client-meta">ID: — · —</div>
             </div>
-            <button class="btn-ghost" style="padding:8px 16px; border-color:var(--red); color:var(--red);" onclick="logoutClient()">Вийти ➔</button>
+            <button class="pd-logout-btn" onclick="logoutClient()">Вийти ➔</button>
           </div>
 
-          <div class="crm-stats-row" style="grid-template-columns: repeat(2,1fr); margin-bottom:20px;">
-            <div class="pd-stat-card accent">
-              <div class="crm-stat-num" id="pd-balance" style="color:var(--green)">0 ₴</div>
-              <div class="crm-stat-label">Особистий баланс</div>
+          <!-- Stats 2×2 grid -->
+          <div class="pd-stats-grid">
+            <div class="pd-stat accent">
+              <div class="pd-stat-num" id="pd-balance">0 ₴</div>
+              <div class="pd-stat-label">Баланс абонементу</div>
             </div>
-            <div class="pd-stat-card">
-              <div class="crm-stat-num" id="pd-visits">0</div>
-              <div class="crm-stat-label">Всього візитів</div>
+            <div class="pd-stat">
+              <div class="pd-stat-num" id="pd-visits">0</div>
+              <div class="pd-stat-label">Всього візитів</div>
+            </div>
+            <div class="pd-stat green-stat">
+              <div class="pd-stat-num" id="pd-total-purchases">0 ₴</div>
+              <div class="pd-stat-label">Витрачено всього</div>
+            </div>
+            <div class="pd-stat">
+              <div class="pd-stat-num" id="pd-avg-check">0 ₴</div>
+              <div class="pd-stat-label">Середній чек</div>
             </div>
           </div>
 
-          <div style="margin-bottom:20px;">
-            <div class="form-label" style="margin-bottom:8px;">Ваші активні абонементи</div>
-            <div id="pd-active-subs-container"></div>
+          <!-- Tabs: Абонементи / Записи / Історія -->
+          <div class="pd-tabs">
+            <button class="pd-tab active" onclick="switchPdTab(this,'subs')">📋 Абонементи</button>
+            <button class="pd-tab" onclick="switchPdTab(this,'bookings')">📅 Записи</button>
+            <button class="pd-tab" onclick="switchPdTab(this,'history')">📜 Історія</button>
           </div>
 
-          <div>
-            <div class="form-label" style="margin-bottom:8px;">Останні 5 візитів</div>
-            <div id="pd-history-container" style="display:flex; flex-direction:column; gap:8px;"></div>
+          <div class="pd-pane active" id="pd-pane-subs">
+            <div id="pd-subs-content"></div>
           </div>
+          <div class="pd-pane" id="pd-pane-bookings">
+            <div id="pd-bookings-content"></div>
+          </div>
+          <div class="pd-pane" id="pd-pane-history">
+            <div id="pd-history-content"></div>
+          </div>
+
         </div>
 
       </div>
