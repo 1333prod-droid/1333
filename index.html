@@ -59,6 +59,70 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;height:64px;
 .nav-insta:hover{color:var(--white);border-color:rgba(255,255,255,0.2);}
 .nav-btn{background:rgba(255,255,255,0.9);color:#050507;border:none;padding:9px 20px;border-radius:8px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;}
 .nav-btn:hover{background:#fff;transform:scale(0.97);}
+/* ✅ v9: кнопка "Увійти" */
+.nav-btn-ghost{background:none;color:rgba(255,255,255,0.55);border:1px solid rgba(255,255,255,0.15);padding:8px 18px;border-radius:8px;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.2s;margin-right:6px;}
+.nav-btn-ghost:hover{color:var(--white);border-color:rgba(255,255,255,0.4);}
+
+/* ═══ CABINET PAGE ═══ */
+#cabinet-page.active{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:80px;}
+.cab-wrap{width:100%;max-width:520px;padding:24px 20px 60px;}
+.cab-step{display:none;} .cab-step.active{display:block;}
+
+/* Login form */
+.cab-login-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:24px;padding:40px 36px;}
+.cab-logo{font-size:32px;font-weight:800;letter-spacing:-1px;margin-bottom:4px;}
+.cab-subtitle{font-size:13px;color:var(--gray);margin-bottom:32px;}
+.cab-field-label{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray);margin-bottom:6px;}
+.cab-field{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:14px 16px;font-family:'Inter',sans-serif;font-size:15px;color:var(--white);outline:none;transition:border-color 0.2s;margin-bottom:4px;}
+.cab-field:focus{border-color:rgba(167,139,250,0.5);}
+.cab-hint{font-size:12px;color:var(--gray);margin-bottom:20px;min-height:16px;}
+.cab-btn{width:100%;background:rgba(255,255,255,0.9);color:#050507;border:none;padding:14px;border-radius:12px;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.2px;margin-top:4px;}
+.cab-btn:hover{background:#fff;}
+.cab-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.cab-btn-ghost{width:100%;background:none;color:var(--gray);border:1px solid rgba(255,255,255,0.1);padding:12px;border-radius:12px;font-family:'Inter',sans-serif;font-size:13px;cursor:pointer;transition:all 0.2s;margin-top:8px;}
+.cab-btn-ghost:hover{color:var(--white);border-color:rgba(255,255,255,0.25);}
+.cab-error{font-size:12px;color:var(--red);min-height:16px;margin-top:6px;}
+.cab-tg-note{font-size:12px;color:var(--gray);text-align:center;margin-top:20px;line-height:1.6;padding:12px;background:rgba(255,255,255,0.03);border-radius:10px;}
+
+/* Code input */
+.cab-code-row{display:flex;gap:8px;justify-content:center;margin:20px 0;}
+.cab-code-digit{width:54px;height:60px;background:rgba(255,255,255,0.05);border:2px solid rgba(255,255,255,0.1);border-radius:14px;font-family:'Inter',sans-serif;font-size:26px;font-weight:700;color:var(--white);text-align:center;outline:none;transition:border-color 0.2s;caret-color:transparent;}
+.cab-code-digit:focus{border-color:rgba(167,139,250,0.6);}
+.cab-code-digit.filled{border-color:rgba(167,139,250,0.4);}
+
+/* Profile */
+.cab-profile{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:24px;padding:28px;margin-bottom:16px;}
+.cab-avatar{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,rgba(167,139,250,0.3),rgba(34,197,94,0.2));display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:16px;}
+.cab-name{font-size:22px;font-weight:700;letter-spacing:-0.3px;margin-bottom:2px;}
+.cab-phone{font-size:13px;color:var(--gray);margin-bottom:16px;}
+.cab-balance-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.cab-balance-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:14px 12px;text-align:center;}
+.cab-balance-num{font-size:20px;font-weight:700;color:var(--green);}
+.cab-balance-label{font-size:9px;color:var(--gray);text-transform:uppercase;letter-spacing:1.2px;margin-top:2px;}
+
+.cab-section-title{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gray);margin:20px 0 10px;}
+
+.cab-sub-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:18px;margin-bottom:8px;position:relative;overflow:hidden;}
+.cab-sub-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#22c55e,#a78bfa);}
+.cab-sub-name{font-size:14px;font-weight:700;margin-bottom:4px;}
+.cab-sub-bal{font-size:24px;font-weight:800;color:var(--green);letter-spacing:-0.5px;}
+.cab-sub-meta{font-size:11px;color:var(--gray);margin-top:4px;}
+.cab-sub-status{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;position:absolute;top:16px;right:16px;padding:3px 10px;border-radius:100px;background:rgba(34,197,94,0.15);color:#22c55e;}
+.cab-sub-status.frozen{background:rgba(59,130,246,0.15);color:#3b82f6;}
+.cab-sub-status.expired{background:rgba(239,68,68,0.1);color:#ef4444;}
+
+.cab-booking-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.05);}
+.cab-booking-row:last-child{border-bottom:none;}
+.cab-booking-date{font-size:12px;font-weight:600;color:var(--white);min-width:80px;}
+.cab-booking-svc{font-size:12px;color:var(--light);flex:1;}
+.cab-booking-time{font-size:11px;color:var(--gray);}
+
+.cab-nav-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+.cab-logout{font-size:12px;color:var(--gray);cursor:pointer;padding:6px 12px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;background:none;font-family:'Inter',sans-serif;transition:all 0.2s;}
+.cab-logout:hover{color:var(--white);border-color:rgba(255,255,255,0.25);}
+.cab-no-tg{background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.2);border-radius:16px;padding:24px;text-align:center;}
+.cab-no-tg-icon{font-size:36px;margin-bottom:12px;}
+.cab-no-tg-text{font-size:14px;color:var(--light);line-height:1.6;}
 .nav-menu-btn{display:none;background:none;border:1px solid rgba(255,255,255,0.1);color:var(--white);padding:8px 10px;border-radius:10px;cursor:pointer;font-size:18px;}
 
 /* GLASS */
@@ -480,6 +544,8 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
       <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
       @1333_car_center
     </a>
+    <!-- ✅ v9: Єдина кнопка входу (кабінет + адмін) -->
+    <button class="nav-btn-ghost" onclick="showPage('cabinet')">Увійти</button>
     <button class="nav-btn" onclick="showPage('booking')">Записатись</button>
     <button class="nav-menu-btn" onclick="openMobileMenu()">☰</button>
   </div>
@@ -663,6 +729,113 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
     <div class="glass plan-full plan-silver"><div class="plan-tier">1 місяць · T-1</div><div class="plan-big-name">Silver</div><div class="plan-dur">Термін: 1 місяць</div><div class="plan-cost">10 000 ₴</div><div class="plan-bonus-tag">+ 10% бонус</div><div class="plan-account">= 11 000 ₴ на рахунок</div><div class="plan-divider"></div><ul class="plan-features"><li>11 000 ₴ на особистий рахунок</li><li>Пріоритетний запис без черги</li><li>Знижка 5% на додаткові послуги</li><li>Особистий менеджер</li></ul><button class="plan-cta-btn" onclick="openPlanModal('Silver','10 000','11 000','T-1','1','10')">Придбати Silver</button></div>
     <div class="glass plan-full plan-gold"><div class="plan-tier">3 місяці · T-2</div><div class="plan-big-name">Gold</div><div class="plan-dur">Термін: 3 місяці</div><div class="plan-cost">30 000 ₴</div><div class="plan-bonus-tag">+ 15% бонус</div><div class="plan-account">= 34 500 ₴ на рахунок</div><div class="plan-divider"></div><ul class="plan-features"><li>34 500 ₴ на особистий рахунок</li><li>Запис поза чергою</li><li>Знижка 10% на послуги</li><li>VIP-зона очікування</li><li>Безкоштовне миття раз на місяць</li></ul><button class="plan-cta-btn" onclick="openPlanModal('Gold','30 000','34 500','T-2','3','15')">Придбати Gold</button></div>
     <div class="glass plan-full plan-platinum"><div class="plan-tier">6 місяців · T-3</div><div class="plan-big-name">Platinum</div><div class="plan-dur">Термін: 6 місяців</div><div class="plan-cost">60 000 ₴</div><div class="plan-bonus-tag">+ 20% бонус</div><div class="plan-account">= 72 000 ₴ на рахунок</div><div class="plan-divider"></div><ul class="plan-features"><li>72 000 ₴ на особистий рахунок</li><li>Необмежений пріоритетний доступ</li><li>Знижка 15% на всі послуги</li><li>Виїзний детейлінг на запит</li><li>Щомісячне миття + полірування</li></ul><button class="plan-cta-btn" onclick="openPlanModal('Platinum','60 000','72 000','T-3','6','20')">Придбати Platinum</button></div>
+  </div>
+</div>
+
+<!-- ═══ CABINET PAGE (Особистий кабінет + Вхід) ═══ -->
+<div id="cabinet-page" class="page">
+  <div class="cab-wrap">
+
+    <!-- ─── Step 0: Phone input ─── -->
+    <div class="cab-step active" id="cab-step-phone">
+      <div class="cab-login-card">
+        <div class="cab-logo">1333</div>
+        <div class="cab-subtitle">Введіть ваш номер телефону щоб увійти</div>
+        <div class="cab-field-label">Номер телефону</div>
+        <input class="cab-field" id="cab-phone-input" type="tel" placeholder="+380 XX XXX XX XX" autocomplete="tel"
+          oninput="cabPhoneInput(this)" onkeydown="if(event.key==='Enter') cabSendCode()">
+        <div class="cab-hint" id="cab-phone-hint"></div>
+        <button class="cab-btn" id="cab-send-btn" onclick="cabSendCode()">Отримати код →</button>
+        <div class="cab-tg-note">📱 Ми надішлемо одноразовий код у ваш Telegram. Переконайтесь, що ви написали боту <b>@Assistant_1333_Bot</b></div>
+        <div class="cab-error" id="cab-phone-error"></div>
+      </div>
+    </div>
+
+    <!-- ─── Step 1: Code input ─── -->
+    <div class="cab-step" id="cab-step-code">
+      <div class="cab-login-card">
+        <div class="cab-logo">1333</div>
+        <div class="cab-subtitle">Введіть код з Telegram</div>
+        <div class="cab-code-row">
+          <input class="cab-code-digit" id="cd0" maxlength="1" type="text" inputmode="numeric" oninput="cabCodeInput(this,0)" onkeydown="cabCodeKey(this,0,event)">
+          <input class="cab-code-digit" id="cd1" maxlength="1" type="text" inputmode="numeric" oninput="cabCodeInput(this,1)" onkeydown="cabCodeKey(this,1,event)">
+          <input class="cab-code-digit" id="cd2" maxlength="1" type="text" inputmode="numeric" oninput="cabCodeInput(this,2)" onkeydown="cabCodeKey(this,2,event)">
+          <input class="cab-code-digit" id="cd3" maxlength="1" type="text" inputmode="numeric" oninput="cabCodeInput(this,3)" onkeydown="cabCodeKey(this,3,event)">
+        </div>
+        <div class="cab-hint" id="cab-code-hint" style="text-align:center;">Код надіслано у Telegram. Дійсний 5 хвилин.</div>
+        <div class="cab-error" id="cab-code-error" style="text-align:center;"></div>
+        <button class="cab-btn" id="cab-verify-btn" onclick="cabVerifyCode()" disabled>Увійти</button>
+        <button class="cab-btn-ghost" onclick="cabGoStep('phone');cabResetCode()">← Змінити номер</button>
+      </div>
+    </div>
+
+    <!-- ─── Step 2: Profile (client) ─── -->
+    <div class="cab-step" id="cab-step-profile">
+      <div class="cab-nav-bar">
+        <span style="font-size:14px;font-weight:600;color:var(--gray);">Особистий кабінет</span>
+        <button class="cab-logout" onclick="cabLogout()">Вийти</button>
+      </div>
+
+      <!-- Profile card -->
+      <div class="cab-profile" id="cab-profile-card">
+        <div class="cab-avatar">👤</div>
+        <div class="cab-name" id="cab-client-name">—</div>
+        <div class="cab-phone" id="cab-client-phone">—</div>
+        <div class="cab-balance-row">
+          <div class="cab-balance-card">
+            <div class="cab-balance-num" id="cab-balance">0 ₴</div>
+            <div class="cab-balance-label">Баланс</div>
+          </div>
+          <div class="cab-balance-card">
+            <div class="cab-balance-num" id="cab-visits" style="color:var(--accent);">0</div>
+            <div class="cab-balance-label">Візитів</div>
+          </div>
+          <div class="cab-balance-card">
+            <div class="cab-balance-num" id="cab-last-visit" style="font-size:14px;color:var(--light);">—</div>
+            <div class="cab-balance-label">Останній візит</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- No telegram warning -->
+      <div class="cab-no-tg" id="cab-no-tg-warn" style="display:none;">
+        <div class="cab-no-tg-icon">📱</div>
+        <div class="cab-no-tg-text">Прив'яжіть Telegram: напишіть боту <b>@Assistant_1333_Bot</b> команду /start та поділіться номером. Так ви зможете отримувати коди та нагадування.</div>
+      </div>
+
+      <!-- Subscriptions -->
+      <div class="cab-section-title">💎 Мої абонементи</div>
+      <div id="cab-subs-list"><div style="color:var(--gray);font-size:13px;">Завантаження…</div></div>
+
+      <!-- Bookings -->
+      <div class="cab-section-title">📅 Мої записи</div>
+      <div class="cab-profile" id="cab-bookings-list" style="padding:16px 20px;">
+        <div style="color:var(--gray);font-size:13px;">Завантаження…</div>
+      </div>
+
+      <!-- Quick actions -->
+      <div class="cab-section-title">Дії</div>
+      <button class="cab-btn" onclick="showPage('booking')" style="margin-bottom:8px;">+ Записатись на мийку</button>
+      <button class="cab-btn-ghost" onclick="showPage('subscriptions')">💎 Переглянути абонементи</button>
+    </div>
+
+    <!-- ─── Step 3: Admin code (for CRM access) ─── -->
+    <div class="cab-step" id="cab-step-admin-code">
+      <div class="cab-login-card">
+        <div class="cab-logo">1333</div>
+        <div class="cab-subtitle" id="cab-admin-hint">Введіть код з Telegram</div>
+        <div class="cab-code-row">
+          <input class="cab-code-digit" id="acd0" maxlength="1" type="text" inputmode="numeric" oninput="cabAdminCodeInput(this,0)" onkeydown="cabAdminCodeKey(this,0,event)">
+          <input class="cab-code-digit" id="acd1" maxlength="1" type="text" inputmode="numeric" oninput="cabAdminCodeInput(this,1)" onkeydown="cabAdminCodeKey(this,1,event)">
+          <input class="cab-code-digit" id="acd2" maxlength="1" type="text" inputmode="numeric" oninput="cabAdminCodeInput(this,2)" onkeydown="cabAdminCodeKey(this,2,event)">
+          <input class="cab-code-digit" id="acd3" maxlength="1" type="text" inputmode="numeric" oninput="cabAdminCodeInput(this,3)" onkeydown="cabAdminCodeKey(this,3,event)">
+        </div>
+        <div class="cab-error" id="cab-admin-code-error" style="text-align:center;"></div>
+        <button class="cab-btn" id="cab-admin-verify-btn" onclick="cabVerifyAdminCode()" disabled>Увійти до системи</button>
+        <button class="cab-btn-ghost" onclick="cabGoStep('phone');cabResetAdminCode()">← Назад</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
