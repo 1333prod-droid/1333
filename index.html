@@ -193,6 +193,35 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;height:64px;
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
 @keyframes spin{to{transform:rotate(360deg);}}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
+/* ✅ v9.1 UI: оновлені анімації (без зміни стилю) */
+@keyframes panelIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+@keyframes popSelect{0%{transform:scale(1);}45%{transform:scale(1.05);}100%{transform:scale(1);}}
+@keyframes itemIn{from{opacity:0;transform:translateY(10px) scale(0.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+/* плавна поява активної панелі бронювання */
+.panel.active{animation:panelIn 0.45s cubic-bezier(0.22,0.61,0.36,1);}
+/* легкий pop при виборі */
+.svc-pick.selected,.car-type-btn.selected,.box-btn.selected,.time-btn.selected,.date-pill.selected{animation:popSelect 0.28s ease;}
+/* hover-ліфт для клікабельних карток */
+.svc-card,.svc-full,.plan-home,.plan-full,.svc-pick,.car-type-btn{transition:transform 0.2s ease,background 0.25s,border-color 0.25s,box-shadow 0.25s;}
+.svc-card:hover,.svc-full:hover,.plan-home:hover,.plan-full:hover{transform:translateY(-3px);}
+.svc-pick:hover{transform:translateY(-2px);}
+.time-btn,.box-btn{transition:transform 0.18s ease,background 0.2s,border-color 0.2s,color 0.2s,opacity 0.2s;}
+.time-btn:hover:not(.busy){transform:translateY(-2px);}
+@media (prefers-reduced-motion: reduce){
+  .panel.active,.svc-pick.selected,.car-type-btn.selected,.box-btn.selected,.time-btn.selected,.date-pill.selected{animation:none;}
+  .svc-card:hover,.svc-full:hover,.plan-home:hover,.plan-full:hover,.svc-pick:hover,.time-btn:hover{transform:none;}
+}
+/* ✅ v9.1 UI: SKELETON-завантаження (shimmer у glass-стилі) */
+.skeleton{position:relative;overflow:hidden;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:12px;}
+.skeleton::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.07) 50%,transparent 100%);transform:translateX(-100%);animation:skshimmer 1.4s ease infinite;}
+@keyframes skshimmer{100%{transform:translateX(100%);}}
+.sk-time{height:40px;border-radius:12px;}
+.sk-row{height:46px;border-radius:10px;margin-bottom:8px;}
+.sk-card{height:120px;border-radius:16px;margin-bottom:8px;}
+.sk-box{height:150px;border-radius:16px;}
+.sk-line{height:13px;border-radius:6px;margin:7px 0;}
+.sk-w40{width:40%;} .sk-w60{width:60%;} .sk-w80{width:80%;}
+@media (prefers-reduced-motion: reduce){ .skeleton::after{animation:none;} }
 
 /* PAGE HEADER */
 .page-header{padding:48px 40px 0;max-width:1100px;margin:0 auto;}
@@ -805,12 +834,12 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
 
       <!-- Subscriptions -->
       <div class="cab-section-title">💎 Мої абонементи</div>
-      <div id="cab-subs-list"><div style="color:var(--gray);font-size:13px;">Завантаження…</div></div>
+      <div id="cab-subs-list"><div class="skeleton sk-card"></div><div class="skeleton sk-card"></div></div>
 
       <!-- Bookings -->
       <div class="cab-section-title">📅 Мої записи</div>
       <div class="cab-profile" id="cab-bookings-list" style="padding:16px 20px;">
-        <div style="color:var(--gray);font-size:13px;">Завантаження…</div>
+        <div class="skeleton sk-line sk-w80"></div><div class="skeleton sk-line sk-w60"></div><div class="skeleton sk-line sk-w40"></div>
       </div>
 
       <!-- Quick actions -->
@@ -1034,7 +1063,49 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
 
 <div class="toast" id="toast"></div>
 
+<!-- ✅ v9.2 AUDIT (п.10): промис-модалка вместо prompt() -->
+<div class="modal-overlay" id="uiPromptModal">
+  <div class="modal-box">
+    <div class="modal-close" onclick="_uiPromptClose(null)">✕</div>
+    <div id="uiPromptTitle" style="font-size:20px;font-weight:700;letter-spacing:-0.3px;margin-bottom:18px;">—</div>
+    <div id="uiPromptFields" style="display:flex;flex-direction:column;gap:12px;"></div>
+    <div class="nav-row" style="margin-top:20px;">
+      <button class="btn-back" onclick="_uiPromptClose(null)">Скасувати</button>
+      <button class="btn-next" id="uiPromptOk">Готово</button>
+    </div>
+  </div>
+</div>
+
 <script>
+// ✅ v9.2 AUDIT (п.10): универсальная модалка-ввод в стиле проекта.
+// fields: [{key,label,value,placeholder,type}] → Promise<{...}|null>
+let _uiPromptResolver = null;
+function uiPrompt(title, fields){
+  return new Promise(resolve=>{
+    _uiPromptResolver = resolve;
+    document.getElementById('uiPromptTitle').textContent = title || '';
+    const wrap = document.getElementById('uiPromptFields');
+    wrap.innerHTML = (fields||[]).map((f,i)=>`
+      <div class="form-group" style="margin-bottom:0;">
+        <div class="form-label">${esc(f.label||'')}</div>
+        <input class="field" id="_uip_${i}" type="${esc(f.type||'text')}" placeholder="${esc(f.placeholder||'')}" value="${esc(f.value==null?'':f.value)}">
+      </div>`).join('');
+    const ov = document.getElementById('uiPromptModal');
+    ov.classList.add('show');
+    const okBtn = document.getElementById('uiPromptOk');
+    okBtn.onclick = ()=>{
+      const out = {};
+      (fields||[]).forEach((f,i)=>{ out[f.key] = document.getElementById('_uip_'+i).value.trim(); });
+      _uiPromptClose(out);
+    };
+    setTimeout(()=>{ const first=document.getElementById('_uip_0'); if(first) first.focus(); }, 50);
+  });
+}
+function _uiPromptClose(result){
+  document.getElementById('uiPromptModal').classList.remove('show');
+  if(_uiPromptResolver){ const r=_uiPromptResolver; _uiPromptResolver=null; r(result); }
+}
+document.getElementById('uiPromptModal').addEventListener('click',function(e){ if(e.target===this) _uiPromptClose(null); });
 // ╔══════════════════════════════════════════════════════╗
 // ║  CONFIG                                              ║
 // ╚══════════════════════════════════════════════════════╝
@@ -1047,6 +1118,11 @@ const PUBLIC_API_ACTIONS = new Set([
 
 // ═══ STATE ═══
 const S = { service:'', price:'', date:'', time:'', box:null, step:1, carType:'' };
+// ✅ v9.2 AUDIT (п.9): защита от двойного клика (в процесе запросы по id)
+const _pendingActions = new Set();
+// ✅ v9.2 AUDIT (п.8/п.11): таймер авто-обновления CRM и предыдущие id заявок
+let _crmAutoRefreshTimer = null;
+let _prevSubReqIds = null;
 const _planMeta = {};
 let _allBookings=[], _allClients=[], _allSubs=[], _allSubRequests=[];
 let _crmToken = sessionStorage.getItem(CRM_TOKEN_KEY) || '';
@@ -1112,6 +1188,7 @@ function showPage(p) {
   if (nl) { nl.classList.add('active'); if(p==='crm') nl.style.opacity='1'; }
   window.scrollTo({top:0,behavior:'smooth'});
   if (p==='crm') initCrmPage();
+  else if (typeof stopCrmAutoRefresh==='function') stopCrmAutoRefresh(); // ✅ v9.2 AUDIT (п.8): уход с CRM
 }
 function scrollToSection(id) { document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'}); }
 function showPageAndService(page, svc, price) {
@@ -1120,6 +1197,8 @@ function showPageAndService(page, svc, price) {
     document.querySelectorAll('.svc-pick').forEach(b=>{
       if(b.querySelector('.svc-pick-name')?.textContent===svc) { b.classList.add('selected'); S.service=svc; S.price=price; }
     });
+    // ✅ v9.1: обрали послугу — одразу на крок 2 (дата/час)
+    if(S.service) setTimeout(()=>goStep(2), 220);
   }, 100);
 }
 function openMobileMenu() { document.getElementById('mobileMenu').classList.add('show'); document.body.style.overflow='hidden'; }
@@ -1171,7 +1250,8 @@ async function selectDate(el, dateStr) {
   const lbl = document.getElementById('timeGridLabel');
   if (lbl) lbl.style.display='block';
   const grid = document.getElementById('timeGrid');
-  grid.innerHTML='<div class="time-loading"><span class="time-loading-spinner"></span>Завантаження...</div>';
+  // ✅ v9.1: skeleton замість спінера — показуємо контури кнопок часу
+  grid.innerHTML = Array.from({length:10}).map(()=>'<div class="skeleton sk-time"></div>').join('');
   if (!isApiConfigured()) { renderDemoTimes(); return; }
   // ✅ Один запит замість двох — отримуємо час і бокси разом
   // Кеш 90 секунд, але тільки для майбутніх дат (сьогодні не кешуємо — минулі години змінюються)
@@ -1283,7 +1363,13 @@ function goStep(n) {
 }
 
 function pickCarType(el,type){document.querySelectorAll('.car-type-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');S.carType=type;}
-function pickService(el,name,price){document.querySelectorAll('.svc-pick').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');S.service=name;S.price=price;}
+function pickService(el,name,price){
+  document.querySelectorAll('.svc-pick').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+  S.service=name;S.price=price;
+  // ✅ v9.1: авто-перехід на крок 2 після короткої анімації вибору
+  setTimeout(()=>goStep(2), 260);
+}
 function pickTime(el, slotData){
   document.querySelectorAll('.time-btn').forEach(b=>b.classList.remove('selected'));
   el.classList.add('selected');
@@ -1376,12 +1462,15 @@ async function cancelLastBooking(){
 
 async function rescheduleLastBooking(){
   if(!S.lastBookingId){toast('ID запису не знайдено');return;}
-  const newDate=prompt('Нова дата у форматі ДД.ММ.РРРР',S.date||getTodayStr());
-  if(!newDate) return;
-  const newTime=prompt('Новий час у форматі HH:MM',S.time||'10:00');
-  if(!newTime) return;
-  const newBox=prompt('Новий бокс: Box 1, Box 2 або Box 3',S.box?'Box '+S.box:'Box 1');
-  if(!newBox) return;
+  // ✅ v9.2 AUDIT (п.10): модалка вместо трёх prompt
+  const res = await uiPrompt('Перенести запис', [
+    {key:'date', label:'Нова дата (ДД.ММ.РРРР)', value:S.date||getTodayStr()},
+    {key:'time', label:'Новий час (HH:MM)', value:S.time||'10:00'},
+    {key:'box',  label:'Новий бокс (Box 1 / Box 2 / Box 3)', value:S.box?'Box '+S.box:'Box 1'}
+  ]);
+  if(!res) return;
+  const newDate=res.date, newTime=res.time, newBox=res.box;
+  if(!newDate||!newTime||!newBox){ toast('Заповніть усі поля'); return; }
   const result=await api('rescheduleBooking',{bookingId:S.lastBookingId,phone:S.lastBookingPhone||document.getElementById('fPhone').value,date:newDate,time:newTime,box:newBox});
   if(result?.success){
     clearCache(`timesBoxes_${S.date}`);
@@ -1447,6 +1536,7 @@ async function checkPin(){
   pb.style.transition='transform 0.08s ease';
 }
 function pinLock(){
+  stopCrmAutoRefresh(); // ✅ v9.2 AUDIT (п.8)
   clearCrmSession();
   _pinBuffer='';
   updatePinDots();
@@ -1464,12 +1554,24 @@ document.addEventListener('keydown', e=>{
 });
 
 // ═══ CRM DATA LOADING ═══
-async function loadCRM(){
+// ✅ v9.2 AUDIT (п.8): silent=true — тихое авто-обновление без скелетонов
+async function loadCRM(silent){
   const today=new Date();
   const dd=String(today.getDate()).padStart(2,'0');
   const mm=String(today.getMonth()+1).padStart(2,'0');
   const yyyy=today.getFullYear();
   const todayStr=`${dd}.${mm}.${yyyy}`;
+
+  // ✅ v9.1: skeleton-заглушки только при ручной загрузке
+  if(!silent){
+    showCrmSkeletons();
+    if(!_crmAutoRefreshTimer) startCrmAutoRefresh();
+  }
+  // ✅ v9.2 AUDIT (п.8): всегда чистим кэш списков, чтобы и ручное, и тихое обновление приносили свежие данные
+  clearCache('allBookings');
+  clearCache('allClients');
+  clearCache('allSubsWithVisits');
+  clearCache('allSubRequests');
 
   if(!isApiConfigured()){
     renderDemoSchedule(); renderDemoBoxes(); renderDemoClients(); renderDemoSubs(); renderDemoSubRequests();
@@ -1506,6 +1608,47 @@ async function loadCRM(){
   renderClients(_allClients);
   renderSubs(_allSubs);
   renderSubRequests(_allSubRequests);
+
+  // ✅ v9.2 AUDIT (п.11): детект новых заявок на абонементы
+  const curIds = new Set((_allSubRequests||[]).map(r=>r.requestId));
+  if(_prevSubReqIds){
+    let fresh=0; curIds.forEach(id=>{ if(!_prevSubReqIds.has(id)) fresh++; });
+    if(fresh>0) toast(`🔔 Нових заявок на абонементи: ${fresh}`);
+  }
+  _prevSubReqIds = curIds;
+  // ✅ v9.2 AUDIT (п.8): поддерживаем авто-обновление активным
+  if(_crmUnlocked) startCrmAutoRefresh();
+}
+
+// ✅ v9.2 AUDIT (п.8): тихое авто-обновление CRM каждые 45с
+function startCrmAutoRefresh(){
+  if(_crmAutoRefreshTimer) return;
+  _crmAutoRefreshTimer = setInterval(()=>{
+    const crmActive = document.getElementById('crm-page')?.classList.contains('active');
+    if(!crmActive || !_crmUnlocked){ stopCrmAutoRefresh(); return; }
+    // не мешать ручным действиям: пропускаем, если есть незавершённые действия или открыта модалка
+    if(_pendingActions.size>0) return;
+    if(document.getElementById('clientModal')?.classList.contains('show')) return;
+    loadCRM(true);
+  }, 45000);
+}
+function stopCrmAutoRefresh(){
+  if(_crmAutoRefreshTimer){ clearInterval(_crmAutoRefreshTimer); _crmAutoRefreshTimer=null; }
+}
+
+// ✅ v9.1: скелетони для всіх CRM-розділів
+function skRows(n){ return Array.from({length:n}).map(()=>'<div class="skeleton sk-row"></div>').join(''); }
+function skBoxes(){ return ['','',''].map(()=>'<div class="skeleton sk-box"></div>').join(''); }
+function showCrmSkeletons(){
+  const set=(id,html)=>{ const el=document.getElementById(id); if(el) el.innerHTML=html; };
+  set('scheduleTableWrap', skRows(6));
+  set('scheduleCards', skRows(3));
+  set('subsTableWrap', skRows(5));
+  set('subsMobileCards', skRows(3));
+  set('subRequestsTableWrap', skRows(4));
+  set('subRequestsMobileCards', skRows(2));
+  set('clientList', skRows(6));
+  set('boxesLive', skBoxes());
 }
 
 function setStats(t,a,m,c){
@@ -1625,41 +1768,41 @@ function renderSchedule(bookings){
     cards.innerHTML='<div style="color:var(--gray);font-size:14px;padding:20px 0;">Записів не знайдено</div>';
     return;
   }
-  // Desktop table
+  // Desktop table — ✅ v9.2 AUDIT (п.1): все данные через esc()
   wrap.innerHTML=`<table class="crm-table"><thead><tr><th>#</th><th>Клієнт</th><th>Дата/Час</th><th>Послуга</th><th>Бокс</th><th>Джерело</th><th>Статус</th><th>Дії</th></tr></thead><tbody>${
     bookings.map(b=>`<tr>
-      <td style="font-size:10px;color:var(--gray);">${b.id}</td>
-      <td><b>${b.clientName}</b><br><span style="font-size:11px;color:var(--gray);">${b.phone}</span></td>
-      <td>${b.date}<br><span style="font-size:11px;color:var(--gray);">${b.time}</span></td>
-      <td style="max-width:120px;">${b.service}</td>
-      <td><span style="font-size:15px;font-weight:700;letter-spacing:-0.3px;">${b.box.replace('Box ','')}</span></td>
-      <td style="font-size:11px;color:var(--gray);">${b.source||'—'}</td>
-      <td><span class="badge ${statusBadgeClass(b.status)}">${b.status||'—'}</span></td>
+      <td style="font-size:10px;color:var(--gray);">${esc(b.id)}</td>
+      <td><b>${esc(b.clientName)}</b><br><span style="font-size:11px;color:var(--gray);">${esc(b.phone)}</span></td>
+      <td>${esc(b.date)}<br><span style="font-size:11px;color:var(--gray);">${esc(b.time)}</span></td>
+      <td style="max-width:120px;">${esc(b.service)}</td>
+      <td><span style="font-size:15px;font-weight:700;letter-spacing:-0.3px;">${esc(String(b.box).replace('Box ',''))}</span></td>
+      <td style="font-size:11px;color:var(--gray);">${esc(b.source||'—')}</td>
+      <td><span class="badge ${statusBadgeClass(b.status)}">${esc(b.status||'—')}</span></td>
       <td>
-        <button class="act-btn act-btn-green" onclick="updateBookingStatusUI('${b.id}','▶ В роботі')" title="Почати">▶</button>
-        <button class="act-btn act-btn-green" onclick="updateBookingStatusUI('${b.id}','✅ Виконано')" title="Виконано">✓</button>
-        <button class="act-btn act-btn-yellow" onclick="updateBookingStatusUI('${b.id}','⏳ Очікує')" title="Очікує">⏸</button>
-        <button class="act-btn" onclick="rescheduleBookingUI('${b.id}','${b.phone}')" title="Перенести">↔</button>
-        <button class="act-btn act-btn-red" onclick="updateBookingStatusUI('${b.id}','❌ Скасовано')" title="Скасувати">✕</button>
+        <button class="act-btn act-btn-green" onclick="updateBookingStatusUI('${esc(b.id)}','▶ В роботі')" title="Почати">▶</button>
+        <button class="act-btn act-btn-green" onclick="updateBookingStatusUI('${esc(b.id)}','✅ Виконано')" title="Виконано">✓</button>
+        <button class="act-btn act-btn-yellow" onclick="updateBookingStatusUI('${esc(b.id)}','⏳ Очікує')" title="Очікує">⏸</button>
+        <button class="act-btn" onclick="rescheduleBookingUI('${esc(b.id)}','${esc(b.phone)}')" title="Перенести">↔</button>
+        <button class="act-btn act-btn-red" onclick="updateBookingStatusUI('${esc(b.id)}','❌ Скасовано')" title="Скасувати">✕</button>
       </td></tr>`).join('')
   }</tbody></table>`;
-  // Mobile cards
+  // Mobile cards — ✅ v9.2 AUDIT (п.1)
   cards.innerHTML=bookings.map(b=>`
     <div class="crm-card">
       <div class="crm-card-header">
-        <div><div class="crm-card-title">${b.clientName}</div><div class="crm-card-sub">${b.phone}</div></div>
-        <span class="badge ${statusBadgeClass(b.status)}">${b.status||'—'}</span>
+        <div><div class="crm-card-title">${esc(b.clientName)}</div><div class="crm-card-sub">${esc(b.phone)}</div></div>
+        <span class="badge ${statusBadgeClass(b.status)}">${esc(b.status||'—')}</span>
       </div>
       <div class="crm-card-meta">
-        <span class="crm-card-tag">📅 ${b.date} ${b.time}</span>
-        <span class="crm-card-tag">🏠 Бокс ${b.box.replace('Box ','')}</span>
-        <span class="crm-card-tag">🔧 ${b.service}</span>
+        <span class="crm-card-tag">📅 ${esc(b.date)} ${esc(b.time)}</span>
+        <span class="crm-card-tag">🏠 Бокс ${esc(String(b.box).replace('Box ',''))}</span>
+        <span class="crm-card-tag">🔧 ${esc(b.service)}</span>
       </div>
       <div class="crm-card-actions">
-        <button class="act-btn act-btn-green" onclick="updateBookingStatusUI('${b.id}','▶ В роботі')">▶ В роботі</button>
-        <button class="act-btn act-btn-green" onclick="updateBookingStatusUI('${b.id}','✅ Виконано')">✓ Готово</button>
-        <button class="act-btn" onclick="rescheduleBookingUI('${b.id}','${b.phone}')">↔</button>
-        <button class="act-btn act-btn-red" onclick="updateBookingStatusUI('${b.id}','❌ Скасовано')">✕</button>
+        <button class="act-btn act-btn-green" onclick="updateBookingStatusUI('${esc(b.id)}','▶ В роботі')">▶ В роботі</button>
+        <button class="act-btn act-btn-green" onclick="updateBookingStatusUI('${esc(b.id)}','✅ Виконано')">✓ Готово</button>
+        <button class="act-btn" onclick="rescheduleBookingUI('${esc(b.id)}','${esc(b.phone)}')">↔</button>
+        <button class="act-btn act-btn-red" onclick="updateBookingStatusUI('${esc(b.id)}','❌ Скасовано')">✕</button>
       </div>
     </div>`).join('');
 }
@@ -1667,34 +1810,60 @@ function renderSchedule(bookings){
 async function updateBookingStatusUI(bookingId,newStatus){
   const params={bookingId,status:newStatus};
   if(newStatus.includes('Виконано')||newStatus.includes('Готово')){
-    const costInput = prompt('Сума списання (грн). Залиште порожнім для завершення без списання:','');
-    if(costInput===null) return;
-    const cost = costInput.trim() ? Number(String(costInput).replace(',','.').replace(/[^\d.]/g,'')) : 0;
-    if(costInput.trim() && (isNaN(cost) || cost < 0)) { toast('Введіть правильну суму'); return; }
+    // ✅ v9.2 AUDIT (п.10): модалка вместо prompt
+    const res = await uiPrompt('Завершити запис', [
+      {key:'cost', label:'Сума списання (грн). Порожньо = без списання / готівка', placeholder:'напр. 600', type:'tel', value:''}
+    ]);
+    if(res===null) return; // скасували
+    const raw = String(res.cost||'').trim();
+    const cost = raw ? Number(raw.replace(',','.').replace(/[^\d.]/g,'')) : 0;
+    if(raw && (isNaN(cost) || cost < 0)) { toast('Введіть правильну суму'); return; }
     if(cost > 0) params.cost = cost;
   }
-  const result=await api('updateBookingStatus',params);
+  // ✅ v9.2 AUDIT (п.9): не даём повторный клик, пока идёт запрос
+  const _pk = 'booking:'+bookingId;
+  if(_pendingActions.has(_pk)){ toast('⏳ Зачекайте...'); return; }
+  _pendingActions.add(_pk);
+  // ✅ v9.1 OPTIMISTIC UI: оновлюємо бейдж миттєво, запит — у фоні, з відкатом
   const b=_allBookings.find(x=>x.id===bookingId);
-  if(b){
-    b.status=newStatus;
-    // ✅ Якщо виконано — інвалідуємо кеш часів для дня запису (звільняємо слот)
-    if((newStatus.includes('Виконано')||newStatus.includes('Готово')) && b.date){
+  const prevStatus = b ? b.status : null;
+  if(b){ b.status=newStatus; }
+  applyBookingControls();
+  renderBoxes(_allBookings,getTodayStr());
+  toast('⏳ Збереження...');
+
+  let result;
+  try { result = await api('updateBookingStatus',params); }
+  catch(e){ result = null; }
+
+  const ok = result && result.success !== false; // null = демо/мережа: вважаємо ok
+  if(ok){
+    if((newStatus.includes('Виконано')||newStatus.includes('Готово')) && b?.date){
       clearCache(`timesBoxes_${b.date}`);
     }
+    clearCache('allBookings');
+    toast(`✓ Статус: ${newStatus}`);
+  } else {
+    // ✅ ROLLBACK
+    if(b && prevStatus!==null){ b.status=prevStatus; }
+    applyBookingControls();
+    renderBoxes(_allBookings,getTodayStr());
+    toast(result?.error ? `❌ ${result.error}` : '❌ Не вдалося зберегти статус');
   }
-  filterBookings('all');
-  const ok = result?.success || result===null;
-  toast(ok ? `✓ Статус: ${newStatus}` : '❌ Помилка зміни статусу');
+  _pendingActions.delete(_pk); // ✅ v9.2 AUDIT (п.9)
 }
 
 async function rescheduleBookingUI(bookingId,phone){
   const b=_allBookings.find(x=>x.id===bookingId)||{};
-  const newDate=prompt('Нова дата ДД.ММ.РРРР',b.date||getTodayStr());
-  if(!newDate) return;
-  const newTime=prompt('Новий час HH:MM',b.time||'10:00');
-  if(!newTime) return;
-  const newBox=prompt('Новий бокс',b.box||'Box 1');
-  if(!newBox) return;
+  // ✅ v9.2 AUDIT (п.10): модалка вместо трёх prompt
+  const res = await uiPrompt('Перенести запис', [
+    {key:'date', label:'Нова дата (ДД.ММ.РРРР)', value:b.date||getTodayStr()},
+    {key:'time', label:'Новий час (HH:MM)', value:b.time||'10:00'},
+    {key:'box',  label:'Новий бокс', value:b.box||'Box 1'}
+  ]);
+  if(!res) return;
+  const newDate=res.date, newTime=res.time, newBox=res.box;
+  if(!newDate||!newTime||!newBox){ toast('Заповніть усі поля'); return; }
   const result=await api('rescheduleBooking',{bookingId,phone,date:newDate,time:newTime,box:newBox});
   if(result?.success){
     Object.assign(b,{date:newDate,time:newTime,box:newBox,status:'✅ Підтверджено'});
@@ -1772,13 +1941,13 @@ function renderClients(clients){
     const initials=(c.name||'NA').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
     const visits=c.visits||_allBookings.filter(b=>b.clientId===c.clientId).length;
     const bal=safeBalance(c.balance);
-    return `<div class="client-row" onclick="openClientModal('${c.clientId}')">
-      <div class="client-av">${initials}</div>
+    return `<div class="client-row" onclick="openClientModal('${esc(c.clientId)}')">
+      <div class="client-av">${esc(initials)}</div>
       <div class="client-info">
-        <div class="client-name-s">${c.name}</div>
-        <div class="client-meta-s">${c.phone} · ${visits} візит${visits===1?'':'ів'} · ${c.source||'—'} · <span style="color:${bal>0?'var(--green)':'var(--gray)'};font-weight:600;">${fmtBalance(bal)}</span></div>
+        <div class="client-name-s">${esc(c.name)}</div>
+        <div class="client-meta-s">${esc(c.phone)} · ${visits} візит${visits===1?'':'ів'} · ${esc(c.source||'—')} · <span style="color:${bal>0?'var(--green)':'var(--gray)'};font-weight:600;">${fmtBalance(bal)}</span></div>
       </div>
-      <span class="badge ${c.status?.includes('VIP')?'badge-gold':c.status?.includes('Черный')||c.status?.includes('Архив')?'badge-red':'badge-green'}">${c.status||'Активный'}</span>
+      <span class="badge ${c.status?.includes('VIP')?'badge-gold':c.status?.includes('Черный')||c.status?.includes('Архив')?'badge-red':'badge-green'}">${esc(c.status||'Активный')}</span>
       ${getSubBadge(c.clientId)}
       <span class="client-arrow">›</span>
     </div>`;
@@ -1800,26 +1969,26 @@ function renderSubs(subs){
       const balColor=bal>0?'color:var(--green)':'color:var(--red)';
       const planBadge=s.typeName?.toLowerCase().includes('gold')?'badge-gold':s.typeName?.toLowerCase().includes('platinum')?'badge-platinum':'badge-silver';
       return `<tr>
-        <td style="font-size:10px;color:var(--gray);">${s.subId}</td>
-        <td><b>${s.clientName}</b></td>
-        <td><span class="badge ${planBadge}">${s.typeName}</span></td>
+        <td style="font-size:10px;color:var(--gray);">${esc(s.subId)}</td>
+        <td><b>${esc(s.clientName)}</b></td>
+        <td><span class="badge ${planBadge}">${esc(s.typeName)}</span></td>
         <td>${safeBalance(s.amount).toLocaleString('uk-UA')} ₴</td>
         <td style="${balColor};font-weight:700;">${bal.toLocaleString('uk-UA')} ₴</td>
         <td style="text-align:center;font-weight:600;">${s.visitCount||0}</td>
-        <td style="font-size:12px;">${s.endDate||'—'}</td>
-        <td><span class="badge ${statusBadgeClass(s.status)}">${s.status||'—'}</span></td>
+        <td style="font-size:12px;">${esc(s.endDate||'—')}</td>
+        <td><span class="badge ${statusBadgeClass(s.status)}">${esc(s.status||'—')}</span></td>
         <td>
-          <button class="act-btn act-btn-green" onclick="updateSubStatusUI('${s.subId}','✅ Активний')">✓</button>
-          <button class="act-btn act-btn-blue" onclick="updateSubStatusUI('${s.subId}','❄️ Заморожений')">❄</button>
-          <button class="act-btn act-btn-red" onclick="updateSubStatusUI('${s.subId}','❌ Неактивний')">✕</button>
+          <button class="act-btn act-btn-green" onclick="updateSubStatusUI('${esc(s.subId)}','✅ Активний')">✓</button>
+          <button class="act-btn act-btn-blue" onclick="updateSubStatusUI('${esc(s.subId)}','❄️ Заморожений')">❄</button>
+          <button class="act-btn act-btn-red" onclick="updateSubStatusUI('${esc(s.subId)}','❌ Неактивний')">✕</button>
         </td></tr>`;
     }).join('')
   }</tbody></table>`;
   mc.innerHTML=subs.map(s=>`
     <div class="crm-card">
       <div class="crm-card-header">
-        <div><div class="crm-card-title">${s.clientName}</div><div class="crm-card-sub">${s.subId}</div></div>
-        <span class="badge ${s.typeName?.toLowerCase().includes('gold')?'badge-gold':s.typeName?.toLowerCase().includes('platinum')?'badge-platinum':'badge-silver'}">${s.typeName}</span>
+        <div><div class="crm-card-title">${esc(s.clientName)}</div><div class="crm-card-sub">${esc(s.subId)}</div></div>
+        <span class="badge ${s.typeName?.toLowerCase().includes('gold')?'badge-gold':s.typeName?.toLowerCase().includes('platinum')?'badge-platinum':'badge-silver'}">${esc(s.typeName)}</span>
       </div>
       <div class="crm-card-meta">
         <span class="crm-card-tag">💰 ${safeBalance(s.amount).toLocaleString('uk-UA')} ₴</span>
@@ -1827,21 +1996,40 @@ function renderSubs(subs){
         <span class="crm-card-tag">📅 до ${s.endDate||'—'}</span>
         <span class="crm-card-tag">✅ ${s.visitCount||0} візит${(s.visitCount||0)===1?'':'ів'}</span>
       </div>
-      <div style="margin-bottom:8px;"><span class="badge ${statusBadgeClass(s.status)}">${s.status||'—'}</span></div>
+      <div style="margin-bottom:8px;"><span class="badge ${statusBadgeClass(s.status)}">${esc(s.status||'—')}</span></div>
       <div class="crm-card-actions">
-        <button class="act-btn act-btn-green" onclick="updateSubStatusUI('${s.subId}','✅ Активний')">✓ Активний</button>
-        <button class="act-btn act-btn-blue" onclick="updateSubStatusUI('${s.subId}','❄️ Заморожений')">❄ Заморозити</button>
-        <button class="act-btn act-btn-red" onclick="updateSubStatusUI('${s.subId}','❌ Неактивний')">✕</button>
+        <button class="act-btn act-btn-green" onclick="updateSubStatusUI('${esc(s.subId)}','✅ Активний')">✓ Активний</button>
+        <button class="act-btn act-btn-blue" onclick="updateSubStatusUI('${esc(s.subId)}','❄️ Заморожений')">❄ Заморозити</button>
+        <button class="act-btn act-btn-red" onclick="updateSubStatusUI('${esc(s.subId)}','❌ Неактивний')">✕</button>
       </div>
     </div>`).join('');
 }
 async function updateSubStatusUI(subId,newStatus){
-  const result=await api('updateSubStatus',{subId,status:newStatus});
+  // ✅ v9.2 AUDIT (п.9): анти-дабл-клик
+  const _pk = 'sub:'+subId;
+  if(_pendingActions.has(_pk)){ toast('⏳ Зачекайте...'); return; }
+  _pendingActions.add(_pk);
+  // ✅ v9.1 OPTIMISTIC UI з відкатом
   const s=_allSubs.find(x=>x.subId===subId);
+  const prevStatus = s ? s.status : null;
   if(s) s.status=newStatus;
   renderSubs(_allSubs);
-  clearCache('allSubs'); clearCache('allSubsWithVisits');
-  toast(result?.success||result===null?'✓ Статус оновлено':'❌ Помилка');
+  toast('⏳ Збереження...');
+
+  let result;
+  try { result = await api('updateSubStatus',{subId,status:newStatus}); }
+  catch(e){ result = null; }
+
+  const ok = result && result.success !== false;
+  if(ok){
+    clearCache('allSubs'); clearCache('allSubsWithVisits');
+    toast('✓ Статус оновлено');
+  } else {
+    if(s && prevStatus!==null) s.status=prevStatus; // ROLLBACK
+    renderSubs(_allSubs);
+    toast(result?.error ? `❌ ${result.error}` : '❌ Не вдалося оновити статус');
+  }
+  _pendingActions.delete(_pk); // ✅ v9.2 AUDIT (п.9)
 }
 
 // ─── Sub Requests ─────────────────────────────────────────
@@ -1851,34 +2039,38 @@ function renderSubRequests(requests){
   if(!requests.length){wrap.innerHTML='<div class="table-loading" style="color:var(--gray);">Заявок не знайдено</div>';mc.innerHTML='';return;}
   wrap.innerHTML=`<table class="crm-table"><thead><tr><th>ID</th><th>Клієнт</th><th>План</th><th>Сума</th><th>Дата</th><th>Статус</th><th>Дії</th></tr></thead><tbody>${
     requests.map(r=>`<tr>
-      <td style="font-size:10px;color:var(--gray);">${r.requestId}</td>
-      <td><b>${r.clientName}</b><br><span style="font-size:11px;color:var(--gray);">${r.clientId}</span></td>
-      <td><span class="badge ${r.typeName?.toLowerCase().includes('gold')?'badge-gold':r.typeName?.toLowerCase().includes('platinum')?'badge-platinum':'badge-silver'}">${r.typeName}</span></td>
+      <td style="font-size:10px;color:var(--gray);">${esc(r.requestId)}</td>
+      <td><b>${esc(r.clientName)}</b><br><span style="font-size:11px;color:var(--gray);">${esc(r.clientId)}</span></td>
+      <td><span class="badge ${r.typeName?.toLowerCase().includes('gold')?'badge-gold':r.typeName?.toLowerCase().includes('platinum')?'badge-platinum':'badge-silver'}">${esc(r.typeName)}</span></td>
       <td style="font-weight:700;">${safeBalance(r.amount).toLocaleString('uk-UA')} ₴</td>
-      <td style="font-size:12px;">${r.createdDate||'—'}</td>
-      <td><span class="badge ${r.status?.includes('Нова')?'badge-yellow':r.status?.includes('Підтверджена')?'badge-green':'badge-red'}">${r.status||'—'}</span></td>
+      <td style="font-size:12px;">${esc(r.createdDate||'—')}</td>
+      <td><span class="badge ${r.status?.includes('Нова')?'badge-yellow':r.status?.includes('Підтверджена')?'badge-green':'badge-red'}">${esc(r.status||'—')}</span></td>
       <td>
-        <button class="act-btn act-btn-green" onclick="updateSubRequestStatusUI('${r.requestId}','✅ Підтверджена')">✓</button>
-        <button class="act-btn act-btn-red" onclick="updateSubRequestStatusUI('${r.requestId}','❌ Відхилена')">✕</button>
+        <button class="act-btn act-btn-green" onclick="updateSubRequestStatusUI('${esc(r.requestId)}','✅ Підтверджена')">✓</button>
+        <button class="act-btn act-btn-red" onclick="updateSubRequestStatusUI('${esc(r.requestId)}','❌ Відхилена')">✕</button>
       </td></tr>`).join('')
   }</tbody></table>`;
   mc.innerHTML=requests.map(r=>`
     <div class="crm-card">
       <div class="crm-card-header">
-        <div><div class="crm-card-title">${r.clientName}</div><div class="crm-card-sub">${r.requestId} · ${r.createdDate||'—'}</div></div>
-        <span class="badge ${r.status?.includes('Нова')?'badge-yellow':r.status?.includes('Підтверджена')?'badge-green':'badge-red'}">${r.status||'—'}</span>
+        <div><div class="crm-card-title">${esc(r.clientName)}</div><div class="crm-card-sub">${esc(r.requestId)} · ${esc(r.createdDate||'—')}</div></div>
+        <span class="badge ${r.status?.includes('Нова')?'badge-yellow':r.status?.includes('Підтверджена')?'badge-green':'badge-red'}">${esc(r.status||'—')}</span>
       </div>
       <div class="crm-card-meta">
-        <span class="crm-card-tag ${r.typeName?.toLowerCase().includes('gold')?'badge-gold':r.typeName?.toLowerCase().includes('platinum')?'badge-platinum':''}">${r.typeName}</span>
+        <span class="crm-card-tag ${r.typeName?.toLowerCase().includes('gold')?'badge-gold':r.typeName?.toLowerCase().includes('platinum')?'badge-platinum':''}">${esc(r.typeName)}</span>
         <span class="crm-card-tag">💰 ${safeBalance(r.amount).toLocaleString('uk-UA')} ₴</span>
       </div>
       <div class="crm-card-actions">
-        <button class="act-btn act-btn-green" onclick="updateSubRequestStatusUI('${r.requestId}','✅ Підтверджена')">✓ Підтвердити</button>
-        <button class="act-btn act-btn-red" onclick="updateSubRequestStatusUI('${r.requestId}','❌ Відхилена')">✕ Відхилити</button>
+        <button class="act-btn act-btn-green" onclick="updateSubRequestStatusUI('${esc(r.requestId)}','✅ Підтверджена')">✓ Підтвердити</button>
+        <button class="act-btn act-btn-red" onclick="updateSubRequestStatusUI('${esc(r.requestId)}','❌ Відхилена')">✕ Відхилити</button>
       </div>
     </div>`).join('');
 }
 async function updateSubRequestStatusUI(requestId,newStatus){
+  // ✅ v9.2 AUDIT (п.9): анти-дабл-клик
+  const _pk = 'subreq:'+requestId;
+  if(_pendingActions.has(_pk)){ toast('⏳ Зачекайте...'); return; }
+  _pendingActions.add(_pk);
   let result;
   if(newStatus.includes('Підтверджена')) result=await api('confirmSubRequest',{requestId});
   else result=await api('rejectSubRequest',{requestId});
@@ -1886,6 +2078,7 @@ async function updateSubRequestStatusUI(requestId,newStatus){
   if(r) r.status=newStatus;
   renderSubRequests(_allSubRequests);
   toast(result?.success||result===null?'✓ Заявка оновлена':'❌ Помилка');
+  _pendingActions.delete(_pk);
 }
 
 // ─── Client Modal ─────────────────────────────────────────
@@ -1904,34 +2097,34 @@ async function openClientModal(clientId){
   const subsHtml=(subs||[]).length?(subs||[]).map(s=>`
     <div class="sub-card-mini">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <span class="badge ${s.typeName?.toLowerCase().includes('gold')?'badge-gold':s.typeName?.toLowerCase().includes('platinum')?'badge-platinum':'badge-silver'}">${s.typeName}</span>
-        <span class="badge ${statusBadgeClass(s.status)}">${s.status}</span>
+        <span class="badge ${s.typeName?.toLowerCase().includes('gold')?'badge-gold':s.typeName?.toLowerCase().includes('platinum')?'badge-platinum':'badge-silver'}">${esc(s.typeName)}</span>
+        <span class="badge ${statusBadgeClass(s.status)}">${esc(s.status)}</span>
       </div>
       <div style="font-size:20px;font-weight:700;color:var(--green);">${safeBalance(s.balance).toLocaleString('uk-UA')} ₴</div>
-      <div style="font-size:12px;color:var(--gray);margin-top:2px;">Поповнено: ${safeBalance(s.amount).toLocaleString('uk-UA')} ₴ · До: ${s.endDate||'—'}</div>
+      <div style="font-size:12px;color:var(--gray);margin-top:2px;">Поповнено: ${safeBalance(s.amount).toLocaleString('uk-UA')} ₴ · До: ${esc(s.endDate||'—')}</div>
       <div class="sub-status-btns">
-        <button class="act-btn act-btn-green" onclick="updateSubStatusUI('${s.subId}','✅ Активний');openClientModal('${clientId}')">✓ Активний</button>
-        <button class="act-btn act-btn-blue" onclick="updateSubStatusUI('${s.subId}','❄️ Заморожений');openClientModal('${clientId}')">❄</button>
-        <button class="act-btn act-btn-red" onclick="updateSubStatusUI('${s.subId}','❌ Неактивний');openClientModal('${clientId}')">✕</button>
+        <button class="act-btn act-btn-green" onclick="updateSubStatusUI('${esc(s.subId)}','✅ Активний');openClientModal('${esc(clientId)}')">✓ Активний</button>
+        <button class="act-btn act-btn-blue" onclick="updateSubStatusUI('${esc(s.subId)}','❄️ Заморожений');openClientModal('${esc(clientId)}')">❄</button>
+        <button class="act-btn act-btn-red" onclick="updateSubStatusUI('${esc(s.subId)}','❌ Неактивний');openClientModal('${esc(clientId)}')">✕</button>
       </div>
     </div>`).join(''):'<div style="color:var(--gray);font-size:13px;">Абонементів немає</div>';
   const booksHtml=(bookings||[]).length?(bookings||[]).slice(0,10).map(b=>`
     <div class="history-item">
       <div style="display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-weight:600;">${b.service}</span>
-        <span class="badge ${statusBadgeClass(b.status)}" style="font-size:8px;">${b.status}</span>
+        <span style="font-weight:600;">${esc(b.service)}</span>
+        <span class="badge ${statusBadgeClass(b.status)}" style="font-size:8px;">${esc(b.status)}</span>
       </div>
-      <div style="color:var(--gray);margin-top:2px;font-size:12px;">${b.date} ${b.time} · ${b.box}</div>
+      <div style="color:var(--gray);margin-top:2px;font-size:12px;">${esc(b.date)} ${esc(b.time)} · ${esc(b.box)}</div>
     </div>`):'<div style="color:var(--gray);font-size:13px;">Записів немає</div>';
   const histHtml=(history||[]).length?(history||[]).slice(0,15).map(h=>`
     <div class="history-item">
-      <div style="display:flex;justify-content:space-between;"><span>${h.service}</span><span style="color:var(--green);font-weight:700;">${Math.round(h.cost||0)} ₴</span></div>
-      <div style="color:var(--gray);font-size:12px;margin-top:2px;">${h.date}</div>
+      <div style="display:flex;justify-content:space-between;"><span>${esc(h.service)}</span><span style="color:var(--green);font-weight:700;">${Math.round(h.cost||0)} ₴</span></div>
+      <div style="color:var(--gray);font-size:12px;margin-top:2px;">${esc(h.date)}</div>
     </div>`):'<div style="color:var(--gray);font-size:13px;">Історії немає</div>';
   document.getElementById('clientModalContent').innerHTML=`
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:22px;">
-      <div style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0;">${initials}</div>
-      <div><div style="font-size:22px;font-weight:700;letter-spacing:-0.5px;letter-spacing:0.5px;">${client.name}</div><div style="font-size:12px;color:var(--gray);">${client.clientId} · ${client.phone}</div></div>
+      <div style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0;">${esc(initials)}</div>
+      <div><div style="font-size:22px;font-weight:700;letter-spacing:-0.5px;letter-spacing:0.5px;">${esc(client.name)}</div><div style="font-size:12px;color:var(--gray);">${esc(client.clientId)} · ${esc(client.phone)}</div></div>
     </div>
     <div class="client-tabs">
       <button class="client-tab-btn active" onclick="switchClientTab(event,'info')">Інфо</button>
@@ -1940,17 +2133,17 @@ async function openClientModal(clientId){
       <button class="client-tab-btn" onclick="switchClientTab(event,'chist')">Історія</button>
     </div>
     <div class="client-tab-pane active" id="cpane-info">
-      <div class="info-row"><span class="info-key">ID</span><span class="info-val">${client.clientId}</span></div>
-      <div class="info-row"><span class="info-key">Ім'я</span><span class="info-val">${client.name}</span></div>
-      <div class="info-row"><span class="info-key">Телефон</span><span class="info-val">${client.phone||client.phoneRaw||'—'}</span></div>
-      <div class="info-row"><span class="info-key">Telegram ID</span><span class="info-val">${client.telegramId||'—'}</span></div>
-      <div class="info-row"><span class="info-key">Статус</span><span class="info-val">${client.status||'Активный'}</span></div>
-      <div class="info-row"><span class="info-key">Зареєстрований</span><span class="info-val">${client.registered||'—'}</span></div>
+      <div class="info-row"><span class="info-key">ID</span><span class="info-val">${esc(client.clientId)}</span></div>
+      <div class="info-row"><span class="info-key">Ім'я</span><span class="info-val">${esc(client.name)}</span></div>
+      <div class="info-row"><span class="info-key">Телефон</span><span class="info-val">${esc(client.phone||client.phoneRaw||'—')}</span></div>
+      <div class="info-row"><span class="info-key">Telegram ID</span><span class="info-val">${esc(client.telegramId||'—')}</span></div>
+      <div class="info-row"><span class="info-key">Статус</span><span class="info-val">${esc(client.status||'Активный')}</span></div>
+      <div class="info-row"><span class="info-key">Зареєстрований</span><span class="info-val">${esc(client.registered||'—')}</span></div>
       <div class="info-row"><span class="info-key">Баланс</span><span class="info-val" style="color:var(--green);">${fmtBalance(client.balance)}</span></div>
       <div class="info-row"><span class="info-key">Покупок</span><span class="info-val">${fmtBalance(client.totalPurchases||0)}</span></div>
       <div class="info-row"><span class="info-key">Середній чек</span><span class="info-val">${fmtBalance(client.averageCheck||0)}</span></div>
-      <div class="info-row"><span class="info-key">Останній візит</span><span class="info-val">${client.lastVisit||'—'}</span></div>
-      <div class="info-row"><span class="info-key">Джерело</span><span class="info-val">${client.source||'—'}</span></div>
+      <div class="info-row"><span class="info-key">Останній візит</span><span class="info-val">${esc(client.lastVisit||'—')}</span></div>
+      <div class="info-row"><span class="info-key">Джерело</span><span class="info-val">${esc(client.source||'—')}</span></div>
       <div class="info-row"><span class="info-key">Абонементів</span><span class="info-val">${(subs||[]).length}</span></div>
       <div class="info-row"><span class="info-key">Записів</span><span class="info-val">${(bookings||[]).length}</span></div>
     </div>
@@ -2240,19 +2433,24 @@ document.getElementById('clientModal').addEventListener('click',function(e){if(e
 // ═══ RECALC ALL BALANCES ═══
 async function recalcAllBalances(){
   const btn=document.getElementById('recalcBtn');
-  if(btn){btn.textContent='⟳ ...';btn.disabled=true;}
-  const result=await api('recalcAllBalances');
-  if(btn){btn.textContent='⟳ Баланси';btn.disabled=false;}
-  clearCache('allSubs');
-  clearCache('allSubsWithVisits');
-  if(result?.success){
-    toast(`✅ Баланси оновлено для ${result.updated} клієнтів`);
-    // Перезавантажуємо дані
-    clearCache();
-    await loadCRM();
-  } else {
-    toast('❌ Помилка перерахунку');
-  }
+  if(btn){ btn.textContent='⏳ Перерахунок запущено...'; btn.disabled=true; }
+  toast('⏳ Перерахунок балансів запущено у фоні...');
+
+  // ✅ v9.1: фоновий Promise — адмін продовжує працювати, екран не блокується
+  api('recalcAllBalances')
+    .then(result=>{
+      if(result?.success){
+        clearCache('allSubs'); clearCache('allSubsWithVisits'); clearCache('allClients');
+        toast(`✅ Баланси оновлено для ${result.updated} клієнтів`);
+        api('getAllClients',{},'allClients').then(cRes=>{
+          if(cRes?.clients){ _allClients=cRes.clients; renderClients(_allClients); }
+        }).catch(()=>{});
+      } else {
+        toast(result?.error ? `❌ ${result.error}` : '❌ Помилка перерахунку');
+      }
+    })
+    .catch(()=>toast('❌ Помилка zʼєднання при перерахунку'))
+    .finally(()=>{ if(btn){ btn.textContent='⟳ Баланси'; btn.disabled=false; } });
 }
 
 async function broadcastUi(){
@@ -2272,6 +2470,12 @@ async function runMaintenanceUi(){
   } else {
     toast('❌ Помилка оновлення KPI');
   }
+}
+
+// ✅ v9.2 AUDIT (п.1): экранирование HTML — защита от stored-XSS в innerHTML.
+// Оборачивать ВСЕ данные из API (имена, услуги, статусы, комментарии, телефоны) при вставке в HTML.
+function esc(s){
+  return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
 // ═══ TOAST ═══
