@@ -1260,13 +1260,12 @@ async function selectDate(el, dateStr) {
   // ✅ v9.1: skeleton замість спінера — показуємо контури кнопок часу
   grid.innerHTML = Array.from({length:10}).map(()=>'<div class="skeleton sk-time"></div>').join('');
   if (!isApiConfigured()) { renderDemoTimes(); return; }
-  // ✅ Один запит замість двох — отримуємо час і бокси разом
-  // Кеш 90 секунд, але тільки для майбутніх дат (сьогодні не кешуємо — минулі години змінюються)
-  const isToday = dateStr === getTodayStr();
-  const cacheKey = isToday ? null : `timesBoxes_${dateStr}`;
-  const data = await api('getTimesAndBoxes',{date:dateStr}, cacheKey);
+  // ✅ fix(занятість): беремо свіжі дані БЕЗ кешу, щоб повністю зайнятий час
+  // відображався неактивним відразу (а не після помилки при підтвердженні).
+  clearCache(`timesBoxes_${dateStr}`);
+  const data = await api('getTimesAndBoxes',{date:dateStr});
   if (!data?.times) { renderDemoTimes(); return; }
-  // Зберігаємо дані боксів для кроку 3 (щоб не робити ще один запит)
+  // Зберігаємо дані боксів для кроку 3 (fallback, якщо свіжий запит не вдасться)
   S._cachedBoxesForTimes = {};
   data.times.forEach(t => { S._cachedBoxesForTimes[t.time] = t.freeBoxes; });
   renderTimes(data.times);
@@ -1348,6 +1347,14 @@ async function loadBoxes() {
   });
   const sub=document.getElementById('box-sub');
   if(sub) sub.textContent=freeBoxes.length?`Вільно ${freeBoxes.length} з 3 боксів`:'Всі бокси зайняті на цей час';
+  // ✅ fix: якщо всі бокси зайняті — не даємо «зависнути» на кроку боксів:
+  // повертаємо на вибір часу з оновленим списком (цей час стане неактивним).
+  if(!freeBoxes.length){
+    toast('⏰ Цей час вже зайнятий. Оберіть інший час.');
+    S.time=''; S.box=null;
+    if(S.date && isApiConfigured()) selectDate(document.querySelector(`.date-pill[data-date="${S.date}"]`)||{classList:{add(){},remove(){}}}, S.date);
+    goStep(2);
+  }
 }
 
 // ═══ BOOKING STEPS ═══
