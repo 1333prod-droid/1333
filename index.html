@@ -35,6 +35,13 @@
 }
 html{scroll-behavior:smooth;}
 body{background:var(--bg);color:var(--white);font-family:'Inter',sans-serif;overflow-x:hidden;min-height:100vh;-webkit-font-smoothing:antialiased;}
+/* ✅ fix(mobile): запобігаємо авто-zoom Safari/iOS при фокусі на полях вводу.
+   iOS масштабує сторінку, якщо font-size інпута < 16px, і не віддаляє назад.
+   16px прибирає авто-zoom, не ламаючи ручне масштабування. */
+@media (max-width:768px){
+  input,select,textarea,
+  .cab-field,.cab-code-digit{font-size:16px !important;}
+}
 
 /* MESH BG */
 .mesh-bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
@@ -1316,12 +1323,18 @@ async function loadBoxes() {
   c.innerHTML='<div style="color:var(--gray);font-size:13px;padding:16px 0;grid-column:1/-1;"><span class="time-loading-spinner" style="width:14px;height:14px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:8px;"></span>Перевіряємо бокси...</div>';
   S.box=null;
   let freeBoxes=['Box 1','Box 2','Box 3'];
-  // ✅ Якщо є кеш з попереднього запиту selectDate — беремо з нього (миттєво!)
-  if (S._cachedBoxesForTimes && S.time && S._cachedBoxesForTimes[S.time] !== undefined) {
-    freeBoxes = S._cachedBoxesForTimes[S.time];
-  } else if(isApiConfigured()&&S.date&&S.time) {
+  // ✅ fix(занятість боксів): ЗАВЖДИ робимо СВІЖИЙ запит на момент вибору бокса.
+  // Кешований список (_cachedBoxesForTimes) міг бути застарілим (інший клієнт
+  // вже зайняв бокс) — це і викликало подвійні записи. Свіжий запит без кешу
+  // гарантує, що зайняті бокси відображаються неактивними в реальному часі.
+  if(isApiConfigured()&&S.date&&S.time) {
     const data=await api('getBoxesForDateTime',{date:S.date,time:S.time});
     if(data?.boxes) freeBoxes=data.boxes;
+    else if (S._cachedBoxesForTimes && S._cachedBoxesForTimes[S.time] !== undefined) {
+      freeBoxes = S._cachedBoxesForTimes[S.time]; // fallback якщо запит не вдався
+    }
+  } else if (S._cachedBoxesForTimes && S.time && S._cachedBoxesForTimes[S.time] !== undefined) {
+    freeBoxes = S._cachedBoxesForTimes[S.time];
   }
   c.innerHTML='';
   ['Box 1','Box 2','Box 3'].forEach(boxName=>{
@@ -2071,13 +2084,28 @@ async function updateSubRequestStatusUI(requestId,newStatus){
   const _pk = 'subreq:'+requestId;
   if(_pendingActions.has(_pk)){ toast('⏳ Зачекайте...'); return; }
   _pendingActions.add(_pk);
-  let result;
-  if(newStatus.includes('Підтверджена')) result=await api('confirmSubRequest',{requestId});
-  else result=await api('rejectSubRequest',{requestId});
+  // ✅ fix(оптимістичний UI): оновлюємо бейдж МИТТЄВО, запит — у фоні, з відкатом
   const r=_allSubRequests.find(x=>x.requestId===requestId);
+  const prevStatus = r ? r.status : null;
   if(r) r.status=newStatus;
   renderSubRequests(_allSubRequests);
-  toast(result?.success||result===null?'✓ Заявка оновлена':'❌ Помилка');
+  toast('⏳ Збереження...');
+
+  let result;
+  try {
+    if(newStatus.includes('Підтверджена')) result=await api('confirmSubRequest',{requestId});
+    else result=await api('rejectSubRequest',{requestId});
+  } catch(e){ result = null; }
+
+  const ok = result && result.success !== false; // null = демо/мережа: вважаємо ok
+  if(ok){
+    clearCache('allSubRequests'); clearCache('allSubs'); clearCache('allSubsWithVisits');
+    toast('✓ Заявка оновлена');
+  } else {
+    if(r && prevStatus!==null) r.status=prevStatus; // ROLLBACK
+    renderSubRequests(_allSubRequests);
+    toast(result?.error ? `❌ ${result.error}` : '❌ Не вдалося оновити заявку');
+  }
   _pendingActions.delete(_pk);
 }
 
