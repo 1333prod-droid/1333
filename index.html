@@ -1120,7 +1120,9 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw9mqrVSrAVeoMa
 const CRM_TOKEN_KEY = 'crm_admin_token';
 const PUBLIC_API_ACTIONS = new Set([
   'getTimesAndBoxes','getAvailableTimesForDate','getBoxesForDateTime',
-  'saveBooking','cancelBooking','rescheduleBooking','saveSubOrder','autoRegister','verifyCrmPin'
+  'saveBooking','cancelBooking','rescheduleBooking','saveSubOrder',
+  'autoRegister','verifyCrmPin','sendClientAuthCode','verifyClientAuthCode',
+  'getClientProfileData','checkLoginPhone','verifyAdminSiteCode'
 ]);
 
 // ═══ STATE ═══
@@ -1459,7 +1461,7 @@ function showSuccess(id){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function resetBooking(){
-  S.service='';S.price='';S.date='';S.time='';S.box=null;S.carType='';S.lastBookingId='';S.lastBookingPhone='';
+  S.service='';S.price='';S.date='';S.time='';S.box=null;S.carType='';S.lastBookingId='';S.lastBookingPhone=''; S._cachedBoxesForTimes = null;
   document.getElementById('confirmView').style.display='block';
   document.getElementById('successView').style.display='none';
   document.querySelectorAll('.svc-pick,.time-btn,.box-btn,.date-pill,.car-type-btn').forEach(x=>x.classList.remove('selected'));
