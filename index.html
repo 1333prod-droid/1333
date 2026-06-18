@@ -90,7 +90,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;height:64px;
 .cab-btn-ghost:hover{color:var(--white);border-color:rgba(255,255,255,0.25);}
 .cab-error{font-size:12px;color:var(--red);min-height:16px;margin-top:6px;}
 .cab-tg-note{font-size:12px;color:var(--gray);text-align:center;margin-top:20px;line-height:1.6;padding:12px;background:rgba(255,255,255,0.03);border-radius:10px;}
-
+.cab-tg-bot-link{display:inline-flex;align-items:center;gap:4px;color:#22c55e;font-weight:700;text-decoration:none;border-bottom:1px solid rgba(34,197,94,0.4);}
+.cab-tg-bot-link:hover{color:#fff;border-bottom-color:#fff;}
 /* Code input */
 .cab-code-row{display:flex;gap:8px;justify-content:center;margin:20px 0;}
 .cab-code-digit{width:54px;height:60px;background:rgba(255,255,255,0.05);border:2px solid rgba(255,255,255,0.1);border-radius:14px;font-family:'Inter',sans-serif;font-size:26px;font-weight:700;color:var(--white);text-align:center;outline:none;transition:border-color 0.2s;caret-color:transparent;}
@@ -782,7 +783,7 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
           oninput="cabPhoneInput(this)" onkeydown="if(event.key==='Enter') cabSendCode()">
         <div class="cab-hint" id="cab-phone-hint"></div>
         <button class="cab-btn" id="cab-send-btn" onclick="cabSendCode()">Отримати код →</button>
-        <div class="cab-tg-note">📱 Ми надішлемо одноразовий код у ваш Telegram. Переконайтесь, що ви написали боту <b>@Assistant_1333_Bot</b></div>
+        <div class="cab-tg-note">📱 Ми надішлемо одноразовий код у ваш Telegram. Переконайтесь, що ви написали боту <a href="https://t.me/Assistant_1333_Bot" target="_blank" rel="noopener" class="cab-tg-bot-link">@Assistant_1333_Bot →</a></div>
         <div class="cab-error" id="cab-phone-error"></div>
       </div>
     </div>
@@ -836,7 +837,7 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
       <!-- No telegram warning -->
       <div class="cab-no-tg" id="cab-no-tg-warn" style="display:none;">
         <div class="cab-no-tg-icon">📱</div>
-        <div class="cab-no-tg-text">Прив'яжіть Telegram: напишіть боту <b>@Assistant_1333_Bot</b> команду /start та поділіться номером. Так ви зможете отримувати коди та нагадування.</div>
+        <div class="cab-no-tg-text">Прив'яжіть Telegram: напишіть боту <a href="https://t.me/Assistant_1333_Bot" target="_blank" rel="noopener" class="cab-tg-bot-link">@Assistant_1333_Bot →</a> команду /start та поділіться номером. Так ви зможете отримувати коди та нагадування.</div>
       </div>
 
       <!-- Subscriptions -->
