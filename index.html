@@ -608,13 +608,8 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
   <div class="section" id="home-services">
     <div class="section-label">Послуги</div>
     <h2 class="section-title">Детейлінг, який<br>захищає ваш автомобіль</h2>
-    <div class="services-row">
-      <div class="glass svc-card" onclick="showPageAndService('booking','Хімчистка салону','2 500 ₴')"><div class="svc-icon">🧹</div><div class="svc-name">Хімчистка салону</div><div class="svc-price">від 2 500 ₴</div><div class="svc-arrow">→</div></div>
-      <div class="glass svc-card" onclick="showPageAndService('booking','Полірування кузова','3 000 ₴')"><div class="svc-icon">✨</div><div class="svc-name">Полірування кузова</div><div class="svc-price">від 3 000 ₴</div><div class="svc-arrow">→</div></div>
-      <div class="glass svc-card" onclick="showPageAndService('booking','Керамічне покриття','6 000 ₴')"><div class="svc-icon">💎</div><div class="svc-name">Керамічне покриття</div><div class="svc-price">від 6 000 ₴</div><div class="svc-arrow">→</div></div>
-      <div class="glass svc-card" onclick="showPageAndService('booking','Тонування скла','1 800 ₴')"><div class="svc-icon">🌑</div><div class="svc-name">Тонування скла</div><div class="svc-price">від 1 800 ₴</div><div class="svc-arrow">→</div></div>
-      <div class="glass svc-card" onclick="showPageAndService('booking','PPF захисна плівка','4 000 ₴')"><div class="svc-icon">🛡️</div><div class="svc-name">PPF захисна плівка</div><div class="svc-price">від 4 000 ₴</div><div class="svc-arrow">→</div></div>
-      <div class="glass svc-card" onclick="showPageAndService('booking','Комплексне миття','600 ₴')"><div class="svc-icon">🚿</div><div class="svc-name">Комплексне миття</div><div class="svc-price">від 600 ₴</div><div class="svc-arrow">→</div></div>
+    <div class="services-row" id="homeServicesRow">
+      <div class="skeleton sk-card"></div><div class="skeleton sk-card"></div><div class="skeleton sk-card"></div>
     </div>
   </div>
   <div class="section" id="home-plans">
@@ -641,13 +636,8 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
 <!-- ═══ SERVICES ═══ -->
 <div id="services-page" class="page">
   <div class="page-header"><div class="section-label">Послуги</div><h2 class="section-title">Детейлінг<br>на вищому рівні</h2><p style="font-size:14px;color:rgba(255,255,255,0.35);margin-top:8px;">Натисніть на будь-яку послугу, щоб одразу записатись</p></div>
-  <div class="services-full-grid">
-    <div class="glass svc-full" onclick="showPageAndService('booking','Хімчистка салону','2 500 ₴')"><div class="svc-icon">🧹</div><div class="svc-name">Хімчистка салону</div><p style="font-size:13px;color:var(--gray);margin-top:7px;line-height:1.7;">Глибоке очищення всіх поверхонь. Видалення складних забруднень та запахів.</p><div class="svc-full-prices"><div class="price-line"><span class="price-label">Седан</span><span class="price-val">2 500 ₴</span></div><div class="price-line"><span class="price-label">SUV / Кросовер</span><span class="price-val">3 500 ₴</span></div><div class="price-line"><span class="price-label">Мінівен</span><span class="price-val">4 500 ₴</span></div></div><button class="svc-full-btn">Записатись →</button></div>
-    <div class="glass svc-full" onclick="showPageAndService('booking','Полірування кузова','3 000 ₴')"><div class="svc-icon">✨</div><div class="svc-name">Полірування кузова</div><p style="font-size:13px;color:var(--gray);margin-top:7px;line-height:1.7;">Абразивне та захисне полірування. Усунення подряпин та відновлення блиску.</p><div class="svc-full-prices"><div class="price-line"><span class="price-label">Однокрокове</span><span class="price-val">3 000 ₴</span></div><div class="price-line"><span class="price-label">Двокрокове</span><span class="price-val">5 000 ₴</span></div><div class="price-line"><span class="price-label">Full Detail</span><span class="price-val">8 000 ₴</span></div></div><button class="svc-full-btn">Записатись →</button></div>
-    <div class="glass svc-full" onclick="showPageAndService('booking','Керамічне покриття','6 000 ₴')"><div class="svc-icon">💎</div><div class="svc-name">Керамічне покриття</div><p style="font-size:13px;color:var(--gray);margin-top:7px;line-height:1.7;">Довготривалий захист. Гідрофобний ефект до 5 років.</p><div class="svc-full-prices"><div class="price-line"><span class="price-label">1 шар</span><span class="price-val">6 000 ₴</span></div><div class="price-line"><span class="price-label">2 шари</span><span class="price-val">9 000 ₴</span></div><div class="price-line"><span class="price-label">Pro (3 шари)</span><span class="price-val">14 000 ₴</span></div></div><button class="svc-full-btn">Записатись →</button></div>
-    <div class="glass svc-full" onclick="showPageAndService('booking','Тонування скла','1 800 ₴')"><div class="svc-icon">🌑</div><div class="svc-name">Тонування скла</div><p style="font-size:13px;color:var(--gray);margin-top:7px;line-height:1.7;">Якісна плівка LLUMAR. УФ-захист, приватність, термоізоляція.</p><div class="svc-full-prices"><div class="price-line"><span class="price-label">Бічні (2 скла)</span><span class="price-val">1 800 ₴</span></div><div class="price-line"><span class="price-label">Задні (3 скла)</span><span class="price-val">2 800 ₴</span></div><div class="price-line"><span class="price-label">Усі скла</span><span class="price-val">4 200 ₴</span></div></div><button class="svc-full-btn">Записатись →</button></div>
-    <div class="glass svc-full" onclick="showPageAndService('booking','PPF захисна плівка','4 000 ₴')"><div class="svc-icon">🛡️</div><div class="svc-name">PPF захисна плівка</div><p style="font-size:13px;color:var(--gray);margin-top:7px;line-height:1.7;">Поліуретанова плівка проти гравію та подряпин. Самовідновлення.</p><div class="svc-full-prices"><div class="price-line"><span class="price-label">Капот</span><span class="price-val">4 000 ₴</span></div><div class="price-line"><span class="price-label">Фронт пакет</span><span class="price-val">9 500 ₴</span></div><div class="price-line"><span class="price-label">Full wrap</span><span class="price-val">від 22 000 ₴</span></div></div><button class="svc-full-btn">Записатись →</button></div>
-    <div class="glass svc-full" onclick="showPageAndService('booking','Комплексне миття','600 ₴')"><div class="svc-icon">🚿</div><div class="svc-name">Комплексне миття</div><p style="font-size:13px;color:var(--gray);margin-top:7px;line-height:1.7;">Ручне миття кузова, колеса, арки, гума, скло, салон.</p><div class="svc-full-prices"><div class="price-line"><span class="price-label">Базове</span><span class="price-val">600 ₴</span></div><div class="price-line"><span class="price-label">Стандарт</span><span class="price-val">950 ₴</span></div><div class="price-line"><span class="price-label">Преміум</span><span class="price-val">1 400 ₴</span></div></div><button class="svc-full-btn">Записатись →</button></div>
+  <div class="services-full-grid" id="servicesFullGrid">
+    <div class="skeleton sk-card"></div><div class="skeleton sk-card"></div><div class="skeleton sk-card"></div><div class="skeleton sk-card"></div>
   </div>
 </div>
 
@@ -668,13 +658,8 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
     <div class="panel active" id="panel-1">
       <div class="panel-title">Послуга</div>
       <div class="panel-sub">Оберіть послугу</div>
-      <div class="svc-pick-grid">
-        <div class="glass svc-pick" onclick="pickService(this,'Хімчистка салону','2 500 ₴')"><div class="svc-pick-icon">🧹</div><div class="svc-pick-name">Хімчистка салону</div><div class="svc-pick-price">від 2 500 ₴</div></div>
-        <div class="glass svc-pick" onclick="pickService(this,'Полірування кузова','3 000 ₴')"><div class="svc-pick-icon">✨</div><div class="svc-pick-name">Полірування кузова</div><div class="svc-pick-price">від 3 000 ₴</div></div>
-        <div class="glass svc-pick" onclick="pickService(this,'Керамічне покриття','6 000 ₴')"><div class="svc-pick-icon">💎</div><div class="svc-pick-name">Керамічне покриття</div><div class="svc-pick-price">від 6 000 ₴</div></div>
-        <div class="glass svc-pick" onclick="pickService(this,'Тонування скла','1 800 ₴')"><div class="svc-pick-icon">🌑</div><div class="svc-pick-name">Тонування скла</div><div class="svc-pick-price">від 1 800 ₴</div></div>
-        <div class="glass svc-pick" onclick="pickService(this,'PPF захисна плівка','4 000 ₴')"><div class="svc-pick-icon">🛡️</div><div class="svc-pick-name">PPF захисна плівка</div><div class="svc-pick-price">від 4 000 ₴</div></div>
-        <div class="glass svc-pick" onclick="pickService(this,'Комплексне миття','600 ₴')"><div class="svc-pick-icon">🚿</div><div class="svc-pick-name">Комплексне миття</div><div class="svc-pick-price">від 600 ₴</div></div>
+      <div class="svc-pick-grid" id="svcPickGrid">
+        <div class="skeleton sk-card"></div><div class="skeleton sk-card"></div><div class="skeleton sk-card"></div><div class="skeleton sk-card"></div>
       </div>
       <div class="nav-row"><span></span><button class="btn-next" onclick="goStep(2)">Далі →</button></div>
     </div>
@@ -702,15 +687,8 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
       <div class="panel-title">Ваші контакти</div>
       <div class="panel-sub">Вас автоматично зареєструємо в системі</div>
       <div class="form-label" style="margin-bottom:10px;">Тип кузова</div>
-      <div class="car-type-grid">
-        <div class="car-type-btn" onclick="pickCarType(this,'Седан')"><span class="car-type-icon">🚗</span><span class="car-type-name">Седан</span></div>
-        <div class="car-type-btn" onclick="pickCarType(this,'Хетчбек')"><span class="car-type-icon">🚙</span><span class="car-type-name">Хетчбек</span></div>
-        <div class="car-type-btn" onclick="pickCarType(this,'Кросовер')"><span class="car-type-icon">🚐</span><span class="car-type-name">Кросовер</span></div>
-        <div class="car-type-btn" onclick="pickCarType(this,'Джип / SUV')"><span class="car-type-icon">🛻</span><span class="car-type-name">Джип/SUV</span></div>
-        <div class="car-type-btn" onclick="pickCarType(this,'Універсал')"><span class="car-type-icon">🚕</span><span class="car-type-name">Універсал</span></div>
-        <div class="car-type-btn" onclick="pickCarType(this,'Купе')"><span class="car-type-icon">🏎️</span><span class="car-type-name">Купе</span></div>
-        <div class="car-type-btn" onclick="pickCarType(this,'Мінівен')"><span class="car-type-icon">🚌</span><span class="car-type-name">Мінівен</span></div>
-        <div class="car-type-btn" onclick="pickCarType(this,'Кабріолет')"><span class="car-type-icon">🏖️</span><span class="car-type-name">Кабріолет</span></div>
+     <div class="car-type-grid" id="carTypeGrid" style="grid-template-columns:repeat(3,1fr);">
+        <div class="skeleton sk-row"></div><div class="skeleton sk-row"></div><div class="skeleton sk-row"></div>
       </div>
       <div class="form-grid-2">
         <div class="form-group"><div class="form-label">Ім'я</div><input type="text" class="field" id="fName" placeholder="Олексій Петренко"></div>
@@ -1201,15 +1179,13 @@ function showPage(p) {
   else if (typeof stopCrmAutoRefresh==='function') stopCrmAutoRefresh(); // ✅ v9.2 AUDIT (п.8): уход с CRM
 }
 function scrollToSection(id) { document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'}); }
-function showPageAndService(page, svc, price) {
+async function showPageAndService(page, svc) {
   showPage(page);
+  await _catalogReady;
   setTimeout(()=>{
-    document.querySelectorAll('.svc-pick').forEach(b=>{
-      if(b.querySelector('.svc-pick-name')?.textContent===svc) { b.classList.add('selected'); S.service=svc; S.price=price; }
-    });
-    // ✅ v9.1: обрали послугу — одразу на крок 2 (дата/час)
-    if(S.service) setTimeout(()=>goStep(2), 220);
-  }, 100);
+    const card = document.querySelector('.svc-pick[data-svc-name="'+CSS.escape(svc)+'"]');
+    if (card) card.click();
+  }, 50);
 }
 function openMobileMenu() { document.getElementById('mobileMenu').classList.add('show'); document.body.style.overflow='hidden'; }
 function closeMobileMenu() { document.getElementById('mobileMenu').classList.remove('show'); document.body.style.overflow=''; }
@@ -1217,13 +1193,10 @@ function closeMobileMenu() { document.getElementById('mobileMenu').classList.rem
 // ═══ DATE PILLS ═══
 window.addEventListener('load', () => {
   initDatePills();
-  // ✅ v9 PERF: "розігріваємо" з'єднання з Apps Script у фоні відразу при
-  // завантаженні сторінки. Перший виклик контейнера Google найдовший —
-  // якщо зробити його непомітно зараз, то коли користувач реально
-  // обере дату на кроці бронювання, відповідь прийде набагато швидше.
   if (isApiConfigured()) {
     api('getTimesAndBoxes', { date: getTodayStr() }).catch(()=>{});
   }
+  loadPublicCatalog();
 });
 
 function fmtDatePill(d) {
@@ -1369,6 +1342,7 @@ function goStep(n) {
     if(!document.getElementById('fName').value){toast("Введіть ім'я");return;}
     if(!document.getElementById('fPhone').value){toast('Введіть телефон');return;}
     if(!S.carType){toast('Оберіть тип кузова');return;}
+    recomputeBookingPrice();
     updateSummary();
   }
   S.step=n;
@@ -1385,7 +1359,7 @@ function goStep(n) {
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function pickCarType(el,type){document.querySelectorAll('.car-type-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');S.carType=type;}
+function pickCarType(el,type){document.querySelectorAll('.car-type-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');S.carType=type;recomputeBookingPrice();}
 function pickService(el,name,price){
   document.querySelectorAll('.svc-pick').forEach(b=>b.classList.remove('selected'));
   el.classList.add('selected');
@@ -1403,7 +1377,115 @@ function pickTime(el, slotData){
   if (slotData?.freeBoxes) S._cachedBoxesForTimes[S.time] = slotData.freeBoxes;
 }
 function pickBox(el,n){document.querySelectorAll('.box-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');S.box=n;}
+// ═══ ПУБЛІЧНИЙ КАТАЛОГ (з листа "💰 Прайс") ═══
+let _catalog = null;
+let _catalogReadyResolve;
+const _catalogReady = new Promise(res => { _catalogReadyResolve = res; });
 
+function parseUahNumber(s){
+  const n = parseFloat(String(s||'').replace(/[^\d.,]/g,'').replace(',','.'));
+  return isNaN(n) ? null : n;
+}
+function findCatalogPrice(serviceName, carType){
+  if (!_catalog?.priceList || !carType) return null;
+  const list = _catalog.priceList[carType];
+  if (!list) return null;
+  const row = list.find(s=>s.name===serviceName);
+  return row ? row.price : null;
+}
+function minCatalogPrice(serviceName){
+  let min=null;
+  (_catalog?.carTypes||[]).forEach(ct=>{
+    const n = parseUahNumber(findCatalogPrice(serviceName, ct));
+    if (n!==null && (min===null || n<min)) min = n;
+  });
+  return min;
+}
+function iconForService(name){
+  const n = String(name).toLowerCase();
+  if (n.includes('поліру')) return '✨';
+  if (n.includes('експрес')) return '🚿';
+  if (n.includes('3-х фазна') || n.includes('3 фазна')) return '💧';
+  if (n.includes('2-фазна') || n.includes('2 фазна')) return '🧽';
+  return '🚗';
+}
+function carTypeIcon(ct){ return ct==='SUV' ? '🚙' : (ct==='Sedan' ? '🚗' : '🚐'); }
+function recomputeBookingPrice(){
+  const n = parseUahNumber(findCatalogPrice(S.service, S.carType));
+  if (n !== null) S.price = n.toLocaleString('uk-UA') + ' ₴';
+}
+
+function renderBookingServicePicker(){
+  const grid = document.getElementById('svcPickGrid');
+  if (!grid) return;
+  if (!_catalog?.serviceNames?.length) { grid.innerHTML = '<div style="color:var(--gray);font-size:13px;grid-column:1/-1;padding:16px 0;">Не вдалося завантажити послуги. Перезавантажте сторінку або зателефонуйте: +380 77 001 13 33</div>'; return; }
+  grid.innerHTML = _catalog.serviceNames.map(name=>{
+    const min = minCatalogPrice(name);
+    const priceStr = min!==null ? ('від '+min.toLocaleString('uk-UA')+' ₴') : '';
+    return `<div class="glass svc-pick" data-svc-name="${esc(name)}"><div class="svc-pick-icon">${iconForService(name)}</div><div class="svc-pick-name">${esc(name)}</div><div class="svc-pick-price">${esc(priceStr)}</div></div>`;
+  }).join('');
+  grid.querySelectorAll('.svc-pick').forEach(card=>{
+    card.addEventListener('click', ()=>pickServiceDyn(card, card.dataset.svcName));
+  });
+}
+function pickServiceDyn(el, name){
+  document.querySelectorAll('.svc-pick').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+  S.service=name;
+  const min = minCatalogPrice(name);
+  S.price = min!==null ? ('від '+min.toLocaleString('uk-UA')+' ₴') : '';
+  setTimeout(()=>goStep(2), 260);
+}
+
+function renderBookingCarTypeGrid(){
+  const grid = document.getElementById('carTypeGrid');
+  if (!grid) return;
+  if (!_catalog?.carTypes?.length) { grid.innerHTML = '<div style="color:var(--gray);font-size:13px;">Не вдалося завантажити типи авто.</div>'; return; }
+  grid.innerHTML = _catalog.carTypes.map(ct=>`<div class="car-type-btn" data-car-type="${esc(ct)}"><span class="car-type-icon">${carTypeIcon(ct)}</span><span class="car-type-name">${esc(ct)}</span></div>`).join('');
+  grid.querySelectorAll('.car-type-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>pickCarType(btn, btn.dataset.carType));
+  });
+}
+
+function renderHomeServiceCards(){
+  const row = document.getElementById('homeServicesRow');
+  if (!row || !_catalog?.serviceNames?.length) return;
+  row.innerHTML = _catalog.serviceNames.map(name=>{
+    const min = minCatalogPrice(name);
+    const priceStr = min!==null ? ('від '+min.toLocaleString('uk-UA')+' ₴') : '';
+    return `<div class="glass svc-card" data-svc-name="${esc(name)}"><div class="svc-icon">${iconForService(name)}</div><div class="svc-name">${esc(name)}</div><div class="svc-price">${esc(priceStr)}</div><div class="svc-arrow">→</div></div>`;
+  }).join('');
+  row.querySelectorAll('.svc-card').forEach(card=>{
+    card.addEventListener('click', ()=>showPageAndService('booking', card.dataset.svcName));
+  });
+}
+function renderFullServicesPage(){
+  const grid = document.getElementById('servicesFullGrid');
+  if (!grid || !_catalog?.serviceNames?.length) return;
+  grid.innerHTML = _catalog.serviceNames.map(name=>{
+    const lines = (_catalog.carTypes||[]).map(ct=>{
+      const n = parseUahNumber(findCatalogPrice(name, ct));
+      return n!==null ? `<div class="price-line"><span class="price-label">${esc(ct)}</span><span class="price-val">${n.toLocaleString('uk-UA')} ₴</span></div>` : '';
+    }).join('');
+    return `<div class="glass svc-full" data-svc-name="${esc(name)}"><div class="svc-icon">${iconForService(name)}</div><div class="svc-name">${esc(name)}</div><div class="svc-full-prices">${lines}</div><button class="svc-full-btn">Записатись →</button></div>`;
+  }).join('');
+  grid.querySelectorAll('.svc-full').forEach(card=>{
+    card.addEventListener('click', ()=>showPageAndService('booking', card.dataset.svcName));
+  });
+}
+
+async function loadPublicCatalog(){
+  if (!isApiConfigured()) { _catalogReadyResolve(); return; }
+  try {
+    const data = await api('getPublicCatalog', {}, 'publicCatalog');
+    if (data?.success) _catalog = data;
+  } catch(e) { console.error('[catalog]', e); }
+  _catalogReadyResolve();
+  renderBookingServicePicker();
+  renderBookingCarTypeGrid();
+  renderHomeServiceCards();
+  renderFullServicesPage();
+}
 function updateSummary(){
   document.getElementById('s-svc').textContent=S.service||'—';
   document.getElementById('s-date').textContent=S.date||'—';
