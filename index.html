@@ -1437,11 +1437,13 @@ function pickServiceDyn(el, name){
   setTimeout(()=>goStep(2), 260);
 }
 
+const CARTYPE_GRID_EXCLUDE = ['Загальні','Мотоцикл'];
 function renderBookingCarTypeGrid(){
   const grid = document.getElementById('carTypeGrid');
   if (!grid) return;
-  if (!_catalog?.carTypes?.length) { grid.innerHTML = '<div style="color:var(--gray);font-size:13px;">Не вдалося завантажити типи авто.</div>'; return; }
-  grid.innerHTML = _catalog.carTypes.map(ct=>`<div class="car-type-btn" data-car-type="${esc(ct)}"><span class="car-type-icon">${carTypeIcon(ct)}</span><span class="car-type-name">${esc(ct)}</span></div>`).join('');
+  const types = (_catalog?.carTypes||[]).filter(ct => !CARTYPE_GRID_EXCLUDE.includes(ct));
+  if (!types.length) { grid.innerHTML = '<div style="color:var(--gray);font-size:13px;">Не вдалося завантажити типи авто.</div>'; return; }
+  grid.innerHTML = types.map(ct=>`<div class="car-type-btn" data-car-type="${esc(ct)}"><span class="car-type-icon">${carTypeIcon(ct)}</span><span class="car-type-name">${esc(ct)}</span></div>`).join('');
   grid.querySelectorAll('.car-type-btn').forEach(btn=>{
     btn.addEventListener('click', ()=>pickCarType(btn, btn.dataset.carType));
   });
@@ -1449,7 +1451,8 @@ function renderBookingCarTypeGrid(){
 
 function renderHomeServiceCards(){
   const row = document.getElementById('homeServicesRow');
-  if (!row || !_catalog?.serviceNames?.length) return;
+  if (!row) return;
+  if (!_catalog?.serviceNames?.length) { row.innerHTML = '<div style="color:var(--gray);font-size:13px;">Не вдалося завантажити послуги. Оновіть сторінку.</div>'; return; }
   row.innerHTML = _catalog.serviceNames.map(name=>{
     const min = minCatalogPrice(name);
     const priceStr = min!==null ? ('від '+min.toLocaleString('uk-UA')+' ₴') : '';
@@ -1461,7 +1464,8 @@ function renderHomeServiceCards(){
 }
 function renderFullServicesPage(){
   const grid = document.getElementById('servicesFullGrid');
-  if (!grid || !_catalog?.serviceNames?.length) return;
+  if (!grid) return;
+  if (!_catalog?.serviceNames?.length) { grid.innerHTML = '<div style="color:var(--gray);font-size:13px;">Не вдалося завантажити послуги. Оновіть сторінку.</div>'; return; }
   grid.innerHTML = _catalog.serviceNames.map(name=>{
     const lines = (_catalog.carTypes||[]).map(ct=>{
       const n = parseUahNumber(findCatalogPrice(name, ct));
