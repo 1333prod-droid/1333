@@ -496,7 +496,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;height:64px;
 .svc-pick-icon{font-size:22px;margin-bottom:7px;}
 .svc-pick-name{font-size:14px;font-weight:700;margin-bottom:2px;}
 .svc-pick-price{font-size:12px;color:var(--gray);}
-
+.svc-pick-back,.svc-card.svc-pick-back,.svc-full.svc-pick-back{background:rgba(167,139,250,0.06)!important;border-color:rgba(167,139,250,0.2)!important;}
+.svc-pick-back .svc-pick-icon,.svc-card.svc-pick-back .svc-icon,.svc-full.svc-pick-back .svc-icon{color:#a78bfa;}
 /* FOOTER */
 footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,0.05);padding:48px 40px 28px;position:relative;z-index:2;}
 .footer-inner{max-width:1100px;margin:0 auto;}
@@ -1182,6 +1183,9 @@ function scrollToSection(id) { document.getElementById(id)?.scrollIntoView({beha
 async function showPageAndService(page, svc) {
   showPage(page);
   await _catalogReady;
+  // знаходимо, в якій категорії ця послуга, і одразу розкриваємо її
+  const cat = Object.keys(_catalog?.catMap||{}).find(c => (_catalog.catMap[c]||[]).includes(svc));
+  if (cat) { _svcStackCategory = cat; renderBookingServicePicker(); }
   setTimeout(()=>{
     const card = document.querySelector('.svc-pick[data-svc-name="'+CSS.escape(svc)+'"]');
     if (card) card.click();
@@ -1377,10 +1381,15 @@ function pickTime(el, slotData){
   if (slotData?.freeBoxes) S._cachedBoxesForTimes[S.time] = slotData.freeBoxes;
 }
 function pickBox(el,n){document.querySelectorAll('.box-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');S.box=n;}
-// ═══ ПУБЛІЧНИЙ КАТАЛОГ (з листа "💰 Прайс") ═══
+// ═══ ПУБЛІЧНИЙ КАТАЛОГ (категорія → послуга, з листа "💰 Прайс") ═══
 let _catalog = null;
 let _catalogReadyResolve;
 const _catalogReady = new Promise(res => { _catalogReadyResolve = res; });
+const CARTYPE_GRID_EXCLUDE = ['Загальні','Мотоцикл'];
+// stack: '' = категорії, інакше = назва обраної категорії (показуємо послуги всередині)
+let _svcStackCategory = '';
+let _homeStackCategory = '';
+let _fullStackCategory = '';
 
 function parseUahNumber(s){
   const n = parseFloat(String(s||'').replace(/[^\d.,]/g,'').replace(',','.'));
@@ -1393,7 +1402,7 @@ function findCatalogPrice(serviceName, carType){
   const row = list.find(s=>s.name===serviceName);
   return row ? row.price : null;
 }
-function minCatalogPrice(serviceName){
+function minCatalogPriceForService(serviceName){
   let min=null;
   (_catalog?.carTypes||[]).forEach(ct=>{
     const n = parseUahNumber(findCatalogPrice(serviceName, ct));
@@ -1401,43 +1410,67 @@ function minCatalogPrice(serviceName){
   });
   return min;
 }
-function iconForService(name){
-  const n = String(name).toLowerCase();
-  if (n.includes('поліру')) return '✨';
-  if (n.includes('експрес')) return '🚿';
-  if (n.includes('3-х фазна') || n.includes('3 фазна')) return '💧';
-  if (n.includes('2-фазна') || n.includes('2 фазна')) return '🧽';
-  return '🚗';
+function minCatalogPriceForCategory(category){
+  const names = _catalog?.catMap?.[category] || [];
+  let min=null;
+  names.forEach(name=>{
+    const n = minCatalogPriceForService(name);
+    if (n!==null && (min===null || n<min)) min = n;
+  });
+  return min;
 }
-function carTypeIcon(ct){ return ct==='SUV' ? '🚙' : (ct==='Sedan' ? '🚗' : '🚐'); }
+function iconForCategory(cat){
+  const map = {
+    'Мийка':'🚿','Воски та захист':'✨','Хімчистка':'🧽','Полірування та кераміка':'💎',
+    'Захист кузова':'🛡️','Додаткові послуги':'🔧','Товари':'🧴','Мотоцикл':'🏍️'
+  };
+  return map[cat] || '🚗';
+}
+function carTypeIcon(ct){ return ct==='SUV'||ct==='Кросовер'||ct==='Джип' ? '🚙' : (ct==='Sedan' ? '🚗' : '🚐'); }
 function recomputeBookingPrice(){
   const n = parseUahNumber(findCatalogPrice(S.service, S.carType));
   if (n !== null) S.price = n.toLocaleString('uk-UA') + ' ₴';
 }
 
+// ── Booking step 1: категорії → послуги ──────────────────────────
 function renderBookingServicePicker(){
   const grid = document.getElementById('svcPickGrid');
   if (!grid) return;
-  if (!_catalog?.serviceNames?.length) { grid.innerHTML = '<div style="color:var(--gray);font-size:13px;grid-column:1/-1;padding:16px 0;">Не вдалося завантажити послуги. Перезавантажте сторінку або зателефонуйте: +380 77 001 13 33</div>'; return; }
-  grid.innerHTML = _catalog.serviceNames.map(name=>{
-    const min = minCatalogPrice(name);
-    const priceStr = min!==null ? ('від '+min.toLocaleString('uk-UA')+' ₴') : '';
-    return `<div class="glass svc-pick" data-svc-name="${esc(name)}"><div class="svc-pick-icon">${iconForService(name)}</div><div class="svc-pick-name">${esc(name)}</div><div class="svc-pick-price">${esc(priceStr)}</div></div>`;
-  }).join('');
-  grid.querySelectorAll('.svc-pick').forEach(card=>{
-    card.addEventListener('click', ()=>pickServiceDyn(card, card.dataset.svcName));
-  });
+  if (!_catalog?.categories?.length) { grid.innerHTML = '<div style="color:var(--gray);font-size:13px;grid-column:1/-1;padding:16px 0;">Не вдалося завантажити послуги. Перезавантажте сторінку або зателефонуйте: +380 77 001 13 33</div>'; return; }
+  if (!_svcStackCategory) {
+    grid.innerHTML = _catalog.categories.map(cat=>{
+      const min = minCatalogPriceForCategory(cat);
+      const priceStr = min!==null ? ('від '+min.toLocaleString('uk-UA')+' ₴') : '';
+      const count = (_catalog.catMap[cat]||[]).length;
+      return `<div class="glass svc-pick" data-cat="${esc(cat)}"><div class="svc-pick-icon">${iconForCategory(cat)}</div><div class="svc-pick-name">${esc(cat)}</div><div class="svc-pick-price">${count} послуг · ${esc(priceStr)}</div></div>`;
+    }).join('');
+    grid.querySelectorAll('.svc-pick').forEach(card=>{
+      card.addEventListener('click', ()=>{ _svcStackCategory = card.dataset.cat; renderBookingServicePicker(); });
+    });
+  } else {
+    const names = _catalog.catMap[_svcStackCategory] || [];
+    const backCard = `<div class="glass svc-pick svc-pick-back" data-back="1"><div class="svc-pick-icon">←</div><div class="svc-pick-name">Назад до категорій</div><div class="svc-pick-price">${esc(_svcStackCategory)}</div></div>`;
+    grid.innerHTML = backCard + names.map(name=>{
+      const min = minCatalogPriceForService(name);
+      const priceStr = min!==null ? ('від '+min.toLocaleString('uk-UA')+' ₴') : '';
+      return `<div class="glass svc-pick" data-svc-name="${esc(name)}"><div class="svc-pick-icon">${iconForCategory(_svcStackCategory)}</div><div class="svc-pick-name">${esc(name)}</div><div class="svc-pick-price">${esc(priceStr)}</div></div>`;
+    }).join('');
+    grid.querySelector('[data-back]')?.addEventListener('click', ()=>{ _svcStackCategory=''; renderBookingServicePicker(); });
+    grid.querySelectorAll('.svc-pick[data-svc-name]').forEach(card=>{
+      card.addEventListener('click', ()=>pickServiceDyn(card, card.dataset.svcName));
+    });
+  }
 }
 function pickServiceDyn(el, name){
   document.querySelectorAll('.svc-pick').forEach(b=>b.classList.remove('selected'));
   el.classList.add('selected');
   S.service=name;
-  const min = minCatalogPrice(name);
+  const min = minCatalogPriceForService(name);
   S.price = min!==null ? ('від '+min.toLocaleString('uk-UA')+' ₴') : '';
   setTimeout(()=>goStep(2), 260);
 }
 
-const CARTYPE_GRID_EXCLUDE = ['Загальні','Мотоцикл'];
+// ── Booking step 4: тип кузова ────────────────────────────────────
 function renderBookingCarTypeGrid(){
   const grid = document.getElementById('carTypeGrid');
   if (!grid) return;
@@ -1449,33 +1482,65 @@ function renderBookingCarTypeGrid(){
   });
 }
 
+// ── Головна сторінка: категорії → послуги ─────────────────────────
 function renderHomeServiceCards(){
   const row = document.getElementById('homeServicesRow');
   if (!row) return;
-  if (!_catalog?.serviceNames?.length) { row.innerHTML = '<div style="color:var(--gray);font-size:13px;">Не вдалося завантажити послуги. Оновіть сторінку.</div>'; return; }
-  row.innerHTML = _catalog.serviceNames.map(name=>{
-    const min = minCatalogPrice(name);
-    const priceStr = min!==null ? ('від '+min.toLocaleString('uk-UA')+' ₴') : '';
-    return `<div class="glass svc-card" data-svc-name="${esc(name)}"><div class="svc-icon">${iconForService(name)}</div><div class="svc-name">${esc(name)}</div><div class="svc-price">${esc(priceStr)}</div><div class="svc-arrow">→</div></div>`;
-  }).join('');
-  row.querySelectorAll('.svc-card').forEach(card=>{
-    card.addEventListener('click', ()=>showPageAndService('booking', card.dataset.svcName));
-  });
+  if (!_catalog?.categories?.length) { row.innerHTML = '<div style="color:var(--gray);font-size:13px;">Не вдалося завантажити послуги. Оновіть сторінку.</div>'; return; }
+  if (!_homeStackCategory) {
+    row.innerHTML = _catalog.categories.map(cat=>{
+      const min = minCatalogPriceForCategory(cat);
+      const priceStr = min!==null ? ('від '+min.toLocaleString('uk-UA')+' ₴') : '';
+      return `<div class="glass svc-card" data-cat="${esc(cat)}"><div class="svc-icon">${iconForCategory(cat)}</div><div class="svc-name">${esc(cat)}</div><div class="svc-price">${esc(priceStr)}</div><div class="svc-arrow">→</div></div>`;
+    }).join('');
+    row.querySelectorAll('.svc-card').forEach(card=>{
+      card.addEventListener('click', ()=>{ _homeStackCategory = card.dataset.cat; renderHomeServiceCards(); });
+    });
+  } else {
+    const names = _catalog.catMap[_homeStackCategory] || [];
+    const backCard = `<div class="glass svc-card svc-pick-back" data-back="1"><div class="svc-icon">←</div><div class="svc-name">Назад</div><div class="svc-price">${esc(_homeStackCategory)}</div></div>`;
+    row.innerHTML = backCard + names.map(name=>{
+      const min = minCatalogPriceForService(name);
+      const priceStr = min!==null ? ('від '+min.toLocaleString('uk-UA')+' ₴') : '';
+      return `<div class="glass svc-card" data-svc-name="${esc(name)}"><div class="svc-icon">${iconForCategory(_homeStackCategory)}</div><div class="svc-name">${esc(name)}</div><div class="svc-price">${esc(priceStr)}</div><div class="svc-arrow">→</div></div>`;
+    }).join('');
+    row.querySelector('[data-back]')?.addEventListener('click', ()=>{ _homeStackCategory=''; renderHomeServiceCards(); });
+    row.querySelectorAll('.svc-card[data-svc-name]').forEach(card=>{
+      card.addEventListener('click', ()=>showPageAndService('booking', card.dataset.svcName));
+    });
+  }
 }
+
+// ── Сторінка «Послуги»: категорії → послуги (з повною таблицею цін) ──
 function renderFullServicesPage(){
   const grid = document.getElementById('servicesFullGrid');
   if (!grid) return;
-  if (!_catalog?.serviceNames?.length) { grid.innerHTML = '<div style="color:var(--gray);font-size:13px;">Не вдалося завантажити послуги. Оновіть сторінку.</div>'; return; }
-  grid.innerHTML = _catalog.serviceNames.map(name=>{
-    const lines = (_catalog.carTypes||[]).map(ct=>{
-      const n = parseUahNumber(findCatalogPrice(name, ct));
-      return n!==null ? `<div class="price-line"><span class="price-label">${esc(ct)}</span><span class="price-val">${n.toLocaleString('uk-UA')} ₴</span></div>` : '';
+  if (!_catalog?.categories?.length) { grid.innerHTML = '<div style="color:var(--gray);font-size:13px;">Не вдалося завантажити послуги. Оновіть сторінку.</div>'; return; }
+  if (!_fullStackCategory) {
+    grid.innerHTML = _catalog.categories.map(cat=>{
+      const min = minCatalogPriceForCategory(cat);
+      const priceStr = min!==null ? ('від '+min.toLocaleString('uk-UA')+' ₴') : '';
+      const count = (_catalog.catMap[cat]||[]).length;
+      return `<div class="glass svc-full" data-cat="${esc(cat)}"><div class="svc-icon">${iconForCategory(cat)}</div><div class="svc-name">${esc(cat)}</div><div class="svc-full-prices"><div class="price-line"><span class="price-label">${count} послуг у категорії</span><span class="price-val">${esc(priceStr)}</span></div></div><button class="svc-full-btn">Переглянути →</button></div>`;
     }).join('');
-    return `<div class="glass svc-full" data-svc-name="${esc(name)}"><div class="svc-icon">${iconForService(name)}</div><div class="svc-name">${esc(name)}</div><div class="svc-full-prices">${lines}</div><button class="svc-full-btn">Записатись →</button></div>`;
-  }).join('');
-  grid.querySelectorAll('.svc-full').forEach(card=>{
-    card.addEventListener('click', ()=>showPageAndService('booking', card.dataset.svcName));
-  });
+    grid.querySelectorAll('.svc-full').forEach(card=>{
+      card.addEventListener('click', ()=>{ _fullStackCategory = card.dataset.cat; renderFullServicesPage(); window.scrollTo({top:0,behavior:'smooth'}); });
+    });
+  } else {
+    const names = _catalog.catMap[_fullStackCategory] || [];
+    const backCard = `<div class="glass svc-full svc-pick-back" data-back="1" style="cursor:pointer;"><div class="svc-icon">←</div><div class="svc-name">Назад до категорій</div></div>`;
+    grid.innerHTML = backCard + names.map(name=>{
+      const lines = (_catalog.carTypes||[]).map(ct=>{
+        const n = parseUahNumber(findCatalogPrice(name, ct));
+        return n!==null ? `<div class="price-line"><span class="price-label">${esc(ct)}</span><span class="price-val">${n.toLocaleString('uk-UA')} ₴</span></div>` : '';
+      }).join('');
+      return `<div class="glass svc-full" data-svc-name="${esc(name)}"><div class="svc-icon">${iconForCategory(_fullStackCategory)}</div><div class="svc-name">${esc(name)}</div><div class="svc-full-prices">${lines}</div><button class="svc-full-btn">Записатись →</button></div>`;
+    }).join('');
+    grid.querySelector('[data-back]')?.addEventListener('click', ()=>{ _fullStackCategory=''; renderFullServicesPage(); window.scrollTo({top:0,behavior:'smooth'}); });
+    grid.querySelectorAll('.svc-full[data-svc-name]').forEach(card=>{
+      card.addEventListener('click', ()=>showPageAndService('booking', card.dataset.svcName));
+    });
+  }
 }
 
 async function loadPublicCatalog(){
