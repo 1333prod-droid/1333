@@ -691,11 +691,13 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
      <div class="car-type-grid" id="carTypeGrid" style="grid-template-columns:repeat(3,1fr);">
         <div class="skeleton sk-row"></div><div class="skeleton sk-row"></div><div class="skeleton sk-row"></div>
       </div>
-      <div class="form-grid-2">
+     <div class="form-grid-2">
         <div class="form-group"><div class="form-label">Ім'я</div><input type="text" class="field" id="fName" placeholder="Олексій Петренко"></div>
         <div class="form-group"><div class="form-label">Телефон</div><input type="tel" class="field" id="fPhone" placeholder="+380 XX XXX XX XX"></div>
         <div class="form-group"><div class="form-label">Марка та модель</div><input type="text" class="field" id="fCar" placeholder="Mercedes ML 350"></div>
         <div class="form-group"><div class="form-label">Рік</div><input type="text" class="field" id="fYear" placeholder="2020"></div>
+        <div class="form-group"><div class="form-label">Держ. номер авто</div><input type="text" class="field" id="fPlate" placeholder="АА1234ВВ" oninput="this.value=this.value.toUpperCase()" autocomplete="off"></div>
+        <div class="form-group"><div class="form-group"><div class="form-label">Коментар (необов.)</div></div></div>
       </div>
       <div class="form-group"><div class="form-label">Коментар</div><input type="text" class="field" id="fComment" placeholder="Побажання..."></div>
       <div class="nav-row"><button class="btn-back" onclick="goStep(3)">← Назад</button><button class="btn-next" onclick="goStep(5)">Переглянути →</button></div>
@@ -713,7 +715,8 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
           <div class="summary-row-i"><span class="summary-key">Бокс</span><span class="summary-val" id="s-box">—</span></div>
           <div class="summary-row-i"><span class="summary-key">Клієнт</span><span class="summary-val" id="s-client">—</span></div>
           <div class="summary-row-i"><span class="summary-key">Тип кузова</span><span class="summary-val" id="s-cartype">—</span></div>
-          <div class="summary-row-i"><span class="summary-key">Авто</span><span class="summary-val" id="s-car">—</span></div>
+           <div class="summary-row-i"><span class="summary-key">Авто</span><span class="summary-val" id="s-car">—</span></div>
+          <div class="summary-row-i"><span class="summary-key">Номер авто</span><span class="summary-val" id="s-plate">—</span></div>
           <div class="summary-row-i summary-total"><span class="summary-key">Вартість від</span><span class="summary-val" id="s-price">—</span></div>
         </div>
         <div class="nav-row"><button class="btn-back" onclick="goStep(4)">← Назад</button><button class="btn-next" id="confirmBtn" onclick="submitBooking()">✓ Підтвердити</button></div>
@@ -1106,7 +1109,7 @@ const PUBLIC_API_ACTIONS = new Set([
 ]);
 
 // ═══ STATE ═══
-const S = { service:'', price:'', date:'', time:'', box:null, step:1, carType:'' };
+const S = { service:'', price:'', date:'', time:'', box:null, step:1, carType:'', plate:'' };
 // ✅ v9.2 AUDIT (п.9): защита от двойного клика (в процесе запросы по id)
 const _pendingActions = new Set();
 // ✅ v9.2 AUDIT (п.8/п.11): таймер авто-обновления CRM и предыдущие id заявок
@@ -1562,9 +1565,10 @@ function updateSummary(){
   document.getElementById('s-box').textContent=S.box?'Бокс '+S.box:'—';
   document.getElementById('s-client').textContent=document.getElementById('fName').value||'—';
   document.getElementById('s-cartype').textContent=S.carType||'—';
-  const car=document.getElementById('fCar').value, yr=document.getElementById('fYear').value;
+   const car=document.getElementById('fCar').value, yr=document.getElementById('fYear').value;
   document.getElementById('s-car').textContent=(car||'—')+(yr?' '+yr:'');
-  document.getElementById('s-price').textContent=S.price||'—';
+  S.plate=(document.getElementById('fPlate').value||'').toUpperCase().trim();
+  document.getElementById('s-plate').textContent=S.plate||'—';
 }
 
 async function submitBooking(){
@@ -1576,7 +1580,8 @@ async function submitBooking(){
     date:S.date, time:S.time, box:'Box '+S.box,
     name, phone, service:S.service,
     car:document.getElementById('fCar').value+' '+document.getElementById('fYear').value,
-    carType:S.carType, comment:document.getElementById('fComment').value
+    carType:S.carType, comment:document.getElementById('fComment').value,
+    plate:(document.getElementById('fPlate').value||'').toUpperCase().trim()
   };
   if(!isApiConfigured()){
     await new Promise(r=>setTimeout(r,700));
@@ -1613,11 +1618,11 @@ function showSuccess(id){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function resetBooking(){
-  S.service='';S.price='';S.date='';S.time='';S.box=null;S.carType='';S.lastBookingId='';S.lastBookingPhone=''; S._cachedBoxesForTimes = null;
+  S.service='';S.price='';S.date='';S.time='';S.box=null;S.carType='';S.plate='';S.lastBookingId='';S.lastBookingPhone=''; S._cachedBoxesForTimes = null;
   document.getElementById('confirmView').style.display='block';
   document.getElementById('successView').style.display='none';
   document.querySelectorAll('.svc-pick,.time-btn,.box-btn,.date-pill,.car-type-btn').forEach(x=>x.classList.remove('selected'));
-  ['fName','fPhone','fCar','fYear','fComment'].forEach(id=>document.getElementById(id).value='');
+  ['fName','fPhone','fCar','fYear','fComment','fPlate'].forEach(id=>document.getElementById(id).value='');
   initDatePills();
   document.getElementById('timeGrid').innerHTML='';
   goStep(1);
@@ -1946,7 +1951,7 @@ function renderSchedule(bookings){
   wrap.innerHTML=`<table class="crm-table"><thead><tr><th>#</th><th>Клієнт</th><th>Дата/Час</th><th>Послуга</th><th>Бокс</th><th>Джерело</th><th>Статус</th><th>Дії</th></tr></thead><tbody>${
     bookings.map(b=>`<tr>
       <td style="font-size:10px;color:var(--gray);">${esc(b.id)}</td>
-      <td><b>${esc(b.clientName)}</b><br><span style="font-size:11px;color:var(--gray);">${esc(b.phone)}</span></td>
+      <td><b>${esc(b.clientName)}</b><br><span style="font-size:11px;color:var(--gray);">${esc(b.phone)}</span>${b.plate?`<br><span style="font-size:11px;color:var(--accent);">🚗 ${esc(b.plate)}</span>`:''}</td>
       <td>${esc(b.date)}<br><span style="font-size:11px;color:var(--gray);">${esc(b.time)}</span></td>
       <td style="max-width:120px;">${esc(b.service)}</td>
       <td><span style="font-size:15px;font-weight:700;letter-spacing:-0.3px;">${esc(String(b.box).replace('Box ',''))}</span></td>
@@ -1967,10 +1972,11 @@ function renderSchedule(bookings){
         <div><div class="crm-card-title">${esc(b.clientName)}</div><div class="crm-card-sub">${esc(b.phone)}</div></div>
         <span class="badge ${statusBadgeClass(b.status)}">${esc(b.status||'—')}</span>
       </div>
-      <div class="crm-card-meta">
+     <div class="crm-card-meta">
         <span class="crm-card-tag">📅 ${esc(b.date)} ${esc(b.time)}</span>
         <span class="crm-card-tag">🏠 Бокс ${esc(String(b.box).replace('Box ',''))}</span>
         <span class="crm-card-tag">🔧 ${esc(b.service)}</span>
+        ${b.plate?`<span class="crm-card-tag">🚗 ${esc(b.plate)}</span>`:''}
       </div>
       <div class="crm-card-actions">
         <button class="act-btn act-btn-green" onclick="updateBookingStatusUI('${esc(b.id)}','▶ В роботі')">▶ В роботі</button>
@@ -2873,7 +2879,7 @@ async function loadCabinetProfile(clientId,clientToken){
       <div class="cab-booking-row">
         <span class="cab-booking-date">${esc(b.date||'')}</span>
         <span class="cab-booking-svc">${esc(b.service||'')}</span>
-        <span class="cab-booking-time">${esc(b.time||'')} · ${esc(b.box||'')}</span>
+        <span class="cab-booking-time">${esc(b.time||'')} · ${esc(b.box||'')}${b.plate?' · 🚗 '+esc(b.plate):''}</span>
       </div>`).join('') : '<div style="color:var(--gray);font-size:13px;">Записів немає</div>';
   }
 }
