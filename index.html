@@ -200,7 +200,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;height:64px;
 @keyframes itemIn{from{opacity:0;transform:translateY(10px) scale(0.98);}to{opacity:1;transform:translateY(0) scale(1);}}
 @keyframes ripple{from{transform:scale(0);opacity:0.5;}to{transform:scale(2.4);opacity:0;}}
 .panel.active{animation:panelIn 0.45s cubic-bezier(0.22,0.61,0.36,1);}
-.svc-pick.selected,.car-type-btn.selected,.box-btn.selected,.time-btn.selected,.date-pill.selected{animation:popSelect 0.42s ease;}
+.svc-pick.selected,.car-type-btn.selected,.box-btn.selected,.time-btn.selected,.date-pill.selected{animation:popSelect 0.42s ease;opacity:1;}
 .svc-card,.svc-full,.plan-home,.plan-full,.svc-pick,.car-type-btn{transition:transform 0.22s cubic-bezier(0.22,0.61,0.36,1),background 0.25s,border-color 0.25s,box-shadow 0.25s;}
 .svc-card:hover,.svc-full:hover,.plan-home:hover,.plan-full:hover{transform:translateY(-4px);box-shadow:0 14px 34px rgba(0,0,0,0.35);}
 .svc-pick:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(0,0,0,0.3);}
@@ -569,6 +569,11 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
 .crm-large .field{font-size:16px;padding:14px 16px;}
 .crm-large .btn-white,.crm-large .btn-ghost{padding:14px 22px;font-size:15px;}
 
+/* MEDIUM SCREEN: hide nav-links before they overlap nav-right */
+@media(max-width:960px){
+  .nav-links{display:none;}
+  .nav-menu-btn{display:flex;align-items:center;justify-content:center;}
+}
 /* MOBILE BREAKPOINT */
 @media(max-width:768px){
   nav{padding:0 16px;}
@@ -1262,7 +1267,6 @@ function goStep(n){
     if(i===n)d.classList.add('active');
     if(i<5)document.getElementById('sline-'+i).classList.toggle('done',i<n);
   }
-  if(n===2){const pc=document.getElementById('datePillsContainer');if(pc){pc.classList.remove('stagger-in');void pc.offsetWidth;pc.classList.add('stagger-in');}}
   if(n===3)loadBoxes();
   // ✅ FIX: scroll до верху сторінки при переході між кроками
   requestAnimationFrame(()=>{
@@ -1346,7 +1350,7 @@ function pickServiceDyn(el,name){
   S.service=name;
   const min=minCatalogPriceForService(name);
   S.price=min!==null?('від '+min.toLocaleString('uk-UA')+' ₴'):'';
-  setTimeout(()=>goStep(2),450);
+  setTimeout(()=>goStep(2),300);
 }
 
 // ── Booking step 4: car types ──
@@ -1368,7 +1372,7 @@ function renderHomeServiceCards(){
       const priceStr=min!==null?('від '+min.toLocaleString('uk-UA')+' ₴'):'';
       return`<div class="glass svc-card" data-cat="${esc(cat)}"><div class="svc-icon">${iconForCategory(cat)}</div><div class="svc-name">${esc(cat)}</div><div class="svc-price">${esc(priceStr)}</div><div class="svc-arrow">→</div></div>`;
     }).join('');
-    row.classList.add('stagger-in');
+    row.classList.remove('stagger-in');void row.offsetWidth;row.classList.add('stagger-in');
     row.querySelectorAll('.svc-card').forEach(card=>{card.addEventListener('click',()=>{_homeStackCategory=card.dataset.cat;renderHomeServiceCards();});});
   }else{
     const names=_catalog.catMap[_homeStackCategory]||[];
@@ -1378,7 +1382,7 @@ function renderHomeServiceCards(){
       const priceStr=min!==null?('від '+min.toLocaleString('uk-UA')+' ₴'):'';
       return`<div class="glass svc-card" data-svc-name="${esc(name)}"><div class="svc-icon">${iconForCategory(_homeStackCategory)}</div><div class="svc-name">${esc(name)}</div><div class="svc-price">${esc(priceStr)}</div><div class="svc-arrow">→</div></div>`;
     }).join('');
-    row.classList.add('stagger-in');
+    row.classList.remove('stagger-in');void row.offsetWidth;row.classList.add('stagger-in');
     row.querySelector('[data-back]')?.addEventListener('click',()=>{_homeStackCategory='';renderHomeServiceCards();});
     row.querySelectorAll('.svc-card[data-svc-name]').forEach(card=>{card.addEventListener('click',()=>showPageAndService('booking',card.dataset.svcName));});
   }
@@ -1395,7 +1399,7 @@ function renderFullServicesPage(){
       const count=(_catalog.catMap[cat]||[]).length;
       return`<div class="glass svc-full" data-cat="${esc(cat)}"><div class="svc-icon">${iconForCategory(cat)}</div><div class="svc-name">${esc(cat)}</div><div class="svc-full-prices"><div class="price-line"><span class="price-label">${count} послуг у категорії</span><span class="price-val">${esc(priceStr)}</span></div></div><button class="svc-full-btn">Переглянути →</button></div>`;
     }).join('');
-    grid.classList.add('stagger-in');
+    grid.classList.remove('stagger-in');void grid.offsetWidth;grid.classList.add('stagger-in');
     grid.querySelectorAll('.svc-full').forEach(card=>{card.addEventListener('click',()=>{_fullStackCategory=card.dataset.cat;renderFullServicesPage();requestAnimationFrame(()=>{window.scrollTo({top:0,behavior:'smooth'});});});});
   }else{
     const names=_catalog.catMap[_fullStackCategory]||[];
@@ -1404,7 +1408,7 @@ function renderFullServicesPage(){
       const lines=(_catalog.carTypes||[]).map(ct=>{const n=parseUahNumber(findCatalogPrice(name,ct));return n!==null?`<div class="price-line"><span class="price-label">${esc(ct)}</span><span class="price-val">${n.toLocaleString('uk-UA')} ₴</span></div>`:''}).join('');
       return`<div class="glass svc-full" data-svc-name="${esc(name)}"><div class="svc-icon">${iconForCategory(_fullStackCategory)}</div><div class="svc-name">${esc(name)}</div><div class="svc-full-prices">${lines}</div><button class="svc-full-btn">Записатись →</button></div>`;
     }).join('');
-    grid.classList.add('stagger-in');
+    grid.classList.remove('stagger-in');void grid.offsetWidth;grid.classList.add('stagger-in');
     grid.querySelector('[data-back]')?.addEventListener('click',()=>{_fullStackCategory='';renderFullServicesPage();requestAnimationFrame(()=>{window.scrollTo({top:0,behavior:'smooth'});});});
     grid.querySelectorAll('.svc-full[data-svc-name]').forEach(card=>{card.addEventListener('click',()=>showPageAndService('booking',card.dataset.svcName));});
   }
