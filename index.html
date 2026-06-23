@@ -553,6 +553,33 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
   .services-full-grid{padding:16px 16px 60px;}
   .nav-logo-img{height:30px;width:auto;display:block;}
   .nav-logo-img{mix-blend-mode:screen;}
+   /* — Поява блоків при прокрутці — */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease;}
+.reveal.reveal-in{opacity:1;transform:none;}
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1!important;transform:none!important;}}  
+ /* ═══ CRM «ВЕЛИКИЙ РЕЖИМ» (для слабкого зору) ═══ */
+.crm-large .crm-tab-btn{font-size:16px;padding:14px 22px;}
+.crm-large .crm-stat-num{font-size:40px;}
+.crm-large .crm-stat-label{font-size:12px;letter-spacing:1px;}
+.crm-large .act-btn{min-height:50px;padding:12px 18px;font-size:15px;font-weight:700;border-width:2px;border-radius:12px;margin:3px;}
+.crm-large .badge{font-size:12px;padding:5px 13px;letter-spacing:1px;}
+.crm-large .crm-card{padding:22px;border-radius:20px;}
+.crm-large .crm-card-title{font-size:19px;}
+.crm-large .crm-card-sub{font-size:15px;}
+.crm-large .crm-card-tag{font-size:14px;padding:6px 14px;}
+.crm-large .crm-card-actions{gap:10px;}
+.crm-large .client-row{padding:20px 22px;}
+.crm-large .client-name-s{font-size:18px;}
+.crm-large .client-meta-s{font-size:14px;}
+.crm-large .client-av{width:48px;height:48px;font-size:16px;}
+.crm-large .crm-table td{font-size:15px;padding:16px 14px;}
+.crm-large .field{font-size:16px;padding:14px 16px;}
+.crm-large .btn-white,.crm-large .btn-ghost{padding:14px 22px;font-size:15px;}
+/* На телефоні — кнопки дій на всю ширину рядка і ще більші */
+@media(max-width:768px){
+  .crm-large .crm-card-actions{flex-direction:column;}
+  .crm-large .crm-card-actions .act-btn{width:100%;min-height:56px;font-size:16px;}
+  .crm-large .crm-tab-btn{font-size:15px;padding:13px 16px;}    
 }
 </style>
 </head>
@@ -572,7 +599,10 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
 
 <!-- NAV -->
 <nav>
-  <div class="nav-logo" onclick="showPage('home')">1333 CAR CENTER</div>
+  <div class="nav-logo" onclick="showPage('home')">
+    <img src="logo.png" alt="1333 Car Center" class="nav-logo-img"
+         onerror="this.outerHTML='1333 CAR CENTER'">
+  </div>
   <ul class="nav-links">
     <li><a href="#" onclick="showPage('home')" id="nl-home" class="active">Головна</a></li>
     <li><a href="#" onclick="showPage('services')" id="nl-services">Послуги</a></li>
@@ -601,11 +631,11 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
       <button class="btn-white" onclick="showPage('booking')">Записатись онлайн</button>
       <button class="btn-ghost" onclick="scrollToSection('home-services')">Послуги та ціни</button>
     </div>
-    <div class="hero-stats">
-      <div class="hero-stat"><div class="hero-stat-num">3</div><div class="hero-stat-label">Бокси</div></div>
-      <div class="hero-stat"><div class="hero-stat-num">500+</div><div class="hero-stat-label">Клієнтів</div></div>
-      <div class="hero-stat"><div class="hero-stat-num">5★</div><div class="hero-stat-label">Google</div></div>
-      <div class="hero-stat"><div class="hero-stat-num">4+</div><div class="hero-stat-label">Роки</div></div>
+  <div class="hero-stats">
+      <div class="hero-stat"><div class="hero-stat-num" data-count="3">0</div><div class="hero-stat-label">Бокси</div></div>
+      <div class="hero-stat"><div class="hero-stat-num" data-count="500" data-suffix="+">0</div><div class="hero-stat-label">Клієнтів</div></div>
+      <div class="hero-stat"><div class="hero-stat-num" data-count="5" data-suffix="★">0</div><div class="hero-stat-label">Google</div></div>
+      <div class="hero-stat"><div class="hero-stat-num" data-count="4" data-suffix="+">0</div><div class="hero-stat-label">Роки</div></div>
     </div>
   </div>
   <div class="section" id="home-services">
@@ -898,6 +928,7 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
           <button class="btn-white" onclick="showPage('booking')">+ Новий запис</button>
           <button class="btn-ghost" style="padding:10px 16px;font-size:13px;" onclick="recalcAllBalances()" id="recalcBtn" title="Перерахувати баланси всіх клієнтів з абонементів">⟳ Баланси</button>
+          <button class="btn-ghost" style="padding:10px 16px;font-size:13px;" onclick="toggleCrmLarge()" id="crmLargeBtn" title="Збільшити кнопки і текст (для слабкого зору)">🔎 Великий режим</button>
           <button class="btn-ghost" style="padding:10px 16px;font-size:13px;" onclick="broadcastUi()">↗ Розсилка</button>
           <button class="btn-ghost" style="padding:10px 16px;font-size:13px;" onclick="runMaintenanceUi()">⚙ KPI</button>
           <button class="btn-ghost" style="padding:10px 16px;font-size:13px;" onclick="pinLock()">🔒 Вийти</button>
@@ -1680,6 +1711,7 @@ function showPinGate(){
 function showCrmInner(){
   document.getElementById('crm-gate').style.display='none';
   document.getElementById('crm-inner').classList.add('show');
+  applyCrmLargePref();
 }
 function pinKey(k){
   if(_pinBuffer.length>=4) return;
@@ -2908,6 +2940,47 @@ window.addEventListener('DOMContentLoaded',()=>{
     cabGoStep('phone');
   }
 });
+     // 1) Анімований лічильник у Hero (цифри "набігають" від 0)
+function initCountUp(){
+  document.querySelectorAll('.hero-stat-num[data-count]').forEach(el=>{
+    const target=parseFloat(el.dataset.count)||0;
+    const suffix=el.dataset.suffix||'';
+    const dur=1200, start=performance.now();
+    (function tick(now){
+      const p=Math.min(1,(now-start)/dur);
+      const e=1-Math.pow(1-p,3);
+      el.textContent=Math.round(target*e)+(p===1?suffix:'');
+      if(p<1) requestAnimationFrame(tick);
+    })(start);
+  });
+}
+ function initRevealFx(){
+  const els=document.querySelectorAll('.section, .plans-full > *, .services-full-grid');
+  if(!('IntersectionObserver' in window)){ els.forEach(e=>e.classList.add('reveal-in')); return; }
+  els.forEach(e=>e.classList.add('reveal'));
+  const io=new IntersectionObserver(ent=>{
+    ent.forEach(x=>{ if(x.isIntersecting){ x.target.classList.add('reveal-in'); io.unobserve(x.target); } });
+  },{threshold:0.12});
+  els.forEach(e=>io.observe(e));
+  // Страхувальна сітка: за 2с показати все, навіть якщо щось пішло не так
+  setTimeout(()=>els.forEach(e=>e.classList.add('reveal-in')),2000);
+}
+     // 3) CRM «Великий режим» (для слабкого зору) — вибір зберігається у браузері
+function toggleCrmLarge(){
+  const on=document.body.classList.toggle('crm-large');
+  try{ localStorage.setItem('crm_large_mode',on?'1':'0'); }catch(e){}
+  const btn=document.getElementById('crmLargeBtn');
+  if(btn) btn.textContent=on?'🔎 Звичайний':'🔎 Великий режим';
+}
+function applyCrmLargePref(){
+  let on=false; try{ on=localStorage.getItem('crm_large_mode')==='1'; }catch(e){}
+  if(on){
+    document.body.classList.add('crm-large');
+    const b=document.getElementById('crmLargeBtn'); if(b) b.textContent='🔎 Звичайний';
+  }
+}
+ 
+window.addEventListener('load',()=>{ initCountUp(); initRevealFx(); });
 </script>
 </body>
 </html>
