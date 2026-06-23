@@ -46,7 +46,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;height:64px;
 .nav-logo:active{transform:scale(0.97);}
 /* ── ЛОГО: коректний розмір + прибирання чорного фону через mix-blend-mode ── */
 .nav-logo-img{height:116px;width:auto;max-width:180px;display:block;object-fit:contain;filter:brightness(1.05);}
-.nav-links{display:flex;gap:2px;list-style:none;}
+.nav-links{display:flex;gap:2px;list-style:none;position:absolute;left:50%;transform:translateX(-50%);}
 .nav-links a{color:rgba(255,255,255,0.45);text-decoration:none;font-size:13px;font-weight:500;padding:6px 14px;border-radius:100px;transition:all 0.2s;letter-spacing:0.1px;}
 .nav-links a:hover{color:var(--white);background:rgba(255,255,255,0.07);}
 .nav-links a:active{transform:scale(0.95);}
@@ -1188,6 +1188,7 @@ function renderTimes(times){
     }
     btn.textContent=t.time;grid.appendChild(btn);
   });
+  grid.classList.remove('stagger-in');void grid.offsetWidth;grid.classList.add('stagger-in');
 }
 function renderDemoTimes(){
   const allSlots=['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'];
@@ -1229,6 +1230,7 @@ async function loadBoxes(){
     if(isFree)div.addEventListener('click',()=>pickBox(div,parseInt(num)));
     c.appendChild(div);
   });
+  c.classList.remove('stagger-in');void c.offsetWidth;c.classList.add('stagger-in');
   const sub=document.getElementById('box-sub');
   if(sub)sub.textContent=freeBoxes.length?`Вільно ${freeBoxes.length} з 3 боксів`:'Всі бокси зайняті на цей час';
   if(!freeBoxes.length){
@@ -1260,6 +1262,7 @@ function goStep(n){
     if(i===n)d.classList.add('active');
     if(i<5)document.getElementById('sline-'+i).classList.toggle('done',i<n);
   }
+  if(n===2){const pc=document.getElementById('datePillsContainer');if(pc){pc.classList.remove('stagger-in');void pc.offsetWidth;pc.classList.add('stagger-in');}}
   if(n===3)loadBoxes();
   // ✅ FIX: scroll до верху сторінки при переході між кроками
   requestAnimationFrame(()=>{
@@ -1273,6 +1276,7 @@ function pickTime(el,slotData){
   el.classList.add('selected');
   S.time=el.textContent.trim();S.box=null;
   if(slotData?.freeBoxes){S._cachedBoxesForTimes=S._cachedBoxesForTimes||{};S._cachedBoxesForTimes[S.time]=slotData.freeBoxes;}
+  setTimeout(()=>goStep(3),380);
 }
 function pickBox(el,n){document.querySelectorAll('.box-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');S.box=n;}
 
@@ -1317,7 +1321,7 @@ function renderBookingServicePicker(){
       const count=(_catalog.catMap[cat]||[]).length;
       return`<div class="glass svc-pick" data-cat="${esc(cat)}"><div class="svc-pick-icon">${iconForCategory(cat)}</div><div class="svc-pick-name">${esc(cat)}</div><div class="svc-pick-price">${count} послуг · ${esc(priceStr)}</div></div>`;
     }).join('');
-    grid.classList.add('stagger-in');
+    grid.classList.remove('stagger-in');void grid.offsetWidth;grid.classList.add('stagger-in');
     grid.querySelectorAll('.svc-pick').forEach(card=>{
       card.addEventListener('click',()=>{_svcStackCategory=card.dataset.cat;renderBookingServicePicker();});
     });
@@ -1329,7 +1333,7 @@ function renderBookingServicePicker(){
       const priceStr=min!==null?('від '+min.toLocaleString('uk-UA')+' ₴'):'';
       return`<div class="glass svc-pick" data-svc-name="${esc(name)}"><div class="svc-pick-icon">${iconForCategory(_svcStackCategory)}</div><div class="svc-pick-name">${esc(name)}</div><div class="svc-pick-price">${esc(priceStr)}</div></div>`;
     }).join('');
-    grid.classList.add('stagger-in');
+    grid.classList.remove('stagger-in');void grid.offsetWidth;grid.classList.add('stagger-in');
     grid.querySelector('[data-back]')?.addEventListener('click',()=>{_svcStackCategory='';renderBookingServicePicker();});
     grid.querySelectorAll('.svc-pick[data-svc-name]').forEach(card=>{
       card.addEventListener('click',()=>pickServiceDyn(card,card.dataset.svcName));
@@ -1342,7 +1346,7 @@ function pickServiceDyn(el,name){
   S.service=name;
   const min=minCatalogPriceForService(name);
   S.price=min!==null?('від '+min.toLocaleString('uk-UA')+' ₴'):'';
-  setTimeout(()=>goStep(2),280);
+  setTimeout(()=>goStep(2),450);
 }
 
 // ── Booking step 4: car types ──
