@@ -884,6 +884,7 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
         <div class="cab-hint" id="cab-code-hint" style="text-align:center;">Код надіслано у Telegram. Дійсний 5 хвилин.</div>
         <div class="cab-error" id="cab-code-error" style="text-align:center;"></div>
         <button class="cab-btn" id="cab-verify-btn" onclick="cabVerifyCode()" disabled>Увійти</button>
+        <button class="cab-btn-ghost" type="button" onclick="cabPasteCode(false)">📋 Вставити код з буфера</button>
         <button class="cab-btn-ghost" onclick="cabGoStep('phone');cabResetCode()">← Змінити номер</button>
       </div>
     </div>
@@ -930,6 +931,7 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
         </div>
         <div class="cab-error" id="cab-admin-code-error" style="text-align:center;"></div>
         <button class="cab-btn" id="cab-admin-verify-btn" onclick="cabVerifyAdminCode()" disabled>Увійти до системи</button>
+        <button class="cab-btn-ghost" type="button" onclick="cabPasteCode(true)">📋 Вставити код з буфера</button>
         <button class="cab-btn-ghost" onclick="cabGoStep('phone');cabResetAdminCode()">← Назад</button>
       </div>
     </div>
@@ -1230,10 +1232,18 @@ async function selectDate(el,dateStr){
   data.times.forEach(t=>{S._cachedBoxesForTimes[t.time]=t.freeBoxes;});
   renderTimes(data.times);
 }
+// ✅ Готує контейнер до stagger-анімації ДО вставки дітей: клас вішається на ПОРОЖНІЙ контейнер,
+//    тому нові діти одразу мають opacity:0 і плавно з'являються — без спалаху «видимі → зникли → з'явились».
+function _primeStagger(el){
+  el.classList.remove('stagger-in');
+  el.innerHTML='';
+  void el.offsetWidth;               // фіксуємо очищення + скидання попередньої анімації
+  el.classList.add('stagger-in');    // тепер контейнер порожній і вже зі stagger-in
+}
 function renderTimes(times){
   const grid=document.getElementById('timeGrid');
-  if(!times?.length){grid.innerHTML='<div style="color:var(--gray);font-size:13px;grid-column:1/-1;padding:16px 0;">Немає доступного часу на цей день</div>';return;}
-  grid.innerHTML='';
+  if(!times?.length){grid.classList.remove('stagger-in');grid.innerHTML='<div style="color:var(--gray);font-size:13px;grid-column:1/-1;padding:16px 0;">Немає доступного часу на цей день</div>';return;}
+  _primeStagger(grid);
   times.forEach(t=>{
     const btn=document.createElement('button');
     if(t.past){btn.className='time-btn busy';btn.style.opacity='0.2';btn.title='Час вже минув';}
@@ -1243,7 +1253,6 @@ function renderTimes(times){
     }
     btn.textContent=t.time;grid.appendChild(btn);
   });
-  grid.classList.remove('stagger-in');void grid.offsetWidth;grid.classList.add('stagger-in');
 }
 function renderDemoTimes(){
   const allSlots=['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'];
@@ -1265,7 +1274,10 @@ function renderDemoTimes(){
 // ═══ BOXES ═══
 async function loadBoxes(){
   const c=document.getElementById('boxRow');
-  c.innerHTML='<div style="color:var(--gray);font-size:13px;padding:16px 0;grid-column:1/-1;"><span class="time-loading-spinner" style="width:14px;height:14px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:8px;"></span>Перевіряємо бокси...</div>';
+  // ✅ скелетон поки перевіряємо доступність (3 картки під сітку 3 колонки) — без «миготіння» дефолтних значень
+  c.classList.remove('stagger-in');
+  c.innerHTML='<div class="skeleton sk-box"></div><div class="skeleton sk-box"></div><div class="skeleton sk-box"></div>';
+  const subLoading=document.getElementById('box-sub');if(subLoading)subLoading.textContent='Перевіряємо доступність...';
   S.box=null;
   let freeBoxes=['Box 1','Box 2','Box 3'];
   if(isApiConfigured()&&S.date&&S.time){
@@ -1275,7 +1287,7 @@ async function loadBoxes(){
   }else if(S._cachedBoxesForTimes&&S.time&&S._cachedBoxesForTimes[S.time]!==undefined){
     freeBoxes=S._cachedBoxesForTimes[S.time];
   }
-  c.innerHTML='';
+  _primeStagger(c);
   ['Box 1','Box 2','Box 3'].forEach(boxName=>{
     const num=boxName.replace('Box ','');
     const isFree=freeBoxes.includes(boxName);
@@ -1285,7 +1297,6 @@ async function loadBoxes(){
     if(isFree)div.addEventListener('click',()=>pickBox(div,parseInt(num)));
     c.appendChild(div);
   });
-  c.classList.remove('stagger-in');void c.offsetWidth;c.classList.add('stagger-in');
   const sub=document.getElementById('box-sub');
   if(sub)sub.textContent=freeBoxes.length?`Вільно ${freeBoxes.length} з 3 боксів`:'Всі бокси зайняті на цей час';
   if(!freeBoxes.length){
@@ -2231,17 +2242,8 @@ function _codeStepNav(input,idx,prefix,verifyBtnId){
   const btn=document.getElementById(verifyBtnId);if(btn)btn.disabled=code.length!==4;
 }
 function _codeKeyNav(input,idx,e,prefix){if(e.key==='Backspace'&&!input.value&&idx>0)document.getElementById(prefix+(idx-1))?.focus();}
-// ✅ Вставка коду цілком (SMS/Telegram): розкладає цифри по комірках + автологін
-function _codePasteHandler(e){
-  const input=e.target;
-  if(!input||!input.classList||!input.classList.contains('cab-code-digit'))return;
-  const raw=(e.clipboardData||window.clipboardData)?.getData('text')||'';
-  const digits=raw.replace(/\D/g,'').slice(0,4);
-  if(!digits)return;
-  e.preventDefault();
-  const isAdmin=input.id.indexOf('acd')===0;
-  const prefix=isAdmin?'acd':'cd';
-  const verifyBtnId=isAdmin?'cab-admin-verify-btn':'cab-verify-btn';
+// ✅ Розкладає цифри коду по комірках + автологін, коли всі 4 заповнені
+function _fillCodeCells(prefix,verifyBtnId,digits,isAdmin){
   for(let i=0;i<4;i++){
     const cell=document.getElementById(prefix+i);if(!cell)continue;
     cell.value=digits[i]||'';
@@ -2251,6 +2253,40 @@ function _codePasteHandler(e){
   document.getElementById(prefix+focusIdx)?.focus();
   const btn=document.getElementById(verifyBtnId);if(btn)btn.disabled=digits.length!==4;
   if(digits.length===4){isAdmin?cabVerifyAdminCode():cabVerifyCode();}
+}
+// Який крок коду зараз активний (адмінський чи клієнтський)
+function _activeCodeIsAdmin(){return !!document.getElementById('cab-step-admin-code')?.classList.contains('active');}
+// ✅ Вставка коду цілком (Ctrl+V / long-press paste) — працює і у комірці, і будь-де на екрані коду
+function _codePasteHandler(e){
+  const target=e.target;
+  const targetIsCell=!!(target&&target.classList&&target.classList.contains('cab-code-digit'));
+  const onCodeScreen=targetIsCell
+    ||document.getElementById('cab-step-code')?.classList.contains('active')
+    ||document.getElementById('cab-step-admin-code')?.classList.contains('active');
+  if(!onCodeScreen)return;
+  const raw=(e.clipboardData||window.clipboardData)?.getData('text')||'';
+  const digits=raw.replace(/\D/g,'').slice(0,4);
+  if(!digits)return;
+  e.preventDefault();
+  const isAdmin=targetIsCell?(target.id.indexOf('acd')===0):_activeCodeIsAdmin();
+  _fillCodeCells(isAdmin?'acd':'cd',isAdmin?'cab-admin-verify-btn':'cab-verify-btn',digits,isAdmin);
+}
+// ✅ Кнопка «Вставити код»: читає буфер обміну (після копіювання коду в Telegram) і заповнює комірки
+async function cabPasteCode(isAdmin){
+  const prefix=isAdmin?'acd':'cd';
+  const btnId=isAdmin?'cab-admin-verify-btn':'cab-verify-btn';
+  const errId=isAdmin?'cab-admin-code-error':'cab-code-error';
+  const er=document.getElementById(errId);
+  let txt='';
+  try{ if(navigator.clipboard&&navigator.clipboard.readText) txt=await navigator.clipboard.readText(); }catch(e){ txt=''; }
+  const digits=(txt||'').replace(/\D/g,'').slice(0,4);
+  if(!digits){
+    if(er)er.textContent='Скопіюйте код у Telegram (кнопка «Скопіювати код»), потім натисніть «Вставити»';
+    document.getElementById(prefix+'0')?.focus();
+    return;
+  }
+  if(er)er.textContent='';
+  _fillCodeCells(prefix,btnId,digits,isAdmin);
 }
 function cabCodeInput(input,idx){_codeStepNav(input,idx,'cd','cab-verify-btn');}
 function cabCodeKey(input,idx,e){_codeKeyNav(input,idx,e,'cd');if(e.key==='Enter'){const b=document.getElementById('cab-verify-btn');if(b&&!b.disabled)cabVerifyCode();}}
