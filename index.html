@@ -2171,15 +2171,25 @@ function renderDemoAnalytics(){
 
 // ═══ PLANS (ціни з гугл-таблиці, лист «Типи абонементів») ═══
 function fmtPlanNum(n){return(Number(n)||0).toLocaleString('uk-UA');}
-// Рендеримо картки абонементів із каталогу (_catalog.types). Якщо каталог не завантажився —
-// лишаємо статичну розмітку як запасний варіант.
+// Нормалізуємо «Бонус %» з таблиці: колонка може містити 5/10 (число відсотків)
+// або 0.15 (відсотковий формат комірки «15,00%» → 0.15). У будь-якому випадку → ціле число %.
+function normBonusPct(raw){
+  const n=parseUahNumber(raw);
+  if(n===null||isNaN(n))return 0;
+  return (n>0&&n<1)?Math.round(n*100):Math.round(n);
+}
+// Рендеримо картки абонементів із каталогу (_catalog.types) — ВСЕ з таблиці «Типи абонементів»:
+// Ціна (D), Бонус % (E), Сума на рахунок (F). Якщо суму не заповнено — рахуємо з ціни та бонусу.
+// Якщо каталог не завантажився — лишаємо статичну розмітку як запасний варіант.
 function renderPlans(){
   const types=(_catalog&&_catalog.types)||[];
   if(!types.length)return;
   const tier=i=>['plan-silver','plan-gold','plan-platinum'][i%3];
   const meta=types.map(t=>{
-    const price=parseUahNumber(t.price)||0,amount=parseUahNumber(t.amount)||0;
-    const bonusPct=price?Math.max(0,Math.round((amount-price)/price*100)):0;
+    const price=parseUahNumber(t.price)||0;
+    const bonusPct=normBonusPct(t.bonus);
+    let amount=parseUahNumber(t.amount)||0;
+    if(!amount&&price)amount=Math.round(price*(1+bonusPct/100));
     return{id:t.id,name:String(t.name||''),months:t.months,price,amount,bonusPct};
   });
   const homeRow=document.getElementById('homePlansRow');
