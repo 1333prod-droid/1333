@@ -163,6 +163,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;height:64px;
 .btn-white{background:rgba(255,255,255,0.92);color:#050507;border:none;padding:13px 28px;border-radius:10px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;}
 .btn-white:hover{background:#fff;transform:translateY(-2px);box-shadow:0 10px 28px rgba(255,255,255,0.14);}
 .btn-white:active{transform:scale(0.97) translateY(0);box-shadow:0 4px 12px rgba(255,255,255,0.08);}
+.btn-white:disabled{opacity:0.5;cursor:not-allowed;transform:none;box-shadow:none;}
 .btn-ghost{background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.1);padding:13px 28px;border-radius:10px;font-family:'Inter',sans-serif;font-size:14px;font-weight:500;cursor:pointer;backdrop-filter:blur(12px);transition:all 0.2s;}
 .btn-ghost:hover{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.2);transform:translateY(-2px);}
 .btn-ghost:active{transform:scale(0.97) translateY(0);}
@@ -209,11 +210,16 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;height:64px;
 @keyframes spin{to{transform:rotate(360deg);}}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
 @keyframes panelIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
-@keyframes popSelect{0%{transform:scale(1);}45%{transform:scale(1.07);box-shadow:0 10px 30px rgba(167,139,250,0.25);}100%{transform:scale(1);}}
+@keyframes popSelect{0%{transform:scale(1);}38%{transform:scale(1.045);}70%{transform:scale(0.992);}100%{transform:scale(1);}}
+@keyframes svcGlow{0%{box-shadow:0 0 0 0 rgba(167,139,250,0);}100%{box-shadow:0 0 0 3px rgba(167,139,250,0.16),0 14px 34px rgba(124,92,255,0.20);}}
 @keyframes itemIn{from{opacity:0;transform:translateY(10px) scale(0.98);}to{opacity:1;transform:translateY(0) scale(1);}}
 @keyframes ripple{from{transform:scale(0);opacity:0.5;}to{transform:scale(2.4);opacity:0;}}
 .panel.active{animation:panelIn 0.45s cubic-bezier(0.22,0.61,0.36,1);}
-.svc-pick.selected,.car-type-btn.selected,.box-btn.selected,.time-btn.selected,.date-pill.selected{animation:popSelect 0.42s ease;opacity:1;}
+.svc-pick.selected,.car-type-btn.selected,.box-btn.selected,.time-btn.selected,.date-pill.selected{animation:popSelect 0.5s var(--ease);opacity:1;}
+/* ── Плавніший вибір послуги: м'який scale-settle + акцентне світіння, що тримається ── */
+.svc-pick{will-change:transform,box-shadow;transition:transform 0.34s var(--ease),background 0.34s var(--ease),border-color 0.34s var(--ease),box-shadow 0.34s var(--ease);}
+.svc-pick.selected{border-color:rgba(167,139,250,0.55)!important;background:rgba(167,139,250,0.12)!important;box-shadow:0 0 0 3px rgba(167,139,250,0.16),0 14px 34px rgba(124,92,255,0.20);}
+.svc-pick.selected .svc-pick-name{color:#fff;}
 .svc-card,.svc-full,.plan-home,.plan-full,.svc-pick,.car-type-btn{transition:transform 0.22s cubic-bezier(0.22,0.61,0.36,1),background 0.25s,border-color 0.25s,box-shadow 0.25s;}
 .svc-card:hover,.svc-full:hover,.plan-home:hover,.plan-full:hover{transform:translateY(-4px);box-shadow:0 14px 34px rgba(0,0,0,0.35);}
 .svc-pick:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(0,0,0,0.3);}
@@ -293,6 +299,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;height:64px;
 .date-pill{padding:8px 16px;border-radius:100px;font-size:12px;font-weight:600;cursor:pointer;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);color:var(--gray);transition:all 0.2s;white-space:nowrap;font-family:inherit;}
 .date-pill:hover,.date-pill.selected{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.25);color:var(--white);}
 .date-pill.selected{background:rgba(167,139,250,0.18);border-color:rgba(167,139,250,0.5);color:#fff;box-shadow:0 0 0 3px rgba(167,139,250,0.12);}
+/* Дата, заблокована адміном: перекреслена й неактивна */
+.date-pill.blocked{opacity:0.4;text-decoration:line-through;pointer-events:none;cursor:not-allowed;color:var(--gray);background:rgba(239,68,68,0.06)!important;border-color:rgba(239,68,68,0.25)!important;box-shadow:none!important;}
 
 .time-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-bottom:28px;min-height:50px;}
 .time-btn{padding:11px 8px;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);color:var(--gray);transition:all 0.2s;text-align:center;font-family:inherit;}
@@ -725,7 +733,7 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
   <div class="section" id="home-plans">
     <div class="section-label">Абонементи</div>
     <h2 class="section-title">Плани для постійних<br>клієнтів</h2>
-    <div class="plans-row">
+    <div class="plans-row" id="homePlansRow">
       <div class="glass plan-home plan-silver"><div class="plan-home-id">1 місяць</div><div class="plan-home-name">Silver</div><div class="plan-home-price">10 000 ₴</div><div class="plan-home-bonus">+10% бонус = 11 000 ₴ на рахунок</div><button class="plan-home-btn" onclick="openPlanModal('Silver','10 000','11 000','T-1','1','10')">Придбати Silver</button></div>
       <div class="glass plan-home plan-gold"><div class="plan-home-id">3 місяці</div><div class="plan-home-name">Gold</div><div class="plan-home-price">30 000 ₴</div><div class="plan-home-bonus">+15% бонус = 34 500 ₴ на рахунок</div><button class="plan-home-btn" onclick="openPlanModal('Gold','30 000','34 500','T-2','3','15')">Придбати Gold</button></div>
       <div class="glass plan-home plan-platinum"><div class="plan-home-id">6 місяців</div><div class="plan-home-name">Platinum</div><div class="plan-home-price">60 000 ₴</div><div class="plan-home-bonus">+20% бонус = 72 000 ₴ на рахунок</div><button class="plan-home-btn" onclick="openPlanModal('Platinum','60 000','72 000','T-3','6','20')">Придбати Platinum</button></div>
@@ -847,7 +855,7 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
     <h2 class="section-title">Плани для постійних<br>клієнтів</h2>
     <p style="font-size:14px;color:rgba(255,255,255,0.35);margin-top:8px;font-weight:400;">Купи абонемент і отримай бонус на рахунок — витрачай на будь-які послуги</p>
   </div>
-  <div class="plans-full">
+  <div class="plans-full" id="plansFullGrid">
     <div class="glass plan-full plan-silver"><div class="plan-tier">1 місяць · T-1</div><div class="plan-big-name">Silver</div><div class="plan-dur">Термін: 1 місяць</div><div class="plan-cost">10 000 ₴</div><div class="plan-bonus-tag">+ 10% бонус</div><div class="plan-account">= 11 000 ₴ на рахунок</div><div class="plan-divider"></div><ul class="plan-features"><li>11 000 ₴ на особистий рахунок</li><li>Пріоритетний запис без черги</li><li>Знижка 5% на додаткові послуги</li><li>Особистий менеджер</li></ul><button class="plan-cta-btn" onclick="openPlanModal('Silver','10 000','11 000','T-1','1','10')">Придбати Silver</button></div>
     <div class="glass plan-full plan-gold"><div class="plan-tier">3 місяці · T-2</div><div class="plan-big-name">Gold</div><div class="plan-dur">Термін: 3 місяці</div><div class="plan-cost">30 000 ₴</div><div class="plan-bonus-tag">+ 15% бонус</div><div class="plan-account">= 34 500 ₴ на рахунок</div><div class="plan-divider"></div><ul class="plan-features"><li>34 500 ₴ на особистий рахунок</li><li>Запис поза чергою</li><li>Знижка 10% на послуги</li><li>VIP-зона очікування</li><li>Безкоштовне миття раз на місяць</li></ul><button class="plan-cta-btn" onclick="openPlanModal('Gold','30 000','34 500','T-2','3','15')">Придбати Gold</button></div>
     <div class="glass plan-full plan-platinum"><div class="plan-tier">6 місяців · T-3</div><div class="plan-big-name">Platinum</div><div class="plan-dur">Термін: 6 місяців</div><div class="plan-cost">60 000 ₴</div><div class="plan-bonus-tag">+ 20% бонус</div><div class="plan-account">= 72 000 ₴ на рахунок</div><div class="plan-divider"></div><ul class="plan-features"><li>72 000 ₴ на особистий рахунок</li><li>Необмежений пріоритетний доступ</li><li>Знижка 15% на всі послуги</li><li>Виїзний детейлінг на запит</li><li>Щомісячне миття + полірування</li></ul><button class="plan-cta-btn" onclick="openPlanModal('Platinum','60 000','72 000','T-3','6','20')">Придбати Platinum</button></div>
@@ -1010,6 +1018,7 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
           <button class="act-btn" onclick="exportCrmCsv('bookings')">Excel</button>
           <button class="act-btn" onclick="exportCrmPdf('bookings')">PDF</button>
           <button class="act-btn" onclick="printCrm('bookings')">Друк</button>
+          <button class="act-btn act-btn-red" onclick="openBlockDatesModal()">🔒 Блокування дат</button>
         </div>
         <div class="table-scroll desktop-table" id="scheduleTableWrap"><div class="table-loading"><span class="table-spinner"></span>Завантаження...</div></div>
         <div class="crm-cards" id="scheduleCards"></div>
@@ -1072,7 +1081,7 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
       <div class="form-group"><div class="form-label">Телефон</div><input type="tel" class="field" id="pm-phone" placeholder="+380 XX XXX XX XX"></div>
       <div class="form-group"><div class="form-label">Telegram (необов'язково)</div><input type="text" class="field" id="pm-tg" placeholder="@username або ID"></div>
       <div class="form-group"><div class="form-label">Спосіб оплати</div><select class="field" id="pm-pay"><option>Безготівковий переказ</option><option>Готівка в центрі</option><option>Термінал</option></select></div>
-      <button class="btn-white" style="width:100%;padding:14px;border-radius:100px;margin-top:4px;" onclick="buyPlan()">Оформити →</button>
+      <button class="btn-white" id="buyPlanBtn" style="width:100%;padding:14px;border-radius:100px;margin-top:4px;" onclick="buyPlan()">Оформити →</button>
     </div>
   </div>
 </div>
@@ -1081,6 +1090,19 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
   <div class="modal-box modal-large">
     <div class="modal-close" onclick="closeClientModal()">✕</div>
     <div id="clientModalContent"><div class="table-loading"><span class="table-spinner"></span>Завантаження...</div></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="blockDatesModal">
+  <div class="modal-box">
+    <div class="modal-close" onclick="closeBlockDatesModal()">✕</div>
+    <div style="font-size:22px;font-weight:700;letter-spacing:-0.3px;margin-bottom:4px;">🔒 Блокування дат</div>
+    <div style="font-size:13px;color:var(--gray);margin-bottom:18px;line-height:1.5;">Закрийте дату — на сайті вона стане перекресленою й недоступною для запису. Зручно, коли записи йдуть телефоном/Instagram: блокуєте дату, спокійно переносите всі записи в CRM, потім відкриваєте.</div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <span style="font-size:12px;color:var(--green);">🟢 відкрита</span>
+      <span style="font-size:12px;color:var(--red);">🔒 заблокована</span>
+    </div>
+    <div id="blockDatesGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;max-height:360px;overflow:auto;"></div>
   </div>
 </div>
 
@@ -1122,7 +1144,7 @@ document.getElementById('uiPromptModal').addEventListener('click',function(e){if
 // ═══ CONFIG ═══
 const APPS_SCRIPT_URL='https://script.google.com/macros/s/AKfycbw9mqrVSrAVeoMa4Np2SxYFRCxj5cW0uX1x7S50LddB7pXnz0PIvL7gPJHmLyIJ9986GQ/exec';
 const CRM_TOKEN_KEY='crm_admin_token';
-const PUBLIC_API_ACTIONS=new Set(['getTimesAndBoxes','getAvailableTimesForDate','getBoxesForDateTime','saveBooking','cancelBooking','rescheduleBooking','saveSubOrder','autoRegister','verifyCrmPin','sendClientAuthCode','verifyClientAuthCode','getClientProfileData','checkLoginPhone','verifyAdminSiteCode','getPublicCatalog']);
+const PUBLIC_API_ACTIONS=new Set(['getTimesAndBoxes','getAvailableTimesForDate','getBoxesForDateTime','saveBooking','cancelBooking','rescheduleBooking','saveSubOrder','autoRegister','verifyCrmPin','sendClientAuthCode','verifyClientAuthCode','getClientProfileData','checkLoginPhone','verifyAdminSiteCode','getPublicCatalog','getBlockedDates']);
 
 // ═══ STATE ═══
 const S={service:'',price:'',date:'',time:'',box:null,step:1,carType:'',plate:''};
@@ -1195,6 +1217,7 @@ window.addEventListener('load',()=>{
   initDatePills();
   if(isApiConfigured())api('getTimesAndBoxes',{date:getTodayStr()}).catch(()=>{});
   loadPublicCatalog();
+  loadBlockedDates();
   initRevealFx();
   // delayed count-up so numbers show after hero animation
   setTimeout(initCountUp,900);
@@ -1216,8 +1239,24 @@ function initDatePills(){
     btn.addEventListener('click',()=>selectDate(btn,dateStr));
     c.appendChild(btn);
   }
+  applyBlockedPills();
+}
+
+// ═══ BLOCKED DATES (захист від подвійних записів) ═══
+let _blockedDates=new Set();
+function applyBlockedPills(){
+  document.querySelectorAll('.date-pill').forEach(p=>{
+    p.classList.toggle('blocked',_blockedDates.has(p.dataset.date));
+  });
+}
+async function loadBlockedDates(){
+  if(!isApiConfigured())return;
+  try{const d=await api('getBlockedDates',{},null);if(Array.isArray(d?.blocked))_blockedDates=new Set(d.blocked);}
+  catch(e){}
+  applyBlockedPills();
 }
 async function selectDate(el,dateStr){
+  if(_blockedDates.has(dateStr)){toast('🔒 Ця дата закрита для запису. Оберіть іншу.');return;}
   document.querySelectorAll('.date-pill').forEach(b=>b.classList.remove('selected'));
   el.classList.add('selected');
   S.date=dateStr;S.time='';S.box=null;
@@ -1411,7 +1450,7 @@ function pickServiceDyn(el,name){
   S.service=name;
   const min=minCatalogPriceForService(name);
   S.price=min!==null?('від '+min.toLocaleString('uk-UA')+' ₴'):'';
-  setTimeout(()=>goStep(2),300);
+  setTimeout(()=>goStep(2),430);
 }
 
 // ── Booking step 4: car types ──
@@ -1480,7 +1519,7 @@ async function loadPublicCatalog(){
   try{const data=await api('getPublicCatalog',{},'publicCatalog');if(data?.success)_catalog=data;}
   catch(e){console.error('[catalog]',e);}
   _catalogReadyResolve();
-  renderBookingServicePicker();renderBookingCarTypeGrid();renderHomeServiceCards();renderFullServicesPage();
+  renderBookingServicePicker();renderBookingCarTypeGrid();renderHomeServiceCards();renderFullServicesPage();renderPlans();
 }
 
 function updateSummary(){
@@ -1565,7 +1604,7 @@ async function rescheduleLastBooking(){
     clearCache(`timesBoxes_${S.date}`);clearCache(`timesBoxes_${newDate}`);
     S.date=newDate;S.time=newTime;S.box=parseInt(String(newBox).replace(/[^\d]/g,''))||S.box;
     updateSummary();toast('✓ Запис перенесено');
-  }else toast(result?.error==='box busy'?'❌ Бокс зайнятий':'❌ Не вдалося перенести');
+  }else toast(rescheduleErrText(result));
 }
 
 // ═══ PIN / CRM ═══
@@ -1795,7 +1834,15 @@ async function rescheduleBookingUI(bookingId,phone){
     Object.assign(b,{date:newDate,time:newTime,box:newBox,status:'✅ Підтверджено'});
     clearCache(`timesBoxes_${newDate}`);clearCache('allBookings');
     applyBookingControls();renderBoxes(_allBookings,getTodayStr());toast('✓ Запис перенесено');
-  }else toast(result?.error==='box busy'?'❌ Бокс зайнятий':'❌ Помилка переносу');
+  }else toast(rescheduleErrText(result));
+}
+function rescheduleErrText(result){
+  const e=result&&result.error;
+  if(e==='box busy')return'❌ Цей бокс зайнятий на обраний час';
+  if(e==='date_blocked')return'🔒 Ця дата закрита для запису';
+  if(e==='bad_datetime')return'❌ Невірний формат дати або часу';
+  if(e==='phone mismatch')return'❌ Телефон не збігається із записом';
+  return'❌ Не вдалося перенести запис';
 }
 
 // ═══ BOXES ═══
@@ -2122,29 +2169,111 @@ function renderDemoAnalytics(){
   const updEl=document.getElementById('anUpdated');if(updEl)updEl.textContent='Демо-режим';
 }
 
+// ═══ PLANS (ціни з гугл-таблиці, лист «Типи абонементів») ═══
+function fmtPlanNum(n){return(Number(n)||0).toLocaleString('uk-UA');}
+// Рендеримо картки абонементів із каталогу (_catalog.types). Якщо каталог не завантажився —
+// лишаємо статичну розмітку як запасний варіант.
+function renderPlans(){
+  const types=(_catalog&&_catalog.types)||[];
+  if(!types.length)return;
+  const tier=i=>['plan-silver','plan-gold','plan-platinum'][i%3];
+  const meta=types.map(t=>{
+    const price=parseUahNumber(t.price)||0,amount=parseUahNumber(t.amount)||0;
+    const bonusPct=price?Math.max(0,Math.round((amount-price)/price*100)):0;
+    return{id:t.id,name:String(t.name||''),months:t.months,price,amount,bonusPct};
+  });
+  const homeRow=document.getElementById('homePlansRow');
+  if(homeRow){
+    homeRow.innerHTML=meta.map((m,i)=>`<div class="glass plan-home ${tier(i)}"><div class="plan-home-id">${esc(String(m.months))} міс</div><div class="plan-home-name">${esc(m.name)}</div><div class="plan-home-price">${fmtPlanNum(m.price)} ₴</div><div class="plan-home-bonus">+${m.bonusPct}% бонус = ${fmtPlanNum(m.amount)} ₴ на рахунок</div><button class="plan-home-btn" data-plan-idx="${i}">Придбати ${esc(m.name)}</button></div>`).join('');
+    homeRow.querySelectorAll('.plan-home-btn').forEach(b=>b.addEventListener('click',()=>openPlanModalMeta(meta[+b.dataset.planIdx])));
+  }
+  const full=document.getElementById('plansFullGrid');
+  if(full){
+    full.innerHTML=meta.map((m,i)=>`<div class="glass plan-full ${tier(i)}"><div class="plan-tier">${esc(String(m.months))} міс · ${esc(String(m.id))}</div><div class="plan-big-name">${esc(m.name)}</div><div class="plan-dur">Термін: ${esc(String(m.months))} міс</div><div class="plan-cost">${fmtPlanNum(m.price)} ₴</div><div class="plan-bonus-tag">+ ${m.bonusPct}% бонус</div><div class="plan-account">= ${fmtPlanNum(m.amount)} ₴ на рахунок</div><div class="plan-divider"></div><ul class="plan-features"><li>${fmtPlanNum(m.amount)} ₴ на особистий рахунок</li><li>Пріоритетний запис без черги</li><li>Бонус +${m.bonusPct}% до балансу</li><li>Особистий менеджер</li></ul><button class="plan-cta-btn" data-plan-idx="${i}">Придбати ${esc(m.name)}</button></div>`).join('');
+    full.querySelectorAll('.plan-cta-btn').forEach(b=>b.addEventListener('click',()=>openPlanModalMeta(meta[+b.dataset.planIdx])));
+  }
+}
+function openPlanModalMeta(m){if(m)openPlanModal(m.name,fmtPlanNum(m.price),fmtPlanNum(m.amount),m.id,String(m.months),m.bonusPct);}
+
 // ═══ PLAN MODAL ═══
+let _buyingPlan=false;
 function openPlanModal(name,price,account,id,months,bonus){
   Object.assign(_planMeta,{name,price,account,id,months,bonus:'+'+bonus+'%'});
   document.getElementById('m-id').textContent=id;
-  document.getElementById('m-name').textContent=name.toUpperCase();
-  document.getElementById('m-sub').textContent=price.replace(' ','')+' ₴ → '+account.replace(' ','')+' ₴ на рахунок';
+  document.getElementById('m-name').textContent=String(name).toUpperCase();
+  document.getElementById('m-sub').textContent=String(price).replace(/\s/g,'')+' ₴ → '+String(account).replace(/\s/g,'')+' ₴ на рахунок';
+  const btn=document.getElementById('buyPlanBtn');if(btn){btn.disabled=false;btn.textContent='Оформити →';}
   document.getElementById('planModal').classList.add('show');
 }
 function closePlanModal(){document.getElementById('planModal').classList.remove('show');}
 async function buyPlan(){
+  if(_buyingPlan)return; // ✅ захист від повторного замовлення подвійним кліком
   const nm=document.getElementById('pm-name').value.trim();
   const ph=document.getElementById('pm-phone').value.trim();
   const tg=document.getElementById('pm-tg').value.trim();
   if(!nm||!ph){toast("Заповніть ім'я та телефон");return;}
-  if(isApiConfigured()){
-    const result=await api('saveSubOrder',{subId:_planMeta.id,subName:_planMeta.name,months:_planMeta.months,price:_planMeta.price.replace(/\s/g,''),account:_planMeta.account.replace(/\s/g,''),bonus:_planMeta.bonus,name:nm,phone:ph,tg});
-    if(!result?.success){toast('❌ Помилка. Спробуйте пізніше.');return;}
-    autoRegisterClient(nm,ph);
+  const btn=document.getElementById('buyPlanBtn');
+  _buyingPlan=true;
+  if(btn){btn.disabled=true;btn.textContent='⏳ Відправляємо...';}
+  try{
+    if(isApiConfigured()){
+      const result=await api('saveSubOrder',{subId:_planMeta.id,subName:_planMeta.name,months:_planMeta.months,price:String(_planMeta.price).replace(/\s/g,''),account:String(_planMeta.account).replace(/\s/g,''),bonus:_planMeta.bonus,name:nm,phone:ph,tg});
+      if(!result?.success){toast('❌ Помилка. Спробуйте пізніше.');return;}
+      autoRegisterClient(nm,ph);
+    }
+    closePlanModal();toast("✓ Заявку відправлено! Зв'яжемося найближчим часом.");
+  }finally{
+    _buyingPlan=false;
+    if(btn){btn.disabled=false;btn.textContent='Оформити →';}
   }
-  closePlanModal();toast("✓ Заявку відправлено! Зв'яжемося найближчим часом.");
 }
 document.getElementById('planModal').addEventListener('click',function(e){if(e.target===this)closePlanModal();});
 document.getElementById('clientModal').addEventListener('click',function(e){if(e.target===this)closeClientModal();});
+
+// ═══ BLOCK DATES (CRM) ═══
+async function openBlockDatesModal(){
+  document.getElementById('blockDatesModal').classList.add('show');
+  await loadBlockedDates();
+  renderBlockDatesGrid();
+}
+function closeBlockDatesModal(){document.getElementById('blockDatesModal').classList.remove('show');}
+function renderBlockDatesGrid(){
+  const grid=document.getElementById('blockDatesGrid');if(!grid)return;
+  const ukDays=['Нд','Пн','Вт','Ср','Чт','Пт','Сб'];
+  const today=new Date();let html='';
+  for(let i=0;i<21;i++){
+    const d=new Date(today.getFullYear(),today.getMonth(),today.getDate()+i);
+    const dd=String(d.getDate()).padStart(2,'0'),mm=String(d.getMonth()+1).padStart(2,'0'),yyyy=d.getFullYear();
+    const ds=`${dd}.${mm}.${yyyy}`;
+    const blocked=_blockedDates.has(ds);
+    html+=`<button class="act-btn ${blocked?'act-btn-red':'act-btn-green'}" data-bd="${ds}" style="justify-content:flex-start;">${blocked?'🔒':'🟢'} ${ukDays[d.getDay()]} ${dd}.${mm}</button>`;
+  }
+  grid.innerHTML=html;
+  grid.querySelectorAll('[data-bd]').forEach(b=>b.addEventListener('click',()=>toggleBlockDateUI(b.dataset.bd)));
+}
+async function toggleBlockDateUI(ds){
+  const wasBlocked=_blockedDates.has(ds);
+  const _pk='blockdate:'+ds;
+  if(_pendingActions.has(_pk))return;
+  _pendingActions.add(_pk);
+  // оптимістично оновлюємо
+  if(wasBlocked)_blockedDates.delete(ds);else _blockedDates.add(ds);
+  renderBlockDatesGrid();applyBlockedPills();
+  let result;
+  try{result=await api(wasBlocked?'unblockDate':'blockDate',{date:ds});}catch(e){result=null;}
+  if(result?.success){
+    if(Array.isArray(result.blockedDates))_blockedDates=new Set(result.blockedDates);
+    clearCache(`timesBoxes_${ds}`);
+    toast(result.blocked?`🔒 ${ds} заблоковано`:`🟢 ${ds} відкрито`);
+  }else{
+    // відкат
+    if(wasBlocked)_blockedDates.add(ds);else _blockedDates.delete(ds);
+    toast(result?.error?`❌ ${result.error}`:'❌ Не вдалося змінити');
+  }
+  renderBlockDatesGrid();applyBlockedPills();
+  _pendingActions.delete(_pk);
+}
+document.getElementById('blockDatesModal').addEventListener('click',function(e){if(e.target===this)closeBlockDatesModal();});
 
 // ═══ RECALC / BROADCAST / MAINTENANCE ═══
 async function recalcAllBalances(){
