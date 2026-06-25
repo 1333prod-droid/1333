@@ -817,6 +817,14 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
       <div class="hero-stat"><div class="hero-stat-num" data-count="4" data-suffix="+">0</div><div class="hero-stat-label">Роки</div></div>
     </div>
   </div>
+
+    <!-- GALLERY -->
+  <div class="section" id="home-gallery">
+    <div class="section-label">Галерея</div>
+    <h2 class="section-title">Наші роботи</h2>
+    <div class="gallery-grid stagger-in" id="galleryGrid"></div>
+  </div>
+  
   <div class="section" id="home-services">
     <div class="section-label">Послуги</div>
     <h2 class="section-title">Детейлінг, який<br>захищає ваш автомобіль</h2>
@@ -825,14 +833,17 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
     </div>
   </div>
 
-  <!-- GALLERY -->
-  <div class="section" id="home-gallery">
-    <div class="section-label">Галерея</div>
-    <h2 class="section-title">Наші роботи</h2>
-    <div class="gallery-grid stagger-in" id="galleryGrid"></div>
+  <div class="section" id="home-plans">
+    <div class="section-label">Абонементи</div>
+    <h2 class="section-title">Плани для постійних<br>клієнтів</h2>
+    <div class="plans-row" id="homePlansRow">
+      <div class="glass plan-home plan-silver"><div class="plan-home-id">1 місяць</div><div class="plan-home-name">Silver</div><div class="plan-home-price">10 000 ₴</div><div class="plan-home-bonus">+10% бонус = 11 000 ₴ на рахунок</div><button class="plan-home-btn" onclick="openPlanModal('Silver','10 000','11 000','T-1','1','10')">Придбати Silver</button></div>
+      <div class="glass plan-home plan-gold"><div class="plan-home-id">3 місяці</div><div class="plan-home-name">Gold</div><div class="plan-home-price">30 000 ₴</div><div class="plan-home-bonus">+15% бонус = 34 500 ₴ на рахунок</div><button class="plan-home-btn" onclick="openPlanModal('Gold','30 000','34 500','T-2','3','15')">Придбати Gold</button></div>
+      <div class="glass plan-home plan-platinum"><div class="plan-home-id">6 місяців</div><div class="plan-home-name">Platinum</div><div class="plan-home-price">60 000 ₴</div><div class="plan-home-bonus">+20% бонус = 72 000 ₴ на рахунок</div><button class="plan-home-btn" onclick="openPlanModal('Platinum','60 000','72 000','T-3','6','20')">Придбати Platinum</button></div>
+    </div>
   </div>
 
-  <!-- FULL-WIDTH MAP -->
+    <!-- FULL-WIDTH MAP -->
   <div class="map-section" id="home-map">
     <div class="map-wrap">
       <iframe
@@ -851,16 +862,7 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
       </div>
     </div>
   </div>
-
-  <div class="section" id="home-plans">
-    <div class="section-label">Абонементи</div>
-    <h2 class="section-title">Плани для постійних<br>клієнтів</h2>
-    <div class="plans-row" id="homePlansRow">
-      <div class="glass plan-home plan-silver"><div class="plan-home-id">1 місяць</div><div class="plan-home-name">Silver</div><div class="plan-home-price">10 000 ₴</div><div class="plan-home-bonus">+10% бонус = 11 000 ₴ на рахунок</div><button class="plan-home-btn" onclick="openPlanModal('Silver','10 000','11 000','T-1','1','10')">Придбати Silver</button></div>
-      <div class="glass plan-home plan-gold"><div class="plan-home-id">3 місяці</div><div class="plan-home-name">Gold</div><div class="plan-home-price">30 000 ₴</div><div class="plan-home-bonus">+15% бонус = 34 500 ₴ на рахунок</div><button class="plan-home-btn" onclick="openPlanModal('Gold','30 000','34 500','T-2','3','15')">Придбати Gold</button></div>
-      <div class="glass plan-home plan-platinum"><div class="plan-home-id">6 місяців</div><div class="plan-home-name">Platinum</div><div class="plan-home-price">60 000 ₴</div><div class="plan-home-bonus">+20% бонус = 72 000 ₴ на рахунок</div><button class="plan-home-btn" onclick="openPlanModal('Platinum','60 000','72 000','T-3','6','20')">Придбати Platinum</button></div>
-    </div>
-  </div>
+  
   <footer>
     <div class="footer-inner">
       <div class="footer-grid">
