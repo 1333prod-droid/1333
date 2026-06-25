@@ -1451,8 +1451,11 @@ function bkGoStep(n){
   if(n===4)bkRenderSummary();
   requestAnimationFrame(()=>window.scrollTo({top:0,behavior:'smooth'}));
 }
+// ── HOME gallery (drop real photo URLs into GALLERY; broken ones auto-hide) ──
+const GALLERY=['assets/work-1.jpg','assets/work-2.jpg','assets/work-3.jpg','assets/work-4.jpg','assets/work-5.jpg','assets/work-6.jpg','assets/work-7.jpg','assets/work-8.jpg'];
+function renderGallery(){const g=document.getElementById('galleryGrid');if(!g)return;g.innerHTML=GALLERY.map((src,i)=>`<a class="gallery-item" href="${esc(src)}" target="_blank" rel="noopener"><img src="${esc(src)}" alt="Робота 1333 Car Center ${i+1}" loading="lazy" decoding="async" onerror="this.closest('.gallery-item').style.display='none'"></a>`).join('');}
 
-// ── submit / lifecycle ──
+  // ── submit / lifecycle ──
 async function bkSubmit(){
   const btn=document.getElementById('bkConfirmBtn');
   const name=document.getElementById('bkName').value.trim();const phone=document.getElementById('bkPhone').value.trim();
@@ -1500,9 +1503,6 @@ async function bkRescheduleLast(){
 }
 function bkDeepLink(svc){BK._pendingSvc=svc||'';bkReset();}
 
-// ── HOME gallery (drop real photo URLs into GALLERY; broken ones auto-hide) ──
-const GALLERY=['assets/work-1.jpg','assets/work-2.jpg','assets/work-3.jpg','assets/work-4.jpg','assets/work-5.jpg','assets/work-6.jpg','assets/work-7.jpg','assets/work-8.jpg'];
-function renderGallery(){const g=document.getElementById('galleryGrid');if(!g)return;g.innerHTML=GALLERY.map((src,i)=>`<a class="gallery-item" href="${esc(src)}" target="_blank" rel="noopener"><img src="${esc(src)}" alt="Робота 1333 Car Center ${i+1}" loading="lazy" decoding="async" onerror="this.closest('.gallery-item').style.display='none'"></a>`).join('');}
 
 // ═══ NAV + SCROLL FIX ═══
 function showPage(p){
