@@ -1934,7 +1934,7 @@ async function rescheduleLastBooking(){
 
 // ═══ PIN / CRM ═══
 let _pinBuffer='',_pinChecking=false,_crmUnlocked=!!_crmToken;
-function initCrmPage(){if(_crmUnlocked){showCrmInner();loadCRM();}else showPinGate();}
+function initCrmPage(){if(_crmUnlocked){showCrmInner();loadCRM();}else showPage('cabinet');}
 function showPinGate(){document.getElementById('crm-gate').style.display='flex';document.getElementById('crm-inner').classList.remove('show');}
 function showCrmInner(){
   document.getElementById('crm-gate').style.display='none';
@@ -1962,7 +1962,7 @@ async function checkPin(){
   setTimeout(()=>{pb.style.transform='translateX(-10px)';},80);
   setTimeout(()=>{pb.style.transform='';},160);
 }
-function pinLock(){stopCrmAutoRefresh();clearCrmSession();_pinBuffer='';updatePinDots();document.getElementById('pin-error').textContent='';showPinGate();}
+function pinLock(){stopCrmAutoRefresh();clearCrmSession();showPage('home');}
 document.addEventListener('keydown',e=>{
   const page=document.getElementById('crm-page');
   if(!page?.classList.contains('active'))return;
