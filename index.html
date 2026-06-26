@@ -2848,7 +2848,6 @@ window.addEventListener('DOMContentLoaded',()=>{
   const savedId=localStorage.getItem(CAB_ID_KEY);
   if(savedToken&&savedId){cabGoStep('profile');loadCabinetProfile(savedId,savedToken);}
   else cabGoStep('phone');
-  if(_crmToken)showPage('crm');
 });
 </script>
 </body>
