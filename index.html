@@ -1264,7 +1264,7 @@ let _crmAutoRefreshTimer=null;
 let _prevSubReqIds=null;
 const _planMeta={};
 let _allBookings=[],_allClients=[],_allSubs=[],_allSubRequests=[];
-let _crmToken=sessionStorage.getItem(CRM_TOKEN_KEY)||'';
+let _crmToken=localStorage.getItem(CRM_TOKEN_KEY)||'';
 let _bookingFilter='all';
 const _cache={};
 const CACHE_TTL=90000;
@@ -1288,7 +1288,7 @@ async function api(action,params={},cacheKey=null){
   }catch(e){console.error('[API]',action,e);return null;}
 }
 function clearCache(prefix=''){Object.keys(_cache).forEach(k=>{if(!prefix||k.startsWith(prefix))delete _cache[k];});}
-function clearCrmSession(){sessionStorage.removeItem(CRM_TOKEN_KEY);_crmToken='';_crmUnlocked=false;clearCache();}
+function clearCrmSession(){localStorage.removeItem(CRM_TOKEN_KEY);_crmToken='';_crmUnlocked=false;clearCache();}
 async function autoRegisterClient(name,phone){
   if(!isApiConfigured()||!name||!phone)return;
   try{await api('autoRegister',{name,phone,source:'Сайт'},null);}catch(e){}
@@ -1949,7 +1949,7 @@ async function checkPin(){
   const result=await api('verifyCrmPin',{pin:_pinBuffer});
   _pinChecking=false;
   if(result?.success&&result.token){
-    _crmToken=result.token;sessionStorage.setItem(CRM_TOKEN_KEY,_crmToken);_crmUnlocked=true;
+    _crmToken=result.token;localStorage.setItem(CRM_TOKEN_KEY,_crmToken);_crmUnlocked=true;
     _pinBuffer='';updatePinDots();showCrmInner();loadCRM();return;
   }
   document.getElementById('pin-error').textContent=result?.error||'Невірний PIN';
@@ -2774,7 +2774,7 @@ async function cabVerifyAdminCode(){
   const res=await api('verifyAdminSiteCode',{code});
   if(btn)btn.textContent='Увійти до системи';
   if(!res||!res.success||!res.token){if(err)err.textContent=res?.error==='code_invalid'?'Невірний код':(res?.error==='code_expired'?'Код прострочено.':'Не вдалося увійти');cabResetAdminCode();document.getElementById('acd0')?.focus();return;}
-  _crmToken=res.token;sessionStorage.setItem(CRM_TOKEN_KEY,_crmToken);_crmUnlocked=true;
+  _crmToken=res.token;localStorage.setItem(CRM_TOKEN_KEY,_crmToken);_crmUnlocked=true;
   cabResetAdminCode();showPage('crm');
 }
 async function loadCabinetProfile(clientId,clientToken){
@@ -2848,6 +2848,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   const savedId=localStorage.getItem(CAB_ID_KEY);
   if(savedToken&&savedId){cabGoStep('profile');loadCabinetProfile(savedId,savedToken);}
   else cabGoStep('phone');
+  if(_crmToken)showPage('crm');
 });
 </script>
 </body>
