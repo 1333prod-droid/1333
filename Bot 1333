@@ -1,0 +1,3651 @@
+/// ==================== BOT 1333 CAR CENTER v9.0 ====================
+// ✅ v9 ОПТИМІЗАЦІЯ:
+//   • [PERF] getTimesAndBoxes/getAvailableTimesForDate → in-memory перевірка боксів < 500мс
+//   • [FIX]  autoRegisterClient → прибрано формули в logAction, більше нема #ERROR!
+//   • [SEC]  doGet → requiresAdminAuth/isValidAdminToken ПЕД runDailyMaintenance  
+//   • [SAFE] deductFromSub, getClientRow → захист від TypeError на порожніх таблицях
+//   • [NEW]  PUBLIC_ACTIONS: sendClientAuthCode, verifyClientAuthCode, getClientProfileData
+//   • [NEW]  Авторизація Особистого кабінету: SMS-код → clientToken
+//   • [NEW]  freezeSubscription/activateSubscription → заморозка з продовженням дати
+
+const scriptProperties = PropertiesService.getScriptProperties();
+const BOT_TOKEN = scriptProperties.getProperty("BOT_TOKEN") || "";
+const ADMIN_ID = Number(scriptProperties.getProperty("ADMIN_ID") || 0);
+const SPREADSHEET_ID = scriptProperties.getProperty("SPREADSHEET_ID") || "";
+const WEBAPP_URL = scriptProperties.getProperty("WEBAPP_URL") || "";
+const PHONE = "+380 77 001 13 33";
+const ADDRESS = "вул.Гвардійців-Широнінців 51/1";
+const TZ = "Europe/Kyiv";
+const CRM_SESSION_TTL_SECONDS = 21600;
+const CLIENT_TOKEN_TTL_SECONDS = 21600;
+const AUTH_CODE_TTL_MS = 5 * 60 * 1000;
+const SCHEMA_VERSION = "v9.4-plate-2026-06-22";
+
+const SHEET_CLIENTS      = "👥 Клієнти";
+const SHEET_TYPES        = "💎 Типи абонементів";
+const SHEET_SUBS         = "📋 Абонементи клієнтів";
+const SHEET_PRICE        = "💰 Прайс";
+const SHEET_SCHEDULE     = "📅 Розклад";
+const SHEET_BOOKINGS     = "📝 Записи на послуги";
+const SHEET_HISTORY      = "📜 Історія";
+const SHEET_SUB_REQUESTS = "📬 Заявки на абонементи";
+const SHEET_SUB_REQUESTS_ALTS = ["🔔 Заявки абонементів","Заявки абонементів"];
+const SHEET_ERRORS       = "⚠️ Системные ошибки";
+const SHEET_AUDIT_LOG    = "🧾 Журнал операций";
+const SHEET_ANALYTICS    = "📊 Аналітика";
+
+const DAY_NAMES       = ["Неділя","Понеділок","Вівторок","Середа","Четвер","П'ятниця","Субота"];
+const DAY_NAMES_SHORT = ["Нд","Пн","Вт","Ср","Чт","Пт","Сб"];
+const CLIENT_STATUS_ACTIVE    = "Активный";
+const CLIENT_STATUS_ARCHIVE   = "Архив";
+const CLIENT_STATUS_BLACKLIST = "Черный список";
+
+const PUBLIC_ACTIONS = {
+  getTimesAndBoxes: true, getAvailableTimesForDate: true, getBoxesForDateTime: true,
+  saveBooking: true, cancelBooking: true, rescheduleBooking: true,
+  saveSubOrder: true, autoRegister: true, verifyCrmPin: true,
+  sendClientAuthCode: true, verifyClientAuthCode: true, getClientProfileData: true,
+  checkLoginPhone: true, verifyAdminSiteCode: true, getPublicCatalog: true,
+  getBlockedDates: true
+};
+
+// ✅ NEW: дати, повністю закриті для онлайн-запису (захист від подвійних записів
+//   через телефон/Instagram, поки адмін не переніс усі записи в CRM).
+//   Зберігаються у ScriptProperties як JSON-масив рядків "dd.MM.yyyy".
+const BLOCKED_DATES_KEY = "BLOCKED_DATES";
+
+let __spreadsheet = null, __sheetCache = {};
+
+// ═══════════════════════════════════════════════════════════════
+// БАЗОВІ ФУНКЦІЇ
+// ═══════════════════════════════════════════════════════════════
+
+function requireConfig(name) {
+  const value = scriptProperties.getProperty(name);
+  if (value === null || value === undefined || String(value).trim() === "") {
+    throw new Error("Missing Script Property: " + name);
+  }
+  return value;
+}
+
+function getSpreadsheet() {
+  if (!__spreadsheet) __spreadsheet = SpreadsheetApp.openById(requireConfig("SPREADSHEET_ID"));
+  return __spreadsheet;
+}
+
+function getSheet(name) {
+  if (!name) return null;
+  if (!__sheetCache[name]) {
+    __sheetCache[name] = getSpreadsheet().getSheetByName(name);
+  }
+  return __sheetCache[name];
+}
+
+function safeGetRangeValues(sheet, startRow, startCol, numRows, numCols) {
+  if (!sheet) return [];
+  const last = sheet.getLastRow();
+  if (last < startRow) return [];
+  const rows = last - startRow + 1;
+  if (rows <= 0) return [];
+  const cols = numCols || Math.max(1, sheet.getLastColumn() - startCol + 1);
+  return sheet.getRange(startRow, startCol, rows, cols).getValues();
+}
+
+function jsonResponse(result) {
+  return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+}
+
+function getOrCreateSheet(name) {
+  let sheet = getSheet(name);
+  if (!sheet) {
+    sheet = getSpreadsheet().insertSheet(name);
+    __sheetCache[name] = sheet;
+  }
+  return sheet;
+}
+
+function ensureSheetHeaders(name, headers) {
+  const sheet = getOrCreateSheet(name);
+  const lastCol = Math.max(sheet.getLastColumn(), 1);
+  const existing = sheet.getRange(1, 1, 1, lastCol).getValues()[0].map(v => String(v || "").trim());
+  const hasHeaders = existing.some(Boolean);
+  sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+  if (!hasHeaders) sheet.setFrozenRows(1);
+  return sheet;
+}
+
+function ensureSchema(force) {
+  if (!force && scriptProperties.getProperty("SCHEMA_VERSION") === SCHEMA_VERSION) return;
+  ensureSheetHeaders(SHEET_CLIENTS, [
+    "ClientID", "ПІБ", "Телефон", "Telegram ID", "Статус", "Дата реєстрації",
+    "Баланс", "Количество посещений", "Общая сумма покупок", "Средний чек",
+    "Последнее посещение", "Источник клиента", "Комментарий администратора"
+  ]);
+  ensureSheetHeaders(SHEET_SUBS, [
+    "ClientID", "SubscriptionID", "TypeID", "Клієнт", "Тип", "Сума",
+    "Дата покупки", "Дата окончания", "Витрачено", "Залишок", "Статус",
+    "Кто продал", "Способ оплаты", "Скидка", "Промокод", "Дата активации"
+  ]);
+  ensureSheetHeaders(SHEET_BOOKINGS, [
+    "BookingID", "Дата", "День", "Час", "Бокс", "ClientID", "Клієнт",
+    "Телефон", "Послуга", "Статус", "Примітка", "Источник записи", "Держ. номер"
+  ]);
+  ensureSheetHeaders(SHEET_HISTORY, [
+    "HistoryID", "Дата", "ClientID", "Клієнт", "SubscriptionID", "Операція",
+    "Сума", "Коментар", "Кто выполнил операцию", "Изменение баланса", "До", "После"
+  ]);
+  ensureSheetHeaders(SHEET_SUB_REQUESTS, [
+    "RequestID", "ClientID", "Клієнт", "Telegram ID", "TypeID", "Тип",
+    "Сума", "Дата створення", "Статус", "Причина отказа", "Дата обработки", "Кто обработал"
+  ]);
+  ensureSheetHeaders(SHEET_ERRORS, ["Дата", "Пользователь", "Функция", "Ошибка", "StackTrace"]);
+  ensureSheetHeaders(SHEET_AUDIT_LOG, ["Дата", "Пользователь", "Операция", "Сущность", "ID", "До", "После", "Комментарий"]);
+  ensureSheetHeaders(SHEET_ANALYTICS, ["KPI", "Значение", "Обновлено"]);
+  scriptProperties.setProperty("SCHEMA_VERSION", SCHEMA_VERSION);
+}
+
+function logError(functionName, error, user) {
+  try {
+    const sheet = ensureSheetHeaders(SHEET_ERRORS, ["Дата", "Пользователь", "Функция", "Ошибка", "StackTrace"]);
+    sheet.appendRow([
+      Utilities.formatDate(new Date(), TZ, "dd.MM.yyyy HH:mm:ss"),
+      String(user || ""), String(functionName || ""),
+      String(error && error.message ? error.message : error),
+      String(error && error.stack ? error.stack : "")
+    ]);
+  } catch (logErr) { Logger.log("logError failed: " + logErr); }
+}
+
+// ✅ v9.1: логи буферизуються у ScriptProperties під локом і скидаються пачкою.
+const AUDIT_QUEUE_KEY = "AUDIT_QUEUE";
+const AUDIT_FLUSH_THRESHOLD = 15;
+const AUDIT_CRITICAL_OPS = ["Списание", "Продажа абонемента", "Заморозка абонемента",
+  "Розморозка абонемента", "Автозакрытие абонемента"];
+
+function logAction(user, operation, entity, entityId, beforeValue, afterValue, comment) {
+  try {
+    const safeStr = (v) => {
+      if (v === undefined || v === null) return "";
+      const s = String(v);
+      return (s.startsWith("=") || s.startsWith("+") || s.startsWith("-") || s.startsWith("@"))
+        ? "'" + s : s;
+    };
+    const row = [
+      Utilities.formatDate(new Date(), TZ, "dd.MM.yyyy HH:mm:ss"),
+      safeStr(user), safeStr(operation), safeStr(entity), safeStr(entityId),
+      safeStr(beforeValue), safeStr(afterValue), safeStr(comment)
+    ];
+    const isCritical = AUDIT_CRITICAL_OPS.some(op =>
+      String(operation || "").toLowerCase().includes(op.toLowerCase()));
+
+    // короткий лок ТІЛЬКИ на запис черги, щоб не втрачати логи при гонці запитів
+    const lock = LockService.getScriptLock();
+    let shouldFlush = false;
+    try {
+      lock.waitLock(5000);
+      let queue = [];
+      try { queue = JSON.parse(scriptProperties.getProperty(AUDIT_QUEUE_KEY) || "[]"); } catch (e) { queue = []; }
+      queue.push(row);
+      scriptProperties.setProperty(AUDIT_QUEUE_KEY, JSON.stringify(queue));
+      shouldFlush = (queue.length >= AUDIT_FLUSH_THRESHOLD || isCritical);
+    } finally {
+      try { lock.releaseLock(); } catch (e) {}
+    }
+    if (shouldFlush) flushAuditQueue();
+  } catch (e) { logError("logAction", e, user); }
+}
+
+// ✅ v9.1: пакетний скид черги логів одним setValues()
+function flushAuditQueue() {
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    let queue = [];
+    try { queue = JSON.parse(scriptProperties.getProperty(AUDIT_QUEUE_KEY) || "[]"); } catch (e) { queue = []; }
+    if (!queue.length) return 0;
+    scriptProperties.deleteProperty(AUDIT_QUEUE_KEY);
+    const sheet = getOrCreateSheet(SHEET_AUDIT_LOG);
+    const startRow = sheet.getLastRow() + 1;
+    sheet.getRange(startRow, 1, queue.length, 8).setValues(queue);
+    return queue.length;
+  } catch (e) {
+    logError("flushAuditQueue", e, "system");
+    return 0;
+  } finally {
+    try { lock.releaseLock(); } catch (e) {}
+  }
+}
+
+// ✅ v10 PERF: лок використовується ВИКЛЮЧНО для транзакційних (write) операцій:
+//   saveBooking / cancelBooking / rescheduleBooking / sellSubscription / updateBookingStatus тощо.
+//   Аналітичні (read) операції — getAllBookings/getAllClients/getAnalyticsFull/getPublicCatalog —
+//   НЕ беруть лок взагалі, тому читання ніколи не чекає на запис.
+//   Час очікування зменшено 30s → 10s: швидкий fail замість довгого зависання під навантаженням.
+//   Важливо: мережеві виклики (sendMessage у Telegram) винесені ЗА межі локу — лок тримається мінімально.
+const WRITE_LOCK_WAIT_MS = 10000;
+function withScriptLock(functionName, fn, user) {
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(WRITE_LOCK_WAIT_MS);
+    return fn();
+  } catch (e) {
+    logError(functionName, e, user);
+    throw e;
+  } finally {
+    try { lock.releaseLock(); } catch (releaseErr) {}
+  }
+}
+
+function fmtDate(d) {
+  if (!d) return "";
+  if (typeof d === 'string') return d;
+  if (d instanceof Date) return Utilities.formatDate(d, TZ, "dd.MM.yyyy");
+  return "";
+}
+
+function parseDate(value) {
+  if (!value) return "";
+  if (typeof value === 'string') return value;
+  if (value instanceof Date) return Utilities.formatDate(value, TZ, "dd.MM.yyyy");
+  if (typeof value === 'number') {
+    try {
+      const ms = (Math.floor(value) - 25569) * 86400 * 1000;
+      const dt = new Date(ms);
+      if (dt.getFullYear() > 1900 && dt.getFullYear() < 2100)
+        return Utilities.formatDate(dt, TZ, "dd.MM.yyyy");
+    } catch(e) {}
+  }
+  return "";
+}
+
+function fmt(num) { return Math.round(num * 100) / 100; }
+
+function normalizePhone(phone) {
+  if (!phone) return "";
+  let digits = String(phone).replace(/\D/g, "");
+  if (digits.startsWith("380") && digits.length === 12) {} 
+  else if (digits.startsWith("0") && digits.length === 10) digits = "38" + digits;
+  else if (digits.length === 9) digits = "380" + digits;
+  else if (digits.startsWith("38") && digits.length === 11) digits = "3" + digits;
+  if (digits.length === 12 && digits.startsWith("38")) {
+    return `+38(${digits.slice(2,5)})${digits.slice(5,8)} ${digits.slice(8,10)} ${digits.slice(10,12)}`;
+  }
+  return phone.startsWith("+") ? phone : "+" + digits;
+}
+
+function sha256Hex(value) {
+  return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, String(value), Utilities.Charset.UTF_8)
+    .map(b => (b < 0 ? b + 256 : b).toString(16).padStart(2, "0")).join("");
+}
+
+function secureCompare(a, b) {
+  a = String(a || ""); b = String(b || "");
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
+function isCrmPinValid(pin) {
+  const hash = scriptProperties.getProperty("CRM_PIN_HASH");
+  if (hash) return secureCompare(sha256Hex(pin), String(hash).toLowerCase());
+  const plain = scriptProperties.getProperty("CRM_PIN");
+  return !!plain && secureCompare(String(pin), String(plain));
+}
+
+function createAdminSession() {
+  const token = Utilities.getUuid() + "-" + Utilities.getUuid();
+  CacheService.getScriptCache().put("crm_session_" + token, "1", CRM_SESSION_TTL_SECONDS);
+  return token;
+}
+
+function isValidAdminToken(token) {
+  if (!token) return false;
+  return CacheService.getScriptCache().get("crm_session_" + token) === "1";
+}
+
+function verifyCrmPin(pin) {
+  if (!isCrmPinValid(pin)) {
+    logAction("web", "Неверный PIN", "CRM", "", "", "", "Попытка входа");
+    return { success: false, error: "Невірний PIN" };
+  }
+  const token = createAdminSession();
+  logAction("web", "Вход в CRM", "CRM", "", "", "ok", "Серверная авторизация");
+  return { success: true, token, expiresIn: CRM_SESSION_TTL_SECONDS };
+}
+
+function requiresAdminAuth(action) {
+  return action && !PUBLIC_ACTIONS[action];
+}
+
+function invalidateBookingCache(dateStr) {
+  try {
+    const cache = CacheService.getScriptCache();
+    if (dateStr) {
+      cache.remove("timesBoxes_" + dateStr);
+      cache.remove("avail_" + dateStr);
+      cache.remove("avail_" + String(dateStr).replace(/\D/g, "")); // ключ _availCacheKey (avail_14062026)
+    }
+  } catch (e) {}
+}
+
+// ─────────────────────── BLOCKED DATES ─────────────────────────
+function getBlockedDates() {
+  try { return JSON.parse(scriptProperties.getProperty(BLOCKED_DATES_KEY) || "[]"); }
+  catch (e) { return []; }
+}
+function _setBlockedDates(arr) {
+  scriptProperties.setProperty(BLOCKED_DATES_KEY, JSON.stringify(arr || []));
+}
+function isDateBlocked(dateStr) {
+  if (!dateStr) return false;
+  return getBlockedDates().indexOf(String(dateStr).trim()) !== -1;
+}
+function blockDate(dateStr, actor) {
+  return withScriptLock("blockDate", function () {
+    const ds = String(dateStr || "").trim();
+    if (!isValidDateStr(ds)) return { success: false, error: "bad_date" };
+    const arr = getBlockedDates();
+    if (arr.indexOf(ds) === -1) { arr.push(ds); _setBlockedDates(arr); }
+    invalidateBookingCache(ds);
+    logAction(actor || "CRM", "Блокування дати", "Schedule", ds, "", "Заблоковано", "");
+    return { success: true, blocked: true, date: ds, blockedDates: arr };
+  }, actor || "CRM");
+}
+function unblockDate(dateStr, actor) {
+  return withScriptLock("unblockDate", function () {
+    const ds = String(dateStr || "").trim();
+    const arr = getBlockedDates();
+    const i = arr.indexOf(ds);
+    if (i !== -1) { arr.splice(i, 1); _setBlockedDates(arr); }
+    invalidateBookingCache(ds);
+    logAction(actor || "CRM", "Розблокування дати", "Schedule", ds, "", "Відкрито", "");
+    return { success: true, blocked: false, date: ds, blockedDates: arr };
+  }, actor || "CRM");
+}
+function toggleBlockDate(dateStr, actor) {
+  return isDateBlocked(dateStr) ? unblockDate(dateStr, actor) : blockDate(dateStr, actor);
+}
+
+function asDate(value) {
+  if (!value) return null;
+  if (value instanceof Date) return value;
+  if (typeof value === "number") {
+    const dt = new Date((Math.floor(value) - 25569) * 86400 * 1000);
+    return isNaN(dt.getTime()) ? null : dt;
+  }
+  const parts = String(value).trim().match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  if (!parts) return null;
+  const dt = new Date(Number(parts[3]), Number(parts[2]) - 1, Number(parts[1]));
+  return isNaN(dt.getTime()) ? null : dt;
+}
+
+function isPastDate(value) {
+  const dt = asDate(value);
+  if (!dt) return false;
+  const today = new Date();
+  const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const dateOnly = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+  return dateOnly < todayOnly;
+}
+
+function isActiveStatus(status) {
+  const s = String(status || "");
+  return s.includes("Активний") || s.includes("Активный") || s.includes("✅");
+}
+
+function isClientBlockedStatus(status) {
+  const s = String(status || "");
+  return s.includes(CLIENT_STATUS_BLACKLIST) || s.includes(CLIENT_STATUS_ARCHIVE);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// БАЛАНС ТА МЕТРИКИ
+// ═══════════════════════════════════════════════════════════════
+
+function updateClientBalance(clientId) {
+  if (!clientId) return 0;
+  const subsSheet = getSheet(SHEET_SUBS);
+  const clientSheet = getSheet(SHEET_CLIENTS);
+  if (!subsSheet || !clientSheet) return 0;
+  const subsData = safeGetRangeValues(subsSheet, 2, 1, null, 16);
+  let totalBalance = 0;
+  if (subsData.length) {
+    subsData.forEach(r => {
+      if (!r || !r[0]) return;
+      if (String(r[0]).trim() !== String(clientId).trim()) return;
+      if (isActiveStatus(String(r[10]).trim())) {
+        totalBalance += parseFloat(r[9]) || 0;
+      }
+    });
+  }
+  const clientsData = safeGetRangeValues(clientSheet, 2, 1, null, 1);
+  if (clientsData.length) {
+    for (let i = 0; i < clientsData.length; i++) {
+      if (!clientsData[i] || !clientsData[i][0]) continue;
+      if (String(clientsData[i][0]).trim() === String(clientId).trim()) {
+        clientSheet.getRange(i + 2, 7).setValue(totalBalance);
+        return totalBalance;
+      }
+    }
+  }
+  return totalBalance;
+}
+
+function syncAllBalances() {
+  const clientSheet = getSheet(SHEET_CLIENTS);
+  if (!clientSheet) return 0;
+  const clientsData = safeGetRangeValues(clientSheet, 2, 1, null, 1);
+  if (!clientsData.length) return 0;
+  let count = 0;
+  clientsData.forEach(r => { if (r && r[0]) { updateClientBalance(String(r[0]).trim()); count++; }});
+  Logger.log("✅ Синхронізовано балансів: " + count);
+  return count;
+}
+
+function deductFromSub(clientId, subId, cost) {
+  if (!subId || !cost || cost <= 0) return true;
+  const sheet = getSheet(SHEET_SUBS);
+  if (!sheet) return false;
+  const data = safeGetRangeValues(sheet, 2, 1, null, 16);
+  if (!data || !data.length) return false;
+  for (let i = 0; i < data.length; i++) {
+    if (!data[i] || !data[i][1]) continue;
+    if (String(data[i][1]).trim() !== String(subId).trim()) continue;
+    if (String(data[i][0]).trim() !== String(clientId).trim()) continue;
+    const currentBalance = parseFloat(data[i][9]) || 0;
+    const currentSpent = parseFloat(data[i][8]) || 0;
+    if (currentBalance < cost) return false;
+    const newBalance = currentBalance - cost;
+    const newSpent = currentSpent + cost;
+    const newStatus = newBalance <= 0 ? "⛔ Вичерпано" : data[i][10];
+    sheet.getRange(i + 2, 9, 1, 3).setValues([[newSpent, newBalance, newStatus]]);
+    updateClientBalance(clientId);
+    return true;
+  }
+  return false;
+}
+
+function findSubForCost(clientId, cost) {
+  if (!clientId || !cost || cost <= 0) return null;
+  const subs = getClientSubs(clientId).filter(s => isActiveStatus(s.status) && parseFloat(s.balance) >= cost);
+  if (!subs.length) return null;
+  subs.sort((a, b) => parseFloat(b.balance) - parseFloat(a.balance));
+  return subs[0].subId;
+}
+
+function markVisit(clientId, subId, service, cost, note, actor) {
+  return withScriptLock("markVisit", function() {
+    assertForeignKeys({ clientId, subId });
+    const client = findClientById(clientId);
+    const beforeBalance = getClientLiveBalance(clientId);
+    const deducted = deductFromSub(clientId, subId, cost);
+    if (!deducted) return { success: false, error: "Недостатньо коштів" };
+    const afterBalance = getClientLiveBalance(clientId);
+    addToHistory("", clientId, client?.name || "", fmtDate(new Date()), service, cost, note, actor, afterBalance - beforeBalance, beforeBalance, afterBalance, subId);
+    updateClientMetrics(clientId);
+    logAction(actor || "admin", "Списание", "Subscription", subId, beforeBalance, afterBalance, service);
+    return { success: true, beforeBalance, afterBalance };
+  }, actor || "admin");
+}
+function markVisitCash(clientId, clientName, service, cost, note, actor) {
+  return withScriptLock("markVisitCash", function() {
+    assertForeignKeys({ clientId });
+    addToHistory("", clientId, clientName, fmtDate(new Date()), service, cost,
+      note ? note + " | Готівка" : "Готівка", actor, 0, "", "", "");
+    updateClientMetrics(clientId);
+    logAction(actor || "admin", "Готівковий візит", "Client", clientId, "", cost, service);
+    return { success: true };
+  }, actor || "admin");
+}
+function autoRegisterClient(name, phone, telegramId, source) {
+  if (!name || !phone) return null;
+  let _newClientNotify = null; // ✅ v10: текст формуємо в локу, шлемо — поза локом
+  const newId = withScriptLock("autoRegisterClient", function() {
+    const normPhone = normalizePhone(phone);
+    const tg = String(telegramId || "").trim();
+    const sheet = getSheet(SHEET_CLIENTS);
+    if (!sheet) return null;
+    const data = safeGetRangeValues(sheet, 2, 1, null, 13);
+    if (data && data.length) {
+      for (let i = 0; i < data.length; i++) {
+        if (!data[i] || !data[i][0]) continue;
+        const samePhone = normPhone && normalizePhone(String(data[i][2])) === normPhone;
+        const sameTelegram = tg && String(data[i][3]).trim() === tg;
+        if (samePhone || sameTelegram) {
+          const row = i + 2;
+          const updates = data[i].slice(0, 13);
+          if (!updates[2] && normPhone) updates[2] = normPhone;
+          if (!updates[3] && tg) updates[3] = tg;
+          if (!updates[4]) updates[4] = CLIENT_STATUS_ACTIVE;
+          if (!updates[11] && source) updates[11] = source;
+          sheet.getRange(row, 1, 1, updates.length).setValues([updates]);
+          return String(data[i][0]);
+        }
+      }
+    }
+    const row = getNextRow(SHEET_CLIENTS);
+    const clientId = genClientId();
+    sheet.getRange(row, 1, 1, 13).setValues([[
+      clientId, name, normPhone, tg, CLIENT_STATUS_ACTIVE, fmtDate(new Date()), 0,
+      0, 0, 0, "", source || "Сайт", ""
+    ]]);
+    logAction(source || "web", "Создание клиента", "Client", clientId, "", name, normPhone);
+    _newClientNotify = "👤 <b>НОВИЙ КЛІЄНТ</b>\n\n🆔 " + clientId + "\n👤 " + name + "\n📱 " + normPhone + "\n📌 " + (source || "Сайт");
+    return clientId;
+  }, source || "web");
+  if (_newClientNotify) notifyAdmin(_newClientNotify); // ✅ v10: мережевий виклик поза локом
+  return newId;
+}
+
+function linkTelegramId(phone, telegramId) {
+  const normPhone = normalizePhone(phone);
+  const sheet = getSheet(SHEET_CLIENTS);
+  if (!sheet) return false;
+  const data = safeGetRangeValues(sheet, 2, 1, null, 13);
+  if (!data || !data.length) return false;
+  for (let i = 0; i < data.length; i++) {
+    if (!data[i] || !data[i][0]) continue;
+    if (normalizePhone(String(data[i][2])) === normPhone) {
+      const existingTg = String(data[i][3]).trim();
+      if (!existingTg || existingTg === "" || existingTg === "0") {
+        sheet.getRange(i + 2, 4).setValue(String(telegramId));
+        return true;
+      }
+      return false;
+    }
+  }
+  return false;
+}
+
+// ─────────────────────── ID GENERATORS ─────────────────────────
+
+// ✅ v9.2 AUDIT (п.5): счётчики ID в ScriptProperties вместо сканирования всего листа.
+// При первом вызове счётчик инициализируется максимумом из листа (fallback), что исключает коллизии.
+function _scanMaxId(sheet, col, regex) {
+  const data = safeGetRangeValues(sheet, 2, col, null, 1);
+  let max = 0;
+  if (data && data.length) data.forEach(r => { if (r && r[0]) { const m = String(r[0]).match(regex); if (m) max = Math.max(max, +m[1]); }});
+  return max;
+}
+
+function _nextSeq(counterKey, sheet, col, regex) {
+  let stored = scriptProperties.getProperty(counterKey);
+  let current;
+  if (stored === null || stored === undefined || stored === "") {
+    current = _scanMaxId(sheet, col, regex); // инициализация по листу
+  } else {
+    current = parseInt(stored, 10) || _scanMaxId(sheet, col, regex);
+  }
+  const next = current + 1;
+  scriptProperties.setProperty(counterKey, String(next));
+  return next;
+}
+
+function genClientId() {
+  const n = _nextSeq("LAST_NUM_CLIENT", getSheet(SHEET_CLIENTS), 1, /C-(\d+)/);
+  return "C-" + String(n).padStart(3, "0");
+}
+
+function genBookingId() {
+  const n = _nextSeq("LAST_NUM_BOOKING", getSheet(SHEET_BOOKINGS), 1, /B-(\d+)/);
+  return "B-" + String(n).padStart(4, "0");
+}
+
+function genSubId() {
+  const n = _nextSeq("LAST_NUM_SUB", getSheet(SHEET_SUBS), 2, /A-(\d+)/);
+  return "A-" + String(n).padStart(3, "0");
+}
+
+function genHistoryId() {
+  const n = _nextSeq("LAST_NUM_HISTORY", getSheet(SHEET_HISTORY), 1, /H-(\d+)/);
+  return "H-" + String(n).padStart(4, "0");
+}
+
+function genSubRequestId() {
+  const sheet = getSubRequestSheet();
+  if (!sheet) return "SR-0001";
+  const n = _nextSeq("LAST_NUM_SUBREQ", sheet, 1, /SR-(\d+)/);
+  return "SR-" + String(n).padStart(4, "0");
+}
+
+function getNextRow(sheetName) {
+  const sheet = getSheet(sheetName);
+  if (!sheet) return 2;
+  const data = safeGetRangeValues(sheet, 2, 1, null, 1);
+  if (data && data.length) {
+    for (let i = 0; i < data.length; i++) { if (!data[i] || !data[i][0]) return i + 2; }
+  }
+  return sheet.getLastRow() + 1;
+}
+
+// ─────────────────────── TELEGRAM API ──────────────────────────
+
+function sendMessage(chatId, text, keyboard) {
+  if (!BOT_TOKEN) { logError("sendMessage", new Error("Missing BOT_TOKEN"), chatId); return null; }
+  const url = "https://api.telegram.org/bot" + BOT_TOKEN + "/sendMessage";
+  const payload = { chat_id: chatId, text: text, parse_mode: "HTML" };
+  if (keyboard) payload.reply_markup = JSON.stringify(keyboard);
+  try {
+    return JSON.parse(UrlFetchApp.fetch(url, {
+      method: "post", contentType: "application/json",
+      payload: JSON.stringify(payload), muteHttpExceptions: true
+    }).getContentText());
+  } catch(e) { return null; }
+}
+
+// ═══ v10 NEW: уніфіковані сповіщення (викликати ЗАВЖДИ поза межами withScriptLock) ═══
+// Тихо повідомляє адміна; ніколи не кидає виняток, щоб не зламати основну операцію.
+function notifyAdmin(text) {
+  try { if (ADMIN_ID && text) sendMessage(ADMIN_ID, text); }
+  catch (e) { logError("notifyAdmin", e, "system"); }
+}
+// Тихо повідомляє клієнта в Telegram за clientId (якщо прив'язаний). Повертає true/false.
+function notifyClient(clientId, text) {
+  try {
+    if (!clientId || !text) return false;
+    const cl = findClientById(clientId);
+    const tgId = cl && cl.telegramId ? String(cl.telegramId).trim() : "";
+    if (!tgId || tgId === "0" || tgId === "undefined" || isNaN(Number(tgId))) return false;
+    sendMessage(Number(tgId), text);
+    return true;
+  } catch (e) { logError("notifyClient", e, clientId); return false; }
+}
+
+// ✅ v10: повідомлення з кодом авторизації.
+//   • код у тегу <code> → на мобільному Telegram це «натисни, щоб скопіювати»;
+//   • інлайн-кнопка copy_text (Bot API 7.11+) → явна кнопка «Скопіювати код».
+// Користувач копіює код і вставляє на сайті кнопкою «Вставити код».
+function sendCodeMessage(chatId, title, code, footer) {
+  const text = String(title) + "\n\n<code>" + String(code) + "</code>" + (footer ? "\n\n" + String(footer) : "");
+  const keyboard = createInlineKeyboard([[{ text: "📋 Скопіювати код", copy_text: { text: String(code) } }]]);
+  const res = sendMessage(chatId, text, keyboard);
+  // ✅ якщо версія Telegram/API не підтримує copy_text — гарантовано шлемо без кнопки,
+  //    щоб код авторизації ЗАВЖДИ дійшов (текст <code> усе одно tap-to-copy).
+  if (!res || res.ok === false) return sendMessage(chatId, text);
+  return res;
+}
+
+function answerCallback(callbackId, text) {
+  try {
+    if (!BOT_TOKEN) return;
+    UrlFetchApp.fetch("https://api.telegram.org/bot" + BOT_TOKEN + "/answerCallbackQuery", {
+      method: "post", contentType: "application/json",
+      payload: JSON.stringify({ callback_query_id: callbackId, text: text || "" }),
+      muteHttpExceptions: true
+    });
+  } catch(e) {}
+}
+
+function createInlineKeyboard(rows) { return { inline_keyboard: rows }; }
+function createReplyKeyboard(rows) { return { keyboard: rows, resize_keyboard: true, one_time_keyboard: false }; }
+
+// ✅ NEW: оновити inline-клавіатуру існуючого повідомлення (без надсилання нового)
+function editMessageReplyMarkup(chatId, messageId, keyboard) {
+  if (!BOT_TOKEN) return;
+  try {
+    UrlFetchApp.fetch("https://api.telegram.org/bot" + BOT_TOKEN + "/editMessageReplyMarkup", {
+      method: "post", contentType: "application/json",
+      payload: JSON.stringify({ chat_id: chatId, message_id: messageId, reply_markup: JSON.stringify(keyboard) }),
+      muteHttpExceptions: true
+    });
+  } catch (e) {}
+}
+
+// ✅ NEW: клавіатура блокування дат на найближчі 14 днів (🟢 відкрита / 🔒 заблокована)
+function _blockDatesKeyboardRows() {
+  const blocked = getBlockedDates();
+  const now = new Date();
+  const rows = [];
+  for (let i = 0; i < 14; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
+    const ds = Utilities.formatDate(d, TZ, "dd.MM.yyyy");
+    const isB = blocked.indexOf(ds) !== -1;
+    rows.push([{
+      text: (isB ? "🔒 " : "🟢 ") + DAY_NAMES_SHORT[d.getDay()] + " · " + ds,
+      callback_data: "blkdate_" + ds
+    }]);
+  }
+  return rows;
+}
+function showBlockDatesMenu(chatId) {
+  sendMessage(chatId,
+    "🔒 <b>БЛОКУВАННЯ ДАТ</b>\n\n" +
+    "🟢 — дата відкрита для онлайн-запису\n🔒 — дата закрита (на сайті перекреслена й неактивна)\n\n" +
+    "Натисніть на дату, щоб перемкнути. Закрийте дату, поки переносите записи (телефон/Instagram) у CRM — і відкрийте, коли все заповните.",
+    createInlineKeyboard(_blockDatesKeyboardRows())
+  );
+}
+
+// ─────────────────────── CLIENT QUERIES ────────────────────────
+
+function findClientByTelegram(telegramId) {
+  const data = safeGetRangeValues(getSheet(SHEET_CLIENTS), 2, 1, null, 13);
+  if (!data || !data.length) return null;
+  for (let i = 0; i < data.length; i++) {
+    if (!data[i] || !data[i][0]) continue;
+    if (String(data[i][3]).trim() === String(telegramId).trim()) {
+      const liveBalance = getClientLiveBalance(String(data[i][0]));
+      return {
+        clientId: data[i][0], name: data[i][1], phone: data[i][2],
+        telegramId: String(data[i][3] || '').trim(),
+        status: String(data[i][4] || CLIENT_STATUS_ACTIVE),
+        registered: parseDate(data[i][5]), balance: liveBalance,
+        visits: Number(data[i][7]) || 0, totalPurchases: Number(data[i][8]) || 0,
+        averageCheck: Number(data[i][9]) || 0, lastVisit: parseDate(data[i][10]),
+        source: String(data[i][11] || ""), adminComment: String(data[i][12] || "")
+      };
+    }
+  }
+  return null;
+}
+
+function findClientById(clientId) {
+  const data = safeGetRangeValues(getSheet(SHEET_CLIENTS), 2, 1, null, 13);
+  if (!data || !data.length) return null;
+  for (let i = 0; i < data.length; i++) {
+    if (!data[i] || !data[i][0]) continue;
+    if (String(data[i][0]).trim() === String(clientId).trim()) {
+      const liveBalance = getClientLiveBalance(String(data[i][0]));
+      return {
+        clientId: data[i][0], name: data[i][1], phone: data[i][2],
+        telegramId: String(data[i][3] || '').trim(),
+        status: String(data[i][4] || CLIENT_STATUS_ACTIVE),
+        registered: parseDate(data[i][5]), balance: liveBalance,
+        visits: Number(data[i][7]) || 0, totalPurchases: Number(data[i][8]) || 0,
+        averageCheck: Number(data[i][9]) || 0, lastVisit: parseDate(data[i][10]),
+        source: String(data[i][11] || ""), adminComment: String(data[i][12] || "")
+      };
+    }
+  }
+  return null;
+}
+
+function findClientByPhone(phone) {
+  const normPhone = normalizePhone(phone);
+  const data = safeGetRangeValues(getSheet(SHEET_CLIENTS), 2, 1, null, 13);
+  if (!data || !data.length) return null;
+  for (let i = 0; i < data.length; i++) {
+    if (!data[i] || !data[i][0]) continue;
+    if (normalizePhone(String(data[i][2])) === normPhone) {
+      const liveBalance = getClientLiveBalance(String(data[i][0]));
+      return {
+        row: i + 2, clientId: data[i][0], name: data[i][1], phone: data[i][2],
+        telegramId: String(data[i][3]).trim(), status: String(data[i][4] || CLIENT_STATUS_ACTIVE),
+        balance: liveBalance
+      };
+    }
+  }
+  return null;
+}
+
+function getClientLiveBalance(clientId) {
+  if (!clientId) return 0;
+  const subsData = safeGetRangeValues(getSheet(SHEET_SUBS), 2, 1, null, 16);
+  if (!subsData || !subsData.length) return 0;
+  let total = 0;
+  subsData.forEach(r => {
+    if (!r || !r[0]) return;
+    if (String(r[0]).trim() !== String(clientId).trim()) return;
+    if (isActiveStatus(String(r[10]).trim())) {
+      total += parseFloat(r[9]) || 0;
+    }
+  });
+  return total;
+}
+
+// ✅ v9.2 AUDIT (п.4): один проход по листу абонементов — Map clientId->баланс (сумма активных).
+// Использовать вместо getClientLiveBalance в циклах по клиентам.
+function buildClientBalanceMap() {
+  const map = {};
+  const subsData = safeGetRangeValues(getSheet(SHEET_SUBS), 2, 1, null, 16);
+  if (subsData && subsData.length) {
+    subsData.forEach(r => {
+      if (!r || !r[0]) return;
+      if (!isActiveStatus(String(r[10]).trim())) return;
+      const cid = String(r[0]).trim();
+      map[cid] = (map[cid] || 0) + (parseFloat(r[9]) || 0);
+    });
+  }
+  return map;
+}
+
+// ─────────────────────── DATA GETTERS ──────────────────────────
+
+function getTypes() {
+  const data = safeGetRangeValues(getSheet(SHEET_TYPES), 2, 1, null, 6);
+  if (!data || !data.length) return [];
+  return data.filter(r => r && r[0]).map(r => ({
+    id: r[0], name: r[1], months: r[2], price: r[3], bonus: r[4], amount: r[5]
+  }));
+}
+
+function getClientSubs(clientId) {
+  const data = safeGetRangeValues(getSheet(SHEET_SUBS), 2, 1, null, 16);
+  if (!data || !data.length) return [];
+  return data
+    .map((r, i) => ({ ...r, _row: i + 2 }))
+    .filter(r => r && String(r[0]).trim() === String(clientId).trim() && r[1])
+    .map(r => ({
+      row: r._row, subId: r[1], typeName: r[4], amount: r[5],
+      startDate: parseDate(r[6]), endDate: parseDate(r[7]),
+      spent: parseFloat(r[8]) || 0, balance: parseFloat(r[9]) || 0,
+      status: r[10], soldBy: r[11] || "", paymentMethod: r[12] || "",
+      discount: r[13] || "", promoCode: r[14] || "", activationDate: parseDate(r[15])
+    }));
+}
+
+function getClientHistory(clientId) {
+  const data = safeGetRangeValues(getSheet(SHEET_HISTORY), 2, 1, null, 12);
+  if (!data || !data.length) return [];
+  return data.filter(r => r && String(r[2]).trim() === String(clientId).trim())
+    .map(r => ({
+      date: parseDate(r[1]), service: r[5], cost: r[6], note: r[7],
+      actor: r[8] || "", balanceChange: r[9] || "", before: r[10] || "", after: r[11] || ""
+    }));
+}
+
+function getClientBookings(clientId) {
+  const sheet = getSheet(SHEET_BOOKINGS);
+  if (!sheet) return [];
+  const data = safeGetRangeValues(sheet, 2, 1, null, 13);
+  if (!data || !data.length) return [];
+  return data.filter(r => r && r[0] && String(r[5]).trim() === String(clientId).trim()).map(row => ({
+    id: String(row[0]),
+    date: row[1] instanceof Date ? fmtDate(row[1]) : String(row[1]).trim(),
+    time: row[3] instanceof Date ? Utilities.formatDate(row[3], TZ, "HH:mm") : String(row[3]).trim(),
+    box: String(row[4]), service: String(row[8]), status: String(row[9]),
+    note: String(row[10] || ""), source: String(row[11] || ""),
+    plate: String(row[12] || "")
+  }));
+}
+
+function getPriceByType(carType) {
+  const data = safeGetRangeValues(getSheet(SHEET_PRICE), 2, 1, null, 5);
+  if (!data || !data.length) return {};
+  const services = {};
+  data.forEach(r => {
+    if (r && r[0] === carType && !services[r[2]])
+      services[r[2]] = { name: r[2], category: r[1], duration: r[3], price: r[4] };
+  });
+  return services;
+}
+
+function getPublicCatalog() {
+  const types = getTypes();
+  const priceRows = safeGetRangeValues(getSheet(SHEET_PRICE), 2, 1, null, 5);
+  const priceList = {};
+  const carTypes = [];
+  const categories = [];
+  const catMap = {};
+  (priceRows || []).forEach(r => {
+    if (!r || !r[0] || !r[2]) return;
+    const carType  = String(r[0]).trim();
+    const category = String(r[1] || "Інше").trim();
+    const svcName  = String(r[2]).trim();
+    if (!priceList[carType]) { priceList[carType] = []; carTypes.push(carType); }
+    priceList[carType].push({ name: svcName, category, duration: r[3], price: r[4] });
+    if (categories.indexOf(category) === -1) categories.push(category);
+    if (!catMap[category]) catMap[category] = [];
+    if (catMap[category].indexOf(svcName) === -1) catMap[category].push(svcName);
+  });
+  return { success: true, types, priceList, carTypes, categories, catMap };
+}
+
+const CARTYPE_BOT_EXCLUDE = ["Загальні", "Мотоцикл"];
+function getCarTypesList() {
+  const data = safeGetRangeValues(getSheet(SHEET_PRICE), 2, 1, null, 1);
+  const seen = [];
+  (data || []).forEach(r => {
+    if (!r || !r[0]) return;
+    const ct = String(r[0]).trim();
+    if (CARTYPE_BOT_EXCLUDE.indexOf(ct) === -1 && seen.indexOf(ct) === -1) seen.push(ct);
+  });
+  return seen;
+}
+function botCarTypeEmoji(ct) {
+  if (ct === "Sedan") return "🚗";
+  if (ct === "Бус" || ct === "Мікроавтобус") return "🚐";
+  return "🚙"; // Кросовер, Джип
+}
+// ─────────────────────── SCHEDULE ──────────────────────────────
+
+function getScheduleForDay(dayName) {
+  const sheet = getSheet(SHEET_SCHEDULE);
+  if (!sheet) return null;
+  const data = safeGetRangeValues(sheet, 2, 1, null, 8);
+  if (!data || !data.length) return null;
+  for (let i = 0; i < data.length; i++) {
+    if (data[i] && String(data[i][0]).trim() === dayName) {
+      return { day: data[i][0], box1_open: data[i][1], box1_close: data[i][2],
+               box2_open: data[i][3], box2_close: data[i][4],
+               box3_open: data[i][5], box3_close: data[i][6], status: data[i][7] };
+    }
+  }
+  return null;
+}
+
+function parseTimeString(timeStr) {
+  if (!timeStr || timeStr === "") return null;
+  try {
+    if (timeStr instanceof Date) {
+      const s = Utilities.formatDate(timeStr, TZ, "HH:mm");
+      const h = parseInt(s.split(":")[0]);
+      return (isNaN(h) || h < 0 || h > 23) ? null : h;
+    }
+    const str = String(timeStr).trim();
+    if (!str || str === "0") return null;
+    const h = parseInt(str.split(str.includes(".") ? "." : ":")[0]);
+    return (isNaN(h) || h < 0 || h > 23) ? null : h;
+  } catch(e) { return null; }
+}
+
+function normalizeTime(timeStr) {
+  if (!timeStr) return "";
+  if (timeStr instanceof Date) return Utilities.formatDate(timeStr, TZ, "HH:mm");
+  const str = String(timeStr).trim();
+  if (!str) return "";
+  // v9.3 FIX: "30.12.1899 10:00" (GAS Date→string) → "10:00"
+  const dtMatch = str.match(/\d{1,2}\.\d{1,2}\.\d{4}\s+(\d{1,2}:\d{2})/);
+  if (dtMatch) return dtMatch[1];
+  if (str.includes(":")) return str.substring(0, 5);
+  if (str.includes(".")) return str.replace(".", ":").substring(0, 5);
+  return str.padStart(2, "0") + ":00";
+}
+
+
+function getDateSchedule(dateStr) {
+  const [day, month, year] = dateStr.split(".");
+  const d = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  return getScheduleForDay(DAY_NAMES[d.getDay()]);
+}
+
+function getTimesForDate(dateStr) {
+  const schedule = getDateSchedule(dateStr);
+  if (!schedule) return [];
+  const times = new Set();
+  const addTimes = (open, close) => {
+    const oh = parseTimeString(open), ch = parseTimeString(close);
+    if (oh === null || ch === null) return;
+    for (let h = oh; h < ch; h++) times.add(String(h).padStart(2, "0") + ":00");
+  };
+  addTimes(schedule.box1_open, schedule.box1_close);
+  addTimes(schedule.box2_open, schedule.box2_close);
+  addTimes(schedule.box3_open, schedule.box3_close);
+  return Array.from(times).sort();
+}
+
+function getBoxesForTime(dateStr, timeStr) {
+  const schedule = getDateSchedule(dateStr);
+  if (!schedule) return [];
+  const timeHour = parseTimeString(timeStr);
+  if (timeHour === null) return [];
+  const boxes = [];
+  const checkBox = (open, close, name) => {
+    const oh = parseTimeString(open), ch = parseTimeString(close);
+    if (oh !== null && ch !== null && timeHour >= oh && timeHour < ch) boxes.push(name);
+  };
+  checkBox(schedule.box1_open, schedule.box1_close, "Box 1");
+  checkBox(schedule.box2_open, schedule.box2_close, "Box 2");
+  checkBox(schedule.box3_open, schedule.box3_close, "Box 3");
+  return boxes;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ✅ v9 PERFORMANCE: In-Memory перевірка боксів
+// ═══════════════════════════════════════════════════════════════
+
+// ✅ v9.1 PERF: записи на дату кешуються у ScriptCache на 10 хвилин.
+// Скидається через invalidateBookingCache(dateStr).
+function _availCacheKey(dateStr) {
+  return "avail_" + String(dateStr || "").replace(/\D/g, ""); // avail_14062026
+}
+
+function _loadBookingsForDate(dateStr) {
+  const cache = CacheService.getScriptCache();
+  const key = _availCacheKey(dateStr);
+  try {
+    const cached = cache.get(key);
+    if (cached) return JSON.parse(cached);
+  } catch (e) {}
+
+  const sheet = getSheet(SHEET_BOOKINGS);
+  if (!sheet) return [];
+  const allData = safeGetRangeValues(sheet, 2, 1, null, 12);
+  if (!allData || !allData.length) return [];
+
+  const filtered = allData.filter(r => {
+    if (!r || !r[0]) return false;
+    const bDate = r[1] instanceof Date
+      ? Utilities.formatDate(r[1], TZ, "dd.MM.yyyy")
+      : String(r[1]).trim();
+    return bDate === dateStr;
+  }).map(r => r.map((c, colIdx) => {
+    if (!(c instanceof Date)) return c;
+    // v9.3 FIX: колонка 3 (Час) → тільки HH:mm, інші → dd.MM.yyyy
+    if (colIdx === 3) return Utilities.formatDate(c, TZ, "HH:mm");
+    return Utilities.formatDate(c, TZ, "dd.MM.yyyy");
+  }));
+
+  try {
+    const payload = JSON.stringify(filtered);
+    if (payload.length < 95000) cache.put(key, payload, 600);
+  } catch (e) {}
+  return filtered;
+}
+
+function _isBoxBookedInMemory(bookingsForDate, timeStr, boxName) {
+  const normInputTime = normalizeTime(timeStr);
+  for (let i = 0; i < bookingsForDate.length; i++) {
+    const r = bookingsForDate[i];
+    let bTime = r[3] instanceof Date ? Utilities.formatDate(r[3], TZ, "HH:mm") : String(r[3]).trim();
+    const bBox = String(r[4]).trim();
+    const bStatus = String(r[9]).trim();
+    if (bBox === boxName &&
+        (bStatus.includes("Підтверджено") || bStatus.includes("Очікує") || bStatus.includes("роботі"))) {
+      if (normalizeTime(bTime) === normInputTime) return true;
+    }
+  }
+  return false;
+}
+
+function isBoxBooked(dateStr, timeStr, boxName) {
+  const bookingsForDate = _loadBookingsForDate(dateStr);
+  return _isBoxBookedInMemory(bookingsForDate, timeStr, boxName);
+}
+
+// ✅ fix(подвійна запис): свіжа перевірка зайнятості бокса ПРЯМО з листа (без кешу).
+// Бокс вважається зайнятим, якщо на цю дату/час є будь-який запис НЕ в статусі "Скасовано".
+// Викликати ТІЛЬКИ під локом (в saveBooking) — це остаточна гарантія від гонки.
+function _isSlotTakenFresh(dateStr, timeStr, boxName, excludeBookingId) {
+  const sheet = getSheet(SHEET_BOOKINGS);
+  if (!sheet) return false;
+  const data = safeGetRangeValues(sheet, 2, 1, null, 12);
+  if (!data || !data.length) return false;
+  const normInputTime = normalizeTime(timeStr);
+  const normBox = String(boxName).trim();
+  const skipId = excludeBookingId ? String(excludeBookingId).trim() : "";
+  for (let i = 0; i < data.length; i++) {
+    const r = data[i];
+    if (!r || !r[0]) continue;
+    if (skipId && String(r[0]).trim() === skipId) continue; // ✅ ігноруємо сам запис, який переносимо
+    const bDate = r[1] instanceof Date ? Utilities.formatDate(r[1], TZ, "dd.MM.yyyy") : String(r[1]).trim();
+    if (bDate !== String(dateStr).trim()) continue;
+    const bTime = r[3] instanceof Date ? Utilities.formatDate(r[3], TZ, "HH:mm") : String(r[3]).trim();
+    if (normalizeTime(bTime) !== normInputTime) continue;
+    if (String(r[4]).trim() !== normBox) continue;
+    const bStatus = String(r[9] || "").trim();
+    if (bStatus.includes("Скасовано")) continue; // скасовані не займають бокс
+    return true; // є активний запис на цей бокс/час
+  }
+  return false;
+}
+
+function getAvailableBoxes(dateStr, timeStr) {
+  const bookingsForDate = _loadBookingsForDate(dateStr);
+  return getBoxesForTime(dateStr, timeStr).filter(b => !_isBoxBookedInMemory(bookingsForDate, timeStr, b));
+}
+
+function isTimeFullyBooked(dateStr, timeStr) {
+  const all = getBoxesForTime(dateStr, timeStr);
+  if (!all.length) return true;
+  const bookingsForDate = _loadBookingsForDate(dateStr);
+  return all.every(b => _isBoxBookedInMemory(bookingsForDate, timeStr, b));
+}
+
+function getBoxReleaseText(dateStr, boxName) {
+  const bookingsForDate = _loadBookingsForDate(dateStr);
+  const now = new Date();
+  const nowMinutes = Number(Utilities.formatDate(now, TZ, "H")) * 60 + Number(Utilities.formatDate(now, TZ, "m"));
+  let best = null;
+  bookingsForDate.forEach(r => {
+    if (!r || !r[0]) return;
+    const bBox = String(r[4]).trim();
+    const status = String(r[9]).trim();
+    if (bBox !== boxName || !(status.includes("роботі") || status.includes("Підтверджено") || status.includes("Очікує"))) return;
+    const time = r[3] instanceof Date ? Utilities.formatDate(r[3], TZ, "HH:mm") : normalizeTime(r[3]);
+    const h = parseTimeString(time);
+    if (h === null) return;
+    const releaseMinutes = (h + 1) * 60;
+    if (releaseMinutes >= nowMinutes && (best === null || releaseMinutes < best)) best = releaseMinutes;
+  });
+  if (best === null) return "";
+  const diff = best - nowMinutes;
+  if (diff <= 0) return "звільняється зараз";
+  return "через " + Math.floor(diff / 60) + " год " + String(diff % 60).padStart(2, "0") + " хв";
+}
+
+function getClientRow(clientId) {
+  const data = safeGetRangeValues(getSheet(SHEET_CLIENTS), 2, 1, null, 13);
+  if (!data || !data.length) return null;
+  for (let i = 0; i < data.length; i++) {
+    if (!data[i] || !data[i][0]) continue;
+    if (String(data[i][0]).trim() === String(clientId).trim()) {
+      return { row: i + 2, values: data[i] };
+    }
+  }
+  return null;
+}
+
+function clientExists(clientId) { return !!getClientRow(clientId); }
+function typeExists(typeId) { return getTypes().some(t => String(t.id).trim() === String(typeId).trim()); }
+
+function subscriptionExists(subId, clientId) {
+  const data = safeGetRangeValues(getSheet(SHEET_SUBS), 2, 1, null, 16);
+  if (!data || !data.length) return false;
+  return data.some(r => r && String(r[1]).trim() === String(subId).trim() &&
+    (!clientId || String(r[0]).trim() === String(clientId).trim()));
+}
+
+function assertClientAllowed(clientId) {
+  const found = getClientRow(clientId);
+  if (!found) throw new Error("ClientID not found: " + clientId);
+  const status = found.values[4] || CLIENT_STATUS_ACTIVE;
+  if (isClientBlockedStatus(status)) throw new Error("Client is blocked/archived: " + clientId);
+  return found;
+}
+
+function assertForeignKeys(keys) {
+  if (keys.clientId) assertClientAllowed(keys.clientId);
+  if (keys.typeId && !typeExists(keys.typeId)) throw new Error("TypeID not found: " + keys.typeId);
+  if (keys.subId && !subscriptionExists(keys.subId, keys.clientId)) throw new Error("SubscriptionID not found: " + keys.subId);
+}
+
+function updateClientMetrics(clientId) {
+  const client = getClientRow(clientId);
+  if (!client) return false;
+  const histData = safeGetRangeValues(getSheet(SHEET_HISTORY), 2, 1, null, 12);
+  const subData = safeGetRangeValues(getSheet(SHEET_SUBS), 2, 1, null, 16);
+  let visits = 0, visitTotal = 0, lastVisit = null, totalPurchases = 0;
+  if (histData && histData.length) {
+    histData.forEach(r => {
+      if (!r || !r[0] || String(r[2]).trim() !== String(clientId).trim()) return;
+      visits++;
+      visitTotal += parseFloat(r[6]) || 0;
+      const d = asDate(r[1]);
+      if (d && (!lastVisit || d > lastVisit)) lastVisit = d;
+    });
+  }
+  if (subData && subData.length) {
+    subData.forEach(r => {
+      if (!r || !r[0] || String(r[0]).trim() !== String(clientId).trim()) return;
+      totalPurchases += parseFloat(r[5]) || 0;
+    });
+  }
+  const averageCheck = visits ? visitTotal / visits : 0;
+  const rowValues = client.values.slice(0, 13);
+  rowValues[4] = rowValues[4] || CLIENT_STATUS_ACTIVE;
+  rowValues[6] = getClientLiveBalance(clientId);
+  rowValues[7] = visits;
+  rowValues[8] = totalPurchases;
+  rowValues[9] = fmt(averageCheck);
+  rowValues[10] = lastVisit ? fmtDate(lastVisit) : "";
+  getSheet(SHEET_CLIENTS).getRange(client.row, 1, 1, rowValues.length).setValues([rowValues]);
+  return true;
+}
+
+// ✅ v9.2 AUDIT (п.7): батч-пересчёт метрик — листы читаются один раз, запись одним setValues().
+function syncClientMetrics() {
+  const clientSheet = getSheet(SHEET_CLIENTS);
+  if (!clientSheet) return 0;
+  const clients = safeGetRangeValues(clientSheet, 2, 1, null, 13);
+  if (!clients || !clients.length) return 0;
+  const histData = safeGetRangeValues(getSheet(SHEET_HISTORY), 2, 1, null, 12) || [];
+  const subData  = safeGetRangeValues(getSheet(SHEET_SUBS), 2, 1, null, 16) || [];
+
+  // агрегация по Клиенту за один проход по каждому листу
+  const visitsMap = {}, visitTotalMap = {}, lastVisitMap = {}, purchasesMap = {}, balanceMap = {};
+  histData.forEach(r => {
+    if (!r || !r[0]) return;
+    const cid = String(r[2]).trim();
+    if (!cid) return;
+    visitsMap[cid] = (visitsMap[cid] || 0) + 1;
+    visitTotalMap[cid] = (visitTotalMap[cid] || 0) + (parseFloat(r[6]) || 0);
+    const d = asDate(r[1]);
+    if (d && (!lastVisitMap[cid] || d > lastVisitMap[cid])) lastVisitMap[cid] = d;
+  });
+  subData.forEach(r => {
+    if (!r || !r[0]) return;
+    const cid = String(r[0]).trim();
+    purchasesMap[cid] = (purchasesMap[cid] || 0) + (parseFloat(r[5]) || 0);
+    if (isActiveStatus(String(r[10]).trim())) balanceMap[cid] = (balanceMap[cid] || 0) + (parseFloat(r[9]) || 0);
+  });
+
+  let count = 0;
+  const out = clients.map(r => {
+    if (!r || !r[0]) return r.slice(0, 13);
+    const cid = String(r[0]).trim();
+    const visits = visitsMap[cid] || 0;
+    const visitTotal = visitTotalMap[cid] || 0;
+    const averageCheck = visits ? visitTotal / visits : 0;
+    const rowValues = r.slice(0, 13);
+    rowValues[4] = rowValues[4] || CLIENT_STATUS_ACTIVE;
+    rowValues[6] = balanceMap[cid] || 0;
+    rowValues[7] = visits;
+    rowValues[8] = purchasesMap[cid] || 0;
+    rowValues[9] = fmt(averageCheck);
+    rowValues[10] = lastVisitMap[cid] ? fmtDate(lastVisitMap[cid]) : "";
+    count++;
+    return rowValues;
+  });
+  if (out.length) clientSheet.getRange(2, 1, out.length, 13).setValues(out);
+  return count;
+}
+
+function expireSubscriptions() {
+  return withScriptLock("expireSubscriptions", function() {
+    const sheet = getSheet(SHEET_SUBS);
+    const data = safeGetRangeValues(sheet, 2, 1, null, 16);
+    if (!data || !data.length) return 0;
+    let count = 0;
+    data.forEach((r, i) => {
+      if (!r || !r[0] || !r[1]) return;
+      const status = String(r[10] || "");
+      if (!isActiveStatus(status) || !isPastDate(r[7])) return;
+      sheet.getRange(i + 2, 11).setValue("⛔ Просрочен");
+      updateClientBalance(String(r[0]));
+      updateClientMetrics(String(r[0]));
+      logAction("system", "Автозакрытие абонемента", "Subscription", r[1], status, "⛔ Просрочен", parseDate(r[7]));
+      count++;
+    });
+    return count;
+  }, "system");
+}
+
+// ✅ v9.2 AUDIT (п.6): устойчивый бэкап с замером длительности.
+// makeCopy на большой таблице может быть медленным; при приближении к таймауту 6 мин пишем предупреждение.
+function createDailyBackup() {
+  const startedAt = Date.now();
+  try {
+    const backupName = "Backup_" + Utilities.formatDate(new Date(), TZ, "yyyy_MM_dd");
+    const file = DriveApp.getFileById(requireConfig("SPREADSHEET_ID"));
+    const parents = file.getParents();
+    const folder = parents.hasNext() ? parents.next() : DriveApp.getRootFolder();
+    const existing = folder.getFilesByName(backupName);
+    if (existing.hasNext()) return { created: false, name: backupName };
+    file.makeCopy(backupName, folder);
+    const durMs = Date.now() - startedAt;
+    if (durMs > 180000) { // >3 мин — близко к лимиту, предупреждаем
+      logError("createDailyBackup", new Error("Backup slow: " + Math.round(durMs/1000) + "s (близко к таймауту 6 мин)"), "system");
+    }
+    logAction("system", "Backup", "Spreadsheet", backupName, "", "created", Math.round(durMs/1000) + "s");
+    return { created: true, name: backupName, durationMs: durMs };
+  } catch (e) {
+    return { created: false, error: e.message }; // graceful-fallback: не валит runDailyMaintenance
+  }
+}
+
+function mergeDuplicateClients() {
+  return withScriptLock("mergeDuplicateClients", function() {
+    const clientSheet = getSheet(SHEET_CLIENTS);
+    const data = safeGetRangeValues(clientSheet, 2, 1, null, 13);
+    if (!data || !data.length) return 0;
+    const seen = {};
+    let merged = 0;
+    data.forEach((r, i) => {
+      if (!r || !r[0]) return;
+      const keys = [];
+      const phone = normalizePhone(String(r[2] || ""));
+      const tg = String(r[3] || "").trim();
+      if (phone) keys.push("p:" + phone);
+      if (tg) keys.push("t:" + tg);
+      let primary = null;
+      keys.forEach(k => { if (!primary && seen[k]) primary = seen[k]; });
+      if (!primary) { keys.forEach(k => seen[k] = String(r[0])); return; }
+      const duplicateId = String(r[0]);
+      if (duplicateId === primary) return;
+      replaceClientId(duplicateId, primary);
+      const rowValues = r.slice(0, 13);
+      rowValues[4] = CLIENT_STATUS_ARCHIVE;
+      rowValues[12] = "Merged into " + primary + " " + Utilities.formatDate(new Date(), TZ, "dd.MM.yyyy HH:mm");
+      clientSheet.getRange(i + 2, 1, 1, rowValues.length).setValues([rowValues]);
+      updateClientMetrics(primary);
+      logAction("system", "Объединение дубля", "Client", duplicateId, duplicateId, primary, phone || tg);
+      merged++;
+    });
+    return merged;
+  }, "system");
+}
+
+function replaceClientId(oldId, newId) {
+  const updates = [
+    { sheet: getSheet(SHEET_SUBS), col: 1 },
+    { sheet: getSheet(SHEET_BOOKINGS), col: 6 },
+    { sheet: getSheet(SHEET_HISTORY), col: 3 },
+    { sheet: getSubRequestSheet(), col: 2 }
+  ];
+  updates.forEach(cfg => {
+    if (!cfg.sheet) return;
+    const data = safeGetRangeValues(cfg.sheet, 2, cfg.col, null, 1);
+    if (!data || !data.length) return;
+    data.forEach((r, i) => {
+      if (r && String(r[0]).trim() === String(oldId).trim()) {
+        cfg.sheet.getRange(i + 2, cfg.col).setValue(newId);
+      }
+    });
+  });
+}
+
+function calculateAnalytics() {
+  const clients = safeGetRangeValues(getSheet(SHEET_CLIENTS), 2, 1, null, 13).filter(r => r && r[0]);
+  const subs = safeGetRangeValues(getSheet(SHEET_SUBS), 2, 1, null, 16).filter(r => r && r[0]);
+  const history = safeGetRangeValues(getSheet(SHEET_HISTORY), 2, 1, null, 12).filter(r => r && r[0]);
+  const bookings = safeGetRangeValues(getSheet(SHEET_BOOKINGS), 2, 1, null, 12).filter(r => r && r[0]);
+  const todayStr = Utilities.formatDate(new Date(), TZ, "dd.MM.yyyy");
+  const now = new Date();
+  const weekStart = new Date(now);
+  weekStart.setDate(now.getDate() - 7);
+  const monthKey = Utilities.formatDate(now, TZ, "MM.yyyy");
+
+  const saleRows = subs.map(r => ({ amount: parseFloat(r[5]) || 0, date: asDate(r[6]), service: String(r[4] || ""), clientId: String(r[0]) }));
+  const salesToday = saleRows.filter(x => x.date && fmtDate(x.date) === todayStr).reduce((s, x) => s + x.amount, 0);
+  const salesWeek = saleRows.filter(x => x.date && x.date >= weekStart).reduce((s, x) => s + x.amount, 0);
+  const salesMonth = saleRows.filter(x => x.date && Utilities.formatDate(x.date, TZ, "MM.yyyy") === monthKey).reduce((s, x) => s + x.amount, 0);
+  const totalRevenue = saleRows.reduce((s, x) => s + x.amount, 0) + history.reduce((s, r) => s + (parseFloat(r[6]) || 0), 0);
+  const orderCount = saleRows.length + history.length;
+  const serviceRevenue = history.reduce((s, r) => s + (parseFloat(r[6]) || 0), 0);
+  const subRevenue = saleRows.reduce((s, x) => s + x.amount, 0);
+  const serviceCounts = {};
+  history.forEach(r => { const key = String(r[5] || "—"); serviceCounts[key] = (serviceCounts[key] || 0) + 1; });
+  bookings.forEach(r => { const key = String(r[8] || "—").split("|")[0].trim(); serviceCounts[key] = (serviceCounts[key] || 0) + 1; });
+  const popularService = Object.keys(serviceCounts).sort((a, b) => serviceCounts[b] - serviceCounts[a])[0] || "—";
+
+  return [
+    ["Клієнти", clients.length],
+    ["Активні абонементи", subs.filter(r => isActiveStatus(r[10])).length],
+    ["Продажі сьогодні", salesToday],
+    ["Продажі тижня", salesWeek],
+    ["Продажі місяця", salesMonth],
+    ["Середній чек", orderCount ? fmt(totalRevenue / orderCount) : 0],
+    ["Дохід (послуги)", serviceRevenue],
+    ["Дохід (абонементи)", subRevenue],
+    ["Популярна послуга", popularService],
+    ["Загальний дохід", fmt(totalRevenue)]
+  ];
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ✅ v9 NEW: ДАНІ ДЛЯ ГРАФІКІВ ДАШБОРДУ "📊 Аналітика"
+// Одна функція = один прохід по таблицях → один HTTP-запит на фронтенді
+// ═══════════════════════════════════════════════════════════════
+function getAnalyticsChartData() {
+  const clients  = safeGetRangeValues(getSheet(SHEET_CLIENTS),  2, 1, null, 13).filter(r => r && r[0]);
+  const subs     = safeGetRangeValues(getSheet(SHEET_SUBS),     2, 1, null, 16).filter(r => r && r[0]);
+  const history  = safeGetRangeValues(getSheet(SHEET_HISTORY),  2, 1, null, 12).filter(r => r && r[0]);
+  const bookings = safeGetRangeValues(getSheet(SHEET_BOOKINGS), 2, 1, null, 12).filter(r => r && r[0]);
+
+  // 1) Динаміка доходу за 14 днів: послуги (Історія) + абонементи (продажі)
+  const dayMap = {};
+  const dayKeys = [];
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const key   = Utilities.formatDate(d, TZ, "dd.MM.yyyy");
+    const label = Utilities.formatDate(d, TZ, "dd.MM");
+    dayMap[key] = { label, services: 0, subs: 0 };
+    dayKeys.push(key);
+  }
+  history.forEach(r => {
+    const d = asDate(r[1]);
+    if (!d) return;
+    const key = fmtDate(d);
+    if (dayMap[key]) dayMap[key].services += parseFloat(r[6]) || 0;
+  });
+  subs.forEach(r => {
+    const d = asDate(r[6]);
+    if (!d) return;
+    const key = fmtDate(d);
+    if (dayMap[key]) dayMap[key].subs += parseFloat(r[5]) || 0;
+  });
+  const revenueTrend = dayKeys.map(k => ({
+    label: dayMap[k].label,
+    services: fmt(dayMap[k].services),
+    subs: fmt(dayMap[k].subs),
+    total: fmt(dayMap[k].services + dayMap[k].subs)
+  }));
+
+  // 2) Топ послуг за кількістю (Історія + активні/виконані записи)
+  const serviceCounts = {};
+  history.forEach(r => {
+    const key = String(r[5] || "—").split("|")[0].trim();
+    if (key) serviceCounts[key] = (serviceCounts[key] || 0) + 1;
+  });
+  bookings.forEach(r => {
+    const status = String(r[9] || "");
+    if (!(status.includes("Виконано") || status.includes("Готово") || status.includes("Підтверджено") || status.includes("роботі"))) return;
+    const key = String(r[8] || "—").split("|")[0].trim();
+    if (key) serviceCounts[key] = (serviceCounts[key] || 0) + 1;
+  });
+  const topServices = Object.entries(serviceCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6)
+    .map(([name, count]) => ({ name, count }));
+
+  // 3) Статуси записів за останні 30 днів (для донат-діаграми)
+  const monthAgo = new Date();
+  monthAgo.setDate(monthAgo.getDate() - 30);
+  const statusCounts = {};
+  bookings.forEach(r => {
+    const d = asDate(r[1]);
+    if (d && d < monthAgo) return;
+    let status = String(r[9] || "—").replace(/^[^\wА-Яа-яІіЇїЄєҐґ]+/u, "").trim() || "—";
+    statusCounts[status] = (statusCounts[status] || 0) + 1;
+  });
+  const bookingStatuses = Object.entries(statusCounts).map(([name, count]) => ({ name, count }));
+
+  // 4) Активні абонементи за типом
+  const typeCounts = {};
+  subs.forEach(r => {
+    if (!isActiveStatus(r[10])) return;
+    const t = String(r[4] || "—");
+    typeCounts[t] = (typeCounts[t] || 0) + 1;
+  });
+  const subsByType = Object.entries(typeCounts).map(([name, count]) => ({ name, count }));
+
+  // 5) Нові клієнти за 14 днів
+  const clientDayMap = {};
+  dayKeys.forEach(k => clientDayMap[k] = 0);
+  clients.forEach(r => {
+    const d = asDate(r[5]);
+    if (!d) return;
+    const key = fmtDate(d);
+    if (clientDayMap[key] !== undefined) clientDayMap[key]++;
+  });
+  const newClientsTrend = dayKeys.map(k => ({ label: dayMap[k].label, count: clientDayMap[k] }));
+
+  // 6) Завантаженість боксів (всі активні/виконані записи)
+  const boxCounts = { "Box 1": 0, "Box 2": 0, "Box 3": 0 };
+  bookings.forEach(r => {
+    const status = String(r[9] || "");
+    if (status.includes("Скасовано")) return;
+    const box = String(r[4] || "").trim();
+    if (boxCounts[box] !== undefined) boxCounts[box]++;
+  });
+  const boxLoad = Object.entries(boxCounts).map(([name, count]) => ({ name, count }));
+
+  return { revenueTrend, topServices, bookingStatuses, subsByType, newClientsTrend, boxLoad };
+}
+
+function updateAnalyticsSheet() {
+  const ss = getSpreadsheet();
+  let sheet = ss.getSheetByName(SHEET_ANALYTICS);
+  if (!sheet) { sheet = ss.insertSheet(SHEET_ANALYTICS); __sheetCache[SHEET_ANALYTICS] = sheet; }
+
+  sheet.clearContents();
+  sheet.clearFormats();
+  // ✅ v10: видаляємо старі нативні графіки (clearContents їх НЕ видаляє — вони накопичуються)
+  try { sheet.getCharts().forEach(ch => sheet.removeChart(ch)); } catch (e) { /* no charts */ }
+
+  const kpis    = calculateAnalytics();
+  const charts  = getAnalyticsChartData();
+  const updated = Utilities.formatDate(new Date(), TZ, "dd.MM.yyyy HH:mm:ss");
+
+  // ── Допоміжні функції форматування ──────────────────────────
+  const setVal  = (r,c,v) => sheet.getRange(r,c).setValue(v);
+  const setFmt  = (r,c,fmt) => sheet.getRange(r,c).setNumberFormat(fmt);
+  const merge   = (r,c,rn,cn) => sheet.getRange(r,c,rn,cn).merge();
+  const bg      = (r,c,rn,cn,color) => sheet.getRange(r,c,rn,cn).setBackground(color);
+  const fc      = (r,c,rn,cn,color) => sheet.getRange(r,c,rn,cn).setFontColor(color);
+  const bold    = (r,c,rn,cn) => sheet.getRange(r,c,rn,cn).setFontWeight('bold');
+  const sz      = (r,c,rn,cn,n) => sheet.getRange(r,c,rn,cn).setFontSize(n);
+  const align   = (r,c,rn,cn,h,v) => sheet.getRange(r,c,rn,cn).setHorizontalAlignment(h).setVerticalAlignment(v||'middle');
+  const border  = (r,c,rn,cn,s) => sheet.getRange(r,c,rn,cn).setBorder(true,true,true,true,false,false,'#333333',SpreadsheetApp.BorderStyle[s||'SOLID']);
+  const wrap    = (r,c,rn,cn) => sheet.getRange(r,c,rn,cn).setWrap(false);
+  // ✅ fix: Range.setIndent не иснує в GAS API. Безпечний відступ через setIndentLevel.
+  const indent  = (r,c,n) => { try { sheet.getRange(r,c).setIndentLevel(n||1); } catch (e) { /* відступ недоступний — пропускаємо */ } };
+
+  // ── Ширина колонок ────────────────────────────────────────────
+  sheet.setColumnWidth(1, 220);
+  sheet.setColumnWidth(2, 150);
+  sheet.setColumnWidth(3, 140);
+  sheet.setColumnWidth(4, 30);
+  sheet.setColumnWidth(5, 120);
+  sheet.setColumnWidth(6, 90);
+  sheet.setColumnWidth(7, 90);
+  sheet.setColumnWidth(8, 90);
+
+  // ── ЗАГОЛОВОК ─────────────────────────────────────────────────
+  merge(1,1,1,8); setVal(1,1,"📊  1333 CAR CENTER — АНАЛІТИКА");
+  bg(1,1,1,8,"#0a0a10"); fc(1,1,1,8,"#ffffff"); bold(1,1,1,8); sz(1,1,1,8,16);
+  align(1,1,1,8,"center","middle"); sheet.setRowHeight(1,52);
+
+  merge(2,1,1,6); setVal(2,1,"Оновлено: " + updated);
+  bg(2,1,1,8,"#111118"); fc(2,1,1,8,"#888888"); sz(2,1,1,8,10);
+  align(2,1,1,8,"center","middle"); sheet.setRowHeight(2,24);
+
+  // ── РОЗДІЛ 1: KPI ─────────────────────────────────────────────
+  const kpiMap = {};
+  kpis.forEach(([k,v]) => kpiMap[k] = v);
+
+  const kpiCards = [
+    { label:"Клієнти",             val: kpiMap["Клієнти"]||0,           ico:"👥", color:"#1a1a2e", accent:"#a78bfa", fmt:"0"          },
+    { label:"Активні абонементи",  val: kpiMap["Активні абонементи"]||0,ico:"💎", color:"#0d1a0d", accent:"#22c55e", fmt:"0"          },
+    { label:"Продажі сьогодні",    val: kpiMap["Продажі сьогодні"]||0,  ico:"📆", color:"#1a1100", accent:"#eab308", fmt:'#,##0" ₴"' },
+    { label:"Продажі місяця",      val: kpiMap["Продажі місяця"]||0,    ico:"📅", color:"#0d1726", accent:"#3b82f6", fmt:'#,##0" ₴"' },
+    { label:"Загальний дохід",     val: kpiMap["Загальний дохід"]||0,   ico:"💰", color:"#1a0d1a", accent:"#f97316", fmt:'#,##0" ₴"' }
+  ];
+
+  // Верхній рядок KPI (рядки 4-7)
+  sheet.setRowHeight(4,18); sheet.setRowHeight(5,36); sheet.setRowHeight(6,28); sheet.setRowHeight(7,18);
+
+  kpiCards.forEach((kpi, i) => {
+    const col = 1 + i + (i > 2 ? 1 : 0); // 1-based, пропускаємо розділову колонку після 3-ї
+    // Для 5 KPI розміщуємо їх у колонках 1-5 (з урахуванням розділювача col 4 = empty)
+    const c = i < 2 ? i + 1 : (i === 2 ? 3 : (i === 3 ? 5 : 7));
+    if (i === 2) merge(4, 4, 4, 1); // розділова
+    merge(4,c,4,1); bg(4,c,4,1, kpi.color); sheet.setRowHeight(4,18);
+    merge(5,c,1,1); setVal(5,c, kpi.ico + "  " + kpi.val); bg(5,c,1,1, kpi.color);
+    fc(5,c,1,1, kpi.accent); bold(5,c,1,1); sz(5,c,1,1,18); align(5,c,1,1,"center");
+    sheet.getRange(5,c).setNumberFormat(kpi.fmt);
+    merge(6,c,1,1); setVal(6,c, kpi.label); bg(6,c,1,1, kpi.color);
+    fc(6,c,1,1,"#aaaaaa"); sz(6,c,1,1,9); align(6,c,1,1,"center"); bold(6,c,1,1);
+    merge(7,c,1,1); bg(7,c,1,1, kpi.color);
+  });
+
+  // ── РОЗДІЛ 2: Середній чек + дохід по каналах ─────────────────
+  const row2Start = 9;
+  merge(row2Start, 1, 1, 8);
+  setVal(row2Start, 1, "⚡  КЛЮЧОВІ МЕТРИКИ");
+  bg(row2Start, 1, 1, 8, "#111118"); fc(row2Start, 1, 1, 8, "#a78bfa"); bold(row2Start, 1, 1, 8); sz(row2Start, 1, 1, 8, 11);
+  align(row2Start, 1, 1, 8, "left"); sheet.setRowHeight(row2Start, 32);
+  indent(row2Start, 1, 1);
+
+  const metricRows = [
+    ["Середній чек",       kpiMap["Середній чек"]||0,      '#,##0.00" ₴"', "#22c55e"],
+    ["Дохід (послуги)",    kpiMap["Дохід (послуги)"]||0,   '#,##0" ₴"',    "#3b82f6"],
+    ["Дохід (абонементи)", kpiMap["Дохід (абонементи)"]||0,'#,##0" ₴"',    "#a78bfa"],
+    ["Популярна послуга",  kpiMap["Популярна послуга"]||"—","@",           "#eab308"]
+  ];
+  metricRows.forEach(([label, val, fmt, accent], idx) => {
+    const r = row2Start + 1 + idx;
+    sheet.setRowHeight(r, 26);
+    setVal(r, 1, label); fc(r, 1, 1, 1, "#cccccc"); sz(r, 1, 1, 1, 11);
+    setVal(r, 2, val); sheet.getRange(r, 2).setNumberFormat(fmt);
+    fc(r, 2, 1, 1, accent); bold(r, 2, 1, 1); sz(r, 2, 1, 1, 12);
+    bg(r, 1, 1, 8, idx % 2 === 0 ? "#111118" : "#0d0d14");
+  });
+
+  // ── РОЗДІЛ 3: Динаміка доходу (таблиця + спарклайни) ──────────
+  const trend = charts.revenueTrend || [];
+  const tStart = row2Start + metricRows.length + 3;
+
+  merge(tStart, 1, 1, 8);
+  setVal(tStart, 1, "📈  ДИНАМІКА ДОХОДУ · ОСТАННІ 14 ДНІВ");
+  bg(tStart, 1, 1, 8, "#111118"); fc(tStart, 1, 1, 8, "#22c55e"); bold(tStart, 1, 1, 8); sz(tStart, 1, 1, 8, 11);
+  align(tStart, 1, 1, 8, "left"); sheet.setRowHeight(tStart, 32);
+  indent(tStart, 1, 1);
+
+  // Шапка таблиці
+  const thead = tStart + 1;
+  ["Дата", "Послуги (₴)", "Абонементи (₴)", "Разом (₴)"].forEach((h, i) => {
+    const c = [1,2,3,5][i];
+    setVal(thead, c, h);
+    bg(thead, c, 1, 1, "#1a1a2e"); fc(thead, c, 1, 1, "#888888"); bold(thead, c, 1, 1); sz(thead, c, 1, 1, 9);
+    align(thead, c, 1, 1, i === 0 ? "left" : "right");
+    sheet.setRowHeight(thead, 24);
+  });
+
+  // Дані таблиці
+  trend.forEach((row, idx) => {
+    const r = thead + 1 + idx;
+    sheet.setRowHeight(r, 22);
+    const isStripe = idx % 2 === 0;
+    bg(r, 1, 1, 8, isStripe ? "#0a0a10" : "#0d0d14");
+    setVal(r, 1, row.label); fc(r, 1, 1, 1, "#aaaaaa"); sz(r, 1, 1, 1, 10);
+    setVal(r, 2, row.services||0); sheet.getRange(r,2).setNumberFormat('#,##0'); fc(r, 2, 1, 1, "#3b82f6"); sz(r,2,1,1,10); align(r,2,1,1,"right");
+    setVal(r, 3, row.subs||0);     sheet.getRange(r,3).setNumberFormat('#,##0'); fc(r, 3, 1, 1, "#a78bfa"); sz(r,3,1,1,10); align(r,3,1,1,"right");
+    setVal(r, 5, row.total||0);    sheet.getRange(r,5).setNumberFormat('#,##0'); fc(r, 5, 1, 1, "#22c55e"); bold(r,5,1,1); sz(r,5,1,1,10); align(r,5,1,1,"right");
+  });
+  // Підсумок
+  const sumRow = thead + 1 + trend.length;
+  sheet.setRowHeight(sumRow, 28);
+  bg(sumRow, 1, 1, 8, "#111820");
+  setVal(sumRow, 1, "РАЗОМ"); fc(sumRow, 1, 1, 1, "#ffffff"); bold(sumRow, 1, 1, 1); sz(sumRow, 1, 1, 1, 11);
+  const totalSvc = trend.reduce((s,r)=>s+(r.services||0),0);
+  const totalSub = trend.reduce((s,r)=>s+(r.subs||0),0);
+  setVal(sumRow, 2, totalSvc); sheet.getRange(sumRow,2).setNumberFormat('#,##0'); fc(sumRow,2,1,1,"#3b82f6"); bold(sumRow,2,1,1); sz(sumRow,2,1,1,11); align(sumRow,2,1,1,"right");
+  setVal(sumRow, 3, totalSub); sheet.getRange(sumRow,3).setNumberFormat('#,##0'); fc(sumRow,3,1,1,"#a78bfa"); bold(sumRow,3,1,1); sz(sumRow,3,1,1,11); align(sumRow,3,1,1,"right");
+  setVal(sumRow, 5, totalSvc+totalSub); sheet.getRange(sumRow,5).setNumberFormat('#,##0'); fc(sumRow,5,1,1,"#22c55e"); bold(sumRow,5,1,1); sz(sumRow,5,1,1,13); align(sumRow,5,1,1,"right");
+
+  // ── РОЗДІЛ 4: Топ послуг + Статуси записів (поряд) ───────────
+  const s4start = sumRow + 3;
+  const topSvcs = charts.topServices || [];
+  const statuses = charts.bookingStatuses || [];
+  const boxLoad  = charts.boxLoad || [];
+
+  // Топ послуг (ліва колонка)
+  merge(s4start, 1, 1, 3);
+  setVal(s4start, 1, "🔧  ТОП ПОСЛУГ");
+  bg(s4start, 1, 1, 3, "#111118"); fc(s4start, 1, 1, 3, "#f97316"); bold(s4start, 1, 1, 3); sz(s4start, 1, 1, 3, 11);
+  align(s4start, 1, 1, 3, "left"); sheet.setRowHeight(s4start, 30);
+  indent(s4start, 1, 1);
+
+  topSvcs.slice(0,6).forEach((svc, idx) => {
+    const r = s4start + 1 + idx;
+    sheet.setRowHeight(r, 24);
+    bg(r, 1, 1, 3, idx % 2 === 0 ? "#0a0a10" : "#0d0d14");
+    setVal(r, 1, (idx+1) + ". " + svc.name); fc(r, 1, 1, 1, "#cccccc"); sz(r, 1, 1, 1, 10);
+    setVal(r, 2, svc.count); fc(r, 2, 1, 1, "#f97316"); bold(r, 2, 1, 1); sz(r, 2, 1, 1, 11); align(r, 2, 1, 1, "right");
+    setVal(r, 3, "разів"); fc(r, 3, 1, 1, "#666666"); sz(r, 3, 1, 1, 9);
+  });
+
+  // Статуси записів (права колонка)
+  merge(s4start, 5, 1, 4);
+  setVal(s4start, 5, "📋  СТАТУСИ ЗАПИСІВ (30 днів)");
+  bg(s4start, 5, 1, 4, "#111118"); fc(s4start, 5, 1, 4, "#3b82f6"); bold(s4start, 5, 1, 4); sz(s4start, 5, 1, 4, 11);
+  align(s4start, 5, 1, 4, "left"); indent(s4start, 5, 1);
+
+  const statusEmoji = (name) => {
+    if (String(name).includes("Виконано")||String(name).includes("Готово")) return "✅";
+    if (String(name).includes("роботі")) return "🔶";
+    if (String(name).includes("Підтверджено")) return "📌";
+    if (String(name).includes("Скасовано")) return "❌";
+    return "•";
+  };
+  statuses.slice(0,6).forEach((st, idx) => {
+    const r = s4start + 1 + idx;
+    sheet.setRowHeight(r, 24);
+    bg(r, 5, 1, 4, idx % 2 === 0 ? "#0a0a10" : "#0d0d14");
+    setVal(r, 5, statusEmoji(st.name) + " " + st.name); fc(r, 5, 1, 1, "#cccccc"); sz(r, 5, 1, 1, 10);
+    setVal(r, 7, st.count); fc(r, 7, 1, 1, "#3b82f6"); bold(r, 7, 1, 1); sz(r, 7, 1, 1, 11); align(r, 7, 1, 1, "right");
+    setVal(r, 8, "записів"); fc(r, 8, 1, 1, "#666666"); sz(r, 8, 1, 1, 9);
+  });
+
+  // ── РОЗДІЛ 5: Завантаженість боксів ──────────────────────────
+  const s5start = s4start + Math.max(topSvcs.length, statuses.length) + 3;
+
+  merge(s5start, 1, 1, 8);
+  setVal(s5start, 1, "🏠  ЗАВАНТАЖЕНІСТЬ БОКСІВ");
+  bg(s5start, 1, 1, 8, "#111118"); fc(s5start, 1, 1, 8, "#22c55e"); bold(s5start, 1, 1, 8); sz(s5start, 1, 1, 8, 11);
+  align(s5start, 1, 1, 8, "left"); sheet.setRowHeight(s5start, 30);
+  indent(s5start, 1, 1);
+
+  const maxBoxCount = Math.max(1, ...boxLoad.map(b=>b.count));
+  const barColors = ["#22c55e","#3b82f6","#f97316"];
+  boxLoad.forEach((box, idx) => {
+    const r = s5start + 1 + idx;
+    sheet.setRowHeight(r, 28);
+    bg(r, 1, 1, 8, idx % 2 === 0 ? "#0a0a10" : "#0d0d14");
+    setVal(r, 1, box.name); fc(r, 1, 1, 1, "#ffffff"); bold(r, 1, 1, 1); sz(r, 1, 1, 1, 11);
+    setVal(r, 2, box.count); sheet.getRange(r,2).setNumberFormat('0" записів"');
+    fc(r, 2, 1, 1, barColors[idx % barColors.length]); bold(r, 2, 1, 1); sz(r, 2, 1, 1, 12);
+    // Візуальний бар через символи
+    const barLen = Math.round((box.count / maxBoxCount) * 20);
+    setVal(r, 3, "▓".repeat(barLen) + "░".repeat(20-barLen));
+    fc(r, 3, 1, 5, barColors[idx % barColors.length]); sz(r, 3, 1, 5, 10);
+  });
+
+  // ── Фінальний Footer ──────────────────────────────────────────
+  const fRow = s5start + boxLoad.length + 3;
+  merge(fRow, 1, 1, 8);
+  setVal(fRow, 1, "🤖 Автоматично оновлюється щодня о 03:00 · 1333 Car Center · " + updated);
+  bg(fRow, 1, 1, 8, "#050507"); fc(fRow, 1, 1, 8, "#444444"); sz(fRow, 1, 1, 8, 9);
+  align(fRow, 1, 1, 8, "center"); sheet.setRowHeight(fRow, 24);
+
+  // Фон усього полотна
+  bg(1, 1, fRow, 8, "#050507");
+  // Перемальовуємо локальні фони поверх (GAS застосовує порядково — це ОК)
+  // (Вже зроблено вище)
+
+  // ✅ v10: НАТИВНІ ГРАФІКИ (EmbeddedChart) — як на сайті
+  try {
+    buildAnalyticsCharts(sheet, charts, fRow + 2);
+  } catch (chErr) {
+    Logger.log("⚠️ Графіки не побудовані: " + chErr);
+    logError("buildAnalyticsCharts", chErr, "crm");
+  }
+
+  Logger.log("✅ Аналітика оновлена: " + fRow + " рядків");
+  return kpis.map(r => r[0] + ": " + r[1]);
+}
+
+// ✅ v10: побудова нативних графіків Google Sheets на листі "Аналітика".
+// Дані для графіків записуються у службову область (колонки K+), яку ховаємо.
+// Графіки розміщуються під основним дашбордом (з рядка startRow).
+function buildAnalyticsCharts(sheet, charts, startRow) {
+  // Використовуємо глобальний сервіс Charts (Charts.ChartType.*) — переобявляти не потрібно.
+  const HELP_COL = 11; // колонка K — початок службової області даних
+  let dataRow = 1;
+
+  // допоміжна: записує двовимірний масив у службову область і повертає Range
+  const putData = (rows) => {
+    if (!rows.length) return null;
+    const r0 = dataRow;
+    const nCols = rows[0].length;
+    sheet.getRange(r0, HELP_COL, rows.length, nCols).setValues(rows);
+    dataRow += rows.length + 1; // порожній рядок-роздільник
+    return sheet.getRange(r0, HELP_COL, rows.length, nCols);
+  };
+
+  const COLORS = ["#22c55e", "#a78bfa", "#f97316", "#eab308", "#3b82f6", "#ef4444", "#06b6d4"];
+  let anchor = startRow;
+  const CHART_ROWS = 18; // висота одного графіка в рядках
+
+  // 1️⃣ Динаміка доходу (лінійний, 14 днів)
+  const trend = charts.revenueTrend || [];
+  if (trend.length) {
+    const rows = [["Дата", "Послуги", "Абонементи", "Разом"]];
+    trend.forEach(t => rows.push([t.label, Number(t.services) || 0, Number(t.subs) || 0, Number(t.total) || 0]));
+    const rng = putData(rows);
+    const chart = sheet.newChart()
+      .setChartType(Charts.ChartType.LINE)
+      .addRange(rng)
+      .setNumHeaders(1)
+      .setOption("title", "📈 Динаміка доходу · 14 днів")
+      .setOption("legend", { position: "bottom", textStyle: { color: "#cccccc" } })
+      .setOption("backgroundColor", "#0a0a10")
+      .setOption("titleTextStyle", { color: "#ffffff", fontSize: 14 })
+      .setOption("colors", [COLORS[4], COLORS[1], COLORS[0]])
+      .setOption("hAxis", { textStyle: { color: "#aaaaaa" } })
+      .setOption("vAxis", { textStyle: { color: "#aaaaaa" }, gridlines: { color: "#222222" } })
+      .setOption("curveType", "function")
+      .setOption("width", 900)
+      .setOption("height", 320)
+      .setPosition(anchor, 1, 0, 0)
+      .build();
+    sheet.insertChart(chart);
+    anchor += CHART_ROWS;
+  }
+
+  // допоміжна для pie/column графіків {name,count}
+  const buildCategoryChart = (items, type, title, headerLabel, colOffset) => {
+    if (!items || !items.length) return;
+    const rows = [[headerLabel, "Кількість"]];
+    items.forEach(it => rows.push([String(it.name || "—"), Number(it.count) || 0]));
+    const rng = putData(rows);
+    let b = sheet.newChart()
+      .setChartType(type)
+      .addRange(rng)
+      .setNumHeaders(1)
+      .setOption("title", title)
+      .setOption("legend", { position: type === Charts.ChartType.PIE ? "right" : "none", textStyle: { color: "#cccccc" } })
+      .setOption("backgroundColor", "#0a0a10")
+      .setOption("titleTextStyle", { color: "#ffffff", fontSize: 13 })
+      .setOption("colors", COLORS)
+      .setOption("hAxis", { textStyle: { color: "#aaaaaa" } })
+      .setOption("vAxis", { textStyle: { color: "#aaaaaa" }, gridlines: { color: "#222222" } })
+      .setOption("width", 450)
+      .setOption("height", 300)
+      .setPosition(anchor, 1 + colOffset, 0, 0)
+      .build();
+    sheet.insertChart(b);
+  };
+
+  // 2️⃣ Структура доходу (pie: послуги vs абонементи) та 3️⃣ Статуси записів (pie)
+  const totalSvc = trend.reduce((s, t) => s + (Number(t.services) || 0), 0);
+  const totalSub = trend.reduce((s, t) => s + (Number(t.subs) || 0), 0);
+  buildCategoryChart(
+    [{ name: "Послуги", count: totalSvc }, { name: "Абонементи", count: totalSub }],
+    Charts.ChartType.PIE, "💰 Структура доходу", "Канал", 0
+  );
+  buildCategoryChart(charts.bookingStatuses, Charts.ChartType.PIE, "📋 Статуси записів (30 днів)", "Статус", 4);
+  anchor += CHART_ROWS;
+
+  // 4️⃣ Топ послуг (стовпчастий) та 5️⃣ Абонементи за типом (pie)
+  buildCategoryChart(charts.topServices, Charts.ChartType.COLUMN, "🔧 Топ послуг", "Послуга", 0);
+  buildCategoryChart(charts.subsByType, Charts.ChartType.PIE, "💎 Абонементи за типом", "Тип", 4);
+  anchor += CHART_ROWS;
+
+  // 6️⃣ Нові клієнти (стовпчастий) та 7️⃣ Завантаженість боксів (стовпчастий)
+  buildCategoryChart(
+    (charts.newClientsTrend || []).map(c => ({ name: c.label, count: c.count })),
+    Charts.ChartType.COLUMN, "👥 Нові клієнти (14 днів)", "Дата", 0
+  );
+  buildCategoryChart(charts.boxLoad, Charts.ChartType.COLUMN, "🏠 Завантаженість боксів", "Бокс", 4);
+  anchor += CHART_ROWS;
+
+  // Ховаємо службову область з даними для графіків (колонки K..N)
+  try { sheet.hideColumns(HELP_COL, 4); } catch (e) { /* ignore */ }
+}
+
+function sendVisitReminders() {
+  const data = safeGetRangeValues(getSheet(SHEET_BOOKINGS), 2, 1, null, 12);
+  if (!data || !data.length) return 0;
+  let sent = 0;
+  data.forEach(r => {
+    if (!r || !r[0] || !r[5]) return;
+    const status = String(r[9] || "");
+    if (!(status.includes("Підтверджено") || status.includes("Очікує"))) return;
+    const dt = asDate(r[1]);
+    const hour = parseTimeString(r[3]);
+    if (!dt || hour === null) return;
+    dt.setHours(hour, 0, 0, 0);
+    const diffHours = (dt.getTime() - new Date().getTime()) / 3600000;
+    [[24, "24h"], [1, "1h"]].forEach(([target, label]) => {
+      if (diffHours < target || diffHours > target + 1) return;
+      const key = "reminder_visit_" + r[0] + "_" + label;
+      if (scriptProperties.getProperty(key)) return;
+      const client = findClientById(String(r[5]));
+      if (client?.telegramId) {
+        sendMessage(client.telegramId, "⏰ <b>Нагадування</b>\n📅 " + fmtDate(dt) + " " + normalizeTime(r[3]) + "\n🏠 " + r[4]);
+        scriptProperties.setProperty(key, "1");
+        sent++;
+      }
+    });
+  });
+  return sent;
+}
+
+function sendSubscriptionExpiryReminders() {
+  const data = safeGetRangeValues(getSheet(SHEET_SUBS), 2, 1, null, 16);
+  if (!data || !data.length) return 0;
+  let sent = 0;
+  data.forEach(r => {
+    if (!r || !r[0] || !r[1] || !isActiveStatus(r[10])) return;
+    const end = asDate(r[7]);
+    if (!end) return;
+    const today = new Date();
+    const days = Math.ceil((new Date(end.getFullYear(), end.getMonth(), end.getDate()) - new Date(today.getFullYear(), today.getMonth(), today.getDate())) / 86400000);
+    if ([7, 3, 1].indexOf(days) === -1) return;
+    const key = "reminder_sub_" + r[1] + "_" + days;
+    if (scriptProperties.getProperty(key)) return;
+    const client = findClientById(String(r[0]));
+    if (client?.telegramId) {
+      sendMessage(client.telegramId, "💎 Абонемент закінчиться за " + days + " дн.");
+      scriptProperties.setProperty(key, "1");
+      sent++;
+    }
+  });
+  return sent;
+}
+
+function broadcastTelegram(message, segment, actor) {
+  if (!message) return { success: false, sent: 0, error: "message required" };
+  const clients = safeGetRangeValues(getSheet(SHEET_CLIENTS), 2, 1, null, 13).filter(r => r && r[0] && r[3]);
+  let sent = 0;
+  clients.forEach(r => {
+    const status = String(r[4] || CLIENT_STATUS_ACTIVE);
+    if (isClientBlockedStatus(status)) return;
+    if (sendMessage(String(r[3]).trim(), message)) sent++;
+  });
+  logAction(actor || "CRM", "Массовая рассылка", "Telegram", segment || "all", "", sent, "");
+  return { success: true, sent };
+}
+
+function runDailyMaintenance(force) {
+  const key = Utilities.formatDate(new Date(), TZ, "yyyy_MM_dd");
+  if (!force && scriptProperties.getProperty("DAILY_MAINTENANCE_DATE") === key) return { skipped: true };
+  flushAuditQueue(); // ✅ v9.1: скидаємо накопичені логи перед обслуговуванням
+  const expired = expireSubscriptions();
+  const merged = mergeDuplicateClients();
+  const balances = syncAllBalances();
+  const metrics = syncClientMetrics();
+  const analytics = updateAnalyticsSheet().length;
+  let backup = { created: false };
+  try { backup = createDailyBackup(); } catch (e) { logError("createDailyBackup", e, "system"); }
+  scriptProperties.setProperty("DAILY_MAINTENANCE_DATE", key);
+  return { skipped: false, expired, merged, balances, metrics, analytics, backup };
+}
+
+function runHourlyReminders() {
+  // ✅ v10: гарантований скид журналу операцій раз на годину (некритичні записи
+  //   буферизуються й чекають порогу 15 — без цього вони з'являлись із затримкою).
+  let flushed = 0;
+  try { flushed = flushAuditQueue(); } catch (e) { logError("runHourlyReminders flush", e, "system"); }
+  return { flushed, visits: sendVisitReminders(), subscriptions: sendSubscriptionExpiryReminders() };
+}
+
+function setupProduction() {
+  ensureSchema(true);
+  installProductionTriggers();
+  try { setupBotCommands(); } catch (e) { logError("setupBotCommands", e, "system"); }
+  return runDailyMaintenance(true);
+}
+
+// ✅ NEW: постійне меню команд бота (кнопка "Меню" у чаті).
+// Клієнти бачать /start; адмін додатково /admin та /crmcode.
+function setupBotCommands() {
+  if (!BOT_TOKEN) { logError("setupBotCommands", new Error("Missing BOT_TOKEN"), "system"); return false; }
+  const base = "https://api.telegram.org/bot" + BOT_TOKEN + "/setMyCommands";
+
+  // Загальні команди для всіх користувачів
+  const defaultCommands = [
+    { command: "start", description: "🏠 Головне меню / реєстрація" },
+    { command: "cancel", description: "❌ Скасувати поточну дію" }
+  ];
+  _setBotCommands(base, defaultCommands, null);
+
+  // Команди адміна (тільки у його приватному чаті)
+  if (ADMIN_ID) {
+    const adminCommands = defaultCommands.concat([
+      { command: "admin", description: "👨‍💼 Адмін-панель" },
+      { command: "crmcode", description: "🔑 Код для входу на сайт" },
+      { command: "syncbalances", description: "⚙ Синхронізувати баланси" }
+    ]);
+    _setBotCommands(base, adminCommands, { type: "chat", chat_id: ADMIN_ID });
+  }
+  return true;
+}
+
+function _setBotCommands(url, commands, scope) {
+  const payload = { commands: commands };
+  if (scope) payload.scope = scope;
+  try {
+    UrlFetchApp.fetch(url, {
+      method: "post", contentType: "application/json",
+      payload: JSON.stringify(payload), muteHttpExceptions: true
+    });
+  } catch (e) { logError("_setBotCommands", e, "system"); }
+}
+
+// ✅ v9.1: щоденний тригер важкого обслуговування (2:30 ночі за TZ проекту).
+// Увага: переконайтесь, що TZ проекту Apps Script = Europe/Kyiv.
+function setupDailyTrigger() {
+  ScriptApp.getProjectTriggers().forEach(t => {
+    if (t.getHandlerFunction() === "runDailyMaintenance") ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger("runDailyMaintenance")
+    .timeBased().everyDays(1).atHour(2).nearMinute(30).create();
+  ensureSchema(true);
+  return "\u2705 Daily trigger set for 02:30 (project TZ must be Europe/Kyiv)";
+}
+
+function installProductionTriggers() {
+  const managed = ["runDailyMaintenance", "runHourlyReminders"];
+  ScriptApp.getProjectTriggers().forEach(t => {
+    if (managed.indexOf(t.getHandlerFunction()) !== -1) ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger("runDailyMaintenance").timeBased().everyDays(1).atHour(3).create();
+  ScriptApp.newTrigger("runHourlyReminders").timeBased().everyHours(1).create();
+  return true;
+}
+
+// ─────────────────────── BOOKING ───────────────────────────────
+
+// ✅ v9.2 AUDIT (п.12): серверная валидация формата даты/времени
+function isValidDateStr(s) {
+  const m = String(s || "").trim().match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  if (!m) return false;
+  const d = +m[1], mo = +m[2], y = +m[3];
+  if (mo < 1 || mo > 12 || d < 1 || d > 31 || y < 2020 || y > 2100) return false;
+  const dt = new Date(y, mo - 1, d);
+  return dt.getFullYear() === y && dt.getMonth() === mo - 1 && dt.getDate() === d;
+}
+function isValidTimeStr(s) {
+  const str = normalizeTime(s);
+  const m = String(str).match(/^(\d{1,2}):(\d{2})$/);
+  if (!m) return false;
+  const h = +m[1], mi = +m[2];
+  return h >= 0 && h <= 23 && mi >= 0 && mi <= 59;
+}
+
+function saveBooking(dateStr, timeStr, boxName, clientId, clientName, phone, service, source, note, actor, plateNumber) {
+  return withScriptLock("saveBooking", function() {
+    const sheet = getSheet(SHEET_BOOKINGS);
+    if (!sheet) return false;
+    if (!isValidDateStr(dateStr) || !isValidTimeStr(timeStr)) {
+      Logger.log("❌ Невірний формат дати/часу: " + dateStr + " " + timeStr);
+      return false;
+    }
+    if (isDateBlocked(dateStr)) {
+      Logger.log("❌ Дата закрита для запису: " + dateStr);
+      return false;
+    }
+    assertForeignKeys({ clientId });
+    if (_isSlotTakenFresh(dateStr, timeStr, boxName)) {
+      Logger.log("❌ Бокс вже зайнятий (fresh): " + boxName + " " + dateStr + " " + timeStr);
+      return false;
+    }
+    const row = getNextRow(SHEET_BOOKINGS);
+    const [day, month, year] = dateStr.split(".");
+    const d = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    const dayName = DAY_NAMES[d.getDay()];
+    const normTime = normalizeTime(timeStr);
+    const bookingId = genBookingId();
+    sheet.getRange(row, 1, 1, 13).setValues([[
+      bookingId, dateStr, dayName, normTime, boxName, clientId, clientName,
+      normalizePhone(phone), service, "✅ Підтверджено", note || "",
+      source || "Администратор",
+      (plateNumber || "").toUpperCase().trim()
+    ]]);
+    invalidateBookingCache(dateStr);
+    logAction(actor || source || "web", "Запись", "Booking", bookingId, "", "Підтверджено", dateStr);
+    return bookingId;
+  }, actor || source || "web");
+}
+
+function findBookingById(bookingId) {
+  const sheet = getSheet(SHEET_BOOKINGS);
+  if (!sheet) return null;
+  const data = safeGetRangeValues(sheet, 2, 1, null, 12);
+  if (!data || !data.length) return null;
+  for (let i = 0; i < data.length; i++) {
+    if (!data[i] || !data[i][0]) continue;
+    if (String(data[i][0]).trim() === String(bookingId).trim()) {
+      return { row: i + 2, values: data[i] };
+    }
+  }
+  return null;
+}
+
+function cancelBooking(bookingId, phone, actor) {
+  return withScriptLock("cancelBooking", function() {
+    const booking = findBookingById(bookingId);
+    if (!booking) return { success: false, error: "booking not found" };
+    const bookingPhone = normalizePhone(String(booking.values[7] || ""));
+    if (phone && bookingPhone !== normalizePhone(phone)) return { success: false, error: "phone mismatch" };
+    const oldStatus = String(booking.values[9] || "");
+    getSheet(SHEET_BOOKINGS).getRange(booking.row, 10).setValue("❌ Скасовано клієнтом");
+    const dateStr = booking.values[1] instanceof Date ? fmtDate(booking.values[1]) : String(booking.values[1]).trim();
+    const timeStr = booking.values[3] instanceof Date ? Utilities.formatDate(booking.values[3], TZ, "HH:mm") : String(booking.values[3] || "").trim();
+    invalidateBookingCache(dateStr);
+    logAction(actor || "client", "Отмена", "Booking", bookingId, oldStatus, "Скасовано клієнтом", bookingPhone);
+    // ✅ v10: повертаємо знімок для сповіщення ЗА межами локу
+    return { success: true, booking: {
+      clientId: String(booking.values[5] || ""), clientName: String(booking.values[6] || ""),
+      date: dateStr, time: timeStr, box: String(booking.values[4] || ""),
+      service: String(booking.values[8] || ""), phone: bookingPhone
+    }};
+  }, actor || "client");
+}
+
+function rescheduleBooking(bookingId, phone, newDate, newTime, newBox, actor) {
+  return withScriptLock("rescheduleBooking", function() {
+    const booking = findBookingById(bookingId);
+    if (!booking) return { success: false, error: "booking not found" };
+    const bookingPhone = normalizePhone(String(booking.values[7] || ""));
+    if (phone && bookingPhone !== normalizePhone(phone)) return { success: false, error: "phone mismatch" };
+    if (!isValidDateStr(newDate) || !isValidTimeStr(newTime)) return { success: false, error: "bad_datetime" };
+    if (isDateBlocked(newDate)) return { success: false, error: "date_blocked" };
+    // ✅ fix(подвійна запис при переносі): свіжа перевірка ПРЯМО з листа + ігноруємо сам запис,
+    //    який переносимо (інакше його власний слот хибно вважається «зайнятим»).
+    if (_isSlotTakenFresh(newDate, newTime, newBox, bookingId)) return { success: false, error: "box busy" };
+    const oldDate = booking.values[1] instanceof Date ? fmtDate(booking.values[1]) : String(booking.values[1]).trim();
+    const oldValue = oldDate + " " + booking.values[3] + " " + booking.values[4];
+    const [day, month, year] = newDate.split(".");
+    const d = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    const dayName = DAY_NAMES[d.getDay()];
+    getSheet(SHEET_BOOKINGS).getRange(booking.row, 2, 1, 4).setValues([[newDate, dayName, normalizeTime(newTime), newBox]]);
+    getSheet(SHEET_BOOKINGS).getRange(booking.row, 10).setValue("✅ Підтверджено");
+    invalidateBookingCache(oldDate);
+    invalidateBookingCache(newDate);
+    logAction(actor || "client", "Перенос", "Booking", bookingId, oldValue, newDate + " " + newTime, bookingPhone);
+    // ✅ v10: знімок для сповіщення ЗА межами локу
+    return { success: true, booking: {
+      clientId: String(booking.values[5] || ""), clientName: String(booking.values[6] || ""),
+      service: String(booking.values[8] || ""), phone: bookingPhone,
+      oldDate: oldValue, newDate: newDate, newTime: normalizeTime(newTime), newBox: newBox
+    }};
+  }, actor || "client");
+}
+
+// ─────────────────────── SUBSCRIPTION REQUESTS ─────────────────
+
+function getSubRequestSheet() {
+  let s = getSheet(SHEET_SUB_REQUESTS);
+  if (s) return s;
+  for (const alt of SHEET_SUB_REQUESTS_ALTS) { s = getSheet(alt); if (s) return s; }
+  return null;
+}
+
+function saveSubscriptionRequest(clientId, clientName, telegramId, typeId, typeName, amount) {
+  return withScriptLock("saveSubscriptionRequest", function() {
+    const sheet = getSubRequestSheet();
+    if (!sheet) return false;
+    assertForeignKeys({ clientId, typeId });
+    const row = getNextRow(sheet.getName());
+    const requestId = genSubRequestId();
+    sheet.getRange(row, 1, 1, 12).setValues([[
+      requestId, clientId, clientName, telegramId, typeId, typeName,
+      Number(amount) || 0, fmtDate(new Date()), "🆕 Нова заявка", "", "", ""
+    ]]);
+    sheet.getRange(row, 7).setNumberFormat("#,##0");
+    logAction(telegramId || "web", "Заявка на абонемент", "SubscriptionRequest", requestId, "", "Нова заявка", typeName);
+    return requestId;
+  }, telegramId || "web");
+}
+
+function getSubscriptionRequests() {
+  const sheet = getSubRequestSheet();
+  if (!sheet) return [];
+  const data = safeGetRangeValues(sheet, 2, 1, null, 12);
+  if (!data || !data.length) return [];
+  return data.filter(r => r && r[0]).map(r => ({
+    requestId: String(r[0]), clientId: String(r[1]), clientName: String(r[2]),
+    telegramId: String(r[3]), typeId: String(r[4]), typeName: String(r[5]),
+    amount: r[6] || 0, createdDate: parseDate(r[7]), status: String(r[8]),
+    rejectReason: String(r[9] || ""), processedDate: parseDate(r[10]), processedBy: String(r[11] || "")
+  }));
+}
+
+function updateSubscriptionRequestStatus(requestId, newStatus, actor, reason) {
+  const sheet = getSubRequestSheet();
+  if (!sheet) return false;
+  const data = safeGetRangeValues(sheet, 2, 1, null, 12);
+  if (!data || !data.length) return false;
+  for (let i = 0; i < data.length; i++) {
+    if (!data[i] || String(data[i][0]) !== String(requestId)) continue;
+    sheet.getRange(i + 2, 9, 1, 4).setValues([[newStatus, reason || data[i][9] || "", fmtDate(new Date()), actor || ""]]);
+    logAction(actor || "admin", "Обработка заявки", "SubscriptionRequest", requestId, data[i][8], newStatus, reason || "");
+    return true;
+  }
+  return false;
+}
+
+function sellSubscription(clientId, typeId, actor, options, skipLock) {
+  const runner = function() {
+    assertForeignKeys({ clientId, typeId });
+    const tClient = findClientById(clientId);
+    const type = getTypes().find(t => String(t.id) === String(typeId));
+    if (!type || !tClient) return { success: false, error: "client or type not found" };
+    const sheet = getSheet(SHEET_SUBS);
+    const row = getNextRow(SHEET_SUBS);
+    const subId = genSubId();
+    const pDate = new Date();
+    const eDate = new Date();
+    eDate.setMonth(eDate.getMonth() + (Number(type.months) || 1));
+    const amount = Number(options?.amount || type.amount || 0);
+    const rowValues = [
+      clientId, subId, typeId,
+      options?.clientName || tClient.name,
+      options?.typeName || type.name,
+      amount, fmtDate(pDate), fmtDate(eDate),
+      0, amount, "✅ Активний",
+      actor || "admin",
+      options?.paymentMethod || "",
+      options?.discount || "",
+      options?.promoCode || "",
+      options?.activationDate || fmtDate(pDate)
+    ];
+    sheet.getRange(row, 1, 1, rowValues.length).setValues([rowValues]);
+    const newBalance = updateClientBalance(clientId);
+    updateClientMetrics(clientId);
+    logAction(actor || "admin", "Продажа абонемента", "Subscription", subId, "", amount, type.name);
+    return { success: true, subId, endDate: fmtDate(eDate), amount, newBalance };
+  };
+  return skipLock ? runner() : withScriptLock("sellSubscription", runner, actor || "admin");
+}
+
+function confirmSubscriptionRequest(requestId, actor) {
+  return withScriptLock("confirmSubscriptionRequest", function() {
+    const req = getSubscriptionRequests().find(r => r.requestId === requestId);
+    if (!req) return false;
+    assertForeignKeys({ clientId: req.clientId, typeId: req.typeId });
+    const sold = sellSubscription(req.clientId, req.typeId, actor || "admin", {
+      clientName: req.clientName, typeName: req.typeName, amount: req.amount,
+      paymentMethod: "Заявка", activationDate: fmtDate(new Date())
+    }, true);
+    if (!sold || !sold.success) return false;
+    updateSubscriptionRequestStatus(requestId, "✅ Підтверджена", actor || "admin", "");
+    return true;
+  }, actor || "admin");
+}
+
+function updateSubStatusBot(subId, newStatus) {
+  return withScriptLock("updateSubStatusBot", function() {
+    const sheet = getSheet(SHEET_SUBS);
+    if (!sheet) return false;
+    const data = safeGetRangeValues(sheet, 2, 1, null, 16);
+    if (!data || !data.length) return false;
+    for (let i = 0; i < data.length; i++) {
+      if (!data[i] || String(data[i][1]).trim() !== String(subId).trim()) continue;
+      const oldStatus = String(data[i][10] || "");
+      sheet.getRange(i + 2, 11).setValue(newStatus);
+      try { if (data[i][0]) { updateClientBalance(String(data[i][0])); updateClientMetrics(String(data[i][0])); } } catch(e) {}
+      logAction("Telegram admin", "Редактирование", "Subscription", subId, oldStatus, newStatus, "status");
+      return true;
+    }
+    return false;
+  }, "Telegram admin");
+}
+
+function freezeSubscription(subId) {
+  return withScriptLock("freezeSubscription", function() {
+    const sheet = getSheet(SHEET_SUBS);
+    if (!sheet) return { success: false };
+    const data = safeGetRangeValues(sheet, 2, 1, null, 16);
+    if (!data || !data.length) return { success: false };
+    for (let i = 0; i < data.length; i++) {
+      if (!data[i] || String(data[i][1]).trim() !== String(subId).trim()) continue;
+      const oldStatus = String(data[i][10] || "");
+      if (!isActiveStatus(oldStatus)) return { success: false, error: "not active" };
+      const freezeDate = Utilities.formatDate(new Date(), TZ, "dd.MM.yyyy");
+      scriptProperties.setProperty("freeze_date_" + subId, freezeDate);
+      sheet.getRange(i + 2, 11).setValue("❄️ Заморожений");
+      try { if (data[i][0]) { updateClientBalance(String(data[i][0])); updateClientMetrics(String(data[i][0])); } } catch(e) {}
+      logAction("Telegram", "Заморозка абонемента", "Subscription", subId, oldStatus, "Заморожений", "freeze:" + freezeDate);
+      return { success: true, freezeDate };
+    }
+    return { success: false, error: "not found" };
+  }, "Telegram");
+}
+
+function activateSubscription(subId) {
+  return withScriptLock("activateSubscription", function() {
+    const sheet = getSheet(SHEET_SUBS);
+    if (!sheet) return { success: false };
+    const data = safeGetRangeValues(sheet, 2, 1, null, 16);
+    if (!data || !data.length) return { success: false };
+    for (let i = 0; i < data.length; i++) {
+      if (!data[i] || String(data[i][1]).trim() !== String(subId).trim()) continue;
+      const oldStatus = String(data[i][10] || "");
+      const freezeDateStr = scriptProperties.getProperty("freeze_date_" + subId);
+      let newEndDate = parseDate(data[i][7]);
+      if (freezeDateStr) {
+        const freezeDt = asDate(freezeDateStr);
+        const today = new Date();
+        if (freezeDt) {
+          const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+          const freezeOnly = new Date(freezeDt.getFullYear(), freezeDt.getMonth(), freezeDt.getDate());
+          const frozenDays = Math.max(0, Math.round((todayOnly - freezeOnly) / 86400000));
+          if (frozenDays > 0) {
+            const currentEnd = asDate(data[i][7]);
+            if (currentEnd) {
+              const extended = new Date(currentEnd);
+              extended.setDate(extended.getDate() + frozenDays);
+              newEndDate = fmtDate(extended);
+              sheet.getRange(i + 2, 8).setValue(newEndDate);
+            }
+          }
+        }
+        scriptProperties.deleteProperty("freeze_date_" + subId);
+      }
+      sheet.getRange(i + 2, 11).setValue("✅ Активний");
+      try { if (data[i][0]) { updateClientBalance(String(data[i][0])); updateClientMetrics(String(data[i][0])); } } catch(e) {}
+      logAction("Telegram", "Розморозка абонемента", "Subscription", subId, oldStatus, "Активний", "new end: " + newEndDate);
+      return { success: true, newEndDate };
+    }
+    return { success: false, error: "not found" };
+  }, "Telegram");
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ✅ v9 NEW: ОСОБИСТИЙ КАБІНЕТ — авторизація через код
+// ═══════════════════════════════════════════════════════════════
+
+function sendClientAuthCode(phone) {
+  if (!phone) return { success: false, error: "phone required" };
+  const normPhone = normalizePhone(phone);
+  const client = findClientByPhone(normPhone);
+  if (!client) return { success: false, error: "client_not_found" };
+  if (!client.telegramId || client.telegramId === "0" || client.telegramId === "") {
+    return { success: false, error: "no_telegram", hint: "Прив'яжіть Telegram" };
+  }
+  const code = String(Math.floor(1000 + Math.random() * 9000));
+  // ✅ v9.2 AUDIT (п.3): код в CacheService с TTL (истекает сам), а не в ScriptProperties
+  CacheService.getScriptCache().put("auth_" + normPhone, code, Math.floor(AUTH_CODE_TTL_MS / 1000));
+  sendCodeMessage(client.telegramId, "🔐 <b>Код входу</b>", code, "⏳ Дійсний 5 хвилин");
+  logAction("web", "Запит коду", "Client", client.clientId, "", normPhone, "");
+  return { success: true, hint: "Код надіслано" };
+}
+
+function verifyClientAuthCode(phone, code) {
+  if (!phone || !code) return { success: false, error: "phone and code required" };
+  const normPhone = normalizePhone(phone);
+  // ✅ v9.2 AUDIT (п.3): код из CacheService; срок жизни контролирует сам кэш (TTL)
+  const cache = CacheService.getScriptCache();
+  const storedCode = cache.get("auth_" + normPhone);
+  if (!storedCode) return { success: false, error: "code_expired" }; // нет в кэше = нет/истёк
+  if (!secureCompare(String(code), storedCode)) {
+    return { success: false, error: "code_invalid" };
+  }
+  cache.remove("auth_" + normPhone);
+  const client = findClientByPhone(normPhone);
+  if (!client) return { success: false, error: "client_not_found" };
+  const clientToken = Utilities.getUuid();
+  CacheService.getScriptCache().put("client_token_" + clientToken, client.clientId, CLIENT_TOKEN_TTL_SECONDS);
+  logAction("web", "Вход в кабінет", "Client", client.clientId, "", "ok", normPhone);
+  return { success: true, clientToken, clientId: client.clientId, expiresIn: CLIENT_TOKEN_TTL_SECONDS };
+}
+
+function isValidClientToken(clientToken, clientId) {
+  if (!clientToken || !clientId) return false;
+  const storedId = CacheService.getScriptCache().get("client_token_" + clientToken);
+  return storedId === String(clientId);
+}
+
+function getClientProfileData(clientId, clientToken) {
+  if (!isValidClientToken(clientToken, clientId)) {
+    return { success: false, unauthorized: true, error: "Invalid token" };
+  }
+  const client = findClientById(clientId);
+  if (!client) return { success: false, error: "client_not_found" };
+  const subs = getClientSubs(clientId);
+  const history = getClientHistory(clientId);
+  const bookings = getClientBookings(clientId);
+  return {
+    success: true,
+    profile: {
+      clientId: client.clientId,
+      name: client.name,
+      phone: normalizePhone(String(client.phone || "")),
+      status: client.status,
+      registered: client.registered,
+      balance: client.balance,
+      visits: client.visits,
+      lastVisit: client.lastVisit,
+      totalPurchases: client.totalPurchases
+    },
+    subs: subs.map(s => ({
+      subId: s.subId,
+      typeName: s.typeName,
+      balance: s.balance,
+      spent: s.spent,
+      startDate: s.startDate,
+      endDate: s.endDate,
+      status: s.status,
+      amount: s.amount
+    })),
+    history: history.slice(-20).reverse(),
+    bookings: bookings.filter(b => !String(b.status).includes("Скасовано")).slice(-10).reverse()
+  };
+}
+
+// ✅ v9 NEW: визначає роль за номером телефону
+// roles: "client" | "admin" | "not_found"
+function checkLoginPhone(phone) {
+  if (!phone) return { success: false, error: "phone required" };
+  const normPhone = normalizePhone(phone);
+  // Перевірка: чи це телефон адміна з налаштувань
+  const adminPhone = scriptProperties.getProperty("ADMIN_PHONE") || "";
+  if (adminPhone && normalizePhone(adminPhone) === normPhone) {
+    // Надсилаємо код адміну в Telegram
+    const code = String(Math.floor(1000 + Math.random() * 9000));
+    // ✅ v9.2 AUDIT (п.3): код админа в CacheService с TTL
+    CacheService.getScriptCache().put("admin_site_code_" + ADMIN_ID, code, Math.floor(AUTH_CODE_TTL_MS / 1000));
+    sendCodeMessage(ADMIN_ID, "🔑 <b>Код для входу на сайт</b>", code, "⏳ Дійсний 5 хвилин. Нікому не передавайте!");
+    return { success: true, role: "admin", hint: "Код надіслано у Telegram" };
+  }
+  // Перевірка: чи є клієнт з таким телефоном
+  const client = findClientByPhone(normPhone);
+  if (!client) return { success: false, role: "not_found", error: "Номер не знайдено" };
+  if (!client.telegramId || client.telegramId === "0" || client.telegramId === "") {
+    return { success: false, role: "no_telegram", error: "Telegram не прив'язано" };
+  }
+  // Надсилаємо код клієнту
+  const code = String(Math.floor(1000 + Math.random() * 9000));
+  // ✅ v9.2 AUDIT (п.3): код клиента в CacheService с TTL
+  CacheService.getScriptCache().put("auth_" + normPhone, code, Math.floor(AUTH_CODE_TTL_MS / 1000));
+  sendCodeMessage(client.telegramId, "🔐 <b>Ваш код для входу в Особистий кабінет</b>", code, "⏳ Дійсний 5 хвилин");
+  logAction("web", "Запит коду входу", "Client", client.clientId, "", normPhone, "");
+  return { success: true, role: "client", hint: "Код надіслано у Telegram" };
+}
+
+// ✅ v9 NEW: верифікація коду адміна (з сайту)
+function verifyAdminSiteCode(adminIdStr, code) {
+  if (!code) return { success: false, error: "code required" };
+  const adminId = adminIdStr || String(ADMIN_ID);
+  // ✅ v9.2 AUDIT (п.3): код из CacheService; TTL контролирует срок
+  const cache = CacheService.getScriptCache();
+  const storedCode = cache.get("admin_site_code_" + adminId);
+  if (!storedCode) return { success: false, error: "code_expired" };
+  if (!secureCompare(String(code), storedCode)) return { success: false, error: "code_invalid" };
+  cache.remove("admin_site_code_" + adminId);
+  // Видаємо CRM-токен адміна через існуючий механізм
+  const token = createAdminSession();
+  logAction("web", "Вхід адміна через сайт", "Admin", adminId, "", "ok", "site_code");
+  return { success: true, role: "admin", token, expiresIn: CRM_SESSION_TTL_SECONDS };
+}
+
+// ─────────────────────── STATE ─────────────────────────────────
+
+function getState(userId) {
+  try { const s = scriptProperties.getProperty('user_' + userId); return s ? JSON.parse(s) : null; }
+  catch(e) { return null; }
+}
+
+function setState(userId, state) {
+  try { scriptProperties.setProperty('user_' + userId, JSON.stringify(state)); } catch(e) {}
+}
+
+function deleteState(userId) { scriptProperties.deleteProperty('user_' + userId); }
+
+// ─────────────────────── WEBHOOK ───────────────────────────────
+
+function setWebhook() {
+  requireConfig("BOT_TOKEN");
+  requireConfig("WEBAPP_URL");
+  const url = "https://api.telegram.org/bot" + BOT_TOKEN + "/setWebhook?url=" + WEBAPP_URL;
+  try { UrlFetchApp.fetch(url); Logger.log("✅ Webhook set"); }
+  catch(e) { Logger.log("❌ Webhook: " + e); }
+}
+
+function doPost(e) {
+  try {
+    const update = JSON.parse(e.postData.contents);
+    if (update.message) {
+      try { handleMessage(update.message); }
+      catch (mErr) {
+        logError("handleMessage", mErr, "telegram");
+        try { sendMessage(update.message.chat.id, "⚠️ Сталася помилка. Спробуйте ще раз або натисніть /start."); } catch (_) {}
+      }
+    }
+    if (update.callback_query) {
+      try { handleCallback(update.callback_query); }
+      catch (cErr) {
+        logError("handleCallback", cErr, "telegram");
+        try { answerCallback(update.callback_query.id, "⚠️ Помилка"); } catch (_) {}
+        try { sendMessage(update.callback_query.message.chat.id, "⚠️ Сталася помилка на цьому кроці. Натисніть /start і спробуйте знову."); } catch (_) {}
+      }
+    }
+  } catch(err) { Logger.log("doPost: " + err); logError("doPost", err, "telegram"); }
+}
+
+// ─────────────────────── MESSAGE HANDLER ───────────────────────
+
+function handleMessage(message) {
+  const chatId    = message.chat.id;
+  const userId    = message.from.id;
+  const text      = message.text || "";
+  const firstName = message.from.first_name || "Користувач";
+
+  if (message.contact) {
+    const phone = message.contact.phone_number || "";
+    const existingByPhone = findClientByPhone(phone);
+    if (existingByPhone) {
+      const linked = linkTelegramId(phone, userId);
+      if (linked) Logger.log("🔗 Прив'язано TG ID до " + existingByPhone.clientId);
+      const updatedClient = findClientByTelegram(userId);
+      if (updatedClient) {
+        sendMessage(chatId, "✅ <b>Ваш акаунт знайдено!</b>\n\n🆔 " + updatedClient.clientId + "\n👤 " + updatedClient.name + "\n💰 " + fmt(updatedClient.balance) + " грн\n\nТепер ви можете користуватись ботом!");
+        showMainMenu(chatId, updatedClient);
+        return;
+      }
+    }
+    setState(userId, { action: "registration", step: 1, phone: phone });
+    sendMessage(chatId, "📝 <b>Введіть ПІБ:</b>\n\n<i>Приклад: Іванов Іван Іванович</i>");
+    return;
+  }
+
+  if (text === "/start") { deleteState(userId); sendWelcomeMessage(chatId, userId, firstName); return; }
+  if (text === "/cancel") {
+    deleteState(userId);
+    const client = findClientByTelegram(userId);
+    if (client) showMainMenu(chatId, client); else sendMessage(chatId, "❌ Скасовано");
+    return;
+  }
+  if (userId === ADMIN_ID && text === "/admin") { showAdminMenu(chatId); return; }
+  if (userId === ADMIN_ID && text === "/syncbalances") {
+    const count = syncAllBalances();
+    sendMessage(chatId, "✅ Синхронізовано балансів: " + count + " клієнтів");
+    return;
+  }
+
+  const client = findClientByTelegram(userId);
+  const state  = getState(userId);
+
+  if (state && state.action === "registration" && state.step === 1) {
+    try {
+      const clientId = autoRegisterClient(text, state.phone, String(userId), "Telegram");
+      sendMessage(chatId, "✅ <b>Реєстрація готова!</b>\n\n🆔 " + clientId + "\n👤 " + text + "\n📱 " + state.phone);
+      const newClient = findClientByTelegram(userId);
+      if (newClient) showMainMenu(chatId, newClient);
+    } catch(e) { sendMessage(chatId, "❌ Помилка: " + e.toString()); }
+    deleteState(userId);
+    return;
+  }
+
+  if (!client) { sendMessage(chatId, "❌ Ви не зареєстровані!\n\nВикористовуйте /start"); return; }
+
+  if (text === "📋 Мої абонементи") {
+    const subs = getClientSubs(client.clientId);
+    if (!subs.length) { sendMessage(chatId, "📋 <b>Абонементи не знайдені</b>"); return; }
+    subs.forEach((s, i) => {
+      const msg =
+        "📋 <b>" + (i+1) + ". " + s.typeName + "</b>\n" +
+        "🆔 " + s.subId + "\n" +
+        "💰 Залишок: <b>" + fmt(s.balance) + " грн</b>\n" +
+        "✅ Витрачено: " + fmt(s.spent) + " грн\n" +
+        "📅 До: " + s.endDate + "\n" +
+        s.status;
+      const buttons = [];
+      if (s.status.includes("Активний")) {
+        buttons.push([{ text: "❄️ Заморозити",   callback_data: "sub_freeze_"    + s.subId }]);
+        buttons.push([{ text: "❌ Деактивувати", callback_data: "sub_deactivate_" + s.subId }]);
+      } else if (s.status.includes("Заморожений")) {
+        buttons.push([{ text: "✅ Активувати",    callback_data: "sub_activate_"  + s.subId }]);
+        buttons.push([{ text: "❌ Деактивувати", callback_data: "sub_deactivate_" + s.subId }]);
+      } else {
+        buttons.push([{ text: "✅ Активувати",    callback_data: "sub_activate_"  + s.subId }]);
+      }
+      sendMessage(chatId, msg, buttons.length ? createInlineKeyboard(buttons) : null);
+    });
+    return;
+  }
+
+  if (text === "💰 Прайс") {
+    const priceCarTypes = getCarTypesList();
+    sendMessage(chatId, "🚗 <b>Оберіть тип авто:</b>", createInlineKeyboard(
+      priceCarTypes.map(ct => [{ text: botCarTypeEmoji(ct) + " " + ct, callback_data: "price_" + ct }])
+    ));
+    return;
+  }
+
+  if (text === "📅 Записатися") {
+    deleteState(userId);
+    const carTypes = getCarTypesList();
+    if (!carTypes.length) { sendMessage(chatId, "❌ Прайс порожній. Зверніться: " + PHONE); return; }
+    const btns = carTypes.map(ct => [{ text: botCarTypeEmoji(ct) + " " + ct, callback_data: "bk_car_" + ct }]);
+    sendMessage(chatId, "🚗 <b>Оберіть тип авто:</b>", createInlineKeyboard(btns));
+    return;
+  }
+
+  if (text === "👤 Мій профіль") {
+    const subs = getClientSubs(client.clientId);
+    const activeSubs = subs.filter(s => String(s.status).includes("Активний") || String(s.status).includes("✅"));
+    let msg = "👤 <b>ПРОФІЛЬ</b>\n\n🆔 " + client.clientId + "\n👤 " + client.name + "\n📱 " + client.phone + "\n💰 Баланс: <b>" + fmt(client.balance) + " грн</b>";
+    if (activeSubs.length) {
+      msg += "\n\n📋 <b>Активні абонементи:</b>";
+      activeSubs.forEach(s => { msg += "\n• " + s.typeName + ": " + fmt(s.balance) + " грн"; });
+    }
+    sendMessage(chatId, msg);
+    return;
+  }
+
+  if (text === "📞 Контакти") { sendMessage(chatId, "📞 <b>КОНТАКТИ</b>\n\n📱 " + PHONE + "\n📍 " + ADDRESS); return; }
+
+  if (text === "💎 Абонементи") {
+    const types = getTypes();
+    let msg = "💎 <b>АБОНЕМЕНТИ:</b>\n\n";
+    const buttons = [];
+    types.forEach(t => {
+      msg += "<b>" + t.name + "</b>\n💰 " + t.price + " грн | " + t.amount + " грн на рахунок\n⏱ " + t.months + " міс\n\n";
+      buttons.push([{ text: "Замовити " + t.name, callback_data: "order_" + t.id }]);
+    });
+    sendMessage(chatId, msg, createInlineKeyboard(buttons));
+    return;
+  }
+
+  if (text === "📊 Статистика") {
+    const subs    = getClientSubs(client.clientId);
+    const history = getClientHistory(client.clientId);
+    let totalSpent = 0;
+    history.forEach(h => { totalSpent += parseFloat(h.cost) || 0; });
+    const activeSubs = subs.filter(s => String(s.status).includes("Активний") || String(s.status).includes("✅"));
+    sendMessage(chatId,
+      "📊 <b>СТАТИСТИКА</b>\n\n" +
+      "📋 Абонементів: " + subs.length + "\n" +
+      "✅ Активних: " + activeSubs.length + "\n" +
+      "💰 Поточний баланс: " + fmt(client.balance) + " грн\n" +
+      "✅ Візитів: " + history.length + "\n" +
+      "💸 Витрачено всього: " + fmt(totalSpent) + " грн"
+    );
+    return;
+  }
+
+  if (userId === ADMIN_ID) {
+    if (text === "➕ Додати клієнта")          { setState(userId, { action: "add_client", step: 1 }); sendMessage(chatId, "➕ <b>ПІБ:</b>"); return; }
+    if (text === "🎫 Продати абонемент")        { setState(userId, { action: "sell_sub", step: 1 }); sendMessage(chatId, "🎫 <b>ID клієнта:</b>"); return; }
+    if (text === "✅ Відмітити відвідування")   { setState(userId, { action: "mark_visit", step: 1 }); sendMessage(chatId, "✅ <b>ID клієнта:</b>"); return; }
+    if (text === "👥 Список клієнтів")          { showClientsList(chatId); return; }
+    if (text === "📊 Аналітика")                { showAnalytics(chatId); return; }
+    if (text === "🔒 Блокування дат")           { showBlockDatesMenu(chatId); return; }
+    // ✅ v9: команда /crmcode — адмін отримує код для входу на сайт
+    if (text === "/crmcode" || text === "🔑 Код для сайту") {
+      const code = sendAdminCrmCode(userId);
+      sendCodeMessage(chatId, "🔑 <b>Ваш код для входу на сайт</b>", code, "⏳ Дійсний 5 хвилин. Нікому не передавайте!");
+      return;
+    }
+  }
+   
+  if (state) {
+     if (state.action === "booking_plate") {
+      const plateNumber = (text === "-" || text.startsWith("/")) ? "" : text.toUpperCase().trim();
+      const bookingId = saveBooking(
+        state.date, state.time, state.box,
+        client.clientId, client.name, client.phone,
+        state.service, "Telegram", "", "Telegram " + userId, plateNumber
+      );
+      deleteState(userId);
+      if (bookingId) {
+        const plateDisplay = plateNumber ? "🚗 " + plateNumber + "\n" : "";
+        sendMessage(chatId,
+          "✅ <b>Запис підтверджено!</b>\n\n" +
+          "🆔 " + bookingId + "\n" +
+          "📅 " + state.date + " · " + state.time + "\n" +
+          "🏠 " + state.box + "\n" +
+          "🔧 " + state.service + "\n" +
+          plateDisplay +
+          "📱 " + client.phone + "\n\n" +
+          "Чекаємо вас! 🚗"
+        );
+        sendMessage(ADMIN_ID,
+          "📅 <b>НОВИЙ ЗАПИС (Telegram)</b>\n\n" +
+          "👤 " + client.name + "\n📱 " + client.phone + "\n" +
+          (plateNumber ? "🚗 " + plateNumber + "\n" : "") +
+          "📅 " + state.date + " · " + state.time + "\n" +
+          "🏠 " + state.box + "\n🔧 " + state.service
+        );
+      } else {
+        sendMessage(chatId, "❌ На жаль, цей час вже зайнятий. Спробуйте інший час або дату.");
+      }
+      return;
+    } 
+    if (userId === ADMIN_ID) {
+      if (state.action === "add_client")  handleAddClient(chatId, userId, text, state);
+      if (state.action === "sell_sub")    handleSellSub(chatId, userId, text, state);
+      if (state.action === "mark_visit")  handleMarkVisit(chatId, userId, text, state);
+    }
+    // booking flow повністю на inline-кнопках — текстовий ввід тут не потрібен
+    return;
+  }
+
+  sendMessage(chatId, "Використовуй меню 👇");
+}
+
+// ─────────────────────── CALLBACK HANDLER ──────────────────────
+
+function handleCallback(callbackQuery) {
+  const chatId = callbackQuery.message.chat.id;
+  const userId = callbackQuery.from.id;
+  const data   = callbackQuery.data;
+  answerCallback(callbackQuery.id);
+
+  const client = findClientByTelegram(userId);
+  const state  = getState(userId);
+
+  // ✅ NEW: адмін перемикає блокування дати (захист від подвійних записів)
+  if (userId === ADMIN_ID && data.startsWith("blkdate_")) {
+    const ds = data.replace("blkdate_", "");
+    const res = toggleBlockDate(ds, "Telegram admin " + userId);
+    answerCallback(callbackQuery.id, res.blocked ? "🔒 " + ds + " заблоковано" : "🟢 " + ds + " відкрито");
+    try {
+      editMessageReplyMarkup(chatId, callbackQuery.message.message_id, createInlineKeyboard(_blockDatesKeyboardRows()));
+    } catch (e) { showBlockDatesMenu(chatId); }
+    return;
+  }
+
+    if (data.startsWith("bk_car_")) {
+    const carType = data.replace("bk_car_", "");
+    setState(userId, { action: "booking", carType });
+    const now = new Date();
+    const buttons = [];
+    for (let i = 0; i < 10; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
+      const dateStr = Utilities.formatDate(d, TZ, "dd.MM.yyyy");
+      const dayName = DAY_NAMES[d.getDay()];
+      if (isDateBlocked(dateStr)) continue; // ✅ закриті дати не показуємо
+      if (!getTimesForDate(dateStr).length) continue;
+      buttons.push([{ text: "📅 " + dayName + " · " + dateStr, callback_data: "book_date_" + dateStr }]);
+    }
+    if (!buttons.length) { sendMessage(chatId, "❌ Нема доступних дат. Зверніться: " + PHONE); return; }
+    sendMessage(chatId, "🚗 <b>" + carType + "</b>\n\n📅 <b>Оберіть дату запису:</b>", createInlineKeyboard(buttons));
+    return;
+  }
+ if (data.startsWith("book_box_")) {
+    const boxName = data.replace("book_box_", "").replace(/_/g, " ");
+    if (!state?.date || !state?.time || !client) { sendMessage(chatId, "❌ Помилка. Почніть знову."); return; }
+    // ✅ v11: якщо тип авто вже вибрано — показуємо КАТЕГОРІЇ замість плаского списку послуг
+    if (state.carType) {
+      const priceServices = getPriceByType(state.carType);
+      const cats = [];
+      Object.values(priceServices).forEach(s => {
+        const c = s.category || "Інше";
+        if (cats.indexOf(c) === -1) cats.push(c);
+      });
+      if (!cats.length) cats.push("Мийка");
+      setState(userId, { ...state, box: boxName, action: "booking_category", cats });
+      const btns = cats.map((name, i) => ([{ text: name, callback_data: "bcat" + i }]));
+      sendMessage(chatId,
+        "🏠 <b>" + boxName + "</b> · " + state.time + " · " + state.date + "\n\n📂 <b>Оберіть категорію для " + state.carType + ":</b>",
+        createInlineKeyboard(btns)
+      );
+      return;
+    }
+    
+// Старий флоу (fallback): тип авто вибирається після бокса
+    setState(userId, { ...state, box: boxName, action: "booking_cartype" });
+    const fallbackCarTypes = getCarTypesList();
+    sendMessage(chatId,
+      "🏠 <b>" + boxName + "</b> · " + state.time + " · " + state.date + "\n\n🚗 <b>Оберіть тип авто:</b>",
+      createInlineKeyboard(fallbackCarTypes.map(ct => [{ text: botCarTypeEmoji(ct) + " " + ct, callback_data: "book_cartype_" + ct }]))
+    );
+    return;
+  }
+  if (data.startsWith("price_")) {
+    const carType = data.replace("price_", "");
+    const services = getPriceByType(carType);
+    if (!Object.keys(services).length) { sendMessage(chatId, "❌ Послуги не знайдені"); return; }
+    const byCat = {};
+    Object.values(services).forEach(s => {
+      const c = s.category || "Інше";
+      if (!byCat[c]) byCat[c] = [];
+      byCat[c].push(s);
+    });
+    let msg = "🚗 <b>" + carType + "</b>\n\n";
+    Object.keys(byCat).forEach(cat => {
+      msg += "📂 <b>" + cat + "</b>\n";
+      byCat[cat].forEach(s => { msg += "• " + s.name + " — <b>" + s.price + " грн</b>\n"; });
+      msg += "\n";
+    });
+    sendMessage(chatId, msg);
+    return;
+  }
+
+  if (data.startsWith("book_date_")) {
+    const dateStr = data.replace("book_date_", "");
+    if (isDateBlocked(dateStr)) { sendMessage(chatId, "🔒 Ця дата закрита для запису. Оберіть іншу дату."); return; }
+    const todayStr = Utilities.formatDate(new Date(), TZ, "dd.MM.yyyy");
+    const isToday  = (dateStr === todayStr);
+    let allTimes   = getTimesForDate(dateStr);
+    if (isToday) {
+      const now = new Date();
+      const curH = parseInt(Utilities.formatDate(now, TZ, "HH"));
+      const curM = parseInt(Utilities.formatDate(now, TZ, "mm"));
+      const minHour = curM > 0 ? curH + 1 : curH;
+      allTimes = allTimes.filter(t => parseInt(t.split(':')[0]) >= minHour);
+    }
+    if (!allTimes.length) { sendMessage(chatId, "❌ На цю дату нема доступного часу. Оберіть іншу дату."); return; }
+    setState(userId, { ...(state || {}), action: "booking", date: dateStr });
+    const buttons = allTimes.map(t => [{ text: "⏰ " + t, callback_data: "book_time_" + t }]);
+    sendMessage(chatId, "📅 " + dateStr + "\n\n⏰ <b>Оберіть час:</b>", createInlineKeyboard(buttons));
+    return;
+  }
+
+  if (data.startsWith("book_time_")) {
+    const timeStr = data.replace("book_time_", "");
+    if (!state?.date) { sendMessage(chatId, "❌ Помилка. Почніть знову."); return; }
+    const boxes = getAvailableBoxes(state.date, timeStr);
+    if (!boxes.length) { sendMessage(chatId, "❌ Нема вільних боксів. Оберіть інший час."); return; }
+    setState(userId, { ...state, time: timeStr });
+    const buttons = boxes.map(b => [{ text: "🏠 " + b, callback_data: "book_box_" + b.replace(/ /g, "_") }]);
+    sendMessage(chatId, "⏰ " + timeStr + "\n\n🏠 <b>Оберіть бокс:</b>", createInlineKeyboard(buttons));
+    return;
+  }
+
+
+
+  // ✅ v9 NEW: вибір типу авто → показуємо послуги кнопками
+ if (data.startsWith("book_cartype_")) {
+    const carType = data.replace("book_cartype_", "");
+    if (!state?.date || !state?.time || !state?.box || !client) {
+      sendMessage(chatId, "❌ Помилка. Почніть знову."); return;
+    }
+    const priceServices = getPriceByType(carType);
+    const cats = [];
+    Object.values(priceServices).forEach(s => {
+      const c = s.category || "Інше";
+      if (cats.indexOf(c) === -1) cats.push(c);
+    });
+    if (!cats.length) cats.push("Мийка");
+    setState(userId, { ...state, carType, action: "booking_category", cats });
+    const btns = cats.map((name, i) => ([{ text: name, callback_data: "bcat" + i }]));
+    sendMessage(chatId, "📂 <b>Оберіть категорію для " + carType + ":</b>", createInlineKeyboard(btns));
+    return;
+  }
+
+// ✅ v11 NEW: вибір категорії → показуємо послуги всередині неї
+  if (data.startsWith("bcat")) {
+    const catIdx = parseInt(data.slice(4), 10);
+    if (!state?.cats || !state?.carType) { sendMessage(chatId, "❌ Помилка. Почніть знову."); return; }
+    const category = state.cats[catIdx];
+    const priceServices = getPriceByType(state.carType);
+    const svcs = Object.values(priceServices).filter(s => (s.category || "Інше") === category);
+    if (!svcs.length) { sendMessage(chatId, "❌ Немає послуг у цій категорії"); return; }
+    setState(userId, { ...state, action: "booking_service", category, svcs: svcs.map(s => s.name), prices: svcs.map(s => s.price) });
+    const btns = svcs.map((s, i) => ([{ text: s.name + " · " + s.price + " грн", callback_data: "bsvc" + i }]));
+    btns.push([{ text: "← Інша категорія", callback_data: "bback_cat" }]);
+    sendMessage(chatId, "📂 <b>" + category + "</b>\n\n🔧 <b>Оберіть послугу:</b>", createInlineKeyboard(btns));
+    return;
+  }
+
+  // ✅ v11 NEW: повернутись до списку категорій
+  if (data === "bback_cat") {
+    if (!state?.cats || !state?.carType) { sendMessage(chatId, "❌ Помилка. Почніть знову."); return; }
+    const btns = state.cats.map((name, i) => ([{ text: name, callback_data: "bcat" + i }]));
+    sendMessage(chatId, "📂 <b>Оберіть категорію для " + state.carType + ":</b>", createInlineKeyboard(btns));
+    return;
+  }
+  // ✅ v9 NEW: вибір послуги → підтвердження і збереження запису
+    if (data.startsWith("bsvc")) {
+    const svcIdx = parseInt(data.slice(4), 10);
+    if (!state?.date || !state?.time || !state?.box || !client) {
+      sendMessage(chatId, "❌ Помилка. Почніть знову."); return;
+    }
+    const svcs = state.svcs || [];
+    const service = svcs[svcIdx] || "Детейлінг";
+    const fullService = service + (state.carType ? " | " + state.carType : "");
+ 
+    // Просимо номер авто перед збереженням
+    setState(userId, { ...state, service: fullService, action: "booking_plate" });
+    sendMessage(chatId,
+      "🔧 <b>" + fullService + "</b>\n\n" +
+      "🚗 Введіть держ. номер авто:\n\n" +
+      "<i>Приклад: АА1234ВВ або AB1234CD</i>\n" +
+      "<i>Або надішліть <b>-</b> щоб пропустити</i>"
+    );
+    return;
+  }
+
+
+  if (data.startsWith("order_")) {
+    if (!client) { sendMessage(chatId, "❌ Ви не зареєстровані"); return; }
+    const typeId = data.replace("order_", "");
+    const type = getTypes().find(t => String(t.id) === String(typeId));
+    const requestId = saveSubscriptionRequest(client.clientId, client.name, String(client.telegramId || ""), typeId, type?.name || typeId, type?.amount || 0);
+    if (requestId) {
+      sendMessage(ADMIN_ID,
+        "🔔 <b>НОВА ЗАЯВКА НА АБОНЕМЕНТ!</b>\n\n👤 " + client.name + "\n🆔 " + client.clientId + "\n📱 " + client.phone + "\n💎 <b>" + (type?.name || typeId) + "</b>\n💰 " + (type?.amount || 0) + " грн\n📅 ID: " + requestId,
+        createInlineKeyboard([[
+          { text: "✅ Підтвердити", callback_data: "confirm_sub_" + requestId },
+          { text: "❌ Відхилити",   callback_data: "reject_sub_"  + requestId }
+        ]])
+      );
+      sendMessage(chatId, "✅ Заявка відправлена!\n\n💎 " + (type?.name || typeId) + "\n⏳ Чекаємо підтвердження...");
+    } else {
+      sendMessage(chatId, "❌ Помилка при створенні заявки");
+    }
+    return;
+  }
+
+  if (data.startsWith("confirm_sub_")) {
+    const requestId = data.replace("confirm_sub_", "");
+    const ok = confirmSubscriptionRequest(requestId, "Telegram admin " + userId);
+    answerCallback(callbackQuery.id, ok ? "✅ Підтверджено!" : "❌ Помилка");
+    sendMessage(ADMIN_ID, ok ? "✅ Заявка " + requestId + " підтверджена!" : "❌ Помилка підтвердження " + requestId);
+    if (ok) {
+      const req = getSubscriptionRequests().find(r => r.requestId === requestId);
+      if (req?.telegramId && req.telegramId !== 'undefined')
+        sendMessage(req.telegramId, "🎉 <b>Абонемент активовано!</b>\n\n💎 " + req.typeName + "\n💰 " + req.amount + " грн");
+    }
+    return;
+  }
+
+  if (data.startsWith("reject_sub_")) {
+    const requestId = data.replace("reject_sub_", "");
+    const ok = updateSubscriptionRequestStatus(requestId, "❌ Відхилена", "Telegram admin " + userId, "");
+    answerCallback(callbackQuery.id, "❌ Відхилено");
+    sendMessage(ADMIN_ID, "❌ Заявка " + requestId + " відхилена");
+    if (ok) {
+      const req = getSubscriptionRequests().find(r => r.requestId === requestId);
+      if (req?.telegramId && req.telegramId !== 'undefined')
+        sendMessage(req.telegramId, "❌ <b>Заявку відхилено</b>\n\n" + req.typeName + "\n\n💬 Зв'яжіться: " + PHONE);
+    }
+    return;
+  }
+
+  if (data.startsWith("sell_")) {
+    const parts = data.replace("sell_", "").split("_");
+    const clientId = parts[0];
+    const typeId   = parts.slice(1).join("_");
+    const tClient  = findClientById(clientId);
+    const type     = getTypes().find(t => String(t.id) === String(typeId));
+    if (!type || !tClient) { sendMessage(chatId, "❌ Помилка: клієнт або тип не знайдено"); return; }
+    try {
+      const sold = sellSubscription(clientId, typeId, "Telegram admin " + userId, { paymentMethod: "Telegram" });
+      if (!sold?.success) { sendMessage(chatId, "❌ Помилка продажу"); return; }
+      sendMessage(chatId, "✅ <b>Продано!</b>\n💎 " + type.name + "\n💰 " + sold.amount + " грн\n👤 " + tClient.name + "\n💳 Новий баланс: " + fmt(sold.newBalance) + " грн");
+      if (tClient.telegramId && tClient.telegramId !== '0' && tClient.telegramId !== '')
+        sendMessage(tClient.telegramId, "🎉 <b>Ви придбали " + type.name + "!</b>\n\n💰 " + sold.amount + " грн на рахунку\n📅 До: " + sold.endDate + "\n\nДякуємо! 🚗");
+    } catch(e) { sendMessage(chatId, "❌ Помилка: " + e); }
+    return;
+  }
+
+  if (data.startsWith("visit_sub_")) {
+    const [clientId, subId] = data.replace("visit_sub_", "").split("|");
+    const curState = getState(userId);
+    if (curState?.action === "mark_visit") {
+      setState(userId, { ...curState, step: 2, clientId, subId });
+      sendMessage(chatId, "🎫 <b>" + subId + "</b>\n\n🔧 <b>Послуга:</b>");
+    }
+    return;
+  }
+  if (data.startsWith("visit_cash_")) {
+    const clientId = data.replace("visit_cash_", "");
+    const curState = getState(userId);
+    if (curState?.action === "mark_visit") {
+      setState(userId, { ...curState, step: 2, clientId, subId: "" });
+      sendMessage(chatId, "💵 <b>Готівка</b>\n\n🔧 <b>Послуга:</b>");
+    }
+    return;
+  }
+  // ✅ v9: Заморозка зберігає дату і продовжує абонемент при розморозці
+  if (data.startsWith("sub_freeze_")) {
+    const subId = data.replace("sub_freeze_", "");
+    const result = freezeSubscription(subId);
+    answerCallback(callbackQuery.id, result.success ? "❄️ Заморожено" : "❌ Помилка");
+    sendMessage(chatId, result.success
+      ? "❄️ <b>Абонемент заморожено</b>\n\nID: " + subId + "\n📅 Дата заморозки: " + result.freezeDate + "\n\nПри активації дата закінчення буде автоматично продовжена на кількість днів заморозки."
+      : "❌ " + (result.error || "Не вдалося заморозити абонемент"));
+    return;
+  }
+
+  if (data.startsWith("sub_activate_")) {
+    const subId = data.replace("sub_activate_", "");
+    const result = activateSubscription(subId);
+    answerCallback(callbackQuery.id, result.success ? "✅ Активовано" : "❌ Помилка");
+    sendMessage(chatId, result.success
+      ? "✅ <b>Абонемент активовано</b>\n\nID: " + subId + (result.newEndDate ? "\n📅 Нова дата закінчення: " + result.newEndDate : "")
+      : "❌ " + (result.error || "Не вдалося активувати абонемент"));
+    return;
+  }
+
+  if (data.startsWith("sub_deactivate_")) {
+    const subId = data.replace("sub_deactivate_", "");
+    const ok = updateSubStatusBot(subId, "❌ Неактивний");
+    answerCallback(callbackQuery.id, ok ? "❌ Деактивовано" : "❌ Помилка");
+    sendMessage(chatId, ok
+      ? "❌ <b>Абонемент деактивовано</b>\n\nID: " + subId
+      : "❌ Не вдалося деактивувати абонемент");
+    return;
+  }
+}
+
+// ─────────────────────── ADMIN HANDLERS ────────────────────────
+
+function handleAddClient(chatId, userId, text, state) {
+  if (state.step === 1) {
+    setState(userId, { action: "add_client", step: 2, name: text });
+    sendMessage(chatId, "📱 <b>Телефон:</b>");
+  } else if (state.step === 2) {
+    setState(userId, { action: "add_client", step: 3, name: state.name, phone: text });
+    sendMessage(chatId, "💬 <b>Telegram ID (або '-'):</b>");
+  } else if (state.step === 3) {
+    try {
+      const clientId = autoRegisterClient(state.name, state.phone, text === "-" ? "" : text, "Администратор");
+      deleteState(userId);
+      sendMessage(chatId, "✅ " + clientId + " — " + state.name + " — додано!");
+      showAdminMenu(chatId);
+    } catch(e) { sendMessage(chatId, "❌ Помилка: " + e); }
+  }
+}
+
+function handleSellSub(chatId, userId, text, state) {
+  if (state.step === 1) {
+    const c = findClientById(text.trim());
+    if (!c) { sendMessage(chatId, "❌ Клієнт " + text + " не знайдений"); return; }
+    setState(userId, { action: "sell_sub", step: 2, clientId: text.trim() });
+    const types = getTypes();
+    if (!types.length) { sendMessage(chatId, "❌ Типи абонементів не знайдено"); return; }
+    const buttons = types.map(t => [{ text: "💎 " + t.name + " — " + t.amount + " грн", callback_data: "sell_" + text.trim() + "_" + t.id }]);
+    sendMessage(chatId, "👤 " + c.name + "\n💰 Поточний баланс: " + fmt(c.balance) + " грн\n\n💎 Оберіть тип:", createInlineKeyboard(buttons));
+  }
+}
+
+function handleMarkVisit(chatId, userId, text, state) {
+  if (state.step === 1) {
+    const c = findClientById(text.trim());
+    if (!c) { sendMessage(chatId, "❌ Клієнт не знайдений"); return; }
+    const subs = getClientSubs(text.trim()).filter(s => String(s.status).includes("Активний") || String(s.status).includes("✅"));
+    setState(userId, { action: "mark_visit", step: 2, clientId: text.trim(), clientName: c.name });
+    const buttons = subs.map((s, i) => [{ text: (i+1) + ". " + s.typeName + " | 💰 " + fmt(s.balance) + " грн", callback_data: "visit_sub_" + text.trim() + "|" + s.subId }]);
+    buttons.push([{ text: "💵 Готівка (без абонементу)", callback_data: "visit_cash_" + text.trim() }]);
+    sendMessage(chatId, "👤 <b>" + c.name + "</b>\n💰 Загальний баланс: " + fmt(c.balance) + " грн\n\n🎫 <b>Оберіть абонемент або готівку:</b>", createInlineKeyboard(buttons));
+  } else if (state.step === 2) {
+    setState(userId, { ...state, step: 3, service: text });
+    sendMessage(chatId, "💰 <b>Сума списання (грн):</b>");
+  } else if (state.step === 3) {
+    const cost = parseFloat(text) || 0;
+    if (cost <= 0) { sendMessage(chatId, "❌ Введіть суму більше 0"); return; }
+    setState(userId, { ...state, step: 4, cost });
+    sendMessage(chatId, "📝 <b>Коментар</b> (або '-'):");
+    } else if (state.step === 4) {
+    try {
+      let visit;
+      if (state.subId) {
+        visit = markVisit(state.clientId, state.subId, state.service, state.cost, text === "-" ? "" : text, "Telegram admin " + userId);
+        if (!visit?.success) {
+          sendMessage(chatId, "❌ Недостатньо коштів на абонементі!\nПеревірте баланс, або оберіть «💵 Готівка».");
+          deleteState(userId);
+          return;
+        }
+      } else {
+        visit = markVisitCash(state.clientId, state.clientName, state.service, state.cost, text === "-" ? "" : text, "Telegram admin " + userId);
+      }
+      deleteState(userId);
+      sendMessage(chatId,
+        "✅ <b>Відвідування записано!</b>\n\n" +
+        "👤 " + state.clientName + "\n" +
+        "🔧 " + state.service + "\n" +
+        (state.subId ? "💸 Списано: " + state.cost + " грн\n💰 Залишок на рахунку: " + fmt(visit.afterBalance) + " грн" : "💵 Оплачено готівкою: " + state.cost + " грн")
+      );
+      const clientData = findClientById(state.clientId);
+      if (clientData?.telegramId && clientData.telegramId !== '0' && clientData.telegramId !== '') {
+        sendMessage(clientData.telegramId,
+          "🚗 <b>Відвідування зафіксовано!</b>\n\n" +
+          "🔧 " + state.service + "\n" +
+          (state.subId ? "💸 Списано: " + state.cost + " грн\n💰 Залишок: " + fmt(visit.afterBalance) + " грн" : "💵 Оплачено готівкою: " + state.cost + " грн")
+        );
+      }
+      showAdminMenu(chatId);
+    } catch(e) { sendMessage(chatId, "❌ Помилка: " + e); }
+  }
+}
+
+// ─────────────────────── ADMIN VIEWS ───────────────────────────
+
+function showClientsList(chatId) {
+  const data = safeGetRangeValues(getSheet(SHEET_CLIENTS), 2, 1, null, 13);
+  const balMap = buildClientBalanceMap(); // ✅ v9.2 AUDIT (п.4): один проход вместо N
+  let msg = "👥 <b>КЛІЄНТИ:</b>\n\n", count = 0;
+  if (data && data.length) {
+    data.forEach(r => {
+      if (r && r[0]) {
+        count++;
+        const liveBalance = balMap[String(r[0]).trim()] || 0;
+        msg += count + ". <b>" + r[1] + "</b> (" + r[0] + ")\n📱 " + r[2] + "\n💰 " + fmt(liveBalance) + " грн\n\n";
+      }
+    });
+  }
+  if (!count) msg = "❌ Клієнтів не знайдено";
+  sendMessage(chatId, msg);
+}
+
+function showAnalytics(chatId) {
+  const rows = calculateAnalytics();
+  updateAnalyticsSheet();
+  sendMessage(chatId, "📊 <b>АНАЛІТИКА</b>\n\n" + rows.map(r => "• " + r[0] + ": <b>" + r[1] + "</b>").join("\n"));
+}
+
+function sendWelcomeMessage(chatId, userId, firstName) {
+  const client = findClientByTelegram(userId);
+  if (client) { showMainMenu(chatId, client); return; }
+  if (userId === ADMIN_ID) { showAdminMenu(chatId); return; }
+  sendMessage(chatId,
+    "🚗 <b>1333 Car Center</b>\n\n" +
+    "Якщо ви реєструвались через сайт — натисніть кнопку нижче, і ваш Telegram буде автоматично прив'язаний!\n\n" +
+    "Натисніть 👇 щоб продовжити:",
+    createReplyKeyboard([[{ text: "📱 Поділитись номером", request_contact: true }]])
+  );
+}
+
+function showMainMenu(chatId, client) {
+  sendMessage(chatId, "👋 Привіт, " + client.name + "!\n💰 Баланс: <b>" + fmt(client.balance) + " грн</b>",
+    createReplyKeyboard([
+      [{ text: "📋 Мої абонементи" }, { text: "💎 Абонементи" }],
+      [{ text: "💰 Прайс" },          { text: "📅 Записатися" }],
+      [{ text: "👤 Мій профіль" },    { text: "📞 Контакти"   }],
+      [{ text: "📊 Статистика" }]
+    ])
+  );
+}
+
+function showAdminMenu(chatId) {
+  sendMessage(chatId, "👨‍💼 <b>АДМІН ПАНЕЛЬ</b>\n\n/syncbalances — синхронізувати всі баланси\n/crmcode — отримати код для входу на сайт",
+    createReplyKeyboard([
+      [{ text: "➕ Додати клієнта"         }, { text: "🎫 Продати абонемент"   }],
+      [{ text: "✅ Відмітити відвідування" }, { text: "👥 Список клієнтів"     }],
+      [{ text: "📊 Аналітика" },             { text: "🔑 Код для сайту"       }],
+      [{ text: "🔒 Блокування дат" }]
+    ])
+  );
+}
+
+// ✅ v9 NEW: адмін отримує одноразовий код для входу на сайт
+function sendAdminCrmCode(adminTelegramId) {
+  const code = String(Math.floor(1000 + Math.random() * 9000));
+  // ✅ v9.2 AUDIT (п.3): код в CacheService с TTL
+  CacheService.getScriptCache().put("admin_site_code_" + adminTelegramId, code, Math.floor(AUTH_CODE_TTL_MS / 1000));
+  logAction("Telegram", "Запит CRM-коду", "Admin", String(adminTelegramId), "", "code_sent", "");
+  return code;
+}
+
+// ─────────────────────── ADD TO HISTORY ────────────────────────
+
+function addToHistory(bookingId, clientId, clientName, date, service, cost, note, actor, balanceChange, beforeBalance, afterBalance, subId) {
+  const sheet = getSheet(SHEET_HISTORY);
+  if (!sheet) return false;
+  try {
+    const row = getNextRow(SHEET_HISTORY);
+    sheet.getRange(row, 1, 1, 12).setValues([[
+      genHistoryId(),
+      date || fmtDate(new Date()),
+      String(clientId || ""),
+      String(clientName || ""),
+      String(subId || ""),
+      String(service || ""),
+      cost || 0,
+      String(note || ""),
+      String(actor || ""),
+      balanceChange === undefined ? "" : balanceChange,
+      beforeBalance === undefined ? "" : beforeBalance,
+      afterBalance === undefined ? "" : afterBalance
+    ]]);
+    return true;
+  } catch(e) {
+    Logger.log("addToHistory error: " + e);
+    return false;
+  }
+}
+
+// ─────────────────────── doGet (REST API) ──────────────────────
+// [續 REST API 和 TELEGRAM HANDLERS - СКОПІЙОВАНО ЗІ СТАРОГО КОДУsync з v9 оптимізаціями]
+
+function doGet(e) {
+  const action = e.parameter.action || '';
+  let result = {};
+  const cache = CacheService.getScriptCache();
+  try {
+    // ✅ v9 SEC: ПРОВЕРКА АВТОРИЗАЦИИ ПЕРВОЙ
+    if (action === 'verifyCrmPin') { return jsonResponse(verifyCrmPin(e.parameter.pin || "")); }
+    if (action === 'sendClientAuthCode') { return jsonResponse(sendClientAuthCode(e.parameter.phone || "")); }
+    if (action === 'verifyClientAuthCode') { return jsonResponse(verifyClientAuthCode(e.parameter.phone || "", e.parameter.code || "")); }
+    if (action === 'getClientProfileData') { return jsonResponse(getClientProfileData(e.parameter.clientId || "", e.parameter.clientToken || "")); }
+
+    // ✅ v9 NEW: Єдиний вхід — визначаємо хто це (клієнт чи адмін) за телефоном
+    if (action === 'checkLoginPhone') { return jsonResponse(checkLoginPhone(e.parameter.phone || "")); }
+    // ✅ v9 NEW: Верифікація коду адміна (окремо від клієнтського)
+    if (action === 'verifyAdminSiteCode') { return jsonResponse(verifyAdminSiteCode(e.parameter.adminId || "", e.parameter.code || "")); }
+
+    // ✅ v9 SEC: Перевірка адмін-токена ДО maintenance
+    if (requiresAdminAuth(action) && !isValidAdminToken(e.parameter.adminToken || "")) {
+      logAction("web", "Unauthorized API", "CRM", action, "", "", "Нет adminToken");
+      return jsonResponse({ success: false, unauthorized: true, error: "Unauthorized" });
+    }
+
+    // ✅ v9.1 PERF: ensureSchema() і runDailyMaintenance() ВИНЕСЕНІ з doGet.
+    // Обслуговування запускається раз на добу тригером setupDailyTrigger().
+
+    // ────────────────────────────────────────────────────────────────
+    // ✅ v9 PERF: getTimesAndBoxes with in-memory booking check
+    if (action === 'getTimesAndBoxes') {
+      const dateStr = e.parameter.date;
+      const todayStr = Utilities.formatDate(new Date(), TZ, "dd.MM.yyyy");
+      const isToday = (dateStr === todayStr);
+      const cacheKey = isToday ? null : 'timesBoxes_' + dateStr;
+      const dateBlocked = isDateBlocked(dateStr);
+      if (dateBlocked) { result = { times: [], date: dateStr, blocked: true }; }
+      if (!dateBlocked && cacheKey) {
+        const cached = cache.get(cacheKey);
+        if (cached) { result = JSON.parse(cached); }
+      }
+      if (!dateBlocked && !result.times) {
+        const now = new Date();
+        const curH = parseInt(Utilities.formatDate(now, TZ, "HH"));
+        const curM = parseInt(Utilities.formatDate(now, TZ, "mm"));
+        const minHour = isToday ? (curM > 0 ? curH + 1 : curH) : 0;
+        const bookingsForDate = _loadBookingsForDate(dateStr);
+        const allTimes = getTimesForDate(dateStr);
+        const times = allTimes.map(time => {
+          const timeHour = parseInt(time.split(':')[0]);
+          if (isToday && timeHour < minHour) {
+            return { time, available: false, past: true, freeBoxes: [] };
+          }
+          const boxes = getBoxesForTime(dateStr, time);
+          const freeBoxes = boxes.filter(b => !_isBoxBookedInMemory(bookingsForDate, time, b));
+          return { time, available: freeBoxes.length > 0, freeBoxes };
+        });
+        result = { times, date: dateStr };
+        if (cacheKey) cache.put(cacheKey, JSON.stringify(result), 120);
+      }
+    }
+
+    else if (action === 'getAvailableTimesForDate') {
+      const dateStr = e.parameter.date;
+      const todayStr = Utilities.formatDate(new Date(), TZ, "dd.MM.yyyy");
+      const isToday = (dateStr === todayStr);
+      const cacheKey = isToday ? null : 'avail_' + dateStr;
+      const dateBlocked = isDateBlocked(dateStr);
+      if (dateBlocked) { result = { times: [], date: dateStr, blocked: true }; }
+      if (!dateBlocked && cacheKey) {
+        const cached = cache.get(cacheKey);
+        if (cached) { result = JSON.parse(cached); }
+      }
+      if (!dateBlocked && !result.times) {
+        const now = new Date();
+        const curH = parseInt(Utilities.formatDate(now, TZ, "HH"));
+        const curM = parseInt(Utilities.formatDate(now, TZ, "mm"));
+        const minHour = isToday ? (curM > 0 ? curH + 1 : curH) : 0;
+        const bookingsForDate = _loadBookingsForDate(dateStr);
+        const allTimes = getTimesForDate(dateStr);
+        const times = allTimes.map(time => {
+          const timeHour = parseInt(time.split(':')[0]);
+          if (isToday && timeHour < minHour) {
+            return { time, available: false, past: true, freeBoxes: [] };
+          }
+          const boxes = getBoxesForTime(dateStr, time);
+          const freeBoxes = boxes.filter(b => !_isBoxBookedInMemory(bookingsForDate, time, b));
+          return { time, available: freeBoxes.length > 0, freeBoxes };
+        });
+        result = { times, date: dateStr };
+        if (cacheKey) cache.put(cacheKey, JSON.stringify(result), 120);
+      }
+    }
+
+    else if (action === 'getBoxesForDateTime') {
+      result = isDateBlocked(e.parameter.date)
+        ? { boxes: [], blocked: true }
+        : { boxes: getAvailableBoxes(e.parameter.date, e.parameter.time) };
+    }
+
+    // ── ✅ NEW: блокування дат (захист від подвійних записів) ──────
+    else if (action === 'getBlockedDates') {
+      result = { success: true, blocked: getBlockedDates() };
+    }
+    else if (action === 'blockDate') {
+      result = blockDate(e.parameter.date, "CRM");
+    }
+    else if (action === 'unblockDate') {
+      result = unblockDate(e.parameter.date, "CRM");
+    }
+    
+    else if (action === 'saveBooking') {
+      const name = e.parameter.name || 'Гість';
+      const phone = normalizePhone(e.parameter.phone || '');
+      const plate = (e.parameter.plate || "").toUpperCase().trim();
+      const clientId = autoRegisterClient(name, phone, "", "Сайт");
+      if (!clientId) {
+        result = { success: false, error: 'Не вдалося' };
+      } else {
+        const fullService = (e.parameter.service || '') + (e.parameter.car ? ' | ' + e.parameter.car : '');
+        const bookingId = saveBooking(e.parameter.date, e.parameter.time, e.parameter.box,
+          clientId, name, phone, fullService,
+          "Сайт", e.parameter.comment || "", "web", plate);
+        if (bookingId) {
+          invalidateBookingCache(e.parameter.date);
+          try {
+            sendMessage(ADMIN_ID,
+              "📅 <b>НОВИЙ ЗАПИС (Сайт)</b>\n\n" +
+              "👤 " + name + "\n📱 " + phone + "\n" +
+              (plate ? "🚗 " + plate + "\n" : "") +
+              "📅 " + e.parameter.date + " · " + e.parameter.time + "\n" +
+              "🏠 " + e.parameter.box + "\n🔧 " + fullService +
+              (e.parameter.comment ? "\n💬 " + e.parameter.comment : "")
+            );
+          } catch (notifyErr) { logError("saveBooking notify", notifyErr, "web"); }
+          // ✅ v10: підтвердження клієнту в Telegram (якщо акаунт прив'язаний)
+          notifyClient(clientId,
+            "📅 <b>Ваш запис прийнято!</b>\n\n" +
+            "🔧 " + fullService + "\n" +
+            "📅 " + e.parameter.date + " · " + e.parameter.time + "\n" +
+            "🏠 " + e.parameter.box + "\n" +
+            (plate ? "🚗 " + plate + "\n" : "") +
+            "📍 " + ADDRESS + "\n\n" +
+            "Очікуйте дзвінок менеджера для підтвердження 🚗"
+          );
+        }
+        result = { success: !!bookingId, bookingId: bookingId || null };
+      }
+    }
+
+    else if (action === 'saveSubOrder') {
+      try {
+        const name = e.parameter.name || 'Гість';
+        const phone = normalizePhone(e.parameter.phone || '');
+        const clientId = autoRegisterClient(name, phone, e.parameter.tg || '', "Сайт");
+        if (!clientId) throw new Error('Не вдалося зареєструвати клієнта');
+        const type = getTypes().find(t => String(t.id) === String(e.parameter.subId));
+    if (!type) throw new Error('Тип абонементу не знайдено');
+    const reqAmount = Number(type.amount) || 0;
+    const requestId = saveSubscriptionRequest(
+      clientId, name, e.parameter.tg || '',
+      type.id, type.name, reqAmount
+    );
+        // ✅ v9.4 NEW: сповіщення адміну про нову заявку з сайту
+        if (requestId) {
+          try {
+            sendMessage(ADMIN_ID,
+              "🔔 <b>НОВА ЗАЯВКА НА АБОНЕМЕНТ (Сайт)</b>\n\n" +
+              "👤 " + name + "\n📱 " + phone + "\n" +
+              "💎 <b>" + (e.parameter.subName || e.parameter.subId) + "</b>\n" +
+              "💰 " + reqAmount.toLocaleString() + " грн на рахунок\n" +
+              "📅 ID: " + requestId + "\n\n" +
+              "Підтвердіть у CRM → Заявки"
+            );
+          } catch(notifyErr) { logError("saveSubOrder notify", notifyErr, "web"); }
+          // ✅ v10: підтвердження клієнту, що заявку прийнято (якщо TG прив'язаний)
+          notifyClient(clientId,
+            "🔔 <b>Заявку на абонемент прийнято!</b>\n\n" +
+            "💎 " + (e.parameter.subName || type.name) + "\n" +
+            "💰 " + reqAmount.toLocaleString() + " грн на рахунок\n\n" +
+            "Менеджер зв'яжеться з вами для підтвердження оплати 🚗\n1333 Car Center"
+          );
+        }
+        result = { success: !!requestId, requestId };
+      } catch(err) { result = { success: false, error: err.toString() }; }
+    }
+
+    else if (action === 'cancelBooking') {
+      result = cancelBooking(e.parameter.bookingId, e.parameter.phone, "client");
+      // ✅ v10: сповіщення адміну + клієнту (поза локом)
+      if (result && result.success && result.booking) {
+        const b = result.booking;
+        notifyAdmin(
+          "❌ <b>ЗАПИС СКАСОВАНО (Сайт)</b>\n\n" +
+          "👤 " + b.clientName + "\n📱 " + b.phone + "\n" +
+          "📅 " + b.date + " · " + b.time + "\n🏠 " + b.box + "\n🔧 " + b.service
+        );
+        notifyClient(b.clientId,
+          "❌ <b>Ваш запис скасовано</b>\n\n" +
+          "🔧 " + b.service + "\n📅 " + b.date + " · " + b.time + "\n🏠 " + b.box + "\n\n" +
+          "Якщо це сталося помилково — зателефонуйте нам: " + PHONE
+        );
+      }
+    }
+
+    else if (action === 'rescheduleBooking') {
+      result = rescheduleBooking(e.parameter.bookingId, e.parameter.phone, e.parameter.date, e.parameter.time, e.parameter.box, "client");
+      // ✅ v10: сповіщення адміну + клієнту (поза локом)
+      if (result && result.success && result.booking) {
+        const b = result.booking;
+        notifyAdmin(
+          "🔄 <b>ЗАПИС ПЕРЕНЕСЕНО (Сайт)</b>\n\n" +
+          "👤 " + b.clientName + "\n📱 " + b.phone + "\n" +
+          "🔧 " + b.service + "\n" +
+          "↦ Нова дата: " + b.newDate + " · " + b.newTime + "\n🏠 " + b.newBox
+        );
+        notifyClient(b.clientId,
+          "🔄 <b>Ваш запис перенесено</b>\n\n" +
+          "🔧 " + b.service + "\n📅 " + b.newDate + " · " + b.newTime + "\n🏠 " + b.newBox + "\n\n" +
+          "До зустрічі! 🚗 1333 Car Center"
+        );
+      }
+    }
+
+    else if (action === 'autoRegister') {
+      const name = e.parameter.name || '';
+      const phone = e.parameter.phone || '';
+      if (!name || !phone) {
+        result = { success: false, error: 'name and phone required' };
+      } else {
+        const clientId = autoRegisterClient(name, phone, e.parameter.telegramId || "", e.parameter.source || "Сайт");
+        result = { success: !!clientId, clientId: clientId || null };
+      }
+    }
+
+    else if (action === 'getAllClients') {
+      const data = safeGetRangeValues(getSheet(SHEET_CLIENTS), 2, 1, null, 13);
+      const balMap = buildClientBalanceMap(); // ✅ v9.2 AUDIT (п.4): один проход вместо N
+      result = {
+        clients: (data || []).filter(r => r && r[0]).map(row => ({
+          clientId: String(row[0]), name: String(row[1]), phone: normalizePhone(String(row[2])),
+          telegramId: String(row[3] || ''), status: String(row[4] || CLIENT_STATUS_ACTIVE),
+          registered: parseDate(row[5]), balance: balMap[String(row[0]).trim()] || 0,
+          visits: Number(row[7]) || 0, totalPurchases: Number(row[8]) || 0,
+          averageCheck: Number(row[9]) || 0, lastVisit: parseDate(row[10]),
+          source: String(row[11] || ''), adminComment: String(row[12] || '')
+        }))
+      };
+    }
+
+    else if (action === 'getAnalytics') {
+      result = { success: true, analytics: calculateAnalytics().map(r => ({ kpi: r[0], value: r[1] })) };
+    }
+
+    // ── ✅ v9 NEW: KPI + графіки в одному запиті (для дашборду) ──────
+    else if (action === 'getAnalyticsFull') {
+      result = {
+        success: true,
+        kpis: calculateAnalytics().map(r => ({ kpi: r[0], value: r[1] })),
+        charts: getAnalyticsChartData()
+      };
+      // ✅ FIX: оновлюємо Лист "📊 Аналітика" при кожному відкритті дашборду
+      try { updateAnalyticsSheet(); } catch (anErr) { logError("getAnalyticsFull updateSheet", anErr, "crm"); }
+    }
+
+    else if (action === 'syncBalances') {
+      const count = syncAllBalances();
+      result = { success: true, synced: count };
+    }
+
+    else if (action === 'runMaintenance') {
+      result = { success: true, maintenance: runDailyMaintenance(true) };
+    }
+
+    // ── Усі записи (для CRM) ───────────────────────────────────────
+    else if (action === 'getAllBookings') {
+      const sheet = getSheet(SHEET_BOOKINGS);
+      const data  = safeGetRangeValues(sheet, 2, 1, null, 13);
+      result = {
+        bookings: (data || []).filter(r => r && r[0]).map((row, idx) => ({
+          row: idx + 2, id: String(row[0]),
+          date: row[1] instanceof Date ? fmtDate(row[1]) : String(row[1]).trim(),
+          day: String(row[2]),
+          time: row[3] instanceof Date ? Utilities.formatDate(row[3], TZ, "HH:mm") : String(row[3]).trim(),
+          box: String(row[4]), clientId: String(row[5]), clientName: String(row[6]),
+          phone: normalizePhone(String(row[7])), service: String(row[8]),
+          status: String(row[9]), note: String(row[10] || ''),
+          source: String(row[11] || ''),
+          plate: String(row[12] || '')
+        }))
+      };
+    }
+
+    // ── Повна картка клієнта ─────────────────────────────────────
+    else if (action === 'getClientFull') {
+      const cid    = e.parameter.clientId;
+      const client = findClientById(cid);
+      if (client) client.phone = normalizePhone(String(client.phone || ''));
+      result = { client, subs: getClientSubs(cid), history: getClientHistory(cid), bookings: getClientBookings(cid) };
+    }
+
+    // ── Усі абонементи (legacy, без visitCount) ────────────────────
+    else if (action === 'getAllSubs') {
+      const data = safeGetRangeValues(getSheet(SHEET_SUBS), 2, 1, null, 16);
+      result = {
+        subs: (data || []).filter(r => r && r[0]).map((row, idx) => ({
+          row: idx + 2, clientId: String(row[0]), subId: String(row[1]),
+          typeId: String(row[2]), clientName: String(row[3]), typeName: String(row[4]),
+          amount: row[5] || 0, startDate: parseDate(row[6]), endDate: parseDate(row[7]),
+          spent: row[8] || 0, balance: row[9] || 0, status: String(row[10]),
+          soldBy: String(row[11] || ''), paymentMethod: String(row[12] || ''),
+          discount: row[13] || '', promoCode: String(row[14] || ''), activationDate: parseDate(row[15])
+        }))
+      };
+    }
+
+    // ── Абонементи з кількістю відвідувань (для CRM-таблиці) ───────
+    else if (action === 'getAllSubsWithVisits') {
+      const histSheet = getSheet(SHEET_HISTORY);
+      const histData  = histSheet ? safeGetRangeValues(histSheet, 2, 1, null, 5) : [];
+      const visitMap  = {};
+      (histData || []).forEach(r => {
+        if (r && r[0] && r[4]) {
+          const sid = String(r[4]).trim();
+          if (sid) visitMap[sid] = (visitMap[sid] || 0) + 1;
+        }
+      });
+      const data = safeGetRangeValues(getSheet(SHEET_SUBS), 2, 1, null, 16);
+      result = {
+        subs: (data || []).filter(r => r && r[0]).map((row, idx) => ({
+          row: idx + 2, clientId: String(row[0]), subId: String(row[1]),
+          typeId: String(row[2]), clientName: String(row[3]), typeName: String(row[4]),
+          amount: row[5] || 0, startDate: parseDate(row[6]), endDate: parseDate(row[7]),
+          spent: row[8] || 0, balance: row[9] || 0, status: String(row[10]),
+          soldBy: String(row[11] || ''), paymentMethod: String(row[12] || ''),
+          discount: row[13] || '', promoCode: String(row[14] || ''), activationDate: parseDate(row[15]),
+          visitCount: visitMap[String(row[1]).trim()] || 0
+        }))
+      };
+    }
+
+    // ── Оновити статус запису + списання з абонементу ──────────────
+  else if (action === 'updateBookingStatus') {
+      const locked = withScriptLock("updateBookingStatus", function() {
+        const bookingId = e.parameter.bookingId;
+        const newStatus = e.parameter.status;
+        const note      = e.parameter.note || "";
+        const cost      = Number(e.parameter.cost || 0);
+        const sheet     = getSheet(SHEET_BOOKINGS);
+        const data      = safeGetRangeValues(sheet, 2, 1, null, 12);
+        if (!data || !data.length) return { success: false, error: "No bookings" };
+        let updated = false, oldStatus = "", bData = null;
+        let subIdForDeduction = null, beforeBalance = 0, paidCash = false;
+        let notifyClientId = "", notifyMsg = ""; // ✅ v10: відправимо ПІСЛЯ звільнення локу
+
+        for (let i = 0; i < data.length; i++) {
+          if (!data[i] || String(data[i][0]).trim() !== String(bookingId).trim()) continue;
+          oldStatus = String(data[i][9] || "");
+          bData = {
+            clientId:   String(data[i][5] || ""),
+            clientName: String(data[i][6] || ""),
+            date:       data[i][1] instanceof Date ? fmtDate(data[i][1]) : String(data[i][1]).trim(),
+            service:    String(data[i][8] || "")
+          };
+          if (cost > 0 && bData.clientId && (newStatus.includes('Виконано') || newStatus.includes('Готово'))) {
+            subIdForDeduction = findSubForCost(bData.clientId, cost);
+            if (subIdForDeduction) {
+              beforeBalance = getClientLiveBalance(bData.clientId);
+              const deducted = deductFromSub(bData.clientId, subIdForDeduction, cost);
+              if (!deducted) { subIdForDeduction = null; paidCash = true; }
+            } else {
+              paidCash = true;
+            }
+          }
+          sheet.getRange(i + 2, 10).setValue(newStatus);
+          updated = true;
+          break;
+        }
+
+        if (updated && bData && (newStatus.includes('Виконано') || newStatus.includes('Готово'))) {
+          if (cost > 0 && subIdForDeduction) {
+            const afterBalance = getClientLiveBalance(bData.clientId);
+            addToHistory(bookingId, bData.clientId, bData.clientName, bData.date, bData.service,
+              cost, note, 'CRM', afterBalance - beforeBalance, beforeBalance, afterBalance, subIdForDeduction);
+          } else if (cost > 0 && paidCash) {
+            addToHistory(bookingId, bData.clientId, bData.clientName, bData.date, bData.service,
+              cost, (note ? note + " | Готівка" : "Готівка"), 'CRM', 0, "", "", "");
+          } else {
+            addToHistory(bookingId, bData.clientId, bData.clientName, bData.date, bData.service,
+              0, note, 'CRM', 0, "", "", "");
+          }
+          updateClientMetrics(bData.clientId);
+
+          // ✅ v10: текст формуємо в локу, але НЕ шлемо тут (мережа = довге утримання локу)
+          if (bData.clientId) {
+            const afterBal = getClientLiveBalance(bData.clientId);
+            let msg = "✅ <b>Запис завершено!</b>\n\n🔧 " + bData.service + "\n📅 " + bData.date + "\n";
+            if (cost > 0 && subIdForDeduction) {
+              msg += "💰 Списано з абонементу: " + cost + " грн\n💳 Залишок на рахунку: " + fmt(afterBal) + " грн\n";
+            } else if (cost > 0 && paidCash) {
+              msg += "💵 Оплачено готівкою: " + cost + " грн\n";
+            }
+            msg += "\nДякуємо! Чекаємо вас знову 🚗\n1333 Car Center";
+            notifyClientId = bData.clientId; notifyMsg = msg;
+          }
+        }
+
+        // ✅ v10: сповіщення «взято в роботу» — теж відкладене
+        if (updated && bData && newStatus.includes('роботі') && bData.clientId) {
+          notifyClientId = bData.clientId;
+          notifyMsg = "🔶 <b>Ваш автомобіль взято в роботу!</b>\n\n🔧 " + bData.service +
+            "\n📅 " + bData.date + "\n\nМи повідомимо вас про завершення 🚗";
+        }
+
+        if (bData?.date) invalidateBookingCache(bData.date);
+        if (updated) logAction("CRM",
+          newStatus.includes("Скасовано") ? "Отмена" : "Редактирование",
+          "Booking", bookingId, oldStatus, newStatus, "");
+        return { success: updated, _notifyClientId: notifyClientId, _notifyMsg: notifyMsg };
+      }, "CRM");
+      // ✅ v10: мережевий виклик у Telegram — ПІСЛЯ release локу
+      if (locked && locked._notifyClientId && locked._notifyMsg) notifyClient(locked._notifyClientId, locked._notifyMsg);
+      result = { success: !!(locked && locked.success) };
+      if (locked && locked.error) result.error = locked.error;
+    }
+     else if (action === 'getRangeAvailability') {
+  const start = e.parameter.date;           // dd.MM.yyyy
+  const days = Math.min(+(e.parameter.days||14), 21);
+  const out = {};
+  for (let i=0;i<days;i++){
+    const ds = shiftDate(start, i);          // helper: +i дней
+    if (isDateBlocked(ds)) { out[ds] = {blocked:true, times:[]}; continue; }
+    const b = _loadBookingsForDate(ds);
+    out[ds] = { times: getTimesForDate(ds).map(t => {
+      const free = getBoxesForTime(ds,t).filter(x=>!_isBoxBookedInMemory(b,t,x));
+      return {time:t, available:free.length>0, freeBoxes:free};
+    })};
+  }
+  result = { success:true, range: out };
+}
+
+    // ── Оновити статус абонементу (з CRM) ───────────────────────────
+    else if (action === 'updateSubStatus') {
+      result = withScriptLock("updateSubStatus", function() {
+        const sheet = getSheet(SHEET_SUBS);
+        const data  = safeGetRangeValues(sheet, 2, 1, null, 16);
+        if (!data || !data.length) return { success: false };
+        let updated = false, clientId = "", oldStatus = "";
+        for (let i = 0; i < data.length; i++) {
+          if (!data[i] || String(data[i][1]) !== e.parameter.subId) continue;
+          clientId  = String(data[i][0] || "");
+          oldStatus = String(data[i][10] || "");
+          sheet.getRange(i + 2, 11).setValue(e.parameter.status);
+          updated = true; break;
+        }
+        if (updated && clientId) {
+          updateClientBalance(clientId);
+          updateClientMetrics(clientId);
+          logAction("CRM", "Редактирование", "Subscription", e.parameter.subId, oldStatus, e.parameter.status, "status");
+        }
+        return { success: updated };
+      }, "CRM");
+    }
+
+    // ── Заявки на абонементи ─────────────────────────────────────
+    else if (action === 'getAllSubRequests') {
+      result = { requests: getSubscriptionRequests() };
+    }
+
+    // ── Підтвердити заявку (з CRM) ────────────────────────────────
+   else if (action === 'confirmSubRequest') {
+      // ✅ v9.4: читаємо заявку ДО підтвердження (після статус може змінитись)
+      const reqToConfirm = getSubscriptionRequests().find(r => r.requestId === e.parameter.requestId);
+      const ok = confirmSubscriptionRequest(e.parameter.requestId, "CRM");
+      if (ok && reqToConfirm) {
+        // Спочатку пробуємо telegramId із заявки, потім — з картки клієнта
+        let tgId = String(reqToConfirm.telegramId || "").trim();
+        if (!tgId || tgId === 'undefined' || tgId === '0' || isNaN(Number(tgId))) {
+          const cl = findClientById(reqToConfirm.clientId);
+          if (cl && cl.telegramId && cl.telegramId !== '0') tgId = String(cl.telegramId);
+        }
+        if (tgId && !isNaN(Number(tgId))) {
+          try {
+            sendMessage(Number(tgId),
+              "🎉 <b>Абонемент підтверджено!</b>\n\n" +
+              "💎 " + reqToConfirm.typeName + "\n" +
+              "💰 " + Number(reqToConfirm.amount).toLocaleString() + " грн зараховано на рахунок\n\n" +
+              "Дякуємо за покупку! 🚗 1333 Car Center"
+            );
+          } catch(e) { logError("confirmSubRequest notify", e, "CRM"); }
+        }
+      }
+      result = { success: ok };
+    }
+  else if (action === 'getPublicCatalog') {
+  result = getPublicCatalog();
+}
+    // ── Відхилити заявку (з CRM) ──────────────────────────────────
+  else if (action === 'rejectSubRequest') {
+      const reqToReject = getSubscriptionRequests().find(r => r.requestId === e.parameter.requestId);
+      const ok = updateSubscriptionRequestStatus(e.parameter.requestId, '❌ Відхилена', "CRM", e.parameter.reason || "");
+      if (ok && reqToReject) {
+        let tgId = String(reqToReject.telegramId || "").trim();
+        if (!tgId || tgId === 'undefined' || tgId === '0' || isNaN(Number(tgId))) {
+          const cl = findClientById(reqToReject.clientId);
+          if (cl && cl.telegramId && cl.telegramId !== '0') tgId = String(cl.telegramId);
+        }
+        if (tgId && !isNaN(Number(tgId))) {
+          try {
+            sendMessage(Number(tgId),
+              "❌ <b>Заявку на абонемент відхилено</b>\n\n" +
+              "💎 " + reqToReject.typeName + "\n" +
+              (e.parameter.reason ? "💬 Причина: " + e.parameter.reason + "\n" : "") +
+              "\nЗверніться до адміністратора: " + PHONE
+            );
+          } catch(e) { logError("rejectSubRequest notify", e, "CRM"); }
+        }
+      }
+      result = { success: ok };
+    }
+
+    // ── Довільне оновлення статусу заявки ──────────────────────────
+    else if (action === 'updateSubRequestStatus') {
+      result = { success: updateSubscriptionRequestStatus(e.parameter.requestId, e.parameter.status, "CRM", e.parameter.reason || "") };
+    }
+
+    // ── Повний перерахунок балансів + метрик клієнтів ───────────────
+    else if (action === 'recalcAllBalances') {
+      const count = syncAllBalances();
+      const metrics = syncClientMetrics();
+      result = { success: true, updated: count, metrics };
+    }
+
+    // ── Масова розсилка у Telegram ───────────────────────────────
+    else if (action === 'broadcastTelegram') {
+      result = broadcastTelegram(e.parameter.message || "", e.parameter.segment || "all", "CRM");
+    }
+
+    // ── Баланс одного клієнта ──────────────────────────────────────
+    else if (action === 'getClientBalance') {
+      const cid = e.parameter.clientId;
+      result = { clientId: cid, balance: getClientLiveBalance(cid) };
+    }
+
+  } catch (err) {
+    logError(action || "doGet", err, e?.parameter?.adminToken ? "crm" : "web");
+    result = { success: false, error: String(err) };
+  }
+
+  return jsonResponse(result);
+}
