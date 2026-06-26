@@ -775,7 +775,7 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
   <a href="#" onclick="showPage('services');closeMobileMenu()">ПОСЛУГИ</a>
   <a href="#" onclick="showPage('subscriptions');closeMobileMenu()">АБОНЕМЕНТИ</a>
   <a href="#" onclick="showPage('booking');closeMobileMenu()">ЗАПИСАТИСЬ</a>
-  <a href="#" onclick="showPage('crm');closeMobileMenu()" style="display:none;">🔐</a>
+  <a href="#" onclick="showPage('crm');closeMobileMenu()" id="mobile-nl-crm" style="display:none;">🔐</a>
 </div>
 
 <!-- NAV -->
@@ -1288,7 +1288,8 @@ async function api(action,params={},cacheKey=null){
   }catch(e){console.error('[API]',action,e);return null;}
 }
 function clearCache(prefix=''){Object.keys(_cache).forEach(k=>{if(!prefix||k.startsWith(prefix))delete _cache[k];});}
-function clearCrmSession(){localStorage.removeItem(CRM_TOKEN_KEY);_crmToken='';_crmUnlocked=false;clearCache();}
+function clearCrmSession(){localStorage.removeItem(CRM_TOKEN_KEY);_crmToken='';_crmUnlocked=false;clearCache();_setCrmNavVisible(false);}
+function _setCrmNavVisible(on){const d=on?'':'none';const nl=document.getElementById('nl-crm');if(nl)nl.style.display=d;const ml=document.getElementById('mobile-nl-crm');if(ml)ml.style.display=d;}
 async function autoRegisterClient(name,phone){
   if(!isApiConfigured()||!name||!phone)return;
   try{await api('autoRegister',{name,phone,source:'Сайт'},null);}catch(e){}
@@ -1939,6 +1940,7 @@ function showCrmInner(){
   document.getElementById('crm-gate').style.display='none';
   document.getElementById('crm-inner').classList.add('show');
   applyCrmLargePref();
+  _setCrmNavVisible(true);
 }
 function pinKey(k){if(_pinBuffer.length>=4)return;_pinBuffer+=k;updatePinDots();if(_pinBuffer.length===4)setTimeout(checkPin,200);}
 function pinBackspace(){_pinBuffer=_pinBuffer.slice(0,-1);updatePinDots();document.getElementById('pin-error').textContent='';}
@@ -2848,6 +2850,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   const savedId=localStorage.getItem(CAB_ID_KEY);
   if(savedToken&&savedId){cabGoStep('profile');loadCabinetProfile(savedId,savedToken);}
   else cabGoStep('phone');
+  if(_crmToken)_setCrmNavVisible(true);
 });
 </script>
 </body>
