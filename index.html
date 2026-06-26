@@ -1288,6 +1288,14 @@ async function api(action,params={},cacheKey=null){
   }catch(e){console.error('[API]',action,e);return null;}
 }
 function clearCache(prefix=''){Object.keys(_cache).forEach(k=>{if(!prefix||k.startsWith(prefix))delete _cache[k];});}
+// ✅ fix(#1/#2): після БУДЬ-ЯКОЇ зміни записів (створення/скасування/перенос/завершення) скидаємо
+//    весь кеш доступності — і батч-календар (range_), і часи (timesBoxes_), і список боксів.
+//    Інакше фронт показує застарілі вільні бокси та повторно обирає вже зайнятий → помилка при збереженні.
+function clearAvailabilityCache(){
+  clearCache('range_');clearCache('timesBoxes_');clearCache('avail_');clearCache('allBookings');
+  try{if(typeof BK!=='undefined'&&BK)BK.rangeTimes={};}catch(e){}
+  try{if(typeof S!=='undefined'&&S)S._cachedBoxesForTimes=null;}catch(e){}
+}
 function clearCrmSession(){localStorage.removeItem(CRM_TOKEN_KEY);_crmToken='';_crmUnlocked=false;clearCache();_setCrmNavVisible(false);}
 function _setCrmNavVisible(on){const d=on?'':'none';const nl=document.getElementById('nl-crm');if(nl)nl.style.display=d;const ml=document.getElementById('mobile-nl-crm');if(ml)ml.style.display=d;}
 async function autoRegisterClient(name,phone){
@@ -1470,8 +1478,15 @@ async function bkSubmit(){
   const result=await api('saveBooking',params);
   btn.textContent='Записатися →';btn.disabled=false;
   if(result===null){toast('❌ Помилка зʼєднання.');return;}
-  if(result.success===false){clearCache('timesBoxes_'+BK.date);toast(result.error?'❌ '+result.error:'❌ Цей час вже зайнятий. Оберіть інший.');bkGoStep(3);bkPickDate(BK.date);return;}
-  clearCache('timesBoxes_'+BK.date);clearCache('allBookings');
+  if(result.success===false){
+    // слот міг бути зайнятий між показом і збереженням → скидаємо кеш і ТЯГНЕМО свіжі дані,
+    // щоб авто-вибір боксу взяв реально вільний бокс, а не застарілий.
+    clearAvailabilityCache();
+    toast(result.error?'❌ '+result.error:'❌ Цей час вже зайнятий. Оберіть інший.');
+    bkGoStep(3);await bkLoadRange();bkPickDate(BK.date);return;
+  }
+  clearAvailabilityCache();
+  if(result.box)BK.box=result.box; // фактично призначений сервером бокс
   BK.lastBookingId=result.bookingId||'';BK.lastPhone=phone;
   bkShowSuccess(BK.lastBookingId||('#1333-'+(Math.floor(Math.random()*9000)+1000)));
   toast('✓ Запис створено!');
@@ -1494,14 +1509,14 @@ function bkReset(){
 async function bkCancelLast(){
   if(!BK.lastBookingId){toast('ID запису не знайдено');return;}
   const r=await api('cancelBooking',{bookingId:BK.lastBookingId,phone:BK.lastPhone||document.getElementById('bkPhone').value});
-  if(r?.success){clearCache('timesBoxes_'+BK.date);toast('✓ Запис скасовано');}else toast('❌ Не вдалося скасувати запис');
+  if(r?.success){clearAvailabilityCache();toast('✓ Запис скасовано');}else toast('❌ Не вдалося скасувати запис');
 }
 async function bkRescheduleLast(){
   if(!BK.lastBookingId){toast('ID запису не знайдено');return;}
   const res=await uiPrompt('Перенести запис',[{key:'date',label:'Нова дата (ДД.ММ.РРРР)',value:BK.date||getTodayStr()},{key:'time',label:'Новий час (HH:MM)',value:BK.time||'10:00'},{key:'box',label:'Бокс (Box 1 / Box 2 / Box 3)',value:BK.box||'Box 1'}]);
   if(!res)return;const{date:nd,time:nt,box:nb}=res;if(!nd||!nt||!nb){toast('Заповніть усі поля');return;}
   const r=await api('rescheduleBooking',{bookingId:BK.lastBookingId,phone:BK.lastPhone||document.getElementById('bkPhone').value,date:nd,time:nt,box:nb});
-  if(r?.success){clearCache('timesBoxes_'+BK.date);clearCache('timesBoxes_'+nd);BK.date=nd;BK.time=nt;BK.box=nb;toast('✓ Запис перенесено');}
+  if(r?.success){clearAvailabilityCache();BK.date=nd;BK.time=nt;BK.box=nb;toast('✓ Запис перенесено');}
   else toast(typeof rescheduleErrText==='function'?rescheduleErrText(r):'❌ Не вдалося перенести');
 }
 function bkDeepLink(svc){BK._pendingSvc=svc||'';bkReset();}
@@ -1882,12 +1897,13 @@ async function submitBooking(){
   btn.textContent='✓ Підтвердити';btn.disabled=false;
   if(result===null){toast("❌ Помилка зʼєднання.");return;}
   if(result.success===false){
-    clearCache(`timesBoxes_${S.date}`);S._cachedBoxesForTimes=null;
+    clearAvailabilityCache();
     toast(result.error?`❌ ${result.error}`:'❌ Бокс вже зайнятий! Оберіть інший час.');
     if(!result.error||result.error.includes('зайнятий')||result.error.includes('busy'))goStep(2);
     return;
   }
-  clearCache(`timesBoxes_${S.date}`);S._cachedBoxesForTimes=null;clearCache('allBookings');
+  clearAvailabilityCache();
+  if(result.box)S.box=parseInt(String(result.box).replace(/[^\d]/g,''))||S.box; // фактично призначений бокс
   S.lastBookingId=result.bookingId||'';S.lastBookingPhone=phone;
   showSuccess(S.lastBookingId||('#1333-'+(Math.floor(Math.random()*9000)+1000)));
   toast('✓ Запис створено!');
@@ -1911,7 +1927,7 @@ function resetBooking(){
 async function cancelLastBooking(){
   if(!S.lastBookingId){toast('ID запису не знайдено');return;}
   const result=await api('cancelBooking',{bookingId:S.lastBookingId,phone:S.lastBookingPhone||document.getElementById('fPhone').value});
-  if(result?.success){clearCache(`timesBoxes_${S.date}`);toast('✓ Запис скасовано');}
+  if(result?.success){clearAvailabilityCache();toast('✓ Запис скасовано');}
   else toast('❌ Не вдалося скасувати запис');
 }
 async function rescheduleLastBooking(){
@@ -1926,7 +1942,7 @@ async function rescheduleLastBooking(){
   if(!newDate||!newTime||!newBox){toast('Заповніть усі поля');return;}
   const result=await api('rescheduleBooking',{bookingId:S.lastBookingId,phone:S.lastBookingPhone||document.getElementById('fPhone').value,date:newDate,time:newTime,box:newBox});
   if(result?.success){
-    clearCache(`timesBoxes_${S.date}`);clearCache(`timesBoxes_${newDate}`);
+    clearAvailabilityCache();
     S.date=newDate;S.time=newTime;S.box=parseInt(String(newBox).replace(/[^\d]/g,''))||S.box;
     updateSummary();toast('✓ Запис перенесено');
   }else toast(rescheduleErrText(result));
@@ -2141,7 +2157,7 @@ async function updateBookingStatusUI(bookingId,newStatus){
   let result;
   try{result=await api('updateBookingStatus',params);}catch(e){result=null;}
   const ok=result&&result.success!==false;
-  if(ok){if((newStatus.includes('Виконано')||newStatus.includes('Готово'))&&b?.date)clearCache(`timesBoxes_${b.date}`);clearCache('allBookings');toast(`✓ Статус: ${newStatus}`);}
+  if(ok){clearAvailabilityCache();toast(`✓ Статус: ${newStatus}`);}
   else{if(b&&prevStatus!==null)b.status=prevStatus;applyBookingControls();renderBoxes(_allBookings,getTodayStr());toast(result?.error?`❌ ${result.error}`:'❌ Не вдалося зберегти');}
   _pendingActions.delete(_pk);
 }
@@ -2158,7 +2174,7 @@ async function rescheduleBookingUI(bookingId,phone){
   const result=await api('rescheduleBooking',{bookingId,phone,date:newDate,time:newTime,box:newBox});
   if(result?.success){
     Object.assign(b,{date:newDate,time:newTime,box:newBox,status:'✅ Підтверджено'});
-    clearCache(`timesBoxes_${newDate}`);clearCache('allBookings');
+    clearAvailabilityCache();
     applyBookingControls();renderBoxes(_allBookings,getTodayStr());toast('✓ Запис перенесено');
   }else toast(rescheduleErrText(result));
 }
