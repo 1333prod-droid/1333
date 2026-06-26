@@ -718,14 +718,6 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
 .bk-bar-count{font-size:12px;color:var(--gray);}
 .bk-bar-price{font-size:18px;font-weight:800;letter-spacing:-.3px;}
 
-  /* ── HOME: gallery ── */
-.gallery-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
-.gallery-item{position:relative;aspect-ratio:4/3;border-radius:16px;overflow:hidden;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);cursor:pointer;display:block;}
-.gallery-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s var(--ease);}
-.gallery-item:hover img{transform:scale(1.06);}
-.gallery-item::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.4));opacity:0;transition:opacity .3s;}
-.gallery-item:hover::after{opacity:1;}
-  
 /* step 3 — horizontal calendar */
 .bk-cal{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 14px;margin-bottom:6px;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-snap-type:x proximity;}
 .bk-cal::-webkit-scrollbar{display:none;}
@@ -737,7 +729,28 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
 .bk-day.selected .bk-day-dow{color:#fff;}
 .bk-day-num{font-size:20px;font-weight:700;line-height:1;}
 .bk-day-mon{font-size:10px;color:var(--gray);}
+.bk-day-dot{width:5px;height:5px;border-radius:50%;background:var(--green);margin-top:3px;box-shadow:0 0 6px rgba(16,185,129,.6);}
+.bk-day-dot.closed{background:var(--red);box-shadow:none;}
+.bk-day.full{opacity:.4;text-decoration:line-through;cursor:not-allowed;pointer-events:none;}
 .bk-time-head{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gray);margin:6px 0 12px;}
+
+/* ── HOME: gallery ── */
+.gallery-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.gallery-item{position:relative;aspect-ratio:4/3;border-radius:16px;overflow:hidden;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);cursor:pointer;display:block;}
+.gallery-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s var(--ease);}
+.gallery-item:hover img{transform:scale(1.06);}
+.gallery-item::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.4));opacity:0;transition:opacity .3s;}
+.gallery-item:hover::after{opacity:1;}
+
+/* ── HOME: full-width map ── */
+.map-section{position:relative;width:100%;margin:8px 0 0;}
+.map-wrap{position:relative;width:100%;height:clamp(360px,52vh,560px);overflow:hidden;background:#0a0a12;}
+.map-wrap iframe{width:100%;height:100%;border:0;display:block;filter:contrast(1.05) saturate(1.1);}
+.map-overlay{position:absolute;left:24px;bottom:24px;z-index:2;background:rgba(8,8,16,0.8);backdrop-filter:saturate(180%) blur(24px);-webkit-backdrop-filter:saturate(180%) blur(24px);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:20px 22px;max-width:340px;box-shadow:0 20px 50px rgba(0,0,0,.4);}
+.map-overlay h3{font-size:18px;font-weight:700;margin-bottom:4px;letter-spacing:-.2px;}
+.map-overlay p{font-size:13px;color:var(--light);margin-bottom:14px;line-height:1.5;}
+.map-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.map-actions .btn-white,.map-actions .btn-ghost{padding:11px 18px;font-size:13px;}
 
 @media (max-width:768px){
   .bk-body-grid{grid-template-columns:repeat(2,1fr);}
@@ -748,16 +761,6 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
 @media (prefers-reduced-motion:reduce){
   .bk-panel.active,.bk-body-card.selected,.bk-bottom-bar.show{animation:none;}
   .bk-body-card:hover,.bk-svc-card:hover,.bk-day:hover,.gallery-item:hover img{transform:none;}
-}
-  /* ── HOME: full-width map ── */
-.map-section{position:relative;width:100%;margin:8px 0 0;}
-.map-wrap{position:relative;width:100%;height:clamp(360px,52vh,560px);overflow:hidden;background:#0a0a12;}
-.map-wrap iframe{width:100%;height:100%;border:0;display:block;filter:contrast(1.05) saturate(1.1);}
-.map-overlay{position:absolute;left:24px;bottom:24px;z-index:2;background:rgba(8,8,16,0.8);backdrop-filter:saturate(180%) blur(24px);-webkit-backdrop-filter:saturate(180%) blur(24px);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:20px 22px;max-width:340px;box-shadow:0 20px 50px rgba(0,0,0,.4);}
-.map-overlay h3{font-size:18px;font-weight:700;margin-bottom:4px;letter-spacing:-.2px;}
-.map-overlay p{font-size:13px;color:var(--light);margin-bottom:14px;line-height:1.5;}
-.map-actions{display:flex;gap:8px;flex-wrap:wrap;}
-.map-actions .btn-white,.map-actions .btn-ghost{padding:11px 18px;font-size:13px;}
 }
 </style>
 </head>
@@ -811,20 +814,18 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
       <button class="btn-ghost" onclick="scrollToSection('home-services')">Послуги та ціни</button>
     </div>
     <div class="hero-stats">
-      <div class="hero-stat"><div class="hero-stat-num" data-count="3">0</div><div class="hero-stat-label">Бокси</div></div>
-      <div class="hero-stat"><div class="hero-stat-num" data-count="500" data-suffix="+">0</div><div class="hero-stat-label">Клієнтів</div></div>
+      <div class="hero-stat"><div class="hero-stat-num" data-count="2">0</div><div class="hero-stat-label">Локації</div></div>
+      <div class="hero-stat"><div class="hero-stat-num" data-count="900" data-suffix="+">0</div><div class="hero-stat-label">Клієнтів</div></div>
       <div class="hero-stat"><div class="hero-stat-num" data-count="5" data-suffix="★">0</div><div class="hero-stat-label">Google</div></div>
       <div class="hero-stat"><div class="hero-stat-num" data-count="4" data-suffix="+">0</div><div class="hero-stat-label">Роки</div></div>
     </div>
   </div>
-
     <!-- GALLERY -->
   <div class="section" id="home-gallery">
     <div class="section-label">Галерея</div>
     <h2 class="section-title">Наші роботи</h2>
     <div class="gallery-grid stagger-in" id="galleryGrid"></div>
   </div>
-  
   <div class="section" id="home-services">
     <div class="section-label">Послуги</div>
     <h2 class="section-title">Детейлінг, який<br>захищає ваш автомобіль</h2>
@@ -842,7 +843,6 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
       <div class="glass plan-home plan-platinum"><div class="plan-home-id">6 місяців</div><div class="plan-home-name">Platinum</div><div class="plan-home-price">60 000 ₴</div><div class="plan-home-bonus">+20% бонус = 72 000 ₴ на рахунок</div><button class="plan-home-btn" onclick="openPlanModal('Platinum','60 000','72 000','T-3','6','20')">Придбати Platinum</button></div>
     </div>
   </div>
-
     <!-- FULL-WIDTH MAP -->
   <div class="map-section" id="home-map">
     <div class="map-wrap">
@@ -853,15 +853,10 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
         allowfullscreen
         src="https://maps.google.com/maps?hl=uk&q=1333%20Car%20Center%2C%20%D0%B2%D1%83%D0%BB.%20%D0%93%D0%B2%D0%B0%D1%80%D0%B4%D1%96%D0%B9%D1%86%D1%96%D0%B2%20%D0%A8%D0%B8%D1%80%D0%BE%D0%BD%D1%96%D0%BD%D1%86%D1%96%D0%B2%2C%2051%2F1%2C%20%D0%A5%D0%B0%D1%80%D0%BA%D1%96%D0%B2&z=16&t=m&output=embed"></iframe>
       <div class="map-overlay">
-        <h3>1333 Car Center</h3>
-        <p>вул. Гвардійців Широнінців, 51/1, Харків</p>
-        <div class="map-actions">
-          <a class="btn-ghost" href="tel:+380770011333">📞 Подзвонити</a>
         </div>
       </div>
     </div>
   </div>
-  
   <footer>
     <div class="footer-inner">
       <div class="footer-grid">
@@ -1262,7 +1257,7 @@ document.getElementById('uiPromptModal').addEventListener('click',function(e){if
 // ═══ CONFIG ═══
 const APPS_SCRIPT_URL='https://script.google.com/macros/s/AKfycbw9mqrVSrAVeoMa4Np2SxYFRCxj5cW0uX1x7S50LddB7pXnz0PIvL7gPJHmLyIJ9986GQ/exec';
 const CRM_TOKEN_KEY='crm_admin_token';
-const PUBLIC_API_ACTIONS=new Set(['getTimesAndBoxes','getAvailableTimesForDate','getBoxesForDateTime','saveBooking','cancelBooking','rescheduleBooking','saveSubOrder','autoRegister','verifyCrmPin','sendClientAuthCode','verifyClientAuthCode','getClientProfileData','checkLoginPhone','verifyAdminSiteCode','getPublicCatalog','getBlockedDates']);
+const PUBLIC_API_ACTIONS=new Set(['getTimesAndBoxes','getAvailableTimesForDate','getBoxesForDateTime','saveBooking','cancelBooking','rescheduleBooking','saveSubOrder','autoRegister','verifyCrmPin','sendClientAuthCode','verifyClientAuthCode','getClientProfileData','checkLoginPhone','verifyAdminSiteCode','getPublicCatalog','getBlockedDates','getRangeAvailability']);
 
 // ═══ STATE ═══
 const S={service:'',price:'',date:'',time:'',box:null,step:1,carType:'',plate:''};
@@ -1307,7 +1302,7 @@ async function autoRegisterClient(name,phone){
 //  getTimesAndBoxes / saveBooking). No box step — box auto-assigned from
 //  the freeBoxes already returned by getTimesAndBoxes (1 request, cached).
 // ═══════════════════════════════════════════════════════════
-const BK={step:1,bodyType:'',services:[],date:'',time:'',box:null,freeBoxesByTime:{},lastBookingId:'',lastPhone:'',_cat:'all',_pendingSvc:''};
+const BK={step:1,bodyType:'',services:[],date:'',time:'',box:null,freeBoxesByTime:{},rangeTimes:{},lastBookingId:'',lastPhone:'',_cat:'all',_pendingSvc:''};
 const BK_CAL_DAYS=14;
 const BODY_ICONS={'Hot Wheels':'🏎️','Седан':'🚗','Sedan':'🚗','Кросовер':'🚙','Crossover':'🚙','Джип':'🚙','SUV':'🚙','Бус':'🚐','Van':'🚐','Мікроавтобус':'🚌','Minibus':'🚌','Мотоцикл':'🏍️'};
 const BODY_FALLBACK=['Hot Wheels','Седан','Кросовер','Джип','Бус','Мікроавтобус'];
@@ -1384,15 +1379,24 @@ function bkUpdateTotals(){
 function bkRenderCalendar(){
   const cal=document.getElementById('bkCal');if(!cal)return;const today=new Date();let html='';
   for(let i=0;i<BK_CAL_DAYS;i++){
-    const d=new Date(today);d.setDate(today.getDate()+i);const ds=bkDateStr(d);const blocked=_blockedDates.has(ds);
-    html+=`<button class="bk-day${BK.date===ds?' selected':''}${blocked?' blocked':''}" data-date="${ds}"${blocked?' disabled':''}><span class="bk-day-dow">${i===0?'Сьогодні':BK_UK_DOW[d.getDay()]}</span><span class="bk-day-num">${d.getDate()}</span><span class="bk-day-mon">${BK_UK_MON[d.getMonth()]}</span></button>`;
+    const d=new Date(today);d.setDate(today.getDate()+i);const ds=bkDateStr(d);
+    const info=BK.rangeTimes&&BK.rangeTimes[ds];
+    const blocked=_blockedDates.has(ds)||!!(info&&info.blocked);
+    let freeCount=null,full=false;
+    if(info&&Array.isArray(info.times)){freeCount=info.times.filter(t=>t.available&&!t.past).length;full=!blocked&&freeCount===0;}
+    const dot=(info||blocked)?`<span class="bk-day-dot${(full||blocked)?' closed':''}"></span>`:'';
+    const dis=(blocked||full)?' disabled':'';
+    html+=`<button class="bk-day${BK.date===ds?' selected':''}${blocked?' blocked':''}${full?' full':''}" data-date="${ds}"${dis}><span class="bk-day-dow">${i===0?'Сьогодні':BK_UK_DOW[d.getDay()]}</span><span class="bk-day-num">${d.getDate()}</span><span class="bk-day-mon">${BK_UK_MON[d.getMonth()]}</span>${dot}</button>`;
   }
   cal.innerHTML=html;
-  cal.querySelectorAll('.bk-day:not(.blocked)').forEach(b=>b.addEventListener('click',()=>bkPickDate(b.dataset.date)));
+  cal.querySelectorAll('.bk-day:not(.blocked):not(.full)').forEach(b=>b.addEventListener('click',()=>bkPickDate(b.dataset.date)));
 }
-function bkPrefetchSlots(){
-  if(!isApiConfigured())return;const today=new Date();
-  for(let i=0;i<3;i++){const d=new Date(today);d.setDate(today.getDate()+i);const ds=bkDateStr(d);if(!_blockedDates.has(ds))api('getTimesAndBoxes',{date:ds},'timesBoxes_'+ds).catch(()=>{});}
+// ✅ ONE request for the whole calendar (batched availability) — EasyWeek-grade
+async function bkLoadRange(){
+  if(!isApiConfigured())return;
+  const start=bkDateStr(new Date());
+  const data=await api('getRangeAvailability',{date:start,days:BK_CAL_DAYS},'range_'+start);
+  if(data&&data.success&&data.range){BK.rangeTimes=data.range;bkRenderCalendar();}
 }
 async function bkPickDate(ds){
   if(_blockedDates.has(ds)){toast('🔒 Ця дата закрита. Оберіть іншу.');return;}
@@ -1401,7 +1405,9 @@ async function bkPickDate(ds){
   const head=document.getElementById('bkTimeHead');if(head)head.style.display='block';
   const grid=document.getElementById('bkTimeGrid');grid.classList.remove('stagger-in');grid.innerHTML=Array.from({length:10}).map(()=>'<div class="skeleton sk-time"></div>').join('');
   let times=null;
-  if(isApiConfigured()){const data=await api('getTimesAndBoxes',{date:ds},'timesBoxes_'+ds);times=data?.times||null;} // client+server cached
+  const cd=BK.rangeTimes&&BK.rangeTimes[ds];
+  if(cd&&Array.isArray(cd.times)){times=cd.times;} // 0 extra requests — already in the batch
+  else if(isApiConfigured()){const data=await api('getTimesAndBoxes',{date:ds},'timesBoxes_'+ds);times=data?.times||null;}
   if(!times){bkRenderDemoTimes();return;}
   BK.freeBoxesByTime={};times.forEach(t=>{BK.freeBoxesByTime[t.time]=t.freeBoxes||[];});
   bkRenderTimes(times);
@@ -1448,15 +1454,12 @@ function bkGoStep(n){
   document.querySelectorAll('.bk-prog-bar').forEach((b,idx)=>b.classList.toggle('done',idx<n-1));
   const bar=document.getElementById('bkBottomBar');if(bar)bar.classList.toggle('show',n===2);
   if(n===2)bkUpdateTotals();
-  if(n===3){bkRenderCalendar();bkPrefetchSlots();}
+  if(n===3){bkRenderCalendar();bkLoadRange();}
   if(n===4)bkRenderSummary();
   requestAnimationFrame(()=>window.scrollTo({top:0,behavior:'smooth'}));
 }
-// ── HOME gallery (drop real photo URLs into GALLERY; broken ones auto-hide) ──
-const GALLERY=['assets/work-1.jpg','assets/work-2.jpg','assets/work-3.jpg','assets/work-4.jpg','assets/work-5.jpg','assets/work-6.jpg','assets/work-7.jpg','assets/work-8.jpg'];
-function renderGallery(){const g=document.getElementById('galleryGrid');if(!g)return;g.innerHTML=GALLERY.map((src,i)=>`<a class="gallery-item" href="${esc(src)}" target="_blank" rel="noopener"><img src="${esc(src)}" alt="Робота 1333 Car Center ${i+1}" loading="lazy" decoding="async" onerror="this.closest('.gallery-item').style.display='none'"></a>`).join('');}
 
-  // ── submit / lifecycle ──
+// ── submit / lifecycle ──
 async function bkSubmit(){
   const btn=document.getElementById('bkConfirmBtn');
   const name=document.getElementById('bkName').value.trim();const phone=document.getElementById('bkPhone').value.trim();
@@ -1504,6 +1507,9 @@ async function bkRescheduleLast(){
 }
 function bkDeepLink(svc){BK._pendingSvc=svc||'';bkReset();}
 
+// ── HOME gallery (drop real photo URLs into GALLERY; broken ones auto-hide) ──
+const GALLERY=['assets/work-1.jpg','assets/work-2.jpg','assets/work-3.jpg','assets/work-4.jpg','assets/work-5.jpg','assets/work-6.jpg','assets/work-7.jpg','assets/work-8.jpg'];
+function renderGallery(){const g=document.getElementById('galleryGrid');if(!g)return;g.innerHTML=GALLERY.map((src,i)=>`<a class="gallery-item" href="${esc(src)}" target="_blank" rel="noopener"><img src="${esc(src)}" alt="Робота 1333 Car Center ${i+1}" loading="lazy" decoding="async" onerror="this.closest('.gallery-item').style.display='none'"></a>`).join('');}
 
 // ═══ NAV + SCROLL FIX ═══
 function showPage(p){
