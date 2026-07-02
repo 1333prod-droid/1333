@@ -698,18 +698,18 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
 .bk-chip{flex:0 0 auto;padding:8px 16px;border-radius:100px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);color:var(--gray);font-family:inherit;transition:all .2s;}
 .bk-chip:hover{color:var(--white);border-color:rgba(255,255,255,0.2);}
 .bk-chip.active{background:rgba(167,139,250,0.16);border-color:rgba(167,139,250,0.5);color:#fff;}
-.bk-svc-list{display:flex;flex-direction:column;gap:8px;margin-bottom:120px;}
-.bk-svc-card{display:flex;align-items:center;gap:14px;padding:15px 18px;border-radius:16px;cursor:pointer;text-align:left;width:100%;background:var(--glass);border:1px solid var(--glass-border);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);transition:transform .2s var(--ease),background .2s,border-color .2s,box-shadow .2s;font-family:inherit;color:var(--white);}
+.bk-svc-list{display:flex;flex-direction:column;gap:10px;margin-bottom:120px;}
+.bk-svc-card{display:flex;align-items:center;gap:16px;padding:21px 24px;border-radius:18px;cursor:pointer;text-align:left;width:100%;background:var(--glass);border:1px solid var(--glass-border);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);transition:transform .2s var(--ease),background .2s,border-color .2s,box-shadow .2s;font-family:inherit;color:var(--white);}
 .bk-svc-card:hover{transform:translateY(-2px);background:var(--glass-hover);}
 .bk-svc-card.selected{border-color:rgba(167,139,250,.5);background:rgba(167,139,250,.1);box-shadow:0 0 0 2px rgba(167,139,250,.18);}
-.bk-svc-check{flex-shrink:0;width:24px;height:24px;border-radius:7px;border:2px solid rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#050507;transition:all .2s;}
+.bk-svc-check{flex-shrink:0;width:28px;height:28px;border-radius:8px;border:2px solid rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#050507;transition:all .2s;}
 .bk-svc-card.selected .bk-svc-check{background:var(--accent);border-color:var(--accent);}
-.bk-svc-main{flex:1;display:flex;flex-direction:column;gap:3px;min-width:0;}
-.bk-svc-name{font-size:14px;font-weight:600;line-height:1.3;}
-.bk-svc-cat{font-size:11px;color:var(--gray);}
-.bk-svc-meta{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;}
-.bk-svc-price{font-size:14px;font-weight:700;white-space:nowrap;}
-.bk-svc-dur{font-size:11px;color:var(--gray);white-space:nowrap;}
+.bk-svc-main{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0;}
+.bk-svc-name{font-size:16px;font-weight:600;line-height:1.3;}
+.bk-svc-cat{font-size:12px;color:var(--gray);}
+.bk-svc-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
+.bk-svc-price{font-size:16px;font-weight:700;white-space:nowrap;}
+.bk-svc-dur{font-size:12px;color:var(--gray);white-space:nowrap;}
 
 /* sticky totals bar */
 .bk-bottom-bar{position:fixed;left:0;right:0;bottom:0;z-index:900;display:none;align-items:center;justify-content:space-between;gap:14px;padding:14px 20px;background:rgba(8,8,16,0.82);backdrop-filter:saturate(180%) blur(24px);-webkit-backdrop-filter:saturate(180%) blur(24px);border-top:1px solid rgba(255,255,255,0.07);}
@@ -1358,6 +1358,9 @@ function bkRenderServices(){
     const cats=Array.from(new Set(list.map(s=>s.category)));
     chips.innerHTML=cats.map(c=>`<button class="bk-chip${BK._cat===c?' active':''}" data-cat="${esc(c)}">${esc(c)}</button>`).join('');
     chips.querySelectorAll('.bk-chip').forEach(ch=>ch.addEventListener('click',()=>{BK._cat=ch.dataset.cat;bkRenderServices();}));
+    // авто-скрол активного чіпа в центр — щоб при натисканні крайніх з'являлись сусідні
+    const activeChip=chips.querySelector('.bk-chip.active');
+    if(activeChip)chips.scrollTo({left:activeChip.offsetLeft-chips.clientWidth/2+activeChip.offsetWidth/2,behavior:'smooth'});
   }
   const cont=document.getElementById('bkSvcList');if(!cont)return;
   const shown=list.filter(s=>BK._cat==='all'||s.category===BK._cat);
