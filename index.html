@@ -130,6 +130,18 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;height:64px;
 .cab-no-tg{background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.2);border-radius:16px;padding:24px;text-align:center;}
 .cab-no-tg-icon{font-size:36px;margin-bottom:12px;}
 .cab-no-tg-text{font-size:14px;color:var(--light);line-height:1.6;}
+/* 🪪 QR-код клієнта: картка навмисно БІЛА — сканеру потрібен світлий фон */
+.qr-overlay{position:fixed;inset:0;z-index:1200;display:none;align-items:center;justify-content:center;background:rgba(5,5,7,0.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:20px;}
+.qr-overlay.show{display:flex;animation:fadeUp 0.35s var(--ease);}
+.qr-card{width:100%;max-width:360px;background:#fff;border-radius:24px;padding:24px;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,0.6);}
+.qr-card-title{font-size:15px;font-weight:800;color:#111;margin-bottom:14px;letter-spacing:-0.2px;}
+.qr-img-box{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:12px;overflow:hidden;}
+.qr-img-box img{width:100%;height:100%;object-fit:contain;display:block;}
+.qr-meta{font-size:13px;font-weight:700;color:#111;margin-top:10px;}
+.qr-note{font-size:11px;color:#666;margin:6px 0 14px;line-height:1.5;}
+.qr-err{font-size:13px;color:#dc2626;padding:30px 10px;line-height:1.5;}
+.qr-spinner{width:36px;height:36px;border:3px solid #eee;border-top-color:#a78bfa;border-radius:50%;animation:qrSpin 0.8s linear infinite;}
+@keyframes qrSpin{to{transform:rotate(360deg);}}
 .nav-menu-btn{display:none;background:none;border:1px solid rgba(255,255,255,0.1);color:var(--white);padding:8px 10px;border-radius:10px;cursor:pointer;font-size:18px;transition:transform 0.2s;}
 .nav-menu-btn:active{transform:scale(0.9);}
 
@@ -596,6 +608,31 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
 .loc-dot{width:10px;height:10px;border-radius:50%;margin-left:auto;flex-shrink:0;}
 .loc-dot.open{background:var(--green);box-shadow:0 0 10px rgba(16,185,129,.7);animation:pulse 2s infinite;}
 .loc-dot.closed{background:var(--red);box-shadow:0 0 8px rgba(239,68,68,.55);}
+/* ✨ Поява: логотип → підзаголовок → картки в'їжджають каскадом */
+.loc-overlay.show .loc-logo{opacity:0;animation:locItemIn .55s var(--ease) .05s forwards;}
+.loc-overlay.show .loc-sub{opacity:0;animation:locItemIn .55s var(--ease) .16s forwards;}
+.loc-overlay.show .loc-card{opacity:0;animation:locCardIn .6s var(--ease) forwards;}
+.loc-overlay.show .loc-card:nth-child(1){animation-delay:.28s;}
+.loc-overlay.show .loc-card:nth-child(2){animation-delay:.44s;}
+@keyframes locItemIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+@keyframes locCardIn{from{opacity:0;transform:translateY(34px) scale(.94);}to{opacity:1;transform:none;}}
+/* Обрана картка — коротка підсвітка перед розльотом */
+.loc-card.picked{border-color:rgba(167,139,250,.85);background:rgba(167,139,250,.14);box-shadow:0 0 0 3px rgba(167,139,250,.25),0 16px 40px rgba(0,0,0,.5);}
+/* 🚪 Зникнення: картки роз'їжджаються в боки, оверлей тане і відкриває сайт */
+.loc-overlay.leaving{animation:locOverlayOut .5s ease .18s forwards;pointer-events:none;}
+.loc-overlay.leaving .loc-logo{animation:locItemOut .4s var(--ease) forwards;}
+.loc-overlay.leaving .loc-sub{animation:locItemOut .4s var(--ease) .05s forwards;}
+.loc-overlay.leaving .loc-card:nth-child(1){animation:locFlyL .62s cubic-bezier(.55,.06,.68,.19) forwards;}
+.loc-overlay.leaving .loc-card:nth-child(2){animation:locFlyR .62s cubic-bezier(.55,.06,.68,.19) forwards;}
+.loc-overlay.leaving .loc-card.picked{animation-delay:.07s;}
+@keyframes locOverlayOut{from{opacity:1;}to{opacity:0;}}
+@keyframes locItemOut{from{opacity:1;transform:none;}to{opacity:0;transform:translateY(-16px);}}
+@keyframes locFlyL{from{opacity:1;transform:none;}to{opacity:0;transform:translateX(-140%) rotate(-6deg);}}
+@keyframes locFlyR{from{opacity:1;transform:none;}to{opacity:0;transform:translateX(140%) rotate(6deg);}}
+@media (prefers-reduced-motion:reduce){
+  .loc-overlay.show .loc-logo,.loc-overlay.show .loc-sub,.loc-overlay.show .loc-card{animation:none;opacity:1;}
+  .loc-overlay.leaving,.loc-overlay.leaving .loc-logo,.loc-overlay.leaving .loc-sub,.loc-overlay.leaving .loc-card{animation-duration:.01s;animation-delay:0s;}
+}
 /* червона крапка у hero-бейджі, коли локація зачинена */
 .hero-badge-dot.closed{background:var(--red);box-shadow:0 0 8px var(--red);}
 
@@ -1110,6 +1147,7 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
       </div>
       <div class="cab-section-title">Дії</div>
       <button class="cab-btn" onclick="showPage('booking')" style="margin-bottom:8px;">+ Записатись на мийку</button>
+      <button class="cab-btn-ghost" onclick="cabShowQr()" id="cab-qr-btn">🪪 Мій QR-код</button>
       <button class="cab-btn-ghost" onclick="showPage('subscriptions')">💎 Переглянути абонементи</button>
     </div>
 
@@ -1129,6 +1167,18 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
         <button class="cab-btn-ghost" onclick="cabGoStep('phone');cabResetAdminCode()">← Назад</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- 🪪 QR-код клієнта (особистий кабінет) -->
+<div class="qr-overlay" id="qr-overlay" onclick="if(event.target===this)cabCloseQr()">
+  <div class="qr-card">
+    <div class="qr-card-title">🪪 Ваша картка клієнта · 1333</div>
+    <div class="qr-img-box" id="qr-img-box"><div class="qr-spinner"></div></div>
+    <div class="qr-meta" id="qr-meta"></div>
+    <div class="qr-note">Покажіть код адміністратору або збережіть на телефон.<br>У коді: ПІБ, телефон, баланс, візити та записи.</div>
+    <a class="cab-btn" id="qr-download" style="display:none;text-align:center;text-decoration:none;box-sizing:border-box;">⬇️ Завантажити PNG</a>
+    <button class="cab-btn-ghost" onclick="cabCloseQr()">Закрити</button>
   </div>
 </div>
 
@@ -1385,18 +1435,37 @@ function renderLocCards(){
   wrap.querySelectorAll('.loc-card').forEach(b=>b.addEventListener('click',()=>pickLocation(b.dataset.loc)));
 }
 function openLocOverlay(allowClose){
-  renderLocCards();
+  renderLocCards(); // картки перестворюються → анімація появи програється щоразу
   const c=document.getElementById('locCloseBtn');if(c)c.style.display=allowClose?'flex':'none';
-  document.getElementById('locOverlay').classList.add('show');
+  const ov=document.getElementById('locOverlay');
+  ov.classList.remove('leaving');ov.classList.add('show');
 }
-function closeLocOverlay(){document.getElementById('locOverlay').classList.remove('show');}
+// ✨ Анімоване закриття: підсвітка обраної картки → картки роз'їжджаються → оверлей тане
+function closeLocOverlayAnimated(pickedId,done){
+  const ov=document.getElementById('locOverlay');
+  if(!ov||!ov.classList.contains('show')||ov.classList.contains('leaving')){if(done)done();return;}
+  const cards=ov.querySelectorAll('.loc-card');
+  cards.forEach(c=>{c.disabled=true;if(pickedId)c.classList.toggle('picked',c.dataset.loc===pickedId);});
+  setTimeout(()=>{
+    ov.classList.add('leaving');
+    setTimeout(()=>{
+      ov.classList.remove('show','leaving');
+      cards.forEach(c=>{c.disabled=false;c.classList.remove('picked');});
+      if(done)done();
+    },740);
+  },pickedId?230:0); // мить, щоб побачити підсвітку вибору
+}
+function closeLocOverlay(){closeLocOverlayAnimated(null,null);}
 function pickLocation(id){
   const prev=currentLocId();
   localStorage.setItem(LOC_KEY,id);
   try{sessionStorage.setItem(LOC_PICKED,'1');}catch(e){}
-  // дані вже завантажені з іншої таблиці → чистий перезапуск під нову локацію
-  if(_locLoadsStarted&&id!==prev){location.reload();return;}
-  applyLocation();closeLocOverlay();_startLocDataLoads();
+  // Перезапуск потрібен лише якщо дані вже завантажені З ІНШОГО бекенда.
+  // ⚠️ Поки бекенд один на обидві адреси (url однакові) — перезапуск зайвий:
+  //    просто оновлюємо назву/мапу/графік і красиво закриваємо оверлей.
+  const needReload=_locLoadsStarted&&id!==prev&&LOCATIONS[prev].url!==LOCATIONS[id].url;
+  if(!needReload){applyLocation();_startLocDataLoads();}
+  closeLocOverlayAnimated(id,()=>{if(needReload)location.reload();});
 }
 function initLocation(){
   applyLocation();
@@ -1405,7 +1474,7 @@ function initLocation(){
   else openLocOverlay(false); // перший вхід у сесії — зустрічаємо вибором адреси
 }
 const CRM_TOKEN_KEY='crm_admin_token';
-const PUBLIC_API_ACTIONS=new Set(['getTimesAndBoxes','getAvailableTimesForDate','getBoxesForDateTime','saveBooking','cancelBooking','rescheduleBooking','saveSubOrder','autoRegister','verifyCrmPin','sendClientAuthCode','verifyClientAuthCode','getClientProfileData','checkLoginPhone','verifyAdminSiteCode','getPublicCatalog','getBlockedDates','getRangeAvailability']);
+const PUBLIC_API_ACTIONS=new Set(['getTimesAndBoxes','getAvailableTimesForDate','getBoxesForDateTime','saveBooking','cancelBooking','rescheduleBooking','saveSubOrder','autoRegister','verifyCrmPin','sendClientAuthCode','verifyClientAuthCode','getClientProfileData','checkLoginPhone','verifyAdminSiteCode','getPublicCatalog','getBlockedDates','getRangeAvailability','getClientQrCode']);
 
 // ═══ STATE ═══
 const S={service:'',price:'',date:'',time:'',box:null,step:1,carType:'',plate:''};
@@ -3058,6 +3127,28 @@ function cabLogout(){
   _cabPhone='';_cabRole='';const input=document.getElementById('cab-phone-input');if(input)input.value='';
   cabResetCode();cabResetAdminCode();cabGoStep('phone');
 }
+// 🪪 QR-код клієнта: живі дані з бекенда (модуль «QR 1333», action=getClientQrCode)
+async function cabShowQr(){
+  const clientId=localStorage.getItem(CAB_ID_KEY),clientToken=localStorage.getItem(CAB_TOKEN_KEY);
+  if(!clientId||!clientToken){cabLogout();return;}
+  const ov=document.getElementById('qr-overlay'),box=document.getElementById('qr-img-box');
+  const meta=document.getElementById('qr-meta'),dl=document.getElementById('qr-download');
+  if(!ov||!box)return;
+  ov.classList.add('show');box.innerHTML='<div class="qr-spinner"></div>';
+  if(meta)meta.textContent='';if(dl)dl.style.display='none';
+  const res=await api('getClientQrCode',{clientId,clientToken});
+  if(!res||!res.success||!res.image){
+    if(res?.unauthorized){cabCloseQr();cabLogout();return;}
+    box.innerHTML='<div class="qr-err">Не вдалося згенерувати QR-код.<br>Спробуйте за хвилину.</div>';
+    return;
+  }
+  const img=document.createElement('img');img.alt='QR-код клієнта';img.src=res.image;
+  box.innerHTML='';box.appendChild(img);
+  if(meta)meta.textContent=(res.name||'')+' · '+(res.balance!=null?res.balance:0)+' ₴';
+  if(dl){dl.href=res.image;dl.setAttribute('download',res.fileName||'1333_QR.png');dl.style.display='block';}
+}
+function cabCloseQr(){document.getElementById('qr-overlay')?.classList.remove('show');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')cabCloseQr();});
 
 // ═══ INIT ═══
 function bindUiHandlers(){
