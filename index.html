@@ -1147,7 +1147,8 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
       </div>
       <div class="cab-section-title">Дії</div>
       <button class="cab-btn" onclick="showPage('booking')" style="margin-bottom:8px;">+ Записатись на мийку</button>
-      <button class="cab-btn-ghost" onclick="cabShowQr()" id="cab-qr-btn">🪪 Мій QR-код</button>
+      <button class="cab-btn-ghost" onclick="cabShowQr()" id="cab-qr-btn" style="margin-bottom:8px;">🪪 QR для адміністратора</button>
+      <button class="cab-btn-ghost" onclick="cabShowCard()" id="cab-card-btn" style="margin-bottom:8px;">🖼️ Моя картка (з телефоном)</button>
       <button class="cab-btn-ghost" onclick="showPage('subscriptions')">💎 Переглянути абонементи</button>
     </div>
 
@@ -1176,9 +1177,20 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
     <div class="qr-card-title">🪪 Ваша картка клієнта · 1333</div>
     <div class="qr-img-box" id="qr-img-box"><div class="qr-spinner"></div></div>
     <div class="qr-meta" id="qr-meta"></div>
-    <div class="qr-note">Покажіть код адміністратору або збережіть на телефон.<br>У коді: ПІБ, телефон, баланс, візити та записи.</div>
+    <div class="qr-note">Покажіть код адміністратору або збережіть на телефон.<br>У коді: ID, ім'я, баланс, дата реєстрації, візити та термін абонемента.</div>
     <a class="cab-btn" id="qr-download" style="display:none;text-align:center;text-decoration:none;box-sizing:border-box;">⬇️ Завантажити PNG</a>
     <button class="cab-btn-ghost" onclick="cabCloseQr()">Закрити</button>
+  </div>
+</div>
+
+<!-- 🖼️ Картка клієнта з даними (PNG для показу адміністратору) -->
+<div class="qr-overlay" id="card-overlay" onclick="if(event.target===this)cabCloseCard()">
+  <div class="qr-card">
+    <div class="qr-card-title">🖼️ Ваша картка · 1333</div>
+    <img id="card-img" alt="Картка клієнта 1333" style="width:100%;display:block;border-radius:14px;background:#050507;"/>
+    <div class="qr-note">Покажіть адміністратору або збережіть на телефон.<br>У картці: ім'я, телефон, баланс, візити та термін абонемента.</div>
+    <a class="cab-btn" id="card-download" style="text-align:center;text-decoration:none;box-sizing:border-box;">⬇️ Завантажити PNG</a>
+    <button class="cab-btn-ghost" onclick="cabCloseCard()">Закрити</button>
   </div>
 </div>
 
@@ -1841,7 +1853,9 @@ window.addEventListener('load',()=>{
   // ✅ гарантований показ лого навіть якщо подія onload зображення вже відпрацювала (кеш)
   document.querySelector('.nav-logo-img')?.classList.add('logo-ready');
   renderGallery();
-  initLocation(); // екран вибору адреси → потім префетч даних обраної локації
+  // 🪪 QR клієнта веде на site/#c=ID → одразу в CRM (без оверлея вибору локації)
+  if(handleClientDeepLink()){ applyLocation(); _startLocDataLoads(); }
+  else initLocation(); // звичайний вхід: екран вибору адреси → префетч даних локації
   initRevealFx();
   // delayed count-up so numbers show after hero animation
   setTimeout(initCountUp,900);
@@ -2234,6 +2248,23 @@ async function rescheduleLastBooking(){
 
 // ═══ PIN / CRM ═══
 let _pinBuffer='',_pinChecking=false,_crmUnlocked=!!_crmToken;
+// 🪪 Deep-link з QR клієнта: site/#c=CLIENT_ID → відкрити картку клієнта в CRM
+let _pendingClientCard=null;
+function handleClientDeepLink(){
+  const src=(location.hash||'')+' '+(location.search||'');
+  const m=src.match(/[#?&]c(?:lient)?=([A-Za-z0-9._-]+)/);
+  if(!m)return false;
+  _pendingClientCard=decodeURIComponent(m[1]);
+  // прибираємо якір, щоб перехід не повторювався і не заважав вибору локації
+  try{history.replaceState(null,'',location.pathname);}catch(e){}
+  showPage('crm'); // якщо адмін не залогінений — initCrmPage відправить на вхід, картка відкриється після входу
+  return true;
+}
+function _openPendingClientCard(){
+  if(!_pendingClientCard||!_crmUnlocked)return;
+  const id=_pendingClientCard;_pendingClientCard=null;
+  setTimeout(()=>{try{openClientModal(id);}catch(e){}},200);
+}
 function initCrmPage(){if(_crmUnlocked){showCrmInner();loadCRM();}else showPage('cabinet');}
 function showPinGate(){document.getElementById('crm-gate').style.display='flex';document.getElementById('crm-inner').classList.remove('show');}
 function showCrmInner(){
@@ -2294,6 +2325,7 @@ async function loadCRM(silent){
   if(_prevSubReqIds){let fresh=0;curIds.forEach(id=>{if(!_prevSubReqIds.has(id))fresh++;});if(fresh>0)toast(`🔔 Нових заявок: ${fresh}`);}
   _prevSubReqIds=curIds;
   if(_crmUnlocked)startCrmAutoRefresh();
+  _openPendingClientCard(); // 🪪 якщо зайшли по QR-посиланню — відкриваємо картку клієнта
 }
 function startCrmAutoRefresh(){
   if(_crmAutoRefreshTimer)return;
@@ -3097,6 +3129,7 @@ async function loadCabinetProfile(clientId,clientToken){
   const res=await api('getClientProfileData',{clientId,clientToken});
   if(!res||res.unauthorized||!res.success){cabLogout();const err=document.getElementById('cab-phone-error');if(err)err.textContent='Сесія завершилась.';return;}
   const p=res.profile||{};
+  _cabProfile={...p,subs:res.subs||[]}; // 🖼️ джерело для картки-картинки (телефон, візити, абонемент)
   const setTxt=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val;};
   setTxt('cab-client-name',p.name||'—');setTxt('cab-client-phone',p.phone||'—');
   setTxt('cab-balance',(Number(p.balance)||0).toLocaleString('uk-UA')+' ₴');
@@ -3136,7 +3169,8 @@ async function cabShowQr(){
   if(!ov||!box)return;
   ov.classList.add('show');box.innerHTML='<div class="qr-spinner"></div>';
   if(meta)meta.textContent='';if(dl)dl.style.display='none';
-  const res=await api('getClientQrCode',{clientId,clientToken});
+  // передаємо адресу сайту → QR веде на цю ж сторінку (site/#c=ID) у CRM
+  const res=await api('getClientQrCode',{clientId,clientToken,siteUrl:location.origin+location.pathname});
   if(!res||!res.success||!res.image){
     if(res?.unauthorized){cabCloseQr();cabLogout();return;}
     box.innerHTML='<div class="qr-err">Не вдалося згенерувати QR-код.<br>Спробуйте за хвилину.</div>';
@@ -3148,7 +3182,89 @@ async function cabShowQr(){
   if(dl){dl.href=res.image;dl.setAttribute('download',res.fileName||'1333_QR.png');dl.style.display='block';}
 }
 function cabCloseQr(){document.getElementById('qr-overlay')?.classList.remove('show');}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')cabCloseQr();});
+
+// 🖼️ КАРТКА-КАРТИНКА: PNG з даними клієнта (ім'я, телефон, баланс, візити, абонемент).
+//   Малюється у браузері на <canvas> — працює офлайн, телефон не «дзвонить» (це зображення).
+let _cabProfile=null; // зберігаємо профіль після завантаження кабінету → джерело для картки
+function _cardRound(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function renderClientCardPng(p){
+  const W=720,H=1040,S=2,c=document.createElement('canvas');
+  c.width=W*S;c.height=H*S;const x=c.getContext('2d');x.scale(S,S);
+  const uah=n=>(Number(n)||0).toLocaleString('uk-UA');
+  const F=(w,s)=>w+' '+s+'px Inter, "Segoe UI", Arial, sans-serif';
+  // тло
+  x.fillStyle='#050507';x.fillRect(0,0,W,H);
+  // рамка-картка
+  x.fillStyle='#0d0d14';_cardRound(x,28,28,W-56,H-56,28);x.fill();
+  x.strokeStyle='rgba(255,255,255,0.08)';x.lineWidth=1.5;_cardRound(x,28,28,W-56,H-56,28);x.stroke();
+  // верхня акцентна смуга
+  const g=x.createLinearGradient(28,0,W-28,0);g.addColorStop(0,'#10b981');g.addColorStop(1,'#a78bfa');
+  x.fillStyle=g;_cardRound(x,28,28,W-56,10,5);x.fill();
+  const cx=W/2;
+  // шапка
+  x.textAlign='center';x.fillStyle='#ffffff';x.font=F(800,40);x.fillText('1333 CAR CENTER',cx,110);
+  x.fillStyle='#8a8a99';x.font=F(600,15);x.fillText('К А Р Т К А   К Л І Є Н Т А',cx,140);
+  // аватар з ініціалами
+  const parts=String(p.name||'').trim().split(/\s+/);
+  const initials=((parts[0]||' ')[0]+(parts[1]||' ')[0]).toUpperCase().trim()||'—';
+  x.save();x.beginPath();x.arc(cx,215,52,0,Math.PI*2);x.closePath();
+  const ag=x.createLinearGradient(cx-52,163,cx+52,267);ag.addColorStop(0,'rgba(167,139,250,0.5)');ag.addColorStop(1,'rgba(16,185,129,0.4)');
+  x.fillStyle=ag;x.fill();x.restore();
+  x.fillStyle='#ffffff';x.font=F(700,40);x.fillText(initials,cx,229);
+  // ім'я
+  x.fillStyle='#ffffff';x.font=F(700,32);
+  let name=String(p.name||'—');
+  while(x.measureText(name).width>W-140&&name.length>4){name=name.slice(0,-2);}
+  x.fillText(name+(name!==String(p.name||'—')?'…':''),cx,315);
+  // телефон
+  x.fillStyle='#9a9aa8';x.font=F(500,20);x.fillText(String(p.phone||'—'),cx,348);
+  // баланс
+  x.fillStyle='#10b981';x.font=F(800,64);x.fillText(uah(p.balance)+' ₴',cx,432);
+  x.fillStyle='#8a8a99';x.font=F(600,14);x.fillText('Б А Л А Н С   Н А   Р А Х У Н К У',cx,462);
+  // блок метрик (3 колонки)
+  const rowY=520,cellH=110,pad=52,innerW=W-56-pad*2,cellW=innerW/3;
+  const cells=[['Зареєстрований',p.registered||'—'],['Візитів',String(p.visits!=null?p.visits:0)],['Останній візит',p.lastVisit||'—']];
+  cells.forEach((cel,i)=>{
+    const bx=pad+2+i*cellW+8;
+    x.fillStyle='rgba(255,255,255,0.04)';_cardRound(x,bx,rowY,cellW-16,cellH,16);x.fill();
+    x.textAlign='center';const mx=bx+(cellW-16)/2;
+    x.fillStyle='#ffffff';x.font=F(700,22);
+    let val=String(cel[1]);while(x.measureText(val).width>cellW-30&&val.length>3){val=val.slice(0,-2);}
+    x.fillText(val,mx,rowY+52);
+    x.fillStyle='#8a8a99';x.font=F(600,12);x.fillText(String(cel[0]).toUpperCase(),mx,rowY+82);
+  });
+  // абонемент
+  const subs=(p.subs||[]).filter(s=>String(s.status||'').includes('Активн')||String(s.status||'').includes('✅'));
+  const sy=rowY+cellH+34;
+  x.fillStyle='rgba(167,139,250,0.10)';_cardRound(x,pad+2,sy,innerW-4,96,18);x.fill();
+  x.strokeStyle='rgba(167,139,250,0.30)';x.lineWidth=1.5;_cardRound(x,pad+2,sy,innerW-4,96,18);x.stroke();
+  x.textAlign='center';
+  if(subs.length){
+    const s=subs[0];
+    x.fillStyle='#c9b8ff';x.font=F(700,22);
+    let tn=String(s.typeName||'Абонемент');while(x.measureText(tn).width>innerW-60&&tn.length>4){tn=tn.slice(0,-2);}
+    x.fillText('💎 '+tn,cx,sy+40);
+    x.fillStyle='#ffffff';x.font=F(600,18);x.fillText('дійсний до '+(s.endDate||'—'),cx,sy+70);
+  }else{
+    x.fillStyle='#9a9aa8';x.font=F(600,20);x.fillText('Активних абонементів немає',cx,sy+56);
+  }
+  // футер
+  x.fillStyle='#5a5a68';x.font=F(600,15);
+  x.fillText('ID: '+String(p.clientId||'—')+'   ·   оновлено '+new Date().toLocaleDateString('uk-UA')+' '+new Date().toLocaleTimeString('uk-UA',{hour:'2-digit',minute:'2-digit'}),cx,H-70);
+  return c.toDataURL('image/png');
+}
+function cabShowCard(){
+  const p=_cabProfile;
+  if(!p){if(typeof toast==='function')toast('Дані ще завантажуються…');return;}
+  const ov=document.getElementById('card-overlay'),img=document.getElementById('card-img'),dl=document.getElementById('card-download');
+  if(!ov||!img)return;
+  let dataUrl;try{dataUrl=renderClientCardPng(p);}catch(e){if(typeof toast==='function')toast('Не вдалося створити картку');return;}
+  img.src=dataUrl;
+  if(dl){dl.href=dataUrl;dl.setAttribute('download','1333_card_'+String(p.clientId||'').replace(/[^\w-]/g,'')+'.png');}
+  ov.classList.add('show');
+}
+function cabCloseCard(){document.getElementById('card-overlay')?.classList.remove('show');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){cabCloseQr();cabCloseCard();}});
 
 // ═══ INIT ═══
 function bindUiHandlers(){
