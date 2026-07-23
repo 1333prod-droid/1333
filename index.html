@@ -589,50 +589,6 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(255,255,255,0.08);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.15);border-radius:100px;padding:12px 22px;font-size:13px;font-weight:600;z-index:5000;opacity:0;transition:all 0.4s;white-space:nowrap;max-width:90vw;overflow:hidden;text-overflow:ellipsis;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-/* ═══ ВИБІР ЛОКАЦІЇ (дві адреси) ═══ */
-.loc-overlay{position:fixed;inset:0;z-index:3000;display:none;align-items:center;justify-content:center;background:rgba(2,2,4,0.9);backdrop-filter:saturate(180%) blur(26px);-webkit-backdrop-filter:saturate(180%) blur(26px);padding:20px;}
-.loc-overlay.show{display:flex;animation:fadeIn .3s ease;}
-.loc-box{max-width:520px;width:100%;text-align:center;position:relative;}
-.loc-logo{font-size:26px;font-weight:800;letter-spacing:2px;margin-bottom:6px;}
-.loc-sub{font-size:13.5px;color:var(--gray);margin-bottom:24px;line-height:1.5;}
-.loc-cards{display:flex;flex-direction:column;gap:12px;}
-.loc-card{display:flex;align-items:center;gap:14px;text-align:left;padding:20px 22px;border-radius:18px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);cursor:pointer;font-family:'Inter',sans-serif;color:var(--white);transition:transform .2s var(--ease),background .2s,border-color .2s,box-shadow .2s;}
-.loc-card:hover{border-color:rgba(167,139,250,.55);background:rgba(167,139,250,.1);transform:translateY(-2px);box-shadow:0 12px 30px rgba(0,0,0,.4);}
-.loc-card:active{transform:scale(.98);}
-.loc-pin{font-size:22px;flex-shrink:0;}
-.loc-main{flex:1;min-width:0;display:block;}
-.loc-name{font-size:15px;font-weight:700;line-height:1.35;display:block;}
-.loc-state{font-size:12px;font-weight:600;margin-top:3px;display:block;}
-.loc-state.open{color:var(--green);}
-.loc-state.closed{color:var(--red);}
-.loc-dot{width:10px;height:10px;border-radius:50%;margin-left:auto;flex-shrink:0;}
-.loc-dot.open{background:var(--green);box-shadow:0 0 10px rgba(16,185,129,.7);animation:pulse 2s infinite;}
-.loc-dot.closed{background:var(--red);box-shadow:0 0 8px rgba(239,68,68,.55);}
-/* ✨ Поява: логотип → підзаголовок → картки в'їжджають каскадом */
-.loc-overlay.show .loc-logo{opacity:0;animation:locItemIn .55s var(--ease) .05s forwards;}
-.loc-overlay.show .loc-sub{opacity:0;animation:locItemIn .55s var(--ease) .16s forwards;}
-.loc-overlay.show .loc-card{opacity:0;animation:locCardIn .6s var(--ease) forwards;}
-.loc-overlay.show .loc-card:nth-child(1){animation-delay:.28s;}
-.loc-overlay.show .loc-card:nth-child(2){animation-delay:.44s;}
-@keyframes locItemIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
-@keyframes locCardIn{from{opacity:0;transform:translateY(34px) scale(.94);}to{opacity:1;transform:none;}}
-/* Обрана картка — коротка підсвітка перед розльотом */
-.loc-card.picked{border-color:rgba(167,139,250,.85);background:rgba(167,139,250,.14);box-shadow:0 0 0 3px rgba(167,139,250,.25),0 16px 40px rgba(0,0,0,.5);}
-/* 🚪 Зникнення: картки роз'їжджаються в боки, оверлей тане і відкриває сайт */
-.loc-overlay.leaving{animation:locOverlayOut .5s ease .18s forwards;pointer-events:none;}
-.loc-overlay.leaving .loc-logo{animation:locItemOut .4s var(--ease) forwards;}
-.loc-overlay.leaving .loc-sub{animation:locItemOut .4s var(--ease) .05s forwards;}
-.loc-overlay.leaving .loc-card:nth-child(1){animation:locFlyL .62s cubic-bezier(.55,.06,.68,.19) forwards;}
-.loc-overlay.leaving .loc-card:nth-child(2){animation:locFlyR .62s cubic-bezier(.55,.06,.68,.19) forwards;}
-.loc-overlay.leaving .loc-card.picked{animation-delay:.07s;}
-@keyframes locOverlayOut{from{opacity:1;}to{opacity:0;}}
-@keyframes locItemOut{from{opacity:1;transform:none;}to{opacity:0;transform:translateY(-16px);}}
-@keyframes locFlyL{from{opacity:1;transform:none;}to{opacity:0;transform:translateX(-140%) rotate(-6deg);}}
-@keyframes locFlyR{from{opacity:1;transform:none;}to{opacity:0;transform:translateX(140%) rotate(6deg);}}
-@media (prefers-reduced-motion:reduce){
-  .loc-overlay.show .loc-logo,.loc-overlay.show .loc-sub,.loc-overlay.show .loc-card{animation:none;opacity:1;}
-  .loc-overlay.leaving,.loc-overlay.leaving .loc-logo,.loc-overlay.leaving .loc-sub,.loc-overlay.leaving .loc-card{animation-duration:.01s;animation-delay:0s;}
-}
 /* червона крапка у hero-бейджі, коли локація зачинена */
 .hero-badge-dot.closed{background:var(--red);box-shadow:0 0 8px var(--red);}
 
@@ -864,16 +820,6 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
 <div class="mesh-bg"><div class="mesh-blob"></div></div>
 <div class="noise"></div>
 
-<!-- ВИБІР ЛОКАЦІЇ (дві адреси) -->
-<div class="loc-overlay" id="locOverlay">
-  <div class="loc-box">
-    <button class="modal-close" id="locCloseBtn" onclick="closeLocOverlay()" style="display:none;">✕</button>
-    <div class="loc-logo">1333 CAR CENTER</div>
-    <div class="loc-sub">Оберіть локацію — розклад і вільний час свої для кожної адреси</div>
-    <div class="loc-cards" id="locCards"></div>
-  </div>
-</div>
-
 <!-- MOBILE MENU -->
 <div class="mobile-menu" id="mobileMenu">
   <button class="mobile-menu-close" onclick="closeMobileMenu()" aria-label="Закрити меню">✕</button>
@@ -913,9 +859,8 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
 <!-- HOME -->
 <div id="home-page" class="page active">
   <div class="hero">
-    <div class="hero-badge" id="heroLocBadge" role="button" tabindex="0" title="Змінити локацію" style="cursor:pointer;" onclick="openLocOverlay(true)"
-         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openLocOverlay(true);}">
-      <span class="hero-badge-dot" id="heroLocDot"></span><span id="heroLocText">Харків · вул. Гвардійців Широнінців, 51/1</span><span style="opacity:.55;font-size:10px;margin-left:2px;">▾</span>
+    <div class="hero-badge" id="heroLocBadge">
+      <span class="hero-badge-dot" id="heroLocDot"></span><span id="heroLocText">Харків · вул. Шевченка, 59</span>
     </div>
     <h1 class="hero-headline">1333<br>CAR <em>CENTER</em></h1>
     <p class="hero-tagline"><b>Детейлінг вищого класу.</b><br>Полірування · Хімчистка · Кераміка · PPF</p>
@@ -924,7 +869,7 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
       <button class="btn-ghost" onclick="scrollToSection('home-services')">Послуги та ціни</button>
     </div>
     <div class="hero-stats">
-      <div class="hero-stat"><div class="hero-stat-num" data-count="2">0</div><div class="hero-stat-label">Локації</div></div>
+      <div class="hero-stat"><div class="hero-stat-num" data-count="1">0</div><div class="hero-stat-label">Локація</div></div>
       <div class="hero-stat"><div class="hero-stat-num" data-count="900" data-suffix="+">0</div><div class="hero-stat-label">Клієнтів</div></div>
       <div class="hero-stat"><div class="hero-stat-num" data-count="5" data-suffix="★">0</div><div class="hero-stat-label">Google</div></div>
       <div class="hero-stat"><div class="hero-stat-num" data-count="4" data-suffix="+">0</div><div class="hero-stat-label">Роки</div></div>
@@ -962,7 +907,7 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
         loading="lazy"
         referrerpolicy="no-referrer-when-downgrade"
         allowfullscreen
-        src="https://maps.google.com/maps?hl=uk&q=1333%20Car%20Center%2C%20%D0%B2%D1%83%D0%BB.%20%D0%93%D0%B2%D0%B0%D1%80%D0%B4%D1%96%D0%B9%D1%86%D1%96%D0%B2%20%D0%A8%D0%B8%D1%80%D0%BE%D0%BD%D1%96%D0%BD%D1%86%D1%96%D0%B2%2C%2051%2F1%2C%20%D0%A5%D0%B0%D1%80%D0%BA%D1%96%D0%B2&z=16&t=m&output=embed"></iframe> 
+        src="https://maps.google.com/maps?hl=uk&q=1333%20Car%20Center%2C%20%D0%B2%D1%83%D0%BB.%20%D0%A8%D0%B5%D0%B2%D1%87%D0%B5%D0%BD%D0%BA%D0%B0%2C%2059%2C%20%D0%A5%D0%B0%D1%80%D0%BA%D1%96%D0%B2&z=16&t=m&output=embed"></iframe>
   </div>
   </div>
   
@@ -971,7 +916,7 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
       <div class="footer-grid">
         <div><div class="footer-brand">1333 CAR CENTER</div><p class="footer-desc">Детейлінг центр у Харкові. Антигравійна плівка, хімчистка, полірування.</p></div>
         <div><div class="footer-col-title">Навігація</div><ul class="footer-links"><li><a href="#" onclick="showPage('home')">Головна</a></li><li><a href="#" onclick="showPage('services')">Послуги</a></li><li><a href="#" onclick="showPage('subscriptions')">Абонементи</a></li><li><a href="#" onclick="showPage('booking')">Записатись</a></li><li><a href="privacy.html">Політика конфіденційності</a></li></ul></div>
-        <div><div class="footer-col-title">Контакти</div><ul class="footer-links"><li><a href="https://instagram.com/1333_car_center" target="_blank">@1333_car_center</a></li><li><a href="#">вул. Гвардійців Широнінців, 51/1</a></li><li><a href="#">вул. Шевченка, 59</a></li><li><a href="#">Пн–Пт: 09:00–20:00</a></li><li><a href="#">Сб–Нд: 10:00–20:00</a></li></ul></div>
+        <div><div class="footer-col-title">Контакти</div><ul class="footer-links"><li><a href="https://instagram.com/1333_car_center" target="_blank">@1333_car_center</a></li><li><a href="#">вул. Шевченка, 59</a></li><li><a href="#">Пн–Пт: 09:00–20:00</a></li><li><a href="#">Сб–Нд: 10:00–20:00</a></li></ul></div>
       </div>
       <div class="footer-bottom"><span>© 2026 1333 Car Center · <a href="privacy.html" style="color:inherit;">Політика конфіденційності</a></span><span>Made with ❤️ in Харків</span></div>
     </div>
@@ -1051,7 +996,7 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
       <div class="success-wrap" id="bkSuccessView" style="display:none">
         <span class="success-icon">✅</span>
         <div class="success-title">Записано!</div>
-        <p class="success-msg">Ваш запис підтверджено.<br>Очікуйте дзвінок від менеджера.<br><span id="bkSuccessAddr">вул. Гвардійців Широнінців, 51/1</span></p>
+        <p class="success-msg">Ваш запис підтверджено.<br>Очікуйте дзвінок від менеджера.<br><span id="bkSuccessAddr">вул. Шевченка, 59</span></p>
         <div class="booking-id-tag" id="bkBookingIdTag">ID: #1333-0001</div>
         <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
           <button class="btn-white" onclick="showPage('home')">На головну</button>
@@ -1388,41 +1333,23 @@ function _uiPromptClose(result){
 }
 document.getElementById('uiPromptModal').addEventListener('click',function(e){if(e.target===this)_uiPromptClose(null);});
 
-// ═══ CONFIG · ЛОКАЦІЇ ═══
-// Кожна локація має ВЛАСНУ Google-таблицю + власний Apps Script (свій url).
-// ⚠️ «Шевченка, 59» ТИМЧАСОВО дивиться в таблицю Широнінців (той самий url).
-//    Коли задеплоїте другий Apps Script — замініть url у блоці shev нижче,
-//    і записи цієї локації підуть у свою таблицю автоматично.
+// ═══ CONFIG · ЛОКАЦІЯ ═══
+// Єдина локація центру. url — Apps Script цієї адреси.
 const LOCATIONS={
-  shyr:{
-    name:'вул. Гвардійців Широнінців, 51/1',
-    url:'https://script.google.com/macros/s/AKfycbw9mqrVSrAVeoMa4Np2SxYFRCxj5cW0uX1x7S50LddB7pXnz0PIvL7gPJHmLyIJ9986GQ/exec',
-    map:'https://maps.google.com/maps?hl=uk&q=1333%20Car%20Center%2C%20%D0%B2%D1%83%D0%BB.%20%D0%93%D0%B2%D0%B0%D1%80%D0%B4%D1%96%D0%B9%D1%86%D1%96%D0%B2%20%D0%A8%D0%B8%D1%80%D0%BE%D0%BD%D1%96%D0%BD%D1%86%D1%96%D0%B2%2C%2051%2F1%2C%20%D0%A5%D0%B0%D1%80%D0%BA%D1%96%D0%B2&z=16&t=m&output=embed',
-    hours:{0:[10,20],1:[9,20],2:[9,20],3:[9,20],4:[9,20],5:[9,20],6:[10,20]} // Нд..Сб: [відкриття, закриття]
-  },
   shev:{
     name:'вул. Шевченка, 59',
-    url:'https://script.google.com/macros/s/AKfycbw9mqrVSrAVeoMa4Np2SxYFRCxj5cW0uX1x7S50LddB7pXnz0PIvL7gPJHmLyIJ9986GQ/exec', // ⚠️ ЗАМІНИТИ на url другого веб-аппу
+    url:'https://script.google.com/macros/s/AKfycbw9mqrVSrAVeoMa4Np2SxYFRCxj5cW0uX1x7S50LddB7pXnz0PIvL7gPJHmLyIJ9986GQ/exec',
     map:'https://maps.google.com/maps?hl=uk&q='+encodeURIComponent('1333 Car Center, вул. Шевченка, 59, Харків')+'&z=16&t=m&output=embed',
-    hours:{0:[10,20],1:[9,20],2:[9,20],3:[9,20],4:[9,20],5:[9,20],6:[10,20]}
+    hours:{0:[10,20],1:[9,20],2:[9,20],3:[9,20],4:[9,20],5:[9,20],6:[10,20]} // Нд..Сб: [відкриття, закриття]
   }
 };
 const LOC_KEY='loc_1333';           // обрана локація (пам'ятається назавжди)
-const LOC_PICKED='loc_1333_picked'; // чи вже обирав у ЦІЙ сесії (екран-зустріч раз на сесію)
-function currentLocId(){const v=localStorage.getItem(LOC_KEY);return LOCATIONS[v]?v:'shyr';}
+function currentLocId(){const v=localStorage.getItem(LOC_KEY);return LOCATIONS[v]?v:'shev';}
 function currentLoc(){return LOCATIONS[currentLocId()];}
 let APPS_SCRIPT_URL=currentLoc().url;
 
 // ── Відчинено/зачинено за графіком локації ──
 function locIsOpen(loc,now){now=now||new Date();const h=loc.hours[now.getDay()];if(!h)return false;const t=now.getHours()+now.getMinutes()/60;return t>=h[0]&&t<h[1];}
-function locStateText(loc){
-  const now=new Date();const h=loc.hours[now.getDay()];
-  if(locIsOpen(loc,now))return 'Відчинено · до '+String(h[1]).padStart(2,'0')+':00';
-  const d=new Date(now);
-  if(!h||now.getHours()>=h[1])d.setDate(d.getDate()+1); // вже закрились → відкриття завтра
-  const nh=loc.hours[d.getDay()]||[9];
-  return 'Зачинено · відкриємось о '+String(nh[0]).padStart(2,'0')+':00';
-}
 let _locLoadsStarted=false;
 function _startLocDataLoads(){
   if(_locLoadsStarted)return;_locLoadsStarted=true;
@@ -1438,52 +1365,9 @@ function applyLocation(){
   const map=document.getElementById('homeMapFrame');if(map&&map.getAttribute('src')!==loc.map)map.setAttribute('src',loc.map);
   const sa=document.getElementById('bkSuccessAddr');if(sa)sa.textContent=loc.name;
 }
-function renderLocCards(){
-  const wrap=document.getElementById('locCards');if(!wrap)return;
-  wrap.innerHTML=Object.keys(LOCATIONS).map(id=>{
-    const loc=LOCATIONS[id];const open=locIsOpen(loc);
-    return '<button class="loc-card" data-loc="'+id+'"><span class="loc-pin">📍</span><span class="loc-main"><span class="loc-name">Харків · '+esc(loc.name)+'</span><span class="loc-state '+(open?'open':'closed')+'">'+esc(locStateText(loc))+'</span></span><span class="loc-dot '+(open?'open':'closed')+'"></span></button>';
-  }).join('');
-  wrap.querySelectorAll('.loc-card').forEach(b=>b.addEventListener('click',()=>pickLocation(b.dataset.loc)));
-}
-function openLocOverlay(allowClose){
-  renderLocCards(); // картки перестворюються → анімація появи програється щоразу
-  const c=document.getElementById('locCloseBtn');if(c)c.style.display=allowClose?'flex':'none';
-  const ov=document.getElementById('locOverlay');
-  ov.classList.remove('leaving');ov.classList.add('show');
-}
-// ✨ Анімоване закриття: підсвітка обраної картки → картки роз'їжджаються → оверлей тане
-function closeLocOverlayAnimated(pickedId,done){
-  const ov=document.getElementById('locOverlay');
-  if(!ov||!ov.classList.contains('show')||ov.classList.contains('leaving')){if(done)done();return;}
-  const cards=ov.querySelectorAll('.loc-card');
-  cards.forEach(c=>{c.disabled=true;if(pickedId)c.classList.toggle('picked',c.dataset.loc===pickedId);});
-  setTimeout(()=>{
-    ov.classList.add('leaving');
-    setTimeout(()=>{
-      ov.classList.remove('show','leaving');
-      cards.forEach(c=>{c.disabled=false;c.classList.remove('picked');});
-      if(done)done();
-    },740);
-  },pickedId?230:0); // мить, щоб побачити підсвітку вибору
-}
-function closeLocOverlay(){closeLocOverlayAnimated(null,null);}
-function pickLocation(id){
-  const prev=currentLocId();
-  localStorage.setItem(LOC_KEY,id);
-  try{sessionStorage.setItem(LOC_PICKED,'1');}catch(e){}
-  // Перезапуск потрібен лише якщо дані вже завантажені З ІНШОГО бекенда.
-  // ⚠️ Поки бекенд один на обидві адреси (url однакові) — перезапуск зайвий:
-  //    просто оновлюємо назву/мапу/графік і красиво закриваємо оверлей.
-  const needReload=_locLoadsStarted&&id!==prev&&LOCATIONS[prev].url!==LOCATIONS[id].url;
-  if(!needReload){applyLocation();_startLocDataLoads();}
-  closeLocOverlayAnimated(id,()=>{if(needReload)location.reload();});
-}
 function initLocation(){
   applyLocation();
-  let picked=false;try{picked=!!sessionStorage.getItem(LOC_PICKED);}catch(e){}
-  if(picked)_startLocDataLoads();
-  else openLocOverlay(false); // перший вхід у сесії — зустрічаємо вибором адреси
+  _startLocDataLoads(); // єдина локація — одразу вантажимо дані, без екрана вибору адреси
 }
 const CRM_TOKEN_KEY='crm_admin_token';
 const PUBLIC_API_ACTIONS=new Set(['getTimesAndBoxes','getAvailableTimesForDate','getBoxesForDateTime','saveBooking','cancelBooking','rescheduleBooking','saveSubOrder','autoRegister','verifyCrmPin','sendClientAuthCode','verifyClientAuthCode','getClientProfileData','checkLoginPhone','verifyAdminSiteCode','getPublicCatalog','getBlockedDates','getRangeAvailability','getClientQrCode']);
@@ -1853,9 +1737,9 @@ window.addEventListener('load',()=>{
   // ✅ гарантований показ лого навіть якщо подія onload зображення вже відпрацювала (кеш)
   document.querySelector('.nav-logo-img')?.classList.add('logo-ready');
   renderGallery();
-  // 🪪 QR клієнта веде на site/#c=ID → одразу в CRM (без оверлея вибору локації)
+  // 🪪 QR клієнта веде на site/#c=ID → одразу в CRM
   if(handleClientDeepLink()){ applyLocation(); _startLocDataLoads(); }
-  else initLocation(); // звичайний вхід: екран вибору адреси → префетч даних локації
+  else initLocation(); // звичайний вхід: застосовуємо локацію → префетч даних
   initRevealFx();
   // delayed count-up so numbers show after hero animation
   setTimeout(initCountUp,900);
