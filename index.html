@@ -192,6 +192,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;height:64px;
 .svc-card{padding:22px 20px;cursor:pointer;border-radius:16px;display:flex;flex-direction:column;gap:0;}
 .svc-icon{font-size:20px;margin-bottom:14px;line-height:1;}
 .svc-name{font-size:14px;font-weight:600;margin-bottom:5px;color:rgba(255,255,255,0.88);letter-spacing:-0.1px;}
+.svc-desc{font-size:12px;color:rgba(255,255,255,0.45);line-height:1.5;margin-top:2px;}
 .svc-price{font-size:12px;color:rgba(255,255,255,0.32);font-weight:400;}
 .svc-arrow{font-size:13px;color:rgba(255,255,255,0.2);margin-top:auto;padding-top:14px;transition:color 0.2s,transform 0.2s;}
 .svc-card:hover .svc-arrow{color:rgba(255,255,255,0.6);transform:translateX(3px);}
@@ -749,6 +750,7 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
 .bk-svc-main{flex:1;display:flex;flex-direction:column;gap:5px;min-width:0;}
 .bk-svc-name{font-size:17px;font-weight:700;line-height:1.3;letter-spacing:-0.2px;}
 .bk-svc-cat{font-size:12.5px;color:var(--gray);}
+.bk-svc-desc{font-size:12px;color:var(--gray);line-height:1.45;opacity:.85;}
 .bk-svc-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
 .bk-svc-price{font-size:17px;font-weight:800;white-space:nowrap;letter-spacing:-0.2px;}
 .bk-svc-dur{font-size:12px;color:var(--gray);white-space:nowrap;}
@@ -1439,7 +1441,7 @@ const BODY_SVG={
  'Кабріолет':_bkSvg(`<path d="M4.8 31 L5.5 26.2 Q5.9 23.9 8.7 23.4 L16 22.2 L39 21.6 L46 22 L54.8 23.4 Q58.3 24.1 58.7 26.8 L59 31"/><path d="M41.4 21.7 L45.6 14 L48.2 15.1 M12.6 22.1 Q14.4 18 19.4 18.4 Q22.4 18.7 23 21.8"/>`+_bkWheel(17,31)+_bkWheel(47,31)),
  'Мотоцикл':_bkSvg(`<path d="M14 29.5 L23.6 20.4 L36.6 19.8 L43.2 24.8 M50 29.5 L43 14.8 M40.2 15.9 L46.8 12.6 M17.4 20.9 L25.8 19.9 M25.8 19.9 Q29.8 16.4 34.8 18.3 M43.4 27.1 A7 7 0 0 1 56.6 27.1"/>`+_bkWheel(14,29.5,5.6)+_bkWheel(50,29.5,5.6))
 };
-BODY_SVG['Sedan']=BODY_SVG['Седан'];BODY_SVG['Crossover']=BODY_SVG['Кросовер'];BODY_SVG['SUV']=BODY_SVG['Джип'];BODY_SVG['Van']=BODY_SVG['Бус'];BODY_SVG['Minibus']=BODY_SVG['Мікроавтобус'];BODY_SVG['Hot Wheels']=BODY_SVG['Спорткар'];
+BODY_SVG['Sedan']=BODY_SVG['Седан'];BODY_SVG['Crossover']=BODY_SVG['Кросовер'];BODY_SVG['SUV']=BODY_SVG['Джип'];BODY_SVG['Van']=BODY_SVG['Бус'];BODY_SVG['Minibus']=BODY_SVG['Мікроавтобус'];BODY_SVG['Hot Wheels']=BODY_SVG['Спорткар'];BODY_SVG['Hot Wheels (маленьке авто)']=BODY_SVG['Спорткар'];
 const BODY_LABELS={'Sedan':'Седан'};
 // ── PNG-іконки кузовів (assets/, прозорий фон, чорний line-art → інвертується в CSS) ──
 const BODY_IMG={
@@ -1451,12 +1453,13 @@ const BODY_IMG={
  'Спорткар':'assets/body-sport.png',
  'Кабріолет':'assets/body-cabrio.png','Кабриолет':'assets/body-cabrio.png',
  'Мотоцикл':'assets/body-moto.png',
- 'Hot Wheels':'assets/body-hotwheels.png'
+ 'Hot Wheels':'assets/body-hotwheels.png',
+ 'Hot Wheels (маленьке авто)':'assets/body-hotwheels.png'
 };
 // Нові типи кузова: показуються завжди; поки у Прайсі нема власних рядків — ціни базового типу (Sedan)
-const BODY_EXTRA=['Спорткар','Кабріолет','Hot Wheels'];
-const BODY_PRICE_BASIS={'Спорткар':'Sedan','Кабріолет':'Sedan','Hot Wheels':'Sedan'};
-const BODY_FALLBACK=['Hot Wheels','Седан','Кросовер','Джип','Бус','Мікроавтобус','Спорткар','Кабріолет','Мотоцикл'];
+const BODY_EXTRA=['Спорткар','Кабріолет','Hot Wheels (маленьке авто)'];
+const BODY_PRICE_BASIS={'Спорткар':'Sedan','Кабріолет':'Sedan','Hot Wheels':'Sedan','Hot Wheels (маленьке авто)':'Sedan'};
+const BODY_FALLBACK=['Hot Wheels (маленьке авто)','Седан','Кросовер','Джип','Бус','Мікроавтобус','Спорткар','Кабріолет','Мотоцикл'];
 function bodyIcon(t){
   const img=BODY_IMG[t]||BODY_IMG[String(t||'').trim()];
   if(img)return `<img class="bk-body-img" src="${img}" alt="" loading="lazy" decoding="async">`;
@@ -1471,7 +1474,7 @@ function bkBodyTypes(){
   if(!l.length)return BODY_FALLBACK;
   BODY_EXTRA.forEach(t=>{if(!l.includes(t))l.push(t);});
   // Hot Wheels → авто (Седан…) → Спорткар/Кабріолет → Мотоцикл
-  const order=t=>t==='Hot Wheels'?-1:(t==='Мотоцикл'?2:(BODY_EXTRA.includes(t)?1:0));
+  const order=t=>String(t).indexOf('Hot Wheels')===0?-1:(t==='Мотоцикл'?2:(BODY_EXTRA.includes(t)?1:0));
   return l.slice().sort((a,b)=>order(a)-order(b));
 }
 function bkDateStr(d){return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear();}
@@ -1491,7 +1494,7 @@ function bkServiceCatalog(){
   let rows=_catalog?.priceList?.[BK.bodyType];
   // нові кузови (Спорткар/Кабріолет): поки у Прайсі нема власних рядків — ціни базового типу
   if((!rows||!rows.length)&&BODY_PRICE_BASIS[BK.bodyType])rows=_catalog?.priceList?.[BODY_PRICE_BASIS[BK.bodyType]];
-  return (rows||[]).map(r=>{const p=parseUahNumber(r.price);return {name:r.name,category:(r.category||'Інше'),price:p,priceStr:p!=null?p.toLocaleString('uk-UA')+' ₴':'—',duration:bkParseDuration(r.duration)};});
+  return (rows||[]).map(r=>{const p=parseUahNumber(r.price);return {name:r.name,category:(r.category||'Інше'),price:p,priceStr:p!=null?p.toLocaleString('uk-UA')+' ₴':'—',duration:bkParseDuration(r.duration),desc:String(r.desc||'').trim()};});
 }
 function bkUsesBasisPrices(){
   return !!(BODY_PRICE_BASIS[BK.bodyType]&&!(_catalog?.priceList?.[BK.bodyType]||[]).length&&(_catalog?.priceList?.[BODY_PRICE_BASIS[BK.bodyType]]||[]).length);
@@ -1536,7 +1539,7 @@ function bkRenderServices(){
   const basisNote=bkUsesBasisPrices()?'<div class="bk-basis-note">ℹ️ Ціни для цього кузова орієнтовні (як для седана) — фінальну вартість підтвердить менеджер.</div>':'';
   cont.innerHTML=basisNote+(shown.length?shown.map(s=>{
     const on=BK.services.some(x=>x.name===s.name);
-    return `<button class="bk-svc-card${on?' selected':''}" data-name="${esc(s.name)}"><span class="bk-svc-ico">${iconForCategory(s.category)}</span><span class="bk-svc-main"><span class="bk-svc-name">${esc(s.name)}</span><span class="bk-svc-cat">${esc(s.category)} · ⏱ ${bkFmtDuration(s.duration)}</span></span><span class="bk-svc-meta"><span class="bk-svc-price">${esc(s.priceStr)}</span></span><span class="bk-svc-check">${on?'✓':''}</span></button>`;
+    return `<button class="bk-svc-card${on?' selected':''}" data-name="${esc(s.name)}"><span class="bk-svc-ico">${iconForCategory(s.category)}</span><span class="bk-svc-main"><span class="bk-svc-name">${esc(s.name)}</span><span class="bk-svc-cat">${esc(s.category)} · ⏱ ${bkFmtDuration(s.duration)}</span>${s.desc?`<span class="bk-svc-desc">${esc(s.desc)}</span>`:''}</span><span class="bk-svc-meta"><span class="bk-svc-price">${esc(s.priceStr)}</span></span><span class="bk-svc-check">${on?'✓':''}</span></button>`;
   }).join(''):'<div style="color:var(--gray);font-size:13px;padding:20px 0;">Немає послуг для цього типу кузова. Оберіть інший кузов або зателефонуйте нам.</div>');
   cont.querySelectorAll('.bk-svc-card').forEach(c=>c.addEventListener('click',()=>bkToggleSvc(c.dataset.name)));
   bkUpdateTotals();
@@ -1919,6 +1922,13 @@ function findCatalogPrice(serviceName,carType){
   const list=_catalog.priceList[carType];if(!list)return null;
   const row=list.find(s=>s.name===serviceName);return row?row.price:null;
 }
+function findCatalogDesc(serviceName){
+  for(const ct of (_catalog?.carTypes||[])){
+    const row=(_catalog.priceList[ct]||[]).find(s=>s.name===serviceName);
+    if(row&&String(row.desc||'').trim())return String(row.desc).trim();
+  }
+  return '';
+}
 function minCatalogPriceForService(serviceName){
   let min=null;
   (_catalog?.carTypes||[]).forEach(ct=>{const n=parseUahNumber(findCatalogPrice(serviceName,ct));if(n!==null&&(min===null||n<min))min=n;});
@@ -1933,7 +1943,7 @@ function iconForCategory(cat){
   const map={'Мийка':'🚿','Воски та захист':'✨','Хімчистка':'🧽','Полірування та кераміка':'💎','Захист кузова':'🛡️','Додаткові послуги':'🔧','Товари':'🧴','Мотоцикл':'🏍️'};
   return map[cat]||'🚗';
 }
-function carTypeIcon(ct){return ct==='SUV'||ct==='Кросовер'||ct==='Джип'?'🚙':(ct==='Sedan'?'🚗':'🚐');}
+function carTypeIcon(ct){if(String(ct).indexOf('Hot Wheels')===0)return '🏁';if(ct==='Мотоцикл')return '🏍️';return ct==='SUV'||ct==='Кросовер'||ct==='Джип'?'🚙':(ct==='Sedan'?'🚗':'🚐');}
 function recomputeBookingPrice(){const n=parseUahNumber(findCatalogPrice(S.service,S.carType));if(n!==null)S.price=n.toLocaleString('uk-UA')+' ₴';}
 
 // ── Booking step 1 ──
@@ -2028,7 +2038,8 @@ function renderFullServicesPage(){
     const backCard=`<div class="glass svc-full svc-pick-back" data-back="1" style="cursor:pointer;"><div class="svc-icon">←</div><div class="svc-name">Назад до категорій</div></div>`;
     grid.innerHTML=backCard+names.map(name=>{
       const lines=(_catalog.carTypes||[]).map(ct=>{const n=parseUahNumber(findCatalogPrice(name,ct));return n!==null?`<div class="price-line"><span class="price-label">${esc(ct)}</span><span class="price-val">${n.toLocaleString('uk-UA')} ₴</span></div>`:''}).join('');
-      return`<div class="glass svc-full" data-svc-name="${esc(name)}"><div class="svc-icon">${iconForCategory(_fullStackCategory)}</div><div class="svc-name">${esc(name)}</div><div class="svc-full-prices">${lines}</div><button class="svc-full-btn">Записатись →</button></div>`;
+      const desc=findCatalogDesc(name);
+      return`<div class="glass svc-full" data-svc-name="${esc(name)}"><div class="svc-icon">${iconForCategory(_fullStackCategory)}</div><div class="svc-name">${esc(name)}</div>${desc?`<div class="svc-desc">${esc(desc)}</div>`:''}<div class="svc-full-prices">${lines}</div><button class="svc-full-btn">Записатись →</button></div>`;
     }).join('');
     grid.classList.remove('stagger-in');void grid.offsetWidth;grid.classList.add('stagger-in');
     grid.querySelector('[data-back]')?.addEventListener('click',()=>{_fullStackCategory='';renderFullServicesPage();requestAnimationFrame(()=>{window.scrollTo({top:0,behavior:'smooth'});});});
