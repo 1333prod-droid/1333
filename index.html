@@ -716,21 +716,43 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
 .bk-prog-bar{flex:1;height:1px;background:rgba(255,255,255,0.08);margin:15px 6px 0;transition:background .3s;}
 .bk-prog-bar.done{background:rgba(16,185,129,0.35);}
 
-/* step 1 — body type grid (авторські SVG-іконки) */
-.bk-body-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
-.bk-body-card{display:flex;flex-direction:column;align-items:center;gap:10px;padding:24px 12px 20px;border-radius:20px;cursor:pointer;background:var(--glass);border:1px solid var(--glass-border);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);transition:transform .22s var(--ease),background .25s,border-color .25s,box-shadow .25s;font-family:inherit;color:var(--white);min-height:118px;}
-.bk-body-card:hover{transform:translateY(-3px);background:var(--glass-hover);box-shadow:0 12px 30px rgba(0,0,0,.35);}
-.bk-body-card:hover .bk-body-icon{color:var(--white);}
-.bk-body-card:active{transform:scale(.97);}
-.bk-body-card.selected{border-color:rgba(167,139,250,.55);background:rgba(167,139,250,.12);box-shadow:0 0 0 3px rgba(167,139,250,.16),0 14px 34px rgba(124,92,255,.2);animation:popSelect .5s var(--ease);}
-.bk-body-card.selected .bk-body-icon{color:var(--accent);}
-.bk-body-icon{height:58px;display:flex;align-items:center;justify-content:center;color:var(--light);transition:color .25s;}
-.bk-body-icon svg{width:76px;height:46px;stroke:currentColor;stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round;display:block;}
-/* PNG-іконки: оригінальні кольори (білий кузов + чорний контур), без плашки — фон прозорий */
-.bk-body-icon img{width:122px;height:58px;object-fit:contain;display:block;filter:drop-shadow(0 3px 8px rgba(0,0,0,.5));transition:transform .25s,filter .25s;}
-.bk-body-card:hover .bk-body-icon img{transform:scale(1.06);}
-.bk-body-card.selected .bk-body-icon img{filter:drop-shadow(0 0 10px rgba(167,139,250,.45));}
-.bk-body-name{font-size:14px;font-weight:700;letter-spacing:.2px;text-align:center;}
+/* step 1 — кнопка «Назад» на головну */
+.bk-back-home{display:inline-flex;align-items:center;gap:6px;margin-bottom:18px;}
+.bk-back-home:hover{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.18);color:var(--white);}
+.bk-back-home:active{transform:scale(.96);}
+
+/* step 1 — body type grid (реалістичні PNG-іконки + неонова підсвітка) */
+.bk-body-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+.bk-body-card{--s:1;position:relative;isolation:isolate;display:flex;flex-direction:column;justify-content:flex-start;align-items:stretch;text-align:left;min-height:173px;padding:15px 18px 16px;border-radius:26px;cursor:pointer;overflow:hidden;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07);box-shadow:inset 0 1px 0 rgba(255,255,255,.05);font-family:inherit;color:var(--white);-webkit-tap-highlight-color:transparent;transition:background .35s ease,border-color .35s ease,box-shadow .45s ease,transform .45s cubic-bezier(.2,.9,.25,1);}
+/* м'яка фіолетова підсвітка під авто */
+.bk-body-card::before{content:"";position:absolute;inset:auto 6% -34% 6%;height:78%;border-radius:50%;background:radial-gradient(ellipse at 50% 50%,rgba(165,92,255,.42) 0%,rgba(120,60,220,.16) 42%,transparent 72%);opacity:.22;filter:blur(9px);transition:opacity .45s ease,transform .45s ease;z-index:-1;pointer-events:none;}
+/* внутрішній градієнт картки */
+.bk-body-card::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(165deg,rgba(165,92,255,.14) 0%,transparent 46%);opacity:0;transition:opacity .45s ease;z-index:-1;pointer-events:none;}
+.bk-body-icon{position:relative;display:block;height:96px;margin-bottom:6px;}
+.bk-body-icon img{position:absolute;left:50%;top:50%;width:calc(104% * var(--s));max-height:118%;object-fit:contain;object-position:center;transform:translate(-50%,-50%) scale(1);transform-origin:50% 60%;filter:drop-shadow(0 12px 18px rgba(0,0,0,.55));transition:transform .5s cubic-bezier(.2,.9,.25,1),filter .45s ease;user-select:none;-webkit-user-drag:none;}
+.bk-body-icon svg{width:76px;height:46px;stroke:currentColor;stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round;display:block;margin:25px auto 0;color:var(--light);}
+.bk-body-meta{position:relative;display:flex;flex-direction:column;gap:6px;}
+.bk-body-name{font-size:19px;font-weight:700;letter-spacing:-.015em;line-height:1.1;}
+.bk-body-note{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.19em;color:rgba(255,255,255,.34);line-height:1;transition:color .4s ease;}
+/* ховер */
+@media (hover:hover){
+  .bk-body-card:hover{background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.14);}
+  .bk-body-card:hover::before{opacity:.4;}
+  .bk-body-card:hover .bk-body-icon img{transform:translate(-50%,calc(-50% - 3px)) scale(1.03);}
+}
+.bk-body-card:active{transform:scale(.978);}
+.bk-body-card:focus-visible{outline:2px solid #a55cff;outline-offset:3px;}
+/* вибрана картка — неон */
+.bk-body-card.selected{background:rgba(255,255,255,.055);border-color:#a55cff;box-shadow:0 0 0 1px rgba(165,92,255,.55),0 0 20px rgba(165,92,255,.42),0 0 52px rgba(140,70,240,.28),inset 0 0 34px rgba(165,92,255,.10);transform:translateY(-2px);}
+.bk-body-card.selected::before{opacity:1;transform:scale(1.06);}
+.bk-body-card.selected::after{opacity:1;}
+.bk-body-card.selected .bk-body-icon img{transform:translate(-50%,calc(-50% - 6px)) scale(1.06);filter:drop-shadow(0 16px 26px rgba(0,0,0,.6)) drop-shadow(0 6px 22px rgba(165,92,255,.34));}
+.bk-body-card.selected .bk-body-name{text-shadow:0 0 18px rgba(165,92,255,.5);}
+.bk-body-card.selected .bk-body-note{color:rgba(214,178,255,.72);}
+/* одноразова хвиля при виборі */
+.bk-body-ring{position:absolute;inset:0;border-radius:inherit;border:1.5px solid rgba(165,92,255,.55);opacity:0;pointer-events:none;z-index:2;}
+.bk-body-card.is-pulsing .bk-body-ring{animation:bodyRing .62s cubic-bezier(.2,.85,.3,1) forwards;}
+@keyframes bodyRing{0%{opacity:.95;transform:scale(1);}100%{opacity:0;transform:scale(1.055);}}
 
 /* step 2 — category chips + service cards */
 .bk-cat-filter{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;margin-bottom:14px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
@@ -798,11 +820,7 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
 .map-actions .btn-white,.map-actions .btn-ghost{padding:11px 18px;font-size:13px;}
 
 @media (max-width:768px){
-  .bk-body-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
-  .bk-body-card{padding:20px 10px 16px;min-height:106px;}
-  .bk-body-icon svg{width:68px;height:42px;}
-  .bk-body-icon{height:50px;}
-  .bk-body-icon img{width:102px;height:50px;}
+  .bk-body-grid{grid-template-columns:repeat(2,1fr);gap:14px;}
   .bk-svc-card{padding:15px 13px;gap:11px;min-height:76px;}
   .bk-svc-ico{width:40px;height:40px;font-size:18px;border-radius:12px;}
   .bk-svc-name{font-size:15.5px;}
@@ -812,8 +830,16 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
   .map-section{margin-top:0;}
   .map-overlay{left:12px;right:12px;bottom:12px;max-width:none;padding:16px 18px;}
 }
+@media (max-width:420px){
+  .bk-body-grid{gap:13px;}
+  .bk-body-card{min-height:156px;padding:14px 15px 15px;border-radius:22px;}
+  .bk-body-icon{height:86px;margin-bottom:5px;}
+  .bk-body-name{font-size:17px;}
+  .bk-body-note{font-size:9.5px;letter-spacing:.16em;}
+}
 @media (prefers-reduced-motion:reduce){
-  .bk-panel.active,.bk-body-card.selected,.bk-bottom-bar.show{animation:none;}
+  .bk-panel.active,.bk-bottom-bar.show{animation:none;}
+  .bk-body-card.is-pulsing .bk-body-ring{animation:none;}
   .bk-body-card:hover,.bk-svc-card:hover,.bk-day:hover,.gallery-item:hover img{transform:none;}
 }
 </style>
@@ -952,6 +978,7 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
 
     <!-- STEP 1: body type -->
     <div class="bk-panel active" id="bk-panel-1">
+      <button class="btn-back bk-back-home" type="button" onclick="bkBackHome()">← Назад</button>
       <div class="panel-title">Тип кузова</div>
       <div class="panel-sub">Оберіть кузов — ціни підлаштуються автоматично</div>
       <div class="bk-body-grid" id="bkBodyGrid">
@@ -1442,7 +1469,31 @@ const BODY_SVG={
  'Мотоцикл':_bkSvg(`<path d="M14 29.5 L23.6 20.4 L36.6 19.8 L43.2 24.8 M50 29.5 L43 14.8 M40.2 15.9 L46.8 12.6 M17.4 20.9 L25.8 19.9 M25.8 19.9 Q29.8 16.4 34.8 18.3 M43.4 27.1 A7 7 0 0 1 56.6 27.1"/>`+_bkWheel(14,29.5,5.6)+_bkWheel(50,29.5,5.6))
 };
 BODY_SVG['Sedan']=BODY_SVG['Седан'];BODY_SVG['Crossover']=BODY_SVG['Кросовер'];BODY_SVG['SUV']=BODY_SVG['Джип'];BODY_SVG['Van']=BODY_SVG['Бус'];BODY_SVG['Minibus']=BODY_SVG['Мікроавтобус'];BODY_SVG['Hot Wheels']=BODY_SVG['Спорткар'];BODY_SVG['Hot Wheels (маленьке авто)']=BODY_SVG['Спорткар'];
-const BODY_LABELS={'Sedan':'Седан'};
+const BODY_LABELS={'Sedan':'Седан','Crossover':'Кросовер','SUV':'Джип','Van':'Бус','Minibus':'Мікроавтобус','Hot Wheels':'Маленьке авто','Hot Wheels (маленьке авто)':'Маленьке авто'};
+// ── англійський підпис під назвою кузова ──
+const BODY_NOTE={
+ 'Седан':'Sedan','Sedan':'Sedan',
+ 'Кросовер':'Crossover','Crossover':'Crossover',
+ 'Джип':'SUV','SUV':'SUV',
+ 'Бус':'Van','Van':'Van',
+ 'Мікроавтобус':'Minibus','Minibus':'Minibus',
+ 'Спорткар':'Sports car',
+ 'Кабріолет':'Cabrio','Кабриолет':'Cabrio',
+ 'Мотоцикл':'Motorcycle',
+ 'Hot Wheels':'Hot Wheels','Hot Wheels (маленьке авто)':'Hot Wheels'
+};
+// ── індивідуальний масштаб PNG-іконки в картці ──
+const BODY_SCALE={
+ 'Седан':0.98,'Sedan':0.98,
+ 'Кросовер':0.98,'Crossover':0.98,
+ 'Джип':0.92,'SUV':0.92,
+ 'Бус':0.98,'Van':0.98,
+ 'Мікроавтобус':0.98,'Minibus':0.98,
+ 'Спорткар':1.02,
+ 'Кабріолет':1.0,'Кабриолет':1.0,
+ 'Мотоцикл':0.72,
+ 'Hot Wheels':0.94,'Hot Wheels (маленьке авто)':0.94
+};
 // ── PNG-іконки кузовів (assets/, прозорий фон, чорний line-art → інвертується в CSS) ──
 const BODY_IMG={
  'Седан':'assets/body-sedan.png','Sedan':'assets/body-sedan.png',
@@ -1462,10 +1513,12 @@ const BODY_PRICE_BASIS={'Спорткар':'Sedan','Кабріолет':'Sedan',
 const BODY_FALLBACK=['Hot Wheels (маленьке авто)','Седан','Кросовер','Джип','Бус','Мікроавтобус','Спорткар','Кабріолет','Мотоцикл'];
 function bodyIcon(t){
   const img=BODY_IMG[t]||BODY_IMG[String(t||'').trim()];
-  if(img)return `<img class="bk-body-img" src="${img}" alt="" loading="lazy" decoding="async">`;
+  if(img)return `<img class="bk-body-img" src="${img}" alt="" loading="lazy" decoding="async" draggable="false">`;
   return BODY_SVG[t]||BODY_SVG['Седан'];
 }
-function bodyLabel(t){return BODY_LABELS[t]||t;}
+function bodyLabel(t){return BODY_LABELS[t]||BODY_LABELS[String(t||'').trim()]||t;}
+function bodyNote(t){return BODY_NOTE[t]||BODY_NOTE[String(t||'').trim()]||'';}
+function bodyScale(t){return BODY_SCALE[t]||BODY_SCALE[String(t||'').trim()]||1;}
 const BK_UK_DOW=['Нд','Пн','Вт','Ср','Чт','Пт','Сб'];
 const BK_UK_MON=['січ','лют','бер','кві','тра','чер','лип','сер','вер','жов','лис','гру'];
 
@@ -1504,7 +1557,11 @@ function bkTotals(){const price=BK.services.reduce((a,s)=>a+(s.price||0),0);cons
 // ── Step 1: body type ──
 function bkRenderBody(){
   const grid=document.getElementById('bkBodyGrid');if(!grid)return;
-  grid.innerHTML=bkBodyTypes().map(t=>`<button class="bk-body-card${BK.bodyType===t?' selected':''}" data-body="${esc(t)}"><span class="bk-body-icon">${bodyIcon(t)}</span><span class="bk-body-name">${esc(bodyLabel(t))}</span></button>`).join('');
+  grid.setAttribute('role','radiogroup');grid.setAttribute('aria-label','Тип кузова');
+  grid.innerHTML=bkBodyTypes().map(t=>{
+    const on=BK.bodyType===t;
+    return `<button class="bk-body-card${on?' selected':''}" type="button" role="radio" aria-checked="${on?'true':'false'}" data-body="${esc(t)}" style="--s:${bodyScale(t)}"><span class="bk-body-icon">${bodyIcon(t)}</span><span class="bk-body-meta"><span class="bk-body-name">${esc(bodyLabel(t))}</span><span class="bk-body-note">${esc(bodyNote(t))}</span></span><span class="bk-body-ring"></span></button>`;
+  }).join('');
   grid.querySelectorAll('.bk-body-card').forEach(b=>b.addEventListener('click',()=>bkPickBody(b.dataset.body)));
 }
 function bkDefaultCat(){
@@ -1513,7 +1570,12 @@ function bkDefaultCat(){
 }
 function bkPickBody(t){
   const changed=BK.bodyType!==t;BK.bodyType=t;if(changed)BK.services=[];
-  document.querySelectorAll('.bk-body-card').forEach(b=>b.classList.toggle('selected',b.dataset.body===t));
+  document.querySelectorAll('.bk-body-card').forEach(b=>{
+    const on=b.dataset.body===t;
+    b.classList.toggle('selected',on);
+    b.setAttribute('aria-checked',on?'true':'false');
+    if(on&&changed){b.classList.remove('is-pulsing');void b.offsetWidth;b.classList.add('is-pulsing');}
+  });
   BK._cat=bkDefaultCat(); // ✅ після кузова одразу відкриваємо розділ «Мийка», а не всі послуги
   bkRenderServices();
   if(BK._pendingSvc){const m=bkServiceCatalog().find(s=>s.name===BK._pendingSvc);if(m){BK.services=[m];BK._cat=m.category;bkRenderServices();}BK._pendingSvc='';}
@@ -1690,6 +1752,12 @@ function bkReset(){
   ['bkName','bkPhone','bkCar','bkPlate','bkComment'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
   document.getElementById('bkTimeGrid').innerHTML='';const head=document.getElementById('bkTimeHead');if(head)head.style.display='none';
   bkRenderBody();bkRenderServices();bkGoStep(1);
+}
+// ← Назад з кроку «Тип кузова» — повернення на головну + скидання запису
+function bkBackHome(){
+  try{bkReset();}catch(e){bkGoStep(1);}
+  const bar=document.getElementById('bkBottomBar');if(bar)bar.classList.remove('show');
+  showPage('home');
 }
 async function bkCancelLast(){
   if(!BK.lastBookingId){toast('ID запису не знайдено');return;}
