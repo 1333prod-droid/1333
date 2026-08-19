@@ -3,12 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>1333 Car Center — Детейлінг Харків</title>
-<meta name="description" content="Детейлінг центр у Харкові. Антигравійна плівка, хімчистка, полірування.">
-<meta property="og:title" content="1333 Car Center — Детейлінг Харків">
-<meta property="og:description" content="Детейлінг центр у Харкові. Антигравійна плівка, хімчистка, полірування.">
-<meta property="og:image" content="logo.svg">
-<link rel="icon" type="image/svg" href="logo.svg">
+<title>1333 Car Center — детейлінг у Харкові · онлайн-запис</title>
+<meta name="description" content="Детейлінг-центр 1333 у Харкові, вул. Шевченка 59: хімчистка салону, полірування, кераміка, антигравійна плівка. Онлайн-запис на вільний час — щодня 9:00–20:00.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://1333carcenter.kh.ua/">
+<meta name="theme-color" content="#07060c">
+<meta name="geo.region" content="UA-63">
+<meta name="geo.placename" content="Харків">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="1333 Car Center">
+<meta property="og:locale" content="uk_UA">
+<meta property="og:url" content="https://1333carcenter.kh.ua/">
+<meta property="og:title" content="1333 Car Center — детейлінг у Харкові">
+<meta property="og:description" content="Хімчистка, полірування, кераміка, антигравійна плівка. вул. Шевченка 59 · щодня 9:00–20:00. Онлайн-запис за 4 кроки.">
+<meta property="og:image" content="https://1333carcenter.kh.ua/assets/og-cover.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="1333 Car Center — детейлінг-центр у Харкові">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="1333 Car Center — детейлінг у Харкові">
+<meta name="twitter:description" content="Хімчистка, полірування, кераміка, антигравійна плівка. Онлайн-запис на вільний час.">
+<meta name="twitter:image" content="https://1333carcenter.kh.ua/assets/og-cover.jpg">
+
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+<link rel="icon" type="image/png" sizes="512x512" href="assets/icon-512.png">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
 <link rel="preconnect" href="https://script.google.com">
 <link rel="dns-prefetch" href="https://script.google.com">
 <link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
@@ -467,7 +487,244 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;height:64px;
 .crm-card-sub{font-size:12px;color:var(--gray);margin-top:2px;}
 .crm-card-meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
 .crm-card-tag{font-size:11px;color:var(--gray);background:rgba(255,255,255,0.05);padding:3px 10px;border-radius:100px;}
-.crm-card-actions{display:flex;gap:6px;flex-wrap:wrap;}
+.crm-card-actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+
+/* ═══════════════════════════════════════════════════════════
+   ✨ CRM v2 — безпечні дії, меню, пікери, глобальний пошук
+   ═══════════════════════════════════════════════════════════ */
+/* головна дія кроку */
+.act-main{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:11px;border:1px solid rgba(167,139,250,.45);background:rgba(167,139,250,.16);color:#fff;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;letter-spacing:.1px;cursor:pointer;white-space:nowrap;min-height:38px;transition:background .2s,border-color .2s,transform .16s var(--ease),box-shadow .2s;}
+.act-main:hover{background:rgba(167,139,250,.26);border-color:rgba(167,139,250,.7);transform:translateY(-1px);box-shadow:0 8px 20px rgba(124,92,255,.18);}
+.act-main:active{transform:scale(.96);}
+.act-main.is-done{border-color:rgba(16,185,129,.4);background:rgba(16,185,129,.14);}
+.act-main.is-done:hover{background:rgba(16,185,129,.22);border-color:rgba(16,185,129,.65);box-shadow:0 8px 20px rgba(16,185,129,.16);}
+.act-main[disabled]{opacity:.4;cursor:default;transform:none!important;box-shadow:none!important;}
+/* кнопка «⋯» */
+.act-more{width:38px;height:38px;min-width:38px;display:inline-flex;align-items:center;justify-content:center;border-radius:11px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:var(--light);font-size:17px;line-height:1;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s;}
+.act-more:hover{border-color:rgba(255,255,255,.28);color:#fff;background:rgba(255,255,255,.08);}
+.act-more:active{transform:scale(.94);}
+/* швидкі іконки-дії (дзвінок / копіювати) */
+.act-ico{width:38px;height:38px;min-width:38px;display:inline-flex;align-items:center;justify-content:center;border-radius:11px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:var(--light);font-size:15px;cursor:pointer;text-decoration:none;transition:all .18s;}
+.act-ico:hover{border-color:rgba(167,139,250,.5);color:#fff;background:rgba(167,139,250,.12);}
+.act-ico:active{transform:scale(.94);}
+
+/* меню дій (desktop popover / mobile bottom-sheet) */
+.crm-menu-backdrop{position:fixed;inset:0;z-index:2400;background:transparent;display:none;}
+.crm-menu-backdrop.show{display:block;}
+.crm-menu{position:fixed;z-index:2500;min-width:236px;max-width:calc(100vw - 24px);padding:6px;border-radius:16px;background:rgba(18,18,28,.92);backdrop-filter:saturate(180%) blur(26px);-webkit-backdrop-filter:saturate(180%) blur(26px);border:1px solid rgba(255,255,255,.1);box-shadow:0 24px 60px rgba(0,0,0,.6);display:none;animation:menuIn .18s var(--ease);}
+.crm-menu.show{display:block;}
+@keyframes menuIn{from{opacity:0;transform:translateY(-6px) scale(.97);}to{opacity:1;transform:none;}}
+.crm-menu-head{padding:10px 12px 8px;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:5px;}
+.crm-menu-head b{display:block;font-size:14px;font-weight:700;letter-spacing:-.2px;}
+.crm-menu-head span{display:block;font-size:11.5px;color:var(--gray);margin-top:2px;}
+.crm-menu-item{display:flex;align-items:center;gap:11px;width:100%;padding:11px 12px;border:none;background:none;border-radius:11px;color:var(--white);font-family:'Inter',sans-serif;font-size:14px;font-weight:500;text-align:left;cursor:pointer;text-decoration:none;transition:background .15s;min-height:44px;}
+.crm-menu-item:hover{background:rgba(255,255,255,.07);}
+.crm-menu-item:active{background:rgba(255,255,255,.12);}
+.crm-menu-item .mi-ico{width:22px;text-align:center;font-size:15px;flex-shrink:0;}
+.crm-menu-item.danger{color:#ef4444;}
+.crm-menu-item.danger:hover{background:rgba(239,68,68,.1);}
+.crm-menu-sep{height:1px;background:rgba(255,255,255,.07);margin:5px 8px;}
+@media (max-width:768px){
+  .crm-menu{left:0!important;right:0!important;top:auto!important;bottom:0;width:100%;max-width:100%;min-width:0;border-radius:24px 24px 0 0;padding:8px 8px calc(10px + env(safe-area-inset-bottom));animation:sheetIn .26s var(--ease);}
+  .crm-menu-backdrop.show{background:rgba(0,0,0,.5);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);}
+  .crm-menu-item{font-size:16px;min-height:52px;padding:13px 14px;}
+  .crm-menu-head{padding:12px 14px 10px;}
+}
+@keyframes sheetIn{from{opacity:0;transform:translateY(100%);}to{opacity:1;transform:none;}}
+
+/* тост з дією «Скасувати» */
+.toast-undo{position:fixed;left:50%;bottom:26px;transform:translate(-50%,140%);z-index:3000;display:flex;align-items:center;gap:14px;padding:13px 14px 13px 18px;border-radius:16px;background:rgba(18,18,28,.94);backdrop-filter:saturate(180%) blur(24px);-webkit-backdrop-filter:saturate(180%) blur(24px);border:1px solid rgba(255,255,255,.11);box-shadow:0 20px 50px rgba(0,0,0,.5);font-size:14px;max-width:calc(100vw - 24px);opacity:0;transition:transform .35s var(--ease),opacity .3s;pointer-events:none;}
+.toast-undo.show{transform:translate(-50%,0);opacity:1;pointer-events:auto;}
+.toast-undo-msg{flex:1;min-width:0;}
+.toast-undo-btn{flex-shrink:0;padding:9px 16px;border-radius:100px;border:1px solid rgba(167,139,250,.5);background:rgba(167,139,250,.16);color:#fff;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .18s;}
+.toast-undo-btn:hover{background:rgba(167,139,250,.3);}
+.toast-undo-bar{position:absolute;left:0;bottom:0;height:2px;background:var(--accent);border-radius:0 0 16px 16px;}
+@media (max-width:768px){.toast-undo{left:12px;right:12px;bottom:14px;transform:translateY(140%);max-width:none;}.toast-undo.show{transform:translateY(0);}}
+
+/* дата/час пікер (перенос + новий запис) */
+.dtp-label{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gray);margin:16px 0 9px;}
+.dtp-days{display:flex;gap:7px;overflow-x:auto;padding:2px 2px 10px;scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;}
+.dtp-days::-webkit-scrollbar{display:none;}
+.dtp-day{flex:0 0 auto;width:64px;padding:11px 5px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);color:var(--white);font-family:'Inter',sans-serif;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;scroll-snap-align:start;transition:all .2s var(--ease);}
+.dtp-day:hover{border-color:rgba(255,255,255,.22);transform:translateY(-2px);}
+.dtp-day.selected{background:rgba(167,139,250,.18);border-color:rgba(167,139,250,.55);box-shadow:0 0 0 3px rgba(167,139,250,.12);}
+.dtp-day.blocked{opacity:.32;text-decoration:line-through;pointer-events:none;}
+.dtp-dow{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--gray);white-space:nowrap;}
+.dtp-day:first-child .dtp-dow{font-size:8px;letter-spacing:0;}
+.dtp-num{font-size:19px;font-weight:700;line-height:1;}
+.dtp-mon{font-size:9.5px;color:var(--gray);}
+.dtp-times{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:7px;max-height:184px;overflow-y:auto;padding-right:2px;}
+.dtp-time{padding:11px 6px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);color:var(--white);font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;min-height:44px;transition:all .18s;}
+.dtp-time:hover{border-color:rgba(255,255,255,.25);}
+.dtp-time.selected{background:rgba(167,139,250,.2);border-color:rgba(167,139,250,.6);box-shadow:0 0 0 3px rgba(167,139,250,.12);}
+.dtp-time.busy{opacity:.3;text-decoration:line-through;pointer-events:none;}
+.dtp-empty{grid-column:1/-1;font-size:13px;color:var(--gray);padding:14px 0;}
+.dtp-boxes{display:flex;gap:7px;flex-wrap:wrap;}
+.dtp-box{padding:10px 16px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);color:var(--white);font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;min-height:42px;transition:all .18s;}
+.dtp-box.selected{background:rgba(167,139,250,.2);border-color:rgba(167,139,250,.6);}
+.dtp-summary{margin-top:16px;padding:13px 15px;border-radius:14px;background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.18);font-size:13.5px;line-height:1.5;}
+
+/* підказка «такий клієнт уже є» */
+.nb-hint{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:10;display:none;padding:6px;border-radius:14px;background:rgba(22,22,34,.97);border:1px solid rgba(255,255,255,.1);box-shadow:0 18px 44px rgba(0,0,0,.55);}
+.nb-hint.show{display:block;}
+.nb-hint .crm-menu-item{font-size:13px;min-height:40px;padding:9px 10px;}
+
+/* збільшений режим для нових елементів */
+.crm-large .act-main{font-size:16px;min-height:52px;padding:12px 22px;}
+.crm-large .act-more,.crm-large .act-ico{width:52px;height:52px;min-width:52px;font-size:20px;}
+.crm-large .crm-menu-item{font-size:17px;min-height:56px;}
+.crm-large .dtp-time{font-size:16px;min-height:52px;}
+.crm-large .nb-chip{font-size:15px;min-height:48px;}
+
+/* чипи вибору послуг у «Новий запис» */
+.nb-chips{display:flex;gap:7px;flex-wrap:wrap;max-height:190px;overflow-y:auto;padding:2px;}
+.nb-chip{padding:9px 14px;border-radius:100px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:var(--light);font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;min-height:40px;transition:all .18s;}
+.nb-chip:hover{border-color:rgba(255,255,255,.25);color:#fff;}
+.nb-chip.selected{background:rgba(167,139,250,.18);border-color:rgba(167,139,250,.55);color:#fff;}
+
+/* глобальний пошук */
+.gs-overlay{display:none;position:fixed;inset:0;z-index:2600;background:rgba(0,0,0,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);padding:64px 16px 16px;animation:fadeIn .2s ease;}
+.gs-overlay.show{display:block;}
+.gs-box{width:100%;max-width:620px;margin:0 auto;border-radius:22px;background:rgba(16,16,26,.9);border:1px solid rgba(255,255,255,.09);box-shadow:0 30px 80px rgba(0,0,0,.6);overflow:hidden;animation:modalPop .34s var(--ease);}
+.gs-input-row{display:flex;align-items:center;gap:11px;padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.07);}
+.gs-input-row input{flex:1;background:none;border:none;outline:none;color:var(--white);font-family:'Inter',sans-serif;font-size:17px;}
+.gs-input-row input::placeholder{color:rgba(255,255,255,.3);}
+.gs-esc{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--gray);border:1px solid rgba(255,255,255,.12);border-radius:7px;padding:4px 8px;cursor:pointer;}
+.gs-results{max-height:min(60vh,460px);overflow-y:auto;padding:8px;}
+.gs-group{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gray);padding:11px 12px 6px;}
+.gs-item{display:flex;align-items:center;gap:12px;width:100%;padding:11px 12px;border:none;background:none;border-radius:12px;color:var(--white);font-family:'Inter',sans-serif;text-align:left;cursor:pointer;transition:background .15s;min-height:52px;}
+.gs-item:hover,.gs-item.active{background:rgba(167,139,250,.14);}
+.gs-item-ico{width:34px;height:34px;flex-shrink:0;border-radius:11px;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.18);display:flex;align-items:center;justify-content:center;font-size:15px;}
+.gs-item-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+.gs-item-name{display:block;font-size:14.5px;font-weight:700;letter-spacing:-.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.gs-item-sub{display:block;font-size:12px;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.gs-item .badge{flex-shrink:0;margin-left:auto;}
+.gs-empty{padding:34px 16px;text-align:center;color:var(--gray);font-size:14px;}
+@media (max-width:768px){.gs-overlay{padding:12px;}.gs-input-row input{font-size:16px;}.gs-esc{display:none;}}
+
+/* ── робочий стіл дня ── */
+.dd-head{display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding:20px 22px;border-radius:20px;background:linear-gradient(135deg,rgba(167,139,250,.10),rgba(255,255,255,.03) 55%);border:1px solid rgba(167,139,250,.16);margin-bottom:22px;}
+.dd-clock{display:flex;flex-direction:column;gap:2px;min-width:106px;}
+.dd-clock b{font-size:38px;font-weight:800;letter-spacing:-1.4px;line-height:1;font-variant-numeric:tabular-nums;}
+.dd-clock span{font-size:11.5px;color:var(--gray);}
+.dd-next{flex:1;min-width:210px;padding-left:20px;border-left:1px solid rgba(255,255,255,.09);}
+.dd-next-label{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gray);margin-bottom:6px;}
+.dd-next-main{font-size:17px;font-weight:700;letter-spacing:-.3px;line-height:1.3;}
+.dd-next-sub{font-size:12.5px;color:var(--gray);margin-top:3px;}
+.dd-chips{display:flex;gap:7px;flex-wrap:wrap;}
+.dd-chip{padding:8px 13px;border-radius:100px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);font-size:12px;font-weight:600;white-space:nowrap;}
+.dd-chip b{font-weight:800;}
+.dd-chip.ok{border-color:rgba(16,185,129,.3);color:#10b981;}
+.dd-chip.work{border-color:rgba(245,158,11,.32);color:#f59e0b;}
+.dd-sec-title{font-size:9px;font-weight:700;letter-spacing:2.8px;text-transform:uppercase;color:var(--gray);margin:24px 0 11px;}
+.dd-sec-title:first-child{margin-top:0;}
+.dd-list{display:flex;flex-direction:column;gap:8px;}
+.dd-item{display:flex;align-items:center;gap:15px;padding:14px 16px;border-radius:18px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07);border-left:3px solid rgba(255,255,255,.18);transition:transform .2s var(--ease),background .2s,border-color .2s,box-shadow .2s;}
+.dd-item:hover{background:rgba(255,255,255,.06);transform:translateY(-1px);box-shadow:0 10px 26px rgba(0,0,0,.3);}
+.dd-item.st-orange{border-left-color:#f59e0b;background:rgba(245,158,11,.05);}
+.dd-item.st-green{border-left-color:#10b981;}
+.dd-item.st-yellow{border-left-color:#eab308;}
+.dd-item.st-red{border-left-color:#ef4444;}
+.dd-item.st-blue{border-left-color:#3b82f6;}
+.dd-item.is-closed{opacity:.55;}
+.dd-time{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:62px;flex-shrink:0;}
+.dd-time b{font-size:19px;font-weight:800;letter-spacing:-.5px;font-variant-numeric:tabular-nums;line-height:1;}
+.dd-time span{font-size:10.5px;color:var(--gray);}
+.dd-main{flex:1;min-width:0;}
+.dd-name{font-size:15.5px;font-weight:700;letter-spacing:-.2px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
+.dd-sub{font-size:12.5px;color:var(--gray);margin-top:3px;overflow:hidden;text-overflow:ellipsis;}
+.dd-act{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.dd-empty{padding:26px 16px;text-align:center;color:var(--gray);font-size:14px;border-radius:18px;background:rgba(255,255,255,.02);border:1px dashed rgba(255,255,255,.08);}
+.dd-done-toggle{width:100%;text-align:left;padding:12px 16px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);color:var(--light);font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .18s;}
+.dd-done-toggle:hover{border-color:rgba(255,255,255,.2);color:#fff;}
+@media (max-width:768px){
+  .dd-head{gap:14px;padding:16px 17px;}
+  .dd-clock b{font-size:32px;}
+  .dd-next{padding-left:0;border-left:none;border-top:1px solid rgba(255,255,255,.09);padding-top:13px;width:100%;flex:1 1 100%;min-width:0;}
+  .dd-item{flex-wrap:wrap;gap:11px;padding:13px 14px;}
+  .dd-act{width:100%;}
+  .dd-act .act-main{flex:1;justify-content:center;min-height:46px;}
+  /* на телефоні спочатку черга (те, що натискаєш), бокси — нижче й каруселлю */
+  #tab-today.active{display:flex;flex-direction:column;}
+  #tab-today .dd-head{order:1;}
+  #tab-today #ddQueue{order:2;}
+  #tab-today #ddBoxesSec{order:3;}
+  #tab-today .boxes-live{display:flex;gap:10px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;}
+  #tab-today .boxes-live::-webkit-scrollbar{display:none;}
+  #tab-today .box-live{flex:0 0 84%;scroll-snap-align:start;padding:18px;}
+}
+.crm-large .dd-name{font-size:19px;}
+.crm-large .dd-sub{font-size:15px;}
+.crm-large .dd-time b{font-size:24px;}
+
+/* ── таймлайн: час × бокси ── */
+.tl-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+.tl-bar .spacer{flex:1;min-width:0;}
+.tl-nav{display:flex;align-items:center;gap:6px;}
+.tl-date{font-size:17px;font-weight:700;letter-spacing:-.3px;white-space:nowrap;}
+.tl-modes{display:flex;gap:3px;padding:3px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);}
+.tl-mode{padding:7px 15px;border:none;background:none;border-radius:9px;color:var(--gray);font-family:'Inter',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;transition:all .18s;min-height:36px;}
+.tl-mode:hover{color:#fff;}
+.tl-mode.active{background:rgba(255,255,255,.1);color:#fff;}
+.tl-hint{font-size:12px;color:var(--gray);margin-bottom:12px;}
+.tl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:18px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.02);}
+.tl-grid{display:grid;grid-template-columns:58px repeat(var(--cols,3),minmax(168px,1fr));min-width:max-content;position:relative;}
+.tl-grid.week{grid-template-columns:8px repeat(7,minmax(132px,1fr));min-width:100%;}
+.tl-colhead{position:sticky;top:0;z-index:3;padding:12px 10px;font-size:11px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--light);background:rgba(14,14,22,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08);text-align:center;white-space:nowrap;}
+.tl-colhead.gutter{text-align:left;color:var(--gray);}
+.tl-colhead small{display:block;font-size:10px;font-weight:600;letter-spacing:.4px;text-transform:none;color:var(--gray);margin-top:2px;}
+.tl-gutter{position:relative;border-right:1px solid rgba(255,255,255,.07);margin-top:10px;}
+.tl-tick{position:absolute;left:0;right:0;font-size:10.5px;color:var(--gray);padding-left:9px;transform:translateY(-6px);font-variant-numeric:tabular-nums;}
+.tl-col{position:relative;border-left:1px solid rgba(255,255,255,.055);margin-top:10px;}
+.tl-line{position:absolute;left:0;right:0;height:1px;background:rgba(255,255,255,.05);}
+.tl-line.hour{background:rgba(255,255,255,.09);}
+.tl-now{position:absolute;left:0;right:0;height:2px;background:#ef4444;z-index:2;pointer-events:none;box-shadow:0 0 10px rgba(239,68,68,.6);}
+.tl-now::before{content:'';position:absolute;left:-4px;top:-3px;width:8px;height:8px;border-radius:50%;background:#ef4444;}
+.tl-block{position:absolute;left:5px;right:5px;border-radius:12px;padding:7px 9px;overflow:hidden;cursor:grab;z-index:1;background:rgba(167,139,250,.2);border:1px solid rgba(167,139,250,.45);box-shadow:0 6px 16px rgba(0,0,0,.3);transition:box-shadow .18s,filter .18s;touch-action:none;user-select:none;}
+.tl-block:hover{filter:brightness(1.15);box-shadow:0 10px 24px rgba(0,0,0,.42);z-index:4;}
+.tl-block.st-orange{background:rgba(245,158,11,.2);border-color:rgba(245,158,11,.5);}
+.tl-block.st-green{background:rgba(16,185,129,.18);border-color:rgba(16,185,129,.45);}
+.tl-block.st-yellow{background:rgba(234,179,8,.18);border-color:rgba(234,179,8,.45);}
+.tl-block.st-red{background:rgba(239,68,68,.16);border-color:rgba(239,68,68,.42);}
+.tl-block.st-blue{background:rgba(59,130,246,.18);border-color:rgba(59,130,246,.45);}
+.tl-block.is-closed{opacity:.5;}
+.tl-block.dragging{opacity:.35;cursor:grabbing;}
+.tl-b-time{font-size:10.5px;font-weight:700;letter-spacing:.3px;opacity:.85;font-variant-numeric:tabular-nums;}
+.tl-b-name{font-size:13px;font-weight:700;letter-spacing:-.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
+.tl-b-svc{font-size:11px;color:rgba(255,255,255,.62);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tl-ghost{position:fixed;z-index:3000;pointer-events:none;border-radius:12px;padding:7px 9px;background:rgba(167,139,250,.32);border:1.5px solid var(--accent);box-shadow:0 18px 40px rgba(0,0,0,.55);opacity:.95;}
+.tl-drop{position:absolute;left:5px;right:5px;border-radius:12px;border:1.5px dashed rgba(167,139,250,.75);background:rgba(167,139,250,.1);z-index:2;pointer-events:none;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
+.tl-drop.bad{border-color:rgba(239,68,68,.8);background:rgba(239,68,68,.12);color:#ef4444;}
+.tl-blocked{position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(239,68,68,.07) 0 10px,transparent 10px 20px);display:flex;align-items:flex-start;justify-content:center;padding-top:26px;color:#ef4444;font-size:13px;font-weight:700;z-index:2;pointer-events:none;}
+/* тиждень */
+.tl-week-col{position:relative;border-left:1px solid rgba(255,255,255,.055);padding:8px 7px;display:flex;flex-direction:column;gap:6px;min-height:180px;}
+.tl-week-col.today{background:rgba(167,139,250,.05);}
+.tl-wblock{border-radius:11px;padding:7px 9px;cursor:pointer;background:rgba(167,139,250,.16);border:1px solid rgba(167,139,250,.34);transition:filter .18s,transform .18s;}
+.tl-wblock:hover{filter:brightness(1.18);transform:translateY(-1px);}
+.tl-wblock.st-orange{background:rgba(245,158,11,.17);border-color:rgba(245,158,11,.42);}
+.tl-wblock.st-green{background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.38);}
+.tl-wblock.st-yellow{background:rgba(234,179,8,.15);border-color:rgba(234,179,8,.38);}
+.tl-wblock.st-red{background:rgba(239,68,68,.14);border-color:rgba(239,68,68,.36);}
+.tl-wblock.is-closed{opacity:.5;}
+.tl-wempty{font-size:11.5px;color:rgba(255,255,255,.22);text-align:center;padding:16px 0;}
+@media (max-width:768px){
+  .tl-hint{display:none;}
+  .tl-date{font-size:15px;width:100%;order:5;}
+  .tl-grid{grid-template-columns:46px repeat(var(--cols,3),minmax(132px,1fr));}
+  .tl-colhead{font-size:10px;padding:10px 6px;letter-spacing:1px;}
+}
+
+/* панель інструментів розкладу */
+.crm-toolbar{display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap;align-items:center;}
+.crm-toolbar .spacer{flex:1;min-width:0;}
+@media (max-width:768px){
+  .crm-toolbar{gap:6px;}
+  .crm-toolbar .spacer{display:none;}
+  .crm-filter-scroll{display:flex;gap:6px;overflow-x:auto;width:100%;padding-bottom:8px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+  .crm-filter-scroll::-webkit-scrollbar{display:none;}
+  .crm-filter-scroll .crm-filter-btn{flex:0 0 auto;min-height:42px;}
+  .crm-card-actions .act-main{flex:1;justify-content:center;min-height:46px;font-size:14px;}
+}
 
 /* ANALYTICS */
 .an-kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px;}
@@ -804,6 +1061,7 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
 /* ── HOME: gallery ── */
 .gallery-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
 .gallery-item{position:relative;aspect-ratio:4/3;border-radius:16px;overflow:hidden;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);cursor:pointer;display:block;}
+.gallery-item picture{display:block;width:100%;height:100%;}
 .gallery-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s var(--ease);}
 .gallery-item:hover img{transform:scale(1.06);}
 .gallery-item::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.4));opacity:0;transition:opacity .3s;}
@@ -1200,12 +1458,9 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
       <div class="crm-top">
         <div><div class="section-label">Адмін</div><h2 style="font-size:28px;font-weight:700;letter-spacing:-0.5px;">CRM Система</h2></div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          <button class="btn-white" onclick="showPage('booking')">+ Новий запис</button>
-          <button class="btn-ghost" style="padding:10px 16px;font-size:13px;" onclick="recalcAllBalances()" id="recalcBtn" title="Перерахувати баланси">⟳ Баланси</button>
-          <button class="btn-ghost" style="padding:10px 16px;font-size:13px;" onclick="toggleCrmLarge()" id="crmLargeBtn" title="Збільшити кнопки і текст">🔎 Великий режим</button>
-          <button class="btn-ghost" style="padding:10px 16px;font-size:13px;" onclick="broadcastUi()">↗ Розсилка</button>
-          <button class="btn-ghost" style="padding:10px 16px;font-size:13px;" onclick="runMaintenanceUi()">⚙ KPI</button>
-          <button class="btn-ghost" style="padding:10px 16px;font-size:13px;" onclick="pinLock()">🔒 Вийти</button>
+          <button class="btn-white" onclick="openNewBooking()">+ Новий запис</button>
+          <button class="btn-ghost" style="padding:10px 16px;font-size:13px;" onclick="openGlobalSearch()" title="Пошук по клієнтах, записах, авто (клавіша /)">🔍 Пошук</button>
+          <button class="btn-ghost" style="padding:10px 16px;font-size:13px;" onclick="openCrmToolsMenu(event)" title="Інструменти">⋯ Ще</button>
         </div>
       </div>
       <div class="crm-stats-row">
@@ -1215,38 +1470,68 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
         <div class="crm-stat-card"><div class="crm-stat-num" id="stat-clients">—</div><div class="crm-stat-label">Клієнтів</div></div>
       </div>
       <div class="crm-tabs-bar">
-        <button class="crm-tab-btn active" onclick="switchCrmTab(event,'sched')">Розклад</button>
-        <button class="crm-tab-btn" onclick="switchCrmTab(event,'boxes')">Бокси</button>
+        <button class="crm-tab-btn active" onclick="switchCrmTab(event,'today')">🏠 Сьогодні</button>
+        <button class="crm-tab-btn" onclick="switchCrmTab(event,'timeline')">🗓 Таймлайн</button>
+        <button class="crm-tab-btn" onclick="switchCrmTab(event,'sched')">Розклад</button>
         <button class="crm-tab-btn" onclick="switchCrmTab(event,'clients')">Клієнти</button>
         <button class="crm-tab-btn" onclick="switchCrmTab(event,'subs')">Абонементи</button>
         <button class="crm-tab-btn" onclick="switchCrmTab(event,'subrequests')">🆕 Заявки</button>
         <button class="crm-tab-btn" onclick="switchCrmTab(event,'analytics')">📊 Аналітика</button>
       </div>
 
-      <div class="crm-tab-panel active" id="tab-sched">
-        <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
-          <button class="crm-filter-btn active" data-filter="all" onclick="filterBookings('all')">Всі <span class="fb-count" data-fc="all">0</span></button>
-          <button class="crm-filter-btn" data-filter="today" onclick="filterBookings('today')">📅 Сьогодні <span class="fb-count" data-fc="today">0</span></button>
+      <!-- ✨ STEP 2 — робочий стіл дня: що відбувається просто зараз -->
+      <div class="crm-tab-panel active" id="tab-today">
+        <div class="dd-head" id="ddHead"></div>
+        <div id="ddBoxesSec">
+          <div class="dd-sec-title">Бокси зараз</div>
+          <div class="boxes-live" id="boxesLive"><div class="table-loading" style="grid-column:1/-1"><span class="table-spinner"></span>Завантаження...</div></div>
+        </div>
+        <div id="ddQueue"><div class="table-loading"><span class="table-spinner"></span>Завантаження...</div></div>
+      </div>
+
+      <!-- ✨ STEP 3 — таймлайн: час × бокси, перенос перетягуванням -->
+      <div class="crm-tab-panel" id="tab-timeline">
+        <div class="tl-bar">
+          <div class="tl-nav">
+            <button class="act-more" onclick="tlShift(-1)" title="Попередній">‹</button>
+            <button class="act-btn" onclick="tlGoToday()">Сьогодні</button>
+            <button class="act-more" onclick="tlShift(1)" title="Наступний">›</button>
+          </div>
+          <div class="tl-date" id="tlDate">—</div>
+          <span class="spacer"></span>
+          <div class="tl-modes">
+            <button class="tl-mode active" data-mode="day" onclick="tlSetMode('day')">День</button>
+            <button class="tl-mode" data-mode="week" onclick="tlSetMode('week')">Тиждень</button>
+          </div>
+          <button class="act-btn act-btn-red" onclick="openBlockDatesModal()">🔒 Блокування дат</button>
+        </div>
+        <div class="tl-hint" id="tlHint">Перетягніть запис, щоб змінити час або бокс. Клік по вільному місцю — новий запис.</div>
+        <div class="tl-wrap" id="tlWrap"><div class="table-loading"><span class="table-spinner"></span>Завантаження...</div></div>
+      </div>
+
+      <div class="crm-tab-panel" id="tab-sched">
+        <div class="crm-filter-scroll">
+          <button class="crm-filter-btn active" data-filter="today" onclick="filterBookings('today')">📅 Сьогодні <span class="fb-count" data-fc="today">0</span></button>
+          <button class="crm-filter-btn" data-filter="pending" onclick="filterBookings('pending')">🆕 Нові <span class="fb-count" data-fc="pending">0</span></button>
           <button class="crm-filter-btn" data-filter="active" onclick="filterBookings('active')">🔧 В роботі <span class="fb-count" data-fc="active">0</span></button>
-          <button class="crm-filter-btn" data-filter="pending" onclick="filterBookings('pending')">🆕 Нові записи <span class="fb-count" data-fc="pending">0</span></button>
-          <input type="text" class="field" id="bookingSearch" placeholder="Пошук..." oninput="applyBookingControls()" style="max-width:180px;padding:9px 11px;font-size:12px;">
-          <select class="field" id="bookingSort" onchange="applyBookingControls()" style="max-width:180px;padding:9px 11px;font-size:12px;">
-            <option value="dateAsc">Дата ↑</option>
-            <option value="dateDesc">Дата ↓</option>
+          <button class="crm-filter-btn" data-filter="upcoming" onclick="filterBookings('upcoming')">📆 Майбутні <span class="fb-count" data-fc="upcoming">0</span></button>
+          <button class="crm-filter-btn" data-filter="archive" onclick="filterBookings('archive')">🗄 Архів <span class="fb-count" data-fc="archive">0</span></button>
+          <button class="crm-filter-btn" data-filter="all" onclick="filterBookings('all')">Всі <span class="fb-count" data-fc="all">0</span></button>
+        </div>
+        <div class="crm-toolbar">
+          <input type="text" class="field" id="bookingSearch" placeholder="🔍 Ім'я, телефон, номер авто..." oninput="applyBookingControls()" style="max-width:260px;padding:10px 12px;font-size:13px;">
+          <select class="field" id="bookingSort" onchange="applyBookingControls()" style="max-width:160px;padding:10px 12px;font-size:13px;">
+            <option value="dateAsc">Спочатку ранні</option>
+            <option value="dateDesc">Спочатку пізні</option>
             <option value="clientAsc">Клієнт А-Я</option>
             <option value="statusAsc">Статус</option>
           </select>
-          <button class="act-btn" onclick="exportCrmCsv('bookings')">Excel</button>
-          <button class="act-btn" onclick="exportCrmPdf('bookings')">PDF</button>
-          <button class="act-btn" onclick="printCrm('bookings')">Друк</button>
+          <span class="spacer"></span>
+          <button class="act-btn" onclick="openExportMenu(event,'bookings')">⤓ Експорт</button>
           <button class="act-btn act-btn-red" onclick="openBlockDatesModal()">🔒 Блокування дат</button>
         </div>
         <div class="table-scroll desktop-table" id="scheduleTableWrap"><div class="table-loading"><span class="table-spinner"></span>Завантаження...</div></div>
         <div class="crm-cards" id="scheduleCards"></div>
-      </div>
-
-      <div class="crm-tab-panel" id="tab-boxes">
-        <div class="boxes-live" id="boxesLive"><div class="table-loading" style="grid-column:1/-1"><span class="table-spinner"></span>Завантаження...</div></div>
       </div>
 
       <div class="crm-tab-panel" id="tab-clients">
@@ -1329,6 +1614,91 @@ footer{background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,
 
 <div class="toast" id="toast"></div>
 
+<!-- ✨ CRM v2 — меню дій, тост з відміною, глобальний пошук, пікери -->
+<div class="crm-menu-backdrop" id="crmMenuBackdrop" onclick="closeCrmMenu()"></div>
+<div class="crm-menu" id="crmMenu"></div>
+
+<div class="toast-undo" id="toastUndo">
+  <span class="toast-undo-msg" id="toastUndoMsg">—</span>
+  <button class="toast-undo-btn" id="toastUndoBtn">Скасувати</button>
+  <span class="toast-undo-bar" id="toastUndoBar"></span>
+</div>
+
+<div class="gs-overlay" id="gsOverlay" onclick="if(event.target===this)closeGlobalSearch()">
+  <div class="gs-box">
+    <div class="gs-input-row">
+      <span style="font-size:17px;">🔍</span>
+      <input type="text" id="gsInput" placeholder="Клієнт, телефон, номер авто, № запису..." autocomplete="off" oninput="renderGlobalSearch()" onkeydown="gsKeyDown(event)">
+      <span class="gs-esc" onclick="closeGlobalSearch()">ESC</span>
+    </div>
+    <div class="gs-results" id="gsResults"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-box" style="width:400px;">
+    <div id="confirmTitle" style="font-size:20px;font-weight:700;letter-spacing:-0.3px;margin-bottom:10px;">—</div>
+    <div id="confirmText" style="font-size:14px;color:var(--light);line-height:1.55;margin-bottom:22px;">—</div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;">
+      <button class="btn-back" id="confirmNo">Ні</button>
+      <button class="btn-next" id="confirmYes">Так</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="dtpModal">
+  <div class="modal-box">
+    <div class="modal-close" onclick="closeDtp()">✕</div>
+    <div id="dtpTitle" style="font-size:21px;font-weight:700;letter-spacing:-0.3px;margin-bottom:4px;">Перенести запис</div>
+    <div id="dtpSub" style="font-size:13px;color:var(--gray);margin-bottom:6px;">—</div>
+    <div class="dtp-label">Дата</div>
+    <div class="dtp-days" id="dtpDays"></div>
+    <div class="dtp-label">Час</div>
+    <div class="dtp-times" id="dtpTimes"><div class="dtp-empty">Оберіть дату</div></div>
+    <div class="dtp-label">Бокс</div>
+    <div class="dtp-boxes" id="dtpBoxes"><span style="font-size:13px;color:var(--gray);">Оберіть час</span></div>
+    <div class="dtp-summary" id="dtpSummary">Оберіть дату й час</div>
+    <div class="nav-row" style="margin-top:18px;">
+      <button class="btn-back" onclick="closeDtp()">Скасувати</button>
+      <button class="btn-next" id="dtpOk" onclick="dtpConfirm()">Перенести →</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="nbModal">
+  <div class="modal-box modal-large">
+    <div class="modal-close" onclick="closeNewBooking()">✕</div>
+    <div style="font-size:22px;font-weight:700;letter-spacing:-0.3px;margin-bottom:4px;">➕ Новий запис</div>
+    <div style="font-size:13px;color:var(--gray);margin-bottom:16px;">Запис телефоном або з Instagram — заповніть і збережіть</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="form-group" style="margin-bottom:0;position:relative;">
+        <div class="form-label">Ім'я клієнта *</div>
+        <input type="text" class="field" id="nbName" placeholder="Олексій Петренко" autocomplete="off" oninput="nbClientHint()">
+        <div id="nbHint" class="nb-hint"></div>
+      </div>
+      <div class="form-group" style="margin-bottom:0;"><div class="form-label">Телефон *</div><input type="tel" class="field" id="nbPhone" placeholder="+380 XX XXX XX XX" oninput="nbClientHint()"></div>
+      <div class="form-group" style="margin-bottom:0;"><div class="form-label">Авто</div><input type="text" class="field" id="nbCar" placeholder="VW Passat B8"></div>
+      <div class="form-group" style="margin-bottom:0;"><div class="form-label">Держномер</div><input type="text" class="field" id="nbPlate" placeholder="АА1234АА" style="text-transform:uppercase;"></div>
+    </div>
+    <div class="dtp-label">Тип кузова</div>
+    <select class="field" id="nbBody" onchange="nbRenderServices()"></select>
+    <div class="dtp-label">Послуги</div>
+    <div class="nb-chips" id="nbServices"><span style="font-size:13px;color:var(--gray);">Оберіть тип кузова</span></div>
+    <div class="dtp-label">Дата</div>
+    <div class="dtp-days" id="nbDays"></div>
+    <div class="dtp-label">Час</div>
+    <div class="dtp-times" id="nbTimes"><div class="dtp-empty">Оберіть дату</div></div>
+    <div class="dtp-label">Бокс</div>
+    <div class="dtp-boxes" id="nbBoxes"><span style="font-size:13px;color:var(--gray);">Оберіть час</span></div>
+    <div class="form-group" style="margin-top:16px;margin-bottom:0;"><div class="form-label">Коментар</div><input type="text" class="field" id="nbComment" placeholder="Побажання клієнта, деталі"></div>
+    <div class="dtp-summary" id="nbSummary">Заповніть клієнта, послуги, дату й час</div>
+    <div class="nav-row" style="margin-top:18px;">
+      <button class="btn-back" onclick="closeNewBooking()">Скасувати</button>
+      <button class="btn-next" id="nbOk" onclick="nbSubmit()">Створити запис →</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="uiPromptModal">
   <div class="modal-box">
     <div class="modal-close" onclick="_uiPromptClose(null)">✕</div>
@@ -1406,10 +1776,25 @@ const S={service:'',price:'',date:'',time:'',box:null,step:1,carType:'',plate:''
 const _pendingActions=new Set();
 let _crmAutoRefreshTimer=null;
 let _prevSubReqIds=null;
+let _prevBookingIds=null;
+// короткий сигнал при новому записі (без зовнішніх файлів)
+function crmPing(){
+  try{
+    const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
+    const ctx=new C(),o=ctx.createOscillator(),g=ctx.createGain();
+    o.type='sine';o.frequency.setValueAtTime(880,ctx.currentTime);
+    o.frequency.setValueAtTime(1174,ctx.currentTime+0.12);
+    g.gain.setValueAtTime(0.0001,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.15,ctx.currentTime+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+0.32);
+    o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+0.34);
+    setTimeout(()=>{try{ctx.close();}catch(e){}},600);
+  }catch(e){}
+}
 const _planMeta={};
 let _allBookings=[],_allClients=[],_allSubs=[],_allSubRequests=[];
 let _crmToken=localStorage.getItem(CRM_TOKEN_KEY)||'';
-let _bookingFilter='all';
+let _bookingFilter='today';   // ✅ CRM відкривається на «Сьогодні», а не на всьому архіві
 const _cache={};
 const CACHE_TTL=90000;
 
@@ -1775,8 +2160,18 @@ async function bkRescheduleLast(){
 function bkDeepLink(svc){BK._pendingSvc=svc||'';bkReset();}
 
 // ── HOME gallery (drop real photo URLs into GALLERY; broken ones auto-hide) ──
-const GALLERY=['assets/work-1.jpg','assets/work-2.jpg','assets/work-3.jpg','assets/work-4.jpg','assets/work-5.jpg','assets/work-6.jpg','assets/work-7.jpg','assets/work-8.jpg'];
-function renderGallery(){const g=document.getElementById('galleryGrid');if(!g)return;g.innerHTML=GALLERY.map((src,i)=>`<a class="gallery-item" href="${esc(src)}" target="_blank" rel="noopener"><img src="${esc(src)}" alt="Робота 1333 Car Center ${i+1}" loading="lazy" decoding="async" onerror="this.closest('.gallery-item').style.display='none'"></a>`).join('');}
+// Роботи центру. Додаєте нове фото — кладете assets/work-N.webp (+ work-N-thumb.webp)
+// і дописуєте номер сюди. Список рівно з тих файлів, що реально лежать у папці.
+const GALLERY=[1,2,3,4];
+function renderGallery(){
+  const g=document.getElementById('galleryGrid');if(!g)return;
+  g.innerHTML=GALLERY.map(n=>`<a class="gallery-item" href="assets/work-${n}.webp" target="_blank" rel="noopener" aria-label="Робота 1333 Car Center ${n}">
+    <picture>
+      <source srcset="assets/work-${n}-thumb.webp" type="image/webp">
+      <img src="assets/work-${n}-thumb.jpg" alt="Приклад роботи детейлінг-центру 1333 Car Center — ${n}" width="760" height="570" loading="lazy" decoding="async" onerror="this.closest('.gallery-item').style.display='none'">
+    </picture>
+  </a>`).join('');
+}
 
 // ═══ NAV + SCROLL FIX ═══
 function showPage(p){
@@ -2283,11 +2678,22 @@ async function loadCRM(silent){
   const activeCount=_allBookings.filter(b=>b.status?.includes('роботі')).length;
   const monthCount=_allBookings.filter(b=>b.date?.endsWith('.'+yyyy)&&b.date?.includes('.'+mm+'.')).length;
   setStats(todayCount,activeCount,monthCount,_allClients.length);
-  filterBookings(_bookingFilter||'all');renderBoxes(_allBookings,todayStr);renderClients(_allClients);renderSubs(_allSubs);renderSubRequests(_allSubRequests);
+  filterBookings(_bookingFilter||'today');renderBoxes(_allBookings,todayStr);renderDayDesk();renderClients(_allClients);renderSubs(_allSubs);renderSubRequests(_allSubRequests);
   const curIds=new Set((_allSubRequests||[]).map(r=>r.requestId));
   if(_prevSubReqIds){let fresh=0;curIds.forEach(id=>{if(!_prevSubReqIds.has(id))fresh++;});if(fresh>0)toast(`🔔 Нових заявок: ${fresh}`);}
   _prevSubReqIds=curIds;
-  if(_crmUnlocked)startCrmAutoRefresh();
+  // 🔔 нові записи з сайту/Telegram — щоб не пропустити між автооновленнями
+  const curBkIds=new Set(_allBookings.map(b=>b.id));
+  if(_prevBookingIds){
+    const fresh=[..._allBookings].filter(b=>!_prevBookingIds.has(b.id));
+    if(fresh.length){
+      const f=fresh[0];
+      toast(fresh.length===1?`🔔 Новий запис: ${f.clientName} · ${f.date} ${f.time}`:`🔔 Нових записів: ${fresh.length}`);
+      try{crmPing();}catch(e){}
+    }
+  }
+  _prevBookingIds=curBkIds;
+  if(_crmUnlocked){startCrmAutoRefresh();startDayDeskTicker();}
   _openPendingClientCard(); // 🪪 якщо зайшли по QR-посиланню — відкриваємо картку клієнта
 }
 function startCrmAutoRefresh(){
@@ -2300,12 +2706,12 @@ function startCrmAutoRefresh(){
     loadCRM(true);
   },120000); // ✅ FIX: 2 хвилини замість 45с — менше навантаження
 }
-function stopCrmAutoRefresh(){if(_crmAutoRefreshTimer){clearInterval(_crmAutoRefreshTimer);_crmAutoRefreshTimer=null;}}
+function stopCrmAutoRefresh(){if(_crmAutoRefreshTimer){clearInterval(_crmAutoRefreshTimer);_crmAutoRefreshTimer=null;}stopDayDeskTicker();}
 function skRows(n){return Array.from({length:n}).map(()=>'<div class="skeleton sk-row"></div>').join('');}
 function skBoxes(){return['','',''].map(()=>'<div class="skeleton sk-box"></div>').join('');}
 function showCrmSkeletons(){
   const set=(id,html)=>{const el=document.getElementById(id);if(el)el.innerHTML=html;};
-  set('scheduleTableWrap',skRows(6));set('scheduleCards',skRows(3));set('subsTableWrap',skRows(5));
+  set('scheduleTableWrap',skRows(6));set('scheduleCards',skRows(3));set('subsTableWrap',skRows(5));set('ddQueue',skRows(3));
   set('subsMobileCards',skRows(3));set('subRequestsTableWrap',skRows(4));set('subRequestsMobileCards',skRows(2));
   set('clientList',skRows(6));set('boxesLive',skBoxes());
 }
@@ -2318,32 +2724,52 @@ function setStats(t,a,m,c){
 
 // ═══ CRM SCHEDULE ═══
 function filterBookings(filter){
+  const changed=_bookingFilter!==filter;
   _bookingFilter=filter;
   document.querySelectorAll('.crm-filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.filter===filter));
+  // архів читається від найсвіжішого, решта — від найближчого
+  const sortEl=document.getElementById('bookingSort');
+  if(changed&&sortEl)sortEl.value=(filter==='archive')?'dateDesc':'dateAsc';
   applyBookingControls();
+}
+// повний текст запису для пошуку (додано держномер і модель авто)
+function bkSearchBlob(b){
+  return [b.id,b.clientName,b.phone,b.service,b.box,b.status,b.source,b.plate,b.car,b.carType,b.date,b.time].join(' ').toLowerCase();
 }
 function applyBookingControls(){updateFilterCounts();renderSchedule(getFilteredSortedBookings());}
 function updateFilterCounts(){
-  const todayStr=getTodayStr();
   const counts={
     all:_allBookings.length,
-    today:_allBookings.filter(b=>b.date===todayStr).length,
+    today:_allBookings.filter(bkIsToday).length,
     active:_allBookings.filter(b=>b.status?.includes('роботі')).length,
-    pending:_allBookings.filter(b=>b.status?.includes('Очікує')||b.status?.includes('Підтверджено')).length
+    pending:_allBookings.filter(bkIsPending).length,
+    upcoming:_allBookings.filter(bkIsUpcoming).length,
+    archive:_allBookings.filter(bkIsArchive).length
   };
   document.querySelectorAll('.fb-count[data-fc]').forEach(el=>{el.textContent=counts[el.dataset.fc]??0;});
 }
+// ── предикати фільтрів (одне джерело правди для лічильників і списку) ──
+function bkIsToday(b){return b.date===getTodayStr();}
+function bkIsPending(b){return !!(b.status?.includes('Очікує')||b.status?.includes('Підтверджено'));}
+function bkIsClosed(b){return !!(b.status?.includes('Виконано')||b.status?.includes('Скасовано'));}
+function bkStartOfToday(){const d=new Date();d.setHours(0,0,0,0);return d.getTime();}
+function bkIsUpcoming(b){return parseBookingDate(b)>=bkStartOfToday()&&!bkIsClosed(b);}
+function bkIsArchive(b){return parseBookingDate(b)<bkStartOfToday()||bkIsClosed(b);}
 function getFilteredSortedBookings(){
   const today=new Date();
   const dd=String(today.getDate()).padStart(2,'0'),mm=String(today.getMonth()+1).padStart(2,'0'),yyyy=today.getFullYear();
   const todayStr=`${dd}.${mm}.${yyyy}`;
   let f=_allBookings;
-  if(_bookingFilter==='today')f=_allBookings.filter(b=>b.date===todayStr);
+  if(_bookingFilter==='today')f=_allBookings.filter(bkIsToday);
   if(_bookingFilter==='active')f=_allBookings.filter(b=>b.status?.includes('роботі'));
-  if(_bookingFilter==='pending')f=_allBookings.filter(b=>b.status?.includes('Очікує')||b.status?.includes('Підтверджено'));
+  if(_bookingFilter==='pending')f=_allBookings.filter(bkIsPending);
+  if(_bookingFilter==='upcoming')f=_allBookings.filter(bkIsUpcoming);
+  if(_bookingFilter==='archive')f=_allBookings.filter(bkIsArchive);
   const q=(document.getElementById('bookingSearch')?.value||'').toLowerCase().trim();
-  if(q)f=f.filter(b=>[b.id,b.clientName,b.phone,b.service,b.box,b.status,b.source].join(' ').toLowerCase().includes(q));
-  const sort=document.getElementById('bookingSort')?.value||'dateAsc';
+  if(q)f=f.filter(b=>bkSearchBlob(b).includes(q));
+  // архів логічніше читати від найсвіжішого
+  const sortEl=document.getElementById('bookingSort');
+  const sort=sortEl?.value||(_bookingFilter==='archive'?'dateDesc':'dateAsc');
   f=[...f].sort((a,b)=>{
     if(sort==='clientAsc')return String(a.clientName).localeCompare(String(b.clientName),'uk');
     if(sort==='statusAsc')return String(a.status).localeCompare(String(b.status),'uk');
@@ -2389,8 +2815,18 @@ function renderSchedule(bookings){
   const wrap=document.getElementById('scheduleTableWrap');
   const cards=document.getElementById('scheduleCards');
   if(!bookings.length){
-    wrap.innerHTML='<div class="table-loading" style="color:var(--gray);">Записів не знайдено</div>';
-    cards.innerHTML='<div style="color:var(--gray);font-size:14px;padding:20px 0;">Записів не знайдено</div>';
+    // зрозумілий порожній стан: підказуємо, куди дивитись далі
+    const q=(document.getElementById('bookingSearch')?.value||'').trim();
+    const txt=q?`Нічого не знайдено за запитом «${esc(q)}»`
+      :(_bookingFilter==='today'?'Сьогодні записів немає'
+      :_bookingFilter==='pending'?'Нових записів немає'
+      :_bookingFilter==='active'?'Зараз ніхто не в роботі'
+      :_bookingFilter==='upcoming'?'Майбутніх записів немає'
+      :'Записів не знайдено');
+    const hint=q?`<button class="act-btn" onclick="document.getElementById('bookingSearch').value='';applyBookingControls();">Очистити пошук</button>`
+      :(_bookingFilter!=='all'?`<button class="act-btn" onclick="filterBookings('upcoming')">📆 Майбутні</button><button class="act-btn" onclick="filterBookings('all')">Показати всі</button>`:'');
+    const html=`<div style="text-align:center;color:var(--gray);font-size:14px;padding:34px 16px;"><div style="font-size:30px;margin-bottom:10px;opacity:.5;">🗓</div>${txt}<div style="margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">${hint}</div></div>`;
+    wrap.innerHTML=html;cards.innerHTML=html;
     return;
   }
   wrap.innerHTML=`<table class="crm-table"><thead><tr><th>#</th><th>Клієнт</th><th>Дата/Час</th><th>Послуга</th><th>Бокс</th><th>Джерело</th><th>Статус</th><th>Дії</th></tr></thead><tbody>${
@@ -2402,13 +2838,7 @@ function renderSchedule(bookings){
       <td><span style="font-size:15px;font-weight:700;letter-spacing:-0.3px;">${esc(String(b.box).replace('Box ',''))}</span></td>
       <td style="font-size:11px;color:var(--gray);">${esc(b.source||'—')}</td>
       <td><span class="badge ${statusBadgeClass(b.status)}">${esc(b.status||'—')}</span></td>
-      <td>
-        <button class="act-btn act-btn-green" title="Взяти в роботу" onclick="updateBookingStatusUI('${esc(b.id)}','▶ В роботі')">▶</button>
-        <button class="act-btn act-btn-green" title="Завершити запис" onclick="updateBookingStatusUI('${esc(b.id)}','✅ Виконано')">✓</button>
-        <button class="act-btn act-btn-yellow" title="Повернути в очікування" onclick="updateBookingStatusUI('${esc(b.id)}','⏳ Очікує')">⏸</button>
-        <button class="act-btn" title="Перенести запис" onclick="rescheduleBookingUI('${esc(b.id)}','${esc(b.phone)}')">↔</button>
-        <button class="act-btn act-btn-red" title="Скасувати запис" onclick="updateBookingStatusUI('${esc(b.id)}','❌ Скасовано')">✕</button>
-      </td></tr>`).join('')
+      <td><div style="display:flex;gap:6px;align-items:center;">${bkPrimaryBtnHtml(b)}<a class="act-ico" href="tel:${esc(String(b.phone||'').replace(/[^\d+]/g,''))}" title="Подзвонити ${esc(b.phone)}">📞</a><button class="act-more" title="Ще дії" onclick="openBookingMenu(event,'${esc(b.id)}')">⋯</button></div></td></tr>`).join('')
   }</tbody></table>`;
   cards.innerHTML=bookings.map(b=>`
     <div class="crm-card ${statusBadgeClass(b.status).replace('badge-','st-')}">
@@ -2423,53 +2853,406 @@ function renderSchedule(bookings){
         ${b.plate?`<span class="crm-card-tag">🚗 ${esc(b.plate)}</span>`:''}
       </div>
       <div class="crm-card-actions">
-        <button class="act-btn act-btn-green" onclick="updateBookingStatusUI('${esc(b.id)}','▶ В роботі')">▶ В роботі</button>
-        <button class="act-btn act-btn-green" onclick="updateBookingStatusUI('${esc(b.id)}','✅ Виконано')">✓ Готово</button>
-        <button class="act-btn" onclick="rescheduleBookingUI('${esc(b.id)}','${esc(b.phone)}')">↔ Перенести</button>
-        <button class="act-btn act-btn-red" onclick="updateBookingStatusUI('${esc(b.id)}','❌ Скасовано')">✕ Скасувати</button>
+        ${bkPrimaryBtnHtml(b)}
+        <a class="act-ico" href="tel:${esc(String(b.phone||'').replace(/[^\d+]/g,''))}" title="Подзвонити">📞</a>
+        <button class="act-more" title="Ще дії" onclick="openBookingMenu(event,'${esc(b.id)}')">⋯</button>
       </div>
     </div>`).join('');
 }
-async function updateBookingStatusUI(bookingId,newStatus){
+
+// ═══════════════════════════════════════════════════════════
+//  ✨ CRM v2 — головна дія, меню, підтвердження, відміна дії
+// ═══════════════════════════════════════════════════════════
+// Наступний логічний крок для запису. null — коли запис уже закритий.
+function bkNextAction(b){
+  const s=String(b?.status||'');
+  if(s.includes('Виконано')||s.includes('Скасовано'))return null;
+  if(s.includes('роботі'))return{label:'✓ Готово',title:'Завершити запис',status:'✅ Виконано',cls:'is-done'};
+  return{label:'▶ В роботу',title:'Взяти в роботу',status:'▶ В роботі',cls:''};
+}
+function bkPrimaryBtnHtml(b){
+  const a=bkNextAction(b);
+  if(!a)return`<button class="act-main" disabled title="Запис закритий">${esc(String(b.status||'').includes('Скасовано')?'✕ Скасовано':'✓ Закрито')}</button>`;
+  return`<button class="act-main ${a.cls}" title="${esc(a.title)}" onclick="updateBookingStatusUI('${esc(b.id)}','${esc(a.status)}')">${esc(a.label)}</button>`;
+}
+function bkDigits(p){return String(p||'').replace(/[^\d+]/g,'');}
+
+// ── меню дій (popover на десктопі, нижній лист на телефоні) ──
+let _crmMenuOpen=false;
+function openCrmMenu(anchorEvent,html){
+  const menu=document.getElementById('crmMenu'),back=document.getElementById('crmMenuBackdrop');
+  if(!menu)return;
+  menu.innerHTML=html;
+  menu.classList.add('show');back.classList.add('show');_crmMenuOpen=true;
+  if(window.innerWidth>768){
+    const t=anchorEvent?.currentTarget||anchorEvent?.target;
+    const r=t?.getBoundingClientRect?.()||{bottom:80,right:window.innerWidth-20,left:20};
+    const mw=menu.offsetWidth,mh=menu.offsetHeight;
+    let left=Math.min(r.right-mw,window.innerWidth-mw-12);left=Math.max(12,left);
+    let top=r.bottom+6;
+    if(top+mh>window.innerHeight-12)top=Math.max(12,r.top-mh-6);
+    menu.style.left=left+'px';menu.style.top=top+'px';
+  }else{menu.style.left='';menu.style.top='';}
+}
+function closeCrmMenu(){
+  const menu=document.getElementById('crmMenu'),back=document.getElementById('crmMenuBackdrop');
+  if(menu)menu.classList.remove('show');
+  if(back)back.classList.remove('show');
+  _crmMenuOpen=false;
+}
+function _mi(ico,label,onclick,cls){return`<button class="crm-menu-item ${cls||''}" onclick="closeCrmMenu();${onclick}"><span class="mi-ico">${ico}</span><span>${esc(label)}</span></button>`;}
+function _mia(ico,label,href,cls){return`<a class="crm-menu-item ${cls||''}" href="${href}" onclick="closeCrmMenu()"><span class="mi-ico">${ico}</span><span>${esc(label)}</span></a>`;}
+
+function openBookingMenu(ev,bookingId){
+  ev.stopPropagation();
+  const b=_allBookings.find(x=>x.id===bookingId);if(!b)return;
+  const id=esc(bookingId),ph=bkDigits(b.phone);
+  const client=_allClients.find(c=>c.clientId===b.clientId||bkDigits(c.phone)===ph);
+  let html=`<div class="crm-menu-head"><b>${esc(b.clientName||'—')}</b><span>${esc(b.date)} · ${esc(b.time)} · ${esc(b.service||'')}</span></div>`;
+  html+=_mia('📞','Подзвонити','tel:'+ph);
+  html+=_mi('📋','Копіювати телефон',`copyText('${esc(b.phone)}','Телефон скопійовано')`);
+  if(client?.telegramId)html+=_mia('💬','Написати в Telegram','tg://user?id='+encodeURIComponent(client.telegramId));
+  html+=_mia('💜','Написати у Viber','viber://chat?number='+encodeURIComponent(ph));
+  if(b.clientId)html+=_mi('🪪','Картка клієнта',`openClientModal('${esc(b.clientId)}')`);
+  html+='<div class="crm-menu-sep"></div>';
+  const s=String(b.status||'');
+  if(!s.includes('роботі')&&!s.includes('Виконано')&&!s.includes('Скасовано'))html+=_mi('▶','Взяти в роботу',`updateBookingStatusUI('${id}','▶ В роботі')`);
+  if(!s.includes('Виконано'))html+=_mi('✓','Завершити запис',`updateBookingStatusUI('${id}','✅ Виконано')`);
+  if(!s.includes('Очікує'))html+=_mi('⏳','Повернути в очікування',`updateBookingStatusUI('${id}','⏳ Очікує')`);
+  html+=_mi('↔','Перенести на інший час',`rescheduleBookingUI('${id}','${esc(b.phone)}')`);
+  html+='<div class="crm-menu-sep"></div>';
+  html+=_mi('✕','Скасувати запис',`updateBookingStatusUI('${id}','❌ Скасовано')`,'danger');
+  openCrmMenu(ev,html);
+}
+function openCrmToolsMenu(ev){
+  ev.stopPropagation();
+  const large=document.body.classList.contains('crm-large');
+  let html='<div class="crm-menu-head"><b>Інструменти</b><span>Службові дії CRM</span></div>';
+  html+=_mi('⟳','Перерахувати баланси','recalcAllBalances()');
+  html+=_mi('🔎',large?'Звичайний розмір':'Великий режим','toggleCrmLarge()');
+  html+=_mi('↗','Розсилка в Telegram','broadcastUi()');
+  html+=_mi('⚙','Перерахунок KPI','runMaintenanceUi()');
+  html+='<div class="crm-menu-sep"></div>';
+  html+=_mi('🔒','Вийти з CRM','pinLock()','danger');
+  openCrmMenu(ev,html);
+}
+function openExportMenu(ev,scope){
+  ev.stopPropagation();
+  let html='<div class="crm-menu-head"><b>Експорт</b><span>Поточний список</span></div>';
+  html+=_mi('📊','Excel (CSV)',`exportCrmCsv('${scope}')`);
+  html+=_mi('📄','PDF',`exportCrmPdf('${scope}')`);
+  html+=_mi('🖨','Друк',`printCrm('${scope}')`);
+  openCrmMenu(ev,html);
+}
+function copyText(txt,msg){
+  const done=()=>toast(msg||'Скопійовано');
+  if(navigator.clipboard?.writeText)navigator.clipboard.writeText(String(txt)).then(done).catch(()=>done());
+  else{const ta=document.createElement('textarea');ta.value=String(txt);document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(e){}ta.remove();done();}
+}
+
+// ── підтвердження замість «випадкового кліку» ──
+function uiConfirm(title,text,yesLabel,danger){
+  return new Promise(resolve=>{
+    const m=document.getElementById('confirmModal');
+    document.getElementById('confirmTitle').textContent=title||'Підтвердіть дію';
+    document.getElementById('confirmText').textContent=text||'';
+    const yes=document.getElementById('confirmYes'),no=document.getElementById('confirmNo');
+    yes.textContent=yesLabel||'Так';
+    yes.style.background=danger?'#ef4444':'';yes.style.color=danger?'#fff':'';
+    const close=v=>{m.classList.remove('show');yes.onclick=null;no.onclick=null;m.onclick=null;resolve(v);};
+    yes.onclick=()=>close(true);no.onclick=()=>close(false);
+    m.onclick=e=>{if(e.target===m)close(false);};
+    m.classList.add('show');
+  });
+}
+
+// ── тост з кнопкою «Скасувати» (5 секунд на відкат) ──
+let _undoTimer=null;
+function toastUndo(msg,onUndo,ms){
+  ms=ms||5000;
+  const el=document.getElementById('toastUndo'),bar=document.getElementById('toastUndoBar');
+  const btn=document.getElementById('toastUndoBtn');
+  document.getElementById('toastUndoMsg').textContent=msg;
+  clearTimeout(_undoTimer);
+  el.classList.add('show');
+  bar.style.transition='none';bar.style.width='100%';
+  requestAnimationFrame(()=>{bar.style.transition=`width ${ms}ms linear`;bar.style.width='0%';});
+  const hide=()=>{el.classList.remove('show');btn.onclick=null;clearTimeout(_undoTimer);};
+  btn.onclick=()=>{hide();onUndo();};
+  _undoTimer=setTimeout(hide,ms);
+}
+async function updateBookingStatusUI(bookingId,newStatus,silentUndo){
   const params={bookingId,status:newStatus};
-  if(newStatus.includes('Виконано')||newStatus.includes('Готово')){
+  const bRef=_allBookings.find(x=>x.id===bookingId);
+  let costApplied=0;
+  // ❗ скасування — незворотна для клієнта дія, тому питаємо підтвердження
+  if(newStatus.includes('Скасовано')&&!silentUndo){
+    const ok=await uiConfirm('Скасувати запис?',
+      `${bRef?.clientName||'Клієнт'} · ${bRef?.date||''} ${bRef?.time||''}. Клієнт побачить скасування, а час звільниться для інших.`,
+      'Так, скасувати',true);
+    if(!ok)return;
+  }
+  if((newStatus.includes('Виконано')||newStatus.includes('Готово'))&&!silentUndo){
     const res=await uiPrompt('Завершити запис',[{key:'cost',label:'Сума списання (грн). Порожньо = без списання',placeholder:'напр. 600',type:'tel',value:''}]);
     if(res===null)return;
     const raw=String(res.cost||'').trim();
     const cost=raw?Number(raw.replace(',','.').replace(/[^\d.]/g,'')):0;
     if(raw&&(isNaN(cost)||cost<0)){toast('Введіть правильну суму');return;}
-    if(cost>0)params.cost=cost;
+    if(cost>0){params.cost=cost;costApplied=cost;}
   }
   const _pk='booking:'+bookingId;
   if(_pendingActions.has(_pk)){toast('⏳ Зачекайте...');return;}
   _pendingActions.add(_pk);
-  const b=_allBookings.find(x=>x.id===bookingId);
+  const b=bRef;
   const prevStatus=b?b.status:null;
   if(b)b.status=newStatus;
-  applyBookingControls();renderBoxes(_allBookings,getTodayStr());toast('⏳ Збереження...');
+  crmRefreshViews();
   let result;
   try{result=await api('updateBookingStatus',params);}catch(e){result=null;}
   const ok=result&&result.success!==false;
-  if(ok){clearAvailabilityCache();toast(`✓ Статус: ${newStatus}`);}
-  else{if(b&&prevStatus!==null)b.status=prevStatus;applyBookingControls();renderBoxes(_allBookings,getTodayStr());toast(result?.error?`❌ ${result.error}`:'❌ Не вдалося зберегти');}
+  if(ok){
+    clearAvailabilityCache();
+    // 5 секунд на відкат — рятує від випадкового натискання
+    if(!silentUndo&&prevStatus&&prevStatus!==newStatus&&!costApplied){
+      toastUndo(`✓ ${b?.clientName||'Запис'}: ${newStatus}`,()=>updateBookingStatusUI(bookingId,prevStatus,true));
+    }else toast(costApplied?`✓ Виконано, списано ${costApplied.toLocaleString('uk-UA')} ₴`:`✓ Статус: ${newStatus}`);
+  }
+  else{if(b&&prevStatus!==null)b.status=prevStatus;crmRefreshViews();toast(result?.error?`❌ ${result.error}`:'❌ Не вдалося зберегти');}
   _pendingActions.delete(_pk);
 }
+// ═══════════════════════════════════════════════════════════
+//  ✨ Пікер дати/часу — спільний для «Перенести» і «Новий запис»
+//  Показує реально вільні слоти замість ручного вводу ДД.ММ.РРРР
+// ═══════════════════════════════════════════════════════════
+const DTP_DAYS=14;
+const _dtp={date:'',time:'',box:'',free:{},bookingId:'',phone:''};
+const _nb={date:'',time:'',box:'',free:{},body:'',services:[]};
+function dtpState(p){return p==='nb'?_nb:_dtp;}
+
+async function dtpTimesFor(ds){
+  // 1) батч-календар (0 запитів), 2) точковий запит, 3) демо
+  const cd=(typeof BK!=='undefined'&&BK.rangeTimes)?BK.rangeTimes[ds]:null;
+  if(cd&&Array.isArray(cd.times))return cd.times;
+  if(isApiConfigured()){const d=await api('getTimesAndBoxes',{date:ds},'timesBoxes_'+ds);if(d?.times)return d.times;}
+  const slots=['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'];
+  const now=new Date(),isToday=ds===getTodayStr(),minH=now.getMinutes()>0?now.getHours()+1:now.getHours();
+  return slots.map(t=>{const h=parseInt(t);if(isToday&&h<minH)return{time:t,available:false,past:true};return{time:t,available:true,freeBoxes:['Box 1','Box 2','Box 3']};});
+}
+function dtpRenderDays(p){
+  const box=document.getElementById(p+'Days');if(!box)return;
+  const st=dtpState(p),today=new Date();let html='';
+  for(let i=0;i<DTP_DAYS;i++){
+    const d=new Date(today);d.setDate(today.getDate()+i);
+    const ds=bkDateStr(d),blocked=_blockedDates.has(ds);
+    html+=`<button class="dtp-day${st.date===ds?' selected':''}${blocked?' blocked':''}" data-date="${ds}"><span class="dtp-dow">${i===0?'Сьогодні':BK_UK_DOW[d.getDay()]}</span><span class="dtp-num">${d.getDate()}</span><span class="dtp-mon">${BK_UK_MON[d.getMonth()]}</span></button>`;
+  }
+  box.innerHTML=html;
+  box.querySelectorAll('.dtp-day:not(.blocked)').forEach(b=>b.addEventListener('click',()=>dtpPickDate(p,b.dataset.date)));
+}
+async function dtpPickDate(p,ds){
+  const st=dtpState(p);st.date=ds;st.time='';st.box='';
+  dtpRenderDays(p);dtpSummary(p);
+  const grid=document.getElementById(p+'Times');
+  grid.innerHTML='<div class="dtp-empty">Завантаження...</div>';
+  document.getElementById(p+'Boxes').innerHTML='<span style="font-size:13px;color:var(--gray);">Оберіть час</span>';
+  const times=await dtpTimesFor(ds);
+  if(st.date!==ds)return; // користувач уже перемкнув дату
+  st.free={};times.forEach(t=>{st.free[t.time]=t.freeBoxes||[];});
+  if(!times.length){grid.innerHTML='<div class="dtp-empty">На цей день немає слотів</div>';return;}
+  grid.innerHTML=times.map(t=>{
+    const free=t.available&&!t.past;
+    return`<button class="dtp-time${free?'':' busy'}" data-time="${esc(t.time)}"${free?'':' disabled'} title="${t.past?'Час вже минув':(free?'Вільно':'Зайнято')}">${esc(t.time)}</button>`;
+  }).join('');
+  grid.querySelectorAll('.dtp-time:not(.busy)').forEach(b=>b.addEventListener('click',()=>dtpPickTime(p,b.dataset.time)));
+}
+function dtpPickTime(p,t){
+  const st=dtpState(p);st.time=t;
+  document.querySelectorAll('#'+p+'Times .dtp-time').forEach(b=>b.classList.toggle('selected',b.dataset.time===t));
+  const free=st.free[t]&&st.free[t].length?st.free[t]:['Box 1','Box 2','Box 3'];
+  st.box=free[0];
+  document.getElementById(p+'Boxes').innerHTML=free.map(bx=>`<button class="dtp-box${bx===st.box?' selected':''}" data-box="${esc(bx)}">${esc(bx)}</button>`).join('');
+  document.querySelectorAll('#'+p+'Boxes .dtp-box').forEach(b=>b.addEventListener('click',()=>{st.box=b.dataset.box;document.querySelectorAll('#'+p+'Boxes .dtp-box').forEach(x=>x.classList.toggle('selected',x.dataset.box===st.box));dtpSummary(p);}));
+  dtpSummary(p);
+}
+function dtpSummary(p){
+  const st=dtpState(p),el=document.getElementById(p==='nb'?'nbSummary':'dtpSummary');if(!el)return;
+  if(p==='nb'){
+    const who=(document.getElementById('nbName')?.value||'').trim()||'—';
+    const svc=st.services.length?st.services.map(s=>s.name).join(', '):'—';
+    const sum=st.services.reduce((a,s)=>a+(s.price||0),0);
+    el.innerHTML=`<b>${esc(who)}</b> · ${esc(svc)}<br>${st.date?esc(st.date)+' о '+esc(st.time||'—')+' · '+esc(st.box||'—'):'Дата не обрана'}${sum?'<br>Орієнтовна вартість: <b>'+sum.toLocaleString('uk-UA')+' ₴</b>':''}`;
+  }else{
+    el.textContent=st.date?`Новий час: ${st.date} о ${st.time||'—'} · ${st.box||'—'}`:'Оберіть дату й час';
+  }
+}
+
+// ── Перенести запис ──
 async function rescheduleBookingUI(bookingId,phone){
   const b=_allBookings.find(x=>x.id===bookingId)||{};
-  const res=await uiPrompt('Перенести запис',[
-    {key:'date',label:'Нова дата (ДД.ММ.РРРР)',value:b.date||getTodayStr()},
-    {key:'time',label:'Новий час (HH:MM)',value:b.time||'10:00'},
-    {key:'box',label:'Новий бокс',value:b.box||'Box 1'}
-  ]);
-  if(!res)return;
-  const{date:newDate,time:newTime,box:newBox}=res;
-  if(!newDate||!newTime||!newBox){toast('Заповніть усі поля');return;}
-  const result=await api('rescheduleBooking',{bookingId,phone,date:newDate,time:newTime,box:newBox});
-  if(result?.success){
-    Object.assign(b,{date:newDate,time:newTime,box:newBox,status:'✅ Підтверджено'});
-    clearAvailabilityCache();
-    applyBookingControls();renderBoxes(_allBookings,getTodayStr());toast('✓ Запис перенесено');
+  _dtp.bookingId=bookingId;_dtp.phone=phone||b.phone||'';
+  _dtp.date='';_dtp.time='';_dtp.box='';_dtp.free={};
+  document.getElementById('dtpSub').textContent=`${b.clientName||''} · зараз ${b.date||''} ${b.time||''} · ${b.box||''}`;
+  document.getElementById('dtpTimes').innerHTML='<div class="dtp-empty">Оберіть дату</div>';
+  document.getElementById('dtpBoxes').innerHTML='<span style="font-size:13px;color:var(--gray);">Оберіть час</span>';
+  dtpSummary('dtp');
+  document.getElementById('dtpModal').classList.add('show');
+  loadBlockedDates().then(()=>dtpRenderDays('dtp'));
+  dtpRenderDays('dtp');
+  if(typeof bkLoadRange==='function')bkLoadRange();
+}
+function closeDtp(){document.getElementById('dtpModal').classList.remove('show');}
+async function dtpConfirm(){
+  if(!_dtp.date||!_dtp.time||!_dtp.box){toast('Оберіть дату, час і бокс');return;}
+  const btn=document.getElementById('dtpOk');btn.disabled=true;btn.textContent='⏳ Переносимо...';
+  const b=_allBookings.find(x=>x.id===_dtp.bookingId)||{};
+  const result=await api('rescheduleBooking',{bookingId:_dtp.bookingId,phone:_dtp.phone,date:_dtp.date,time:_dtp.time,box:_dtp.box});
+  btn.disabled=false;btn.textContent='Перенести →';
+  if(result?.success||!isApiConfigured()){
+    Object.assign(b,{date:_dtp.date,time:_dtp.time,box:_dtp.box,status:'✅ Підтверджено'});
+    clearAvailabilityCache();closeDtp();
+    crmRefreshViews();
+    toast(`✓ Перенесено на ${_dtp.date} о ${_dtp.time}`);
   }else toast(rescheduleErrText(result));
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ✨ Новий запис прямо в CRM (телефон / Instagram)
+// ═══════════════════════════════════════════════════════════
+async function openNewBooking(){
+  _nb.date='';_nb.time='';_nb.box='';_nb.free={};_nb.services=[];_nb.body='';
+  ['nbName','nbPhone','nbCar','nbPlate','nbComment'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  document.getElementById('nbTimes').innerHTML='<div class="dtp-empty">Оберіть дату</div>';
+  document.getElementById('nbBoxes').innerHTML='<span style="font-size:13px;color:var(--gray);">Оберіть час</span>';
+  document.getElementById('nbModal').classList.add('show');
+  try{await _catalogReady;}catch(e){}
+  const sel=document.getElementById('nbBody');
+  const types=(typeof bkBodyTypes==='function'?bkBodyTypes():[]) ;
+  sel.innerHTML=types.map(t=>`<option value="${esc(t)}">${esc(bodyLabel(t))}</option>`).join('');
+  _nb.body=types[0]||'';sel.value=_nb.body;
+  nbRenderServices();
+  dtpRenderDays('nb');dtpSummary('nb');
+  loadBlockedDates().then(()=>dtpRenderDays('nb'));
+  if(typeof bkLoadRange==='function')bkLoadRange();
+}
+function closeNewBooking(){document.getElementById('nbModal').classList.remove('show');}
+function nbCatalogFor(body){
+  let rows=_catalog?.priceList?.[body];
+  if((!rows||!rows.length)&&BODY_PRICE_BASIS[body])rows=_catalog?.priceList?.[BODY_PRICE_BASIS[body]];
+  return (rows||[]).map(r=>{const p=parseUahNumber(r.price);return{name:r.name,category:r.category||'Інше',price:p||0,duration:bkParseDuration(r.duration)};});
+}
+function nbRenderServices(){
+  _nb.body=document.getElementById('nbBody').value;
+  _nb.services=[];
+  const wrap=document.getElementById('nbServices');
+  const list=nbCatalogFor(_nb.body);
+  if(!list.length){wrap.innerHTML='<span style="font-size:13px;color:var(--gray);">Для цього кузова у Прайсі ще немає послуг</span>';dtpSummary('nb');return;}
+  wrap.innerHTML=list.map((s,i)=>`<button class="nb-chip" data-i="${i}">${esc(s.name)}${s.price?' · '+s.price.toLocaleString('uk-UA')+' ₴':''}</button>`).join('');
+  wrap.querySelectorAll('.nb-chip').forEach(ch=>ch.addEventListener('click',()=>{
+    const s=list[+ch.dataset.i];const ix=_nb.services.findIndex(x=>x.name===s.name);
+    if(ix>=0)_nb.services.splice(ix,1);else _nb.services.push(s);
+    ch.classList.toggle('selected',ix<0);dtpSummary('nb');
+  }));
+  dtpSummary('nb');
+}
+// підказка «такий клієнт уже є»
+function nbClientHint(){
+  const q=((document.getElementById('nbName').value||'')+' '+(document.getElementById('nbPhone').value||'')).trim().toLowerCase();
+  dtpSummary('nb');
+  const box=document.getElementById('nbHint');if(!box)return;
+  if(q.length<3){box.classList.remove('show');return;}
+  const found=_allClients.filter(c=>(c.name+' '+c.phone).toLowerCase().includes(q.replace(/\s+/g,' '))).slice(0,4);
+  if(!found.length){box.classList.remove('show');return;}
+  box.classList.add('show');
+  box.innerHTML=found.map(c=>`<button class="crm-menu-item" onclick="nbPickClient('${esc(c.clientId)}')"><span class="mi-ico">🪪</span><span>${esc(c.name)} · ${esc(c.phone)}</span></button>`).join('');
+}
+function nbPickClient(id){
+  const c=_allClients.find(x=>x.clientId===id);if(!c)return;
+  document.getElementById('nbName').value=c.name;document.getElementById('nbPhone').value=c.phone;
+  document.getElementById('nbHint').classList.remove('show');
+  dtpSummary('nb');
+}
+async function nbSubmit(){
+  const name=(document.getElementById('nbName').value||'').trim();
+  const phone=(document.getElementById('nbPhone').value||'').trim();
+  if(!name){toast("Введіть ім'я клієнта");return;}
+  if(!phone){toast('Введіть телефон');return;}
+  if(!_nb.services.length){toast('Оберіть хоча б одну послугу');return;}
+  if(!_nb.date||!_nb.time||!_nb.box){toast('Оберіть дату, час і бокс');return;}
+  const btn=document.getElementById('nbOk');btn.disabled=true;btn.textContent='⏳ Зберігаємо...';
+  const params={date:_nb.date,time:_nb.time,box:_nb.box,name,phone,
+    service:_nb.services.map(s=>s.name).join(' + '),
+    car:(document.getElementById('nbCar').value||'').trim(),
+    carType:_nb.body,
+    comment:(document.getElementById('nbComment').value||'').trim(),
+    plate:(document.getElementById('nbPlate').value||'').toUpperCase().trim(),
+    source:'CRM'};
+  let result=null;
+  if(isApiConfigured())result=await api('saveBooking',params);
+  btn.disabled=false;btn.textContent='Створити запис →';
+  if(isApiConfigured()&&(result===null||result.success===false)){
+    clearAvailabilityCache();
+    toast(result?.error?'❌ '+result.error:'❌ Цей час уже зайнятий. Оберіть інший.');
+    dtpPickDate('nb',_nb.date);return;
+  }
+  clearAvailabilityCache();closeNewBooking();
+  toast('✓ Запис створено');
+  loadCRM(true);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ✨ Глобальний пошук по CRM (клавіша «/»)
+// ═══════════════════════════════════════════════════════════
+let _gsIndex=0;
+function openGlobalSearch(){
+  const o=document.getElementById('gsOverlay');o.classList.add('show');
+  const i=document.getElementById('gsInput');i.value='';_gsIndex=0;
+  renderGlobalSearch();
+  setTimeout(()=>i.focus(),60);
+}
+function closeGlobalSearch(){document.getElementById('gsOverlay').classList.remove('show');}
+function gsMatches(){
+  const q=(document.getElementById('gsInput').value||'').trim().toLowerCase();
+  if(!q)return{q:'',bookings:[],clients:[]};
+  const bookings=_allBookings.filter(b=>bkSearchBlob(b).includes(q)).sort((a,b)=>parseBookingDate(b)-parseBookingDate(a)).slice(0,6);
+  const clients=_allClients.filter(c=>[c.name,c.phone,c.clientId].join(' ').toLowerCase().includes(q)).slice(0,6);
+  return{q,bookings,clients};
+}
+function renderGlobalSearch(){
+  const{q,bookings,clients}=gsMatches();
+  const box=document.getElementById('gsResults');
+  if(!q){box.innerHTML='<div class="gs-empty">Введіть ім’я, телефон, держномер або № запису</div>';return;}
+  if(!bookings.length&&!clients.length){box.innerHTML='<div class="gs-empty">Нічого не знайдено</div>';return;}
+  let html='',i=0;
+  if(bookings.length){
+    html+='<div class="gs-group">Записи</div>';
+    html+=bookings.map(b=>`<button class="gs-item${i++===_gsIndex?' active':''}" data-i="${i-1}" onclick="gsOpenBooking('${esc(b.id)}')"><span class="gs-item-ico">📋</span><span class="gs-item-main"><span class="gs-item-name">${esc(b.clientName)} · ${esc(b.service||'')}</span><span class="gs-item-sub">${esc(b.date)} ${esc(b.time)} · ${esc(b.box||'')} · ${esc(b.phone||'')}${b.plate?' · '+esc(b.plate):''}</span></span><span class="badge ${statusBadgeClass(b.status)}">${esc(b.status||'')}</span></button>`).join('');
+  }
+  if(clients.length){
+    html+='<div class="gs-group">Клієнти</div>';
+    html+=clients.map(c=>`<button class="gs-item${i++===_gsIndex?' active':''}" data-i="${i-1}" onclick="gsOpenClient('${esc(c.clientId)}')"><span class="gs-item-ico">🪪</span><span class="gs-item-main"><span class="gs-item-name">${esc(c.name)}</span><span class="gs-item-sub">${esc(c.phone)} · ${esc(c.clientId)} · баланс ${fmtBalance(c.balance)}</span></span></button>`).join('');
+  }
+  box.innerHTML=html;
+}
+function gsKeyDown(e){
+  const items=[...document.querySelectorAll('#gsResults .gs-item')];
+  if(e.key==='Escape'){closeGlobalSearch();return;}
+  if(e.key==='ArrowDown'){e.preventDefault();_gsIndex=Math.min(_gsIndex+1,items.length-1);renderGlobalSearch();return;}
+  if(e.key==='ArrowUp'){e.preventDefault();_gsIndex=Math.max(_gsIndex-1,0);renderGlobalSearch();return;}
+  if(e.key==='Enter'){const el=items[_gsIndex];if(el)el.click();}
+}
+function gsOpenBooking(id){
+  closeGlobalSearch();
+  const b=_allBookings.find(x=>x.id===id);if(!b)return;
+  switchCrmTabById('sched');
+  filterBookings('all');
+  const s=document.getElementById('bookingSearch');if(s){s.value=b.id;applyBookingControls();}
+  toast('Показано запис '+b.id);
+}
+function gsOpenClient(id){closeGlobalSearch();openClientModal(id);}
+function switchCrmTabById(id){
+  document.querySelectorAll('.crm-tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+id)?.classList.add('active');
+  document.querySelectorAll('.crm-tab-btn').forEach((b,i)=>b.classList.toggle('active',(b.getAttribute('onclick')||'').includes("'"+id+"'")));
 }
 function rescheduleErrText(result){
   const e=result&&result.error;
@@ -2486,10 +3269,15 @@ function renderBoxes(bookings,todayStr){
   const nowTime=String(today.getHours()).padStart(2,'0')+':'+String(today.getMinutes()).padStart(2,'0');
   const todayBookings=bookings.filter(b=>b.date===todayStr);
   const c=document.getElementById('boxesLive');
+  const nowM=ddNowMinutes();
   c.innerHTML=['1','2','3'].map(num=>{
     const boxName='Box '+num;
-    const active=todayBookings.find(b=>b.box===boxName&&(b.status?.includes('роботі')||b.status?.includes('Підтверджено')));
+    const inBox=todayBookings.filter(b=>b.box===boxName&&!bkIsClosed(b));
+    // зайнятий — тільки те, що реально в роботі; решта на сьогодні = черга цього боксу
+    const active=inBox.find(b=>b.status?.includes('роботі'));
     const isBusy=!!active;
+    const upcoming=inBox.filter(b=>b!==active).sort((a,b)=>ddMinutesOf(a)-ddMinutesOf(b));
+    const nextInBox=upcoming.find(b=>ddMinutesOf(b)>=nowM)||upcoming[0];
     return`<div class="box-live ${isBusy?'busy':'free'}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
         <span style="font-size:22px;font-weight:700;letter-spacing:-0.5px;">БОКС ${num}</span>
@@ -2497,20 +3285,397 @@ function renderBoxes(bookings,todayStr){
       </div>
       ${isBusy?`<div style="font-size:15px;font-weight:700;margin-bottom:3px;">${esc(active.clientName)}</div>
         <div style="font-size:13px;color:var(--gray);">${esc(active.service)}</div>
-        <div style="font-size:12px;color:var(--gray);margin-top:8px;">⏰ ${esc(active.time)}</div>
-        <div style="font-size:12px;color:var(--orange);margin-top:5px;">${getReleaseText(active.time)}</div>
+        <div style="font-size:12px;color:var(--gray);margin-top:8px;">⏰ з ${esc(active.time)} · ${esc(bkFmtDuration(ddDuration(active)))}</div>
+        <div style="font-size:12px;color:var(--orange);margin-top:5px;">${esc(getReleaseText(active.time,ddDuration(active)))}</div>
       `:`<div style="font-size:13px;color:var(--green);font-weight:600;">● Готовий до роботи</div>
         <div style="font-size:12px;color:var(--gray);margin-top:6px;">Зараз: ${nowTime}</div>`}
+      ${nextInBox?`<div style="font-size:12px;color:var(--gray);margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.07);">Далі: <b style="color:var(--white);">${esc(nextInBox.time)}</b> · ${esc(nextInBox.clientName||'')}</div>`:''}
     </div>`;
   }).join('');
 }
-function getReleaseText(startTime){
+function getReleaseText(startTime,durMin){
   const[hh,mm]=(startTime||'00:00').split(':').map(Number);
-  const end=new Date();end.setHours((hh||0)+1,mm||0,0,0);
+  const end=new Date();end.setHours(hh||0,(mm||0)+(durMin||60),0,0);
   const diff=end.getTime()-Date.now();
   if(diff<=0)return'Звільняється зараз';
-  const mins=Math.ceil(diff/60000);
-  return`Звільниться через ${Math.floor(mins/60)} год ${String(mins%60).padStart(2,'0')} хв`;
+  return`Звільниться через ${ddFmtLeft(Math.ceil(diff/60000))} · до ${ddHm(end)}`;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ✨ STEP 2 — РОБОЧИЙ СТІЛ ДНЯ
+//  Відповідає на одне питання: що відбувається просто зараз
+// ═══════════════════════════════════════════════════════════
+const DD_BOXES=['1','2','3'];
+function ddHm(d){return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+function ddFmtLeft(min){
+  if(min<1)return'менш ніж хвилину';
+  const h=Math.floor(min/60),m=min%60;
+  return (h?h+' год':'')+(h&&m?' ':'')+(m?m+' хв':'');
+}
+// реальна тривалість запису: сума послуг із Прайсу, інакше 1 година
+function ddDuration(b){
+  const names=String(b.service||'').split('+').map(x=>x.trim()).filter(Boolean);
+  const pl=_catalog?.priceList||{};
+  let rows=pl[b.carType]||pl[BODY_PRICE_BASIS?.[b.carType]]||[];
+  // якщо тип кузова не збігся з Прайсом — шукаємо послугу в усіх типах
+  if(!rows.length)rows=Object.values(pl).flat();
+  let min=0,found=false;
+  names.forEach(n=>{const r=rows.find(x=>String(x.name).trim()===n);if(r){const d=bkParseDuration(r.duration);if(d){min+=d;found=true;}}});
+  return found?min:60;
+}
+function ddMinutesOf(b){const[h,m]=String(b.time||'00:00').split(':').map(Number);return (h||0)*60+(m||0);}
+function ddNowMinutes(){const d=new Date();return d.getHours()*60+d.getMinutes();}
+function ddTodayBookings(){return _allBookings.filter(bkIsToday).sort((a,b)=>ddMinutesOf(a)-ddMinutesOf(b));}
+function ddItemHtml(b,closed){
+  const cls=statusBadgeClass(b.status).replace('badge-','st-');
+  const parts=[b.service||'—'];
+  if(b.plate)parts.push('🚗 '+b.plate);
+  parts.push(bkFmtDuration(ddDuration(b)));
+  return`<div class="dd-item ${cls}${closed?' is-closed':''}">
+    <div class="dd-time"><b>${esc(b.time||'--:--')}</b><span>Бокс ${esc(String(b.box||'').replace('Box ',''))}</span></div>
+    <div class="dd-main">
+      <div class="dd-name">${esc(b.clientName||'—')}<span class="badge ${statusBadgeClass(b.status)}">${esc(b.status||'—')}</span></div>
+      <div class="dd-sub">${esc(parts.join(' · '))} · ${esc(b.phone||'')}</div>
+    </div>
+    <div class="dd-act">
+      ${bkPrimaryBtnHtml(b)}
+      <a class="act-ico" href="tel:${esc(bkDigits(b.phone))}" title="Подзвонити">📞</a>
+      <button class="act-more" title="Ще дії" onclick="openBookingMenu(event,'${esc(b.id)}')">⋯</button>
+    </div>
+  </div>`;
+}
+let _ddShowDone=false;
+function ddToggleDone(){_ddShowDone=!_ddShowDone;renderDayDesk();}
+function renderDayDesk(){
+  const head=document.getElementById('ddHead'),wrap=document.getElementById('ddQueue');
+  if(!head||!wrap)return;
+  const now=new Date(),nowM=ddNowMinutes();
+  const list=ddTodayBookings();
+  const working=list.filter(b=>String(b.status||'').includes('роботі'));
+  const done=list.filter(bkIsClosed);
+  const queue=list.filter(b=>!bkIsClosed(b)&&!String(b.status||'').includes('роботі'));
+  const next=queue.find(b=>ddMinutesOf(b)>=nowM)||queue[0];
+  const busyBoxes=new Set(working.map(b=>b.box));
+  const freeBoxes=DD_BOXES.filter(n=>!busyBoxes.has('Box '+n)).length;
+
+  let nextHtml;
+  if(next){
+    const diff=ddMinutesOf(next)-nowM;
+    const when=diff>0?`через ${ddFmtLeft(diff)}`:(diff===0?'просто зараз':`запізнення на ${ddFmtLeft(-diff)}`);
+    nextHtml=`<div class="dd-next-label">Наступний клієнт</div>
+      <div class="dd-next-main">${esc(next.time)} · ${esc(next.clientName||'—')}</div>
+      <div class="dd-next-sub">${esc(next.service||'')} · Бокс ${esc(String(next.box||'').replace('Box ',''))} · ${esc(when)}</div>`;
+  }else{
+    nextHtml=`<div class="dd-next-label">Наступний клієнт</div>
+      <div class="dd-next-main">${list.length?'Усі записи на сьогодні закриті':'На сьогодні записів немає'}</div>
+      <div class="dd-next-sub">${list.length?'Гарна робота 👌':'Можна прийняти запис телефоном — кнопка «+ Новий запис»'}</div>`;
+  }
+  head.innerHTML=`
+    <div class="dd-clock"><b>${ddHm(now)}</b><span>${now.getDate()} ${BK_UK_MON[now.getMonth()]}, ${BK_UK_DOW[now.getDay()]}</span></div>
+    <div class="dd-next">${nextHtml}</div>
+    <div class="dd-chips">
+      <span class="dd-chip">Сьогодні <b>${list.length}</b></span>
+      <span class="dd-chip work">В роботі <b>${working.length}</b></span>
+      <span class="dd-chip ok">Завершено <b>${done.length}</b></span>
+      <span class="dd-chip">Вільних боксів <b>${freeBoxes}</b></span>
+    </div>`;
+
+  let html='';
+  html+='<div class="dd-sec-title">Зараз у роботі</div>';
+  html+=working.length?`<div class="dd-list">${working.map(b=>ddItemHtml(b)).join('')}</div>`
+    :'<div class="dd-empty">Жодна машина не в роботі — можна брати наступну</div>';
+  html+='<div class="dd-sec-title">Далі сьогодні</div>';
+  html+=queue.length?`<div class="dd-list">${queue.map(b=>ddItemHtml(b)).join('')}</div>`
+    :'<div class="dd-empty">Черга порожня</div>';
+  if(done.length){
+    html+='<div class="dd-sec-title">Закриті сьогодні</div>';
+    html+=`<button class="dd-done-toggle" onclick="ddToggleDone()">${_ddShowDone?'▾':'▸'} ${_ddShowDone?'Сховати':'Показати'} закриті записи (${done.length})</button>`;
+    if(_ddShowDone)html+=`<div class="dd-list" style="margin-top:8px;">${done.map(b=>ddItemHtml(b,true)).join('')}</div>`;
+  }
+  wrap.innerHTML=html;
+}
+// один виклик замість трьох — щоб жоден екран не лишився застарілим
+function crmRefreshViews(){
+  applyBookingControls();
+  renderBoxes(_allBookings,getTodayStr());
+  renderDayDesk();
+  if(document.getElementById('tab-timeline')?.classList.contains('active'))renderTimeline();
+}
+// живий годинник: оновлює «через скільки» без запитів до сервера
+let _ddTicker=null;
+function startDayDeskTicker(){
+  if(_ddTicker)return;
+  _ddTicker=setInterval(()=>{
+    if(!_crmUnlocked||!document.getElementById('crm-page')?.classList.contains('active')){stopDayDeskTicker();return;}
+    if(!document.getElementById('tab-today')?.classList.contains('active'))return;
+    if(_crmMenuOpen||document.querySelector('.modal-overlay.show'))return;
+    renderDayDesk();renderBoxes(_allBookings,getTodayStr());
+  },30000);
+}
+function stopDayDeskTicker(){if(_ddTicker){clearInterval(_ddTicker);_ddTicker=null;}}
+
+// ═══════════════════════════════════════════════════════════
+//  ✨ STEP 3 — ТАЙМЛАЙН: час × бокси, перенос перетягуванням
+// ═══════════════════════════════════════════════════════════
+const TL_BOXES=['1','2','3'];
+const TL_PX_PER_MIN=1.5;      // 30 хв = 45px
+const TL_SNAP=15;             // крок прилипання, хв
+const TL={mode:'day',date:null};
+
+function tlDateObj(){return TL.date?new Date(TL.date):new Date();}
+function tlSetDate(d){TL.date=new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime();}
+function tlGoToday(){tlSetDate(new Date());renderTimeline();}
+function tlShift(n){const d=tlDateObj();d.setDate(d.getDate()+(TL.mode==='week'?n*7:n));tlSetDate(d);renderTimeline();}
+function tlSetMode(m){
+  TL.mode=m;
+  document.querySelectorAll('.tl-mode').forEach(b=>b.classList.toggle('active',b.dataset.mode===m));
+  renderTimeline();
+}
+function tlPlural(n,one,few,many){
+  const m10=n%10,m100=n%100;
+  if(m10===1&&m100!==11)return one;
+  if(m10>=2&&m10<=4&&(m100<12||m100>14))return few;
+  return many;
+}
+function tlHours(d){const h=currentLoc().hours[d.getDay()];return h?{open:h[0]*60,close:h[1]*60}:{open:9*60,close:20*60};}
+function tlMin2Hm(m){m=Math.max(0,Math.round(m));return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');}
+function tlWeekStart(d){const x=new Date(d);const dow=(x.getDay()+6)%7;x.setDate(x.getDate()-dow);x.setHours(0,0,0,0);return x;}
+function tlBookingsOn(ds){return _allBookings.filter(b=>b.date===ds).sort((a,b)=>ddMinutesOf(a)-ddMinutesOf(b));}
+// чи вільно в боксі на [start, start+dur) — окрім самого запису, який тягнемо
+function tlIsFree(ds,box,startMin,durMin,ignoreId){
+  return !_allBookings.some(b=>{
+    if(b.id===ignoreId||b.date!==ds||b.box!==box||bkIsClosed(b))return false;
+    const s=ddMinutesOf(b),e=s+ddDuration(b);
+    return startMin<e&&s<startMin+durMin;
+  });
+}
+
+function renderTimeline(){
+  const wrap=document.getElementById('tlWrap');if(!wrap)return;
+  if(!TL.date)tlSetDate(new Date());
+  const hint=document.getElementById('tlHint');
+  if(hint)hint.textContent=TL.mode==='week'
+    ?'Клік по запису — дії. Подвійний клік по дню — відкрити його в режимі «День».'
+    :'Перетягніть запис, щоб змінити час або бокс. Клік по вільному місцю — новий запис.';
+  if(TL.mode==='week')return tlRenderWeek(wrap);
+  tlRenderDay(wrap);
+}
+
+// ── режим «День»: колонки = бокси ──
+function tlRenderDay(wrap){
+  const d=tlDateObj(),ds=bkDateStr(d);
+  const{open,close}=tlHours(d);
+  const total=close-open,height=total*TL_PX_PER_MIN;
+  const list=tlBookingsOn(ds);
+  const blocked=_blockedDates.has(ds);
+  document.getElementById('tlDate').textContent=`${d.getDate()} ${BK_UK_MON[d.getMonth()]} ${d.getFullYear()}, ${BK_UK_DOW[d.getDay()]}${ds===getTodayStr()?' · сьогодні':''}${blocked?' · 🔒 закрито':''}`;
+
+  // лінійка часу
+  let ticks='',lines='';
+  for(let m=open;m<=close;m+=30){
+    const top=(m-open)*TL_PX_PER_MIN;
+    if(m%60===0)ticks+=`<div class="tl-tick" style="top:${top}px">${tlMin2Hm(m)}</div>`;
+    lines+=`<div class="tl-line${m%60===0?' hour':''}" style="top:${top}px"></div>`;
+  }
+  const nowD=new Date();
+  const showNow=ds===getTodayStr()&&ddNowMinutes()>=open&&ddNowMinutes()<=close;
+  const nowLine=showNow?`<div class="tl-now" style="top:${(ddNowMinutes()-open)*TL_PX_PER_MIN}px"></div>`:'';
+
+  let html=`<div class="tl-grid" style="--cols:${TL_BOXES.length}">
+    <div class="tl-colhead gutter">Час</div>`;
+  TL_BOXES.forEach(n=>{
+    const busy=list.filter(b=>b.box==='Box '+n&&!bkIsClosed(b));
+    const load=busy.reduce((a,b)=>a+ddDuration(b),0);
+    const sub=busy.length?`${busy.length} ${tlPlural(busy.length,'запис','записи','записів')} · ${bkFmtDuration(load)}`:'вільний весь день';
+    html+=`<div class="tl-colhead">Бокс ${n}<small>${sub}</small></div>`;
+  });
+  html+=`<div class="tl-gutter" style="height:${height}px">${ticks}</div>`;
+  TL_BOXES.forEach(n=>{
+    const box='Box '+n;
+    const items=list.filter(b=>b.box===box);
+    let blocks='';
+    items.forEach(b=>{
+      const s=ddMinutesOf(b),dur=ddDuration(b);
+      const top=(s-open)*TL_PX_PER_MIN;
+      const h=Math.max(dur*TL_PX_PER_MIN,36);
+      const cls=statusBadgeClass(b.status).replace('badge-','st-');
+      blocks+=`<div class="tl-block ${cls}${bkIsClosed(b)?' is-closed':''}" style="top:${top}px;height:${h}px" data-id="${esc(b.id)}" title="${esc(b.clientName+' · '+(b.service||''))}">
+        <div class="tl-b-time">${esc(b.time)}–${tlMin2Hm(s+dur)}</div>
+        <div class="tl-b-name">${esc(b.clientName||'—')}</div>
+        ${h>58?`<div class="tl-b-svc">${esc(b.service||'')}</div>`:''}
+      </div>`;
+    });
+    html+=`<div class="tl-col" data-box="${box}" style="height:${height}px">${lines}${nowLine}${blocks}${blocked?'<div class="tl-blocked">Дата закрита</div>':''}</div>`;
+  });
+  html+='</div>';
+  wrap.innerHTML=html;
+  wrap.dataset.open=open;wrap.dataset.close=close;wrap.dataset.ds=ds;
+  tlBind(wrap,blocked);
+}
+
+// ── режим «Тиждень»: колонки = дні ──
+function tlRenderWeek(wrap){
+  const start=tlWeekStart(tlDateObj());
+  const end=new Date(start);end.setDate(end.getDate()+6);
+  document.getElementById('tlDate').textContent=`${start.getDate()} ${BK_UK_MON[start.getMonth()]} — ${end.getDate()} ${BK_UK_MON[end.getMonth()]} ${end.getFullYear()}`;
+  let head='<div class="tl-colhead gutter"></div>',cols='<div class="tl-gutter"></div>';
+  for(let i=0;i<7;i++){
+    const d=new Date(start);d.setDate(start.getDate()+i);
+    const ds=bkDateStr(d),isToday=ds===getTodayStr();
+    const list=tlBookingsOn(ds),open=list.filter(b=>!bkIsClosed(b));
+    const blocked=_blockedDates.has(ds);
+    head+=`<div class="tl-colhead">${BK_UK_DOW[d.getDay()]} ${d.getDate()}<small>${blocked?'🔒 закрито':(open.length?open.length+' '+tlPlural(open.length,'запис','записи','записів'):'вільно')}</small></div>`;
+    let inner=list.map(b=>{
+      const cls=statusBadgeClass(b.status).replace('badge-','st-');
+      return`<div class="tl-wblock ${cls}${bkIsClosed(b)?' is-closed':''}" data-id="${esc(b.id)}">
+        <div class="tl-b-time">${esc(b.time)} · Бокс ${esc(String(b.box||'').replace('Box ',''))}</div>
+        <div class="tl-b-name">${esc(b.clientName||'—')}</div>
+        <div class="tl-b-svc">${esc(b.service||'')}</div>
+      </div>`;
+    }).join('');
+    if(!list.length)inner=`<div class="tl-wempty">${blocked?'закрито':'немає записів'}</div>`;
+    cols+=`<div class="tl-week-col${isToday?' today':''}" data-date="${ds}">${inner}</div>`;
+  }
+  wrap.innerHTML=`<div class="tl-grid week">${head}${cols}</div>`;
+  wrap.querySelectorAll('.tl-wblock').forEach(el=>el.addEventListener('click',e=>openBookingMenu(e,el.dataset.id)));
+  wrap.querySelectorAll('.tl-week-col').forEach(col=>col.addEventListener('dblclick',()=>{TL.mode='day';tlSetDate(new Date(col.dataset.date.split('.').reverse().join('-')));tlSetMode('day');}));
+}
+
+// ── перетягування записів ──
+let _tlDrag=null;
+function tlBind(wrap,blocked){
+  wrap.querySelectorAll('.tl-block').forEach(el=>{
+    el.addEventListener('pointerdown',e=>tlPointerDown(e,el,wrap,blocked));
+  });
+  // клік по вільному місцю — новий запис на цей час і бокс
+  wrap.querySelectorAll('.tl-col').forEach(col=>{
+    col.addEventListener('click',e=>{
+      if(e.target.closest('.tl-block'))return;
+      if(blocked){toast('🔒 Ця дата закрита для запису');return;}
+      const open=+wrap.dataset.open;
+      const r=col.getBoundingClientRect();
+      const min=tlSnap(open+(e.clientY-r.top)/TL_PX_PER_MIN);
+      tlNewAt(wrap.dataset.ds,col.dataset.box,tlMin2Hm(min));
+    });
+  });
+}
+function tlSnap(min){return Math.round(min/TL_SNAP)*TL_SNAP;}
+function tlPointerDown(e,el,wrap,blocked){
+  if(e.button!==undefined&&e.button!==0)return;
+  const id=el.dataset.id,b=_allBookings.find(x=>x.id===id);
+  if(!b)return;
+  const touch=e.pointerType==='touch';
+  const startX=e.clientX,startY=e.clientY;
+  const rect=el.getBoundingClientRect();
+  const grabY=e.clientY-rect.top,grabX=e.clientX-rect.left;
+  let started=false,holdTimer=null;
+  const open=+wrap.dataset.open,close=+wrap.dataset.close,ds=wrap.dataset.ds;
+  const dur=ddDuration(b);
+
+  const begin=()=>{
+    if(started)return;
+    if(blocked||bkIsClosed(b)){return;}
+    started=true;
+    el.setPointerCapture?.(e.pointerId);
+    el.classList.add('dragging');
+    const ghost=document.createElement('div');
+    ghost.className='tl-ghost';ghost.id='tlGhost';
+    ghost.style.width=rect.width+'px';ghost.style.height=rect.height+'px';
+    ghost.innerHTML=`<div class="tl-b-time">${esc(b.time)}</div><div class="tl-b-name">${esc(b.clientName||'')}</div>`;
+    document.body.appendChild(ghost);
+    const drop=document.createElement('div');drop.className='tl-drop';drop.id='tlDrop';
+    drop.style.height=Math.max(dur*TL_PX_PER_MIN,36)+'px';
+    _tlDrag={id,b,dur,grabY,grabX,open,close,ds,wrap,ghost,drop,target:null,el};
+    tlMove(e);
+  };
+  if(touch)holdTimer=setTimeout(begin,320); // на телефоні — довге натискання
+
+  const onMove=ev=>{
+    if(!started){
+      const far=Math.abs(ev.clientX-startX)>6||Math.abs(ev.clientY-startY)>6;
+      if(touch&&far){clearTimeout(holdTimer);cleanup(false);return;} // це скрол, не перенос
+      if(!touch&&far)begin();
+      if(!started)return;
+    }
+    ev.preventDefault();
+    tlMove(ev);
+  };
+  const onUp=()=>{clearTimeout(holdTimer);if(started)tlDrop();else cleanup(false);};
+  const cleanup=drop=>{
+    document.removeEventListener('pointermove',onMove);
+    document.removeEventListener('pointerup',onUp);
+    document.removeEventListener('pointercancel',onUp);
+    el.classList.remove('dragging');
+    document.getElementById('tlGhost')?.remove();
+    document.getElementById('tlDrop')?.remove();
+    if(!drop)_tlDrag=null;
+  };
+  _tlCleanup=cleanup;
+  document.addEventListener('pointermove',onMove,{passive:false});
+  document.addEventListener('pointerup',onUp);
+  document.addEventListener('pointercancel',onUp);
+}
+let _tlCleanup=null;
+function tlMove(ev){
+  const d=_tlDrag;if(!d)return;
+  d.ghost.style.left=(ev.clientX-d.grabX)+'px';
+  d.ghost.style.top=(ev.clientY-d.grabY)+'px';
+  // яка колонка під курсором
+  let col=null;
+  d.wrap.querySelectorAll('.tl-col').forEach(c=>{
+    const r=c.getBoundingClientRect();
+    if(ev.clientX>=r.left&&ev.clientX<=r.right)col=c;
+  });
+  if(!col){d.drop.remove();d.target=null;return;}
+  const r=col.getBoundingClientRect();
+  let min=tlSnap(d.open+(ev.clientY-r.top-d.grabY)/TL_PX_PER_MIN);
+  min=Math.max(d.open,Math.min(min,d.close-d.dur));
+  const free=tlIsFree(d.ds,col.dataset.box,min,d.dur,d.id);
+  d.drop.style.top=((min-d.open)*TL_PX_PER_MIN)+'px';
+  d.drop.classList.toggle('bad',!free);
+  d.drop.textContent=free?`${tlMin2Hm(min)}–${tlMin2Hm(min+d.dur)}`:'зайнято';
+  if(d.drop.parentElement!==col)col.appendChild(d.drop);
+  d.target=free?{box:col.dataset.box,min}:null;
+}
+async function tlDrop(){
+  const d=_tlDrag;if(!d)return;
+  const target=d.target;
+  if(_tlCleanup)_tlCleanup(true);
+  const el=d.el;el.classList.remove('dragging');
+  _tlDrag=null;
+  if(!target){toast('Цей час зайнятий — оберіть інший');return;}
+  const b=d.b,newTime=tlMin2Hm(target.min);
+  if(b.time===newTime&&b.box===target.box)return;
+  const ok=await uiConfirm('Перенести запис?',
+    `${b.clientName||'Клієнт'}: ${b.time} · ${b.box} → ${newTime} · ${target.box} (${d.ds})`,'Перенести');
+  if(!ok){renderTimeline();return;}
+  const prev={time:b.time,box:b.box};
+  Object.assign(b,{time:newTime,box:target.box});
+  renderTimeline();
+  const res=await api('rescheduleBooking',{bookingId:b.id,phone:b.phone,date:d.ds,time:newTime,box:target.box});
+  if(res?.success||!isApiConfigured()){
+    clearAvailabilityCache();crmRefreshViews();renderTimeline();
+    toastUndo(`✓ ${b.clientName}: ${newTime} · ${target.box}`,async()=>{
+      Object.assign(b,prev);renderTimeline();
+      await api('rescheduleBooking',{bookingId:b.id,phone:b.phone,date:d.ds,time:prev.time,box:prev.box});
+      clearAvailabilityCache();crmRefreshViews();renderTimeline();
+    });
+  }else{
+    Object.assign(b,prev);renderTimeline();
+    toast(rescheduleErrText(res));
+  }
+}
+// новий запис із вільного місця на таймлайні
+function tlNewAt(ds,box,time){
+  openNewBooking().then(()=>{
+    _nb.date=ds;_nb.box=box;
+    dtpRenderDays('nb');
+    dtpPickDate('nb',ds).then(()=>{
+      const btn=document.querySelector(`#nbTimes .dtp-time[data-time="${time}"]`);
+      if(btn&&!btn.classList.contains('busy'))btn.click();
+      else{_nb.time=time;_nb.box=box;dtpSummary('nb');}
+    });
+  });
 }
 
 // ═══ CLIENTS ═══
@@ -2723,8 +3888,8 @@ function closeClientModal(){document.getElementById('clientModal').classList.rem
 
 // ═══ DEMO DATA ═══
 function getTodayStr(){const d=new Date();return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear();}
-function renderDemoSchedule(){_allBookings=[{id:'#1333-0042',date:getTodayStr(),time:'09:00',box:'Box 1',clientId:'C-001',clientName:'Андрій Коваль',phone:'+380671234567',service:'Кераміка',status:'🔶 В роботі',plate:'АА1234АА'},{id:'#1333-0043',date:getTodayStr(),time:'11:00',box:'Box 2',clientId:'C-002',clientName:'Марина Ткач',phone:'+380932345678',service:'Хімчистка',status:'✅ Підтверджено',plate:''}];renderSchedule(_allBookings);}
-function renderDemoBoxes(){renderBoxes(_allBookings,getTodayStr());}
+function renderDemoSchedule(){_allBookings=[{id:'#1333-0042',date:getTodayStr(),time:'09:00',box:'Box 1',clientId:'C-001',clientName:'Андрій Коваль',phone:'+380671234567',service:'Кераміка',status:'🔶 В роботі',plate:'АА1234АА'},{id:'#1333-0043',date:getTodayStr(),time:'11:00',box:'Box 2',clientId:'C-002',clientName:'Марина Ткач',phone:'+380932345678',service:'Хімчистка',status:'✅ Підтверджено',plate:''}];applyBookingControls();}
+function renderDemoBoxes(){renderBoxes(_allBookings,getTodayStr());renderDayDesk();}
 function renderDemoClients(){_allClients=[{clientId:'C-001',name:'Андрій Коваль',phone:'+380671234567',telegramId:'123456',registered:'01.01.2025',balance:28200},{clientId:'C-002',name:'Марина Ткач',phone:'+380932345678',telegramId:'234567',registered:'15.02.2025',balance:67500}];renderClients(_allClients);}
 function renderDemoSubs(){_allSubs=[{subId:'A-041',clientId:'C-001',clientName:'Андрій Коваль',typeName:'Gold',amount:34500,balance:28200,endDate:'15.08.2026',status:'✅ Активний'}];renderSubs(_allSubs);}
 function renderDemoSubRequests(){_allSubRequests=[{requestId:'SR-0001',clientName:'Іван Петренко',clientId:'C-004',typeName:'Gold',amount:30000,createdDate:getTodayStr(),status:'🆕 Нова заявка'}];renderSubRequests(_allSubRequests);setStats(2,1,8,2);}
@@ -2735,6 +3900,8 @@ function switchCrmTab(e,id){
   document.querySelectorAll('.crm-tab-panel').forEach(x=>x.classList.remove('active'));
   e.target.classList.add('active');document.getElementById('tab-'+id).classList.add('active');
   if(id==='analytics')loadAnalyticsTab(false);
+  if(id==='today'){renderDayDesk();renderBoxes(_allBookings,getTodayStr());startDayDeskTicker();}
+  if(id==='timeline'){loadBlockedDates().then(()=>renderTimeline());renderTimeline();}
 }
 const _charts={};
 const AN_PALETTE=['#10b981','#a78bfa','#f59e0b','#eab308','#3b82f6','#ef4444','#06b6d4'];
@@ -3231,6 +4398,15 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){cabCloseQr();cabClo
 
 // ═══ INIT ═══
 function bindUiHandlers(){
+  // ✨ CRM: «/» — глобальний пошук, ESC — закрити меню/пошук
+  document.addEventListener('keydown',e=>{
+    const t=e.target,typing=t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable);
+    if(e.key==='Escape'){if(_crmMenuOpen)closeCrmMenu();if(document.getElementById('gsOverlay')?.classList.contains('show'))closeGlobalSearch();return;}
+    if(e.key==='/'&&!typing&&_crmUnlocked&&document.getElementById('crm-page')?.classList.contains('active')){e.preventDefault();openGlobalSearch();}
+  });
+  window.addEventListener('resize',()=>{if(_crmMenuOpen)closeCrmMenu();});
+  window.addEventListener('scroll',()=>{if(_crmMenuOpen&&window.innerWidth>768)closeCrmMenu();},{passive:true});
+  document.addEventListener('click',e=>{const h=document.getElementById('nbHint');if(h&&h.classList.contains('show')&&!e.target.closest('#nbHint')&&e.target.id!=='nbName'&&e.target.id!=='nbPhone')h.classList.remove('show');});
   document.querySelectorAll('.modal-close').forEach(x=>{
     x.addEventListener('click',()=>{
       const overlay=x.closest('.modal-overlay');if(!overlay)return;
@@ -3267,6 +4443,60 @@ window.addEventListener('DOMContentLoaded',()=>{
   else cabGoStep('phone');
   if(_crmToken)_setCrmNavVisible(true);
 });
+</script>
+
+<!-- ✨ Розмітка для Google: картка закладу, послуги, години роботи -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": ["LocalBusiness", "AutoWash"],
+      "@id": "https://1333carcenter.kh.ua/#business",
+      "name": "1333 Car Center",
+      "description": "Детейлінг-центр у Харкові: хімчистка салону, полірування, керамічне покриття, антигравійна плівка, мийка. Онлайн-запис на вільний час.",
+      "url": "https://1333carcenter.kh.ua/",
+      "image": "https://1333carcenter.kh.ua/assets/og-cover.jpg",
+      "logo": "https://1333carcenter.kh.ua/assets/icon-512.png",
+      "priceRange": "$$",
+      "currenciesAccepted": "UAH",
+      "paymentAccepted": "Готівка, картка, безготівковий переказ",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "вул. Шевченка, 59",
+        "addressLocality": "Харків",
+        "addressRegion": "Харківська область",
+        "addressCountry": "UA"
+      },
+      "areaServed": { "@type": "City", "name": "Харків" },
+      "sameAs": ["https://instagram.com/1333_car_center"],
+      "openingHoursSpecification": [
+        { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"], "opens": "09:00", "closes": "20:00" },
+        { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Saturday","Sunday"], "opens": "10:00", "closes": "20:00" }
+      ],
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Послуги детейлінгу",
+        "itemListElement": [
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Мийка автомобіля" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Хімчистка салону" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Полірування кузова" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Керамічне покриття" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Антигравійна плівка" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Воски та захист кузова" } }
+        ]
+      }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://1333carcenter.kh.ua/#website",
+      "url": "https://1333carcenter.kh.ua/",
+      "name": "1333 Car Center",
+      "inLanguage": "uk-UA",
+      "publisher": { "@id": "https://1333carcenter.kh.ua/#business" }
+    }
+  ]
+}
 </script>
 </body>
 </html>
